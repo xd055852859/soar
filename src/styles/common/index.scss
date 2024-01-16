@@ -1,0 +1,287 @@
+html,
+body,
+#app {
+  margin: 0px;
+  padding: 0px;
+  width: 100vw;
+  height: 100%;
+  overflow: hidden;
+}
+// :root {
+//   --vh: 1vh;
+// }
+
+// body {
+//   height: 100vh;
+//   height: calc(var(--vh, 1vh) * 100);
+// }
+
+.dp-center {
+  display: flex;
+  justify-content: center;
+}
+.dp--center {
+  display: flex;
+  align-items: center;
+}
+.dp-center-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.dp-space-center {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+//手型
+.icon-point {
+  cursor: pointer;
+}
+
+.tab-nav {
+  padding: 0px 15px;
+}
+.single-to-long {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+// .footer {
+//   width: 100%;
+//   height: 50px;
+//   background: var(--talk-footer-color);
+//   position: relative;
+//   z-index: 1;
+//   > div {
+//     height: 100%;
+//     img {
+//       height: 60%;
+//       margin-right: 7px;
+//     }
+//   }
+// }
+
+.box {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+  .box-header {
+    width: 100%;
+    height: 64px;
+    @include flex(space-between, center, null);
+  }
+  .box-table {
+    height: calc(100% - 64px);
+    @include p-number(10px, 25px);
+    @include scroll();
+    &::-webkit-scrollbar {
+      height: 5px;
+    }
+    .box-img {
+      width: 100%;
+      @include flex(null, center, wrap);
+      .box-img-item {
+        width: 70px;
+        height: 70px;
+        overflow: hidden;
+        border-radius: 8px;
+        margin-right: 10px;
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+    }
+  }
+  .box-footer {
+    width: 100%;
+    height: 65px;
+    @include flex(flex-end, center, null);
+  }
+}
+.upload-button {
+  position: relative;
+  z-index: 1;
+  border: 1px solid #dcdfe6;
+  border-radius: 6px;
+  cursor: pointer;
+  @include flex(center, center, null);
+  .upload-img {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 5;
+    overflow: hidden;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .upload-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .upload-close {
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    z-index: 10;
+    top: 5px;
+    right: 5px;
+    display: none;
+    cursor: pointer;
+  }
+  &:hover {
+    .upload-close {
+      @include flex(center, center, null);
+    }
+  }
+}
+.info {
+  width: 100%;
+  height: calc(100% - 70px);
+  padding: 10px 10px 0px 0px;
+  box-sizing: border-box;
+  @include scroll();
+  > div {
+    .left {
+      width: 90px;
+      margin-right: 8px;
+      font-size: 18px;
+    }
+    .right {
+      width: calc(100% - 100px);
+      @include flex(flex-end, center, null);
+    }
+    width: 100%;
+    min-height: 55px;
+    margin-bottom: 10px;
+    @include flex(space-between, center, wrap);
+  }
+  .info-area {
+    align-items: flex-start;
+    .info-single-line {
+      width: 100%;
+      text-align: right;
+      margin: 5px 0px;
+    }
+  }
+}
+.info-footer {
+  width: 100%;
+  height: 60px;
+  margin-top: 10px;
+  @include flex(center, center, null);
+}
+:focus {
+  outline: 0;
+}
+
+.select-third-item {
+  height: 65px;
+
+  @include flex(flex-start, center, null);
+  .select-item-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    @include flex(center, center, null);
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+  .select-item-name {
+    max-width: calc(100% - 60px);
+    font-size: 18px;
+    flex: 1;
+    margin: 0px 10px;
+    text-align: left;
+  }
+  .select-item-icon {
+    width: 30px;
+    height: 30px;
+    @include flex(center, center, null);
+  }
+  .select-icon-hover {
+    display: none;
+  }
+  &:hover {
+    .select-icon-hover {
+      @include flex(center, center, null);
+    }
+  }
+}
+.form {
+  height: 100%;
+  position: relative;
+  z-index: 1;
+  @include scroll();
+  > div {
+    .form-left {
+      width: 150px;
+      margin-right: 8px;
+      font-size: 16px;
+    }
+    .form-right {
+      width: calc(100% - 160px);
+      @include flex(flex-end, center, null);
+    }
+    width: 100%;
+    min-height: 45px;
+    margin-bottom: 10px;
+    @include flex(space-between, center, wrap);
+  }
+  .form-area {
+    align-items: flex-start;
+    .form-single-line {
+      width: 100%;
+      text-align: right;
+      margin: 5px 0px;
+    }
+  }
+  .form-save {
+    width: 100%;
+    height: 30px;
+    margin-top: 20px;
+    @include flex(center, flex-end, null);
+  }
+  .form-footer {
+    width: 100%;
+    height: 60px;
+    @include flex(center, center, null);
+    position: absolute;
+    left: 0px;
+    bottom: 10px;
+  }
+}
+
+.common-table {
+  /* height 或 max-height 很重要 */
+  width:100%;
+  height: 100%;
+  /* 设置固定行的表头颜色 */
+  thead tr:first-child th {
+    background-color: $grey-2;
+  }
+
+  thead tr th {
+    position: sticky;
+    z-index: 1;
+  }
+  th:last-child,
+  td:last-child {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+  }
+  thead tr:first-child th {
+    top: 0;
+  }
+}

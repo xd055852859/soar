@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="56px" height="56px" viewBox="0 0 56 56" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>箭头</title>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="42" height="42" rx="12"></rect>
+        <filter x="-22.6%" y="-22.6%" width="145.2%" height="145.2%" filterUnits="objectBoundingBox" id="filter-2">
+            <feMorphology radius="0.5" operator="dilate" in="SourceAlpha" result="shadowSpreadOuter1"></feMorphology>
+            <feOffset dx="0" dy="0" in="shadowSpreadOuter1" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="3" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feComposite in="shadowBlurOuter1" in2="SourceAlpha" operator="out" result="shadowBlurOuter1"></feComposite>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.0846536276 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="有光英语20230929✅" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="首页" transform="translate(-156.000000, -160.000000)">
+            <g id="编组-10" transform="translate(120.000000, 132.000000)">
+                <g id="箭头" transform="translate(43.000000, 35.000000)">
+                    <g id="矩形">
+                        <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                        <use stroke="#E8E8E8" stroke-width="1" fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-1"></use>
+                    </g>
+                    <path d="M20.2886592,24.6263753 L20.3274491,24.6744961 C20.5093298,24.8829056 20.756083,25 21.0133836,25 C21.2706842,25 21.5174374,24.8829056 21.6993181,24.6744961 L26.7277803,18.916285 C27.0952875,18.4805559 27.0900317,17.7879427 26.7159674,17.3595929 C26.3419032,16.9312431 25.7370662,16.9252244 25.3565578,17.3460657 L21.0146766,22.3173164 L16.6669769,17.3386625 C16.4233787,17.0501203 16.062777,16.934543 15.7237684,17.0363525 C15.3847598,17.1381621 15.1201013,17.4415146 15.031514,17.8298173 C14.9429267,18.21812 15.0441966,18.6309443 15.2964009,18.9096221 L20.2886592,24.6263753 L20.2886592,24.6263753 Z" id="路径" stroke="#000000" fill="#000000" fill-rule="nonzero" transform="translate(21.000000, 21.000000) rotate(-270.000000) translate(-21.000000, -21.000000) "></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
