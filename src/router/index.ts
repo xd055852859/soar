@@ -45,6 +45,12 @@ const routes: Array<RouteRecordRaw> = [
           },
           {
             path: "doc",
+            name: "teamDoc",
+            component: () => import("@/views/home/team/tab/teamDoc.vue"),
+            children: [],
+          },
+          {
+            path: "file",
             name: "teamFile",
             component: () => import("@/views/home/team/tab/teamFile.vue"),
             children: [],

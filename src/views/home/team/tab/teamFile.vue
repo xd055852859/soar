@@ -4,15 +4,17 @@ import api from "@/services/api";
 import _ from "lodash";
 import { setMessage } from "@/services/util/common";
 import appStore from "@/store";
+import fileCard from "@/components/fileCard/fileCard.vue";
 import { useQuasar } from "quasar";
 import { storeToRefs } from "pinia";
 import cIframe from "@/components/common/cIframe.vue";
+import { uploadFile } from "@/services/util/file";
 const $q = useQuasar();
 const dayjs: any = inject("dayjs");
 const { token } = storeToRefs(appStore.authStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { teamKey } = storeToRefs(appStore.teamStore);
-const subType = ref<string>("");
+const subType = ref<string>("image");
 const page = ref<number>(1);
 const fileList = ref<any>([]);
 const fileDetail = ref<any>(null);
@@ -53,28 +55,17 @@ const getFileList = async () => {
   let fileRes = (await api.request.get("card", {
     teamKey: spaceKey.value,
     projectKey: teamKey.value,
-    cardType: "doc",
+    cardType: "file",
     subType: subType.value,
     page: page.value,
     limit: 30,
   })) as ResultProps;
   if (fileRes.msg === "OK") {
-    fileList.value = [...fileRes.data];
+    fileList.value = [...fileList.value, ...fileRes.data];
     total.value = fileRes.total as number;
   }
 };
-const addFile = async (type, typeName) => {
-  let fileRes = (await api.request.post("card", {
-    projectKey: teamKey.value,
-    type: "doc",
-    subType: type,
-    title: "新" + typeName,
-  })) as ResultProps;
-  if (fileRes.msg === "OK") {
-    setMessage("success", `创建${typeName}成功`);
-    fileList.value.unshift(fileRes.data);
-  }
-};
+
 const deleteFile = async (key, index) => {
   $q.dialog({
     title: "删除文档",
@@ -109,33 +100,78 @@ const scrollFile = (e) => {
     page.value++;
   }
 };
-const chooseFile = (type, detail) => {
-  fileDetail.value = detail;
-  const getApi = api.API_URL + "card/detail";
-  const getParams = `{"cardKey": "${detail._key}" }`;
-  const patchApi = api.API_URL + "card";
-  const patchData = `["content", "title"]`;
-  const uptokenApi = api.API_URL + "account/qiniuToken";
-  const uptokenParams = `{"target": "cdn-soar"}`;
-  switch (type) {
-    case "text":
-      detailUrl.value = `https://notecute.com/#/editor?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
-      break;
-    case "draw":
-      detailUrl.value = `https://draw.workfly.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":${patchData}}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
-      break;
-    case "mind":
-      detailUrl.value = `https://mind.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
-      break;
-    case "ppt":
-      detailUrl.value = `https://ppt.mindcute.com/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
-      break;
-    case "table":
-      detailUrl.value = `https://sheets.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
-      break;
+const handleUpload = async (file: any) => {
+  const docTypeArr = ["pdf", "docx", "zip", "doc", "pptx"];
+  const imgTypeArr = ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg"];
+  let subType: string = "";
+  if (
+    file.type ===
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+    file.name.split(".")[1].indexOf("docx") !== -1 ||
+    file.name.split(".")[1].indexOf("doc") !== -1
+  ) {
+    if (file.size === 0) {
+      setMessage("error", "请上传有内容的docx文件");
+      return;
+    }
+    subType = "docx";
+  } else if (file.type === "application/pdf") {
+    subType = "pdf";
+  } else if (file.type === "application/msword") {
+    subType = "doc";
+  } else if (
+    file.type === "application/x-zip-compressed" ||
+    file.type === "application/zip"
+  ) {
+    subType = "zip";
+  } else if (
+    file.type === "application/x-rar" ||
+    file.name.indexOf("rar") !== -1
+  ) {
+    subType = "rar";
+  } else if (file.type === "audio/mpeg") {
+    subType = "mp3";
+  } else if (file.type === "video/mp4") {
+    subType = "mp4";
+  } else if (
+    file.type ===
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  ) {
+    subType = "xlsx";
+  } else if (
+    file.type === "application/vnd.ms-powerpoint" ||
+    file.name.indexOf("pptx") !== -1 ||
+    file.name.split(".")[1].indexOf("ppt") !== -1
+  ) {
+    subType = "pptx";
+  } else if (file.type.indexOf("image") !== -1) {
+    subType = "image";
+  } else {
+    setMessage("error", "仅支持pdf,docx,xlsx,zip,rar,mp3,mp4,ppt和图片格式");
+    return;
   }
-  detailVisible.value = true;
+  uploadFile(
+    file,
+    [...imgTypeArr, ...docTypeArr, "audio/*", "video/*"],
+    async (url) => {
+      let title = file.name.split(".")[0] ? file.name.split(".")[0] : "新文件";
+      let fileRes = (await api.request.post("card", {
+        projectKey: teamKey.value,
+        type: "doc",
+        subType: subType,
+        url: url,
+        fileSize: file.size,
+        title: title,
+      })) as ResultProps;
+      if (fileRes.msg === "OK") {
+        setMessage("success", `创建${title}成功`);
+        fileList.value.unshift(fileRes.data);
+      }
+    },
+    subType === "image" ? undefined : subType
+  );
 };
+const chooseFile = (type, detail) => {};
 watchEffect(() => {
   getFileList();
 });
@@ -143,20 +179,22 @@ watchEffect(() => {
 <template>
   <div class="teamFile">
     <div class="teamFile-header">
-      <q-btn color="primary" label="创建" dense style="width: 120px">
-        <q-menu>
-          <q-list style="min-width: 100px">
-            <q-item
-              v-for="(item, index) in fileArray.slice(1, fileArray.length)"
-              :key="`fileType${index}`"
-              clickable
-              v-close-popup
-              @click="addFile(item.value, item.label)"
-            >
-              <q-item-section>{{ item.label }}</q-item-section>
-            </q-item>
-          </q-list>
-        </q-menu>
+      <q-btn
+        color="primary"
+        label="上传"
+        dense
+        style="width: 120px"
+        class="upload-button"
+      >
+        <input
+          type="file"
+          accept="image/*"
+          @change="
+            //@ts-ignore
+            handleUpload($event.target.files[0])
+          "
+          class="upload-img"
+        />
       </q-btn>
       <q-select
         style="width: 150px"
@@ -170,47 +208,9 @@ watchEffect(() => {
       />
     </div>
     <div class="teamFile-box" @scroll="scrollFile">
-      <q-card
-        v-for="(item, index) in fileList"
-        :key="`file${index}`"
-        class="teamFile-box-container q-mb-md icon-point"
-        @click="chooseFile(item.subType, item)"
-      >
-        <q-card-section class="teamFile-box-top">
-          <div>{{ item.title }}</div>
-          <div>
-            {{
-              fileArray[_.findIndex(fileArray, { value: item.subType })]?.label
-            }}
-            <q-chip>引用</q-chip>
-            <q-chip>浏览</q-chip>
-
-            <q-btn flat round icon="more_horiz" size="12px" @click.stop="">
-              <q-menu anchor="top right" self="top left" class="q-pa-sm">
-                <q-list dense>
-                  <!--  @click="editFile(item._key, index)" -->
-                  <q-item clickable v-close-popup>
-                    <q-item-section>编辑</q-item-section>
-                  </q-item>
-                  <q-item
-                    clickable
-                    v-close-popup
-                    @click="deleteFile(item._key, index)"
-                  >
-                    <q-item-section>删除</q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
-            </q-btn>
-          </div>
-        </q-card-section>
-        <q-card-section class="teamFile-box-bottom">
-          <div>
-            <!-- <span v-for="(personItem,personIndex) in item."></span> -->
-          </div>
-          <div>{{ dayjs(item.updateTime).format("YYYY-MM-DD HH:mm") }}</div>
-        </q-card-section>
-      </q-card>
+      <template v-for="(item, index) in fileList" :key="`file${index}`">
+        <fileCard :card="item" type="file" />
+      </template>
     </div>
   </div>
   <Teleport to="body">

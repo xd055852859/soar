@@ -289,10 +289,10 @@ watch(
           ></div>
         </q-menu>
       </q-btn>
-      <q-btn flat round icon="sentiment_satisfied">
+      <!-- <q-btn flat round icon="sentiment_satisfied">
         <treeIcon />
-      </q-btn>
-      <q-btn flat round icon="bookmark" @click="commentVisible = true" />
+      </q-btn> -->
+      <!-- <q-btn flat round icon="bookmark" @click="commentVisible = true" /> -->
       <q-btn flat round icon="link">
         <q-menu style="width: 250px">
           <q-card>

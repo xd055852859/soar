@@ -6,7 +6,7 @@ import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import cDialog from "@/components/common/cDialog.vue";
 import api from "@/services/api";
-import team from "@/views/home/team/menu.vue";
+import team from "@/views/home/team/menu/menu.vue";
 import router from "@/router";
 import { setMessage } from "@/services/util/common";
 import { uploadFile } from "@/services/util/file";
