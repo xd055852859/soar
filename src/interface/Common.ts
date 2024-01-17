@@ -1,8 +1,8 @@
 import { User } from "./User";
 
-export interface ResultProps {
+export interface ResultProps<T = any> {
   msg: string;
-  data: any;
+  data: T;
   status: number;
   pageNum?: number;
   totalNum?: number;

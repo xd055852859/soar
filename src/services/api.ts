@@ -3,6 +3,7 @@ import appStore from "@/store";
 import axios from "axios";
 import { commonStore } from "@/store/common";
 import { setMessage } from "./util/common";
+import { JSONContent } from "@tiptap/vue-3";
 const AUTH_URL = import.meta.env.VITE_AUTH_URL;
 const API_URL = import.meta.env.VITE_API_URL;
 let token = localStorage.getItem("auth_token") || "";
@@ -108,11 +109,90 @@ const request = {
   },
 };
 
+const qiniu = {
+  getUptoken() {
+    return request.get(AUTH_URL + "/upTokenQiniu/getQiNiuUpToken", {
+      token: token,
+      type: 2,
+      bucketType: 7,
+    });
+  },
+  getUptokenOverWrite(key: string) {
+    return request.get(AUTH_URL + "/upTokenQiniu/getQiNiuUpTokenKey", {
+      token: token,
+      type: 2,
+      key,
+      bucketType: 7,
+    });
+  },
+  qiniuRemain(fileSize: number, cardKey?: string, tagKey?: string) {
+    return request.get(API_URL + "/qiniu/remain", {
+      fileSize,
+      cardKey,
+      tagKey,
+    });
+  },
+  qiniuStatistic(
+    cardKey: string,
+    url: string,
+    fileSize: number,
+    nodeKey?: string
+  ) {
+    return request.post(API_URL + "/qiniu", {
+      cardKey,
+      nodeKey,
+      url,
+      fileSize,
+    });
+  },
+};
+
+const note = {
+  create(props: {
+    type: "text" | "outline" | "clip" | "link" | "file";
+    title: string;
+    content: JSONContent;
+    summary: string;
+    icon?: string;
+  }) {
+    return request.post("/note", props);
+  },
+  get(props: {
+    page: number;
+    limit: number;
+    type?: "text" | "outline" | "clip" | "link" | "file";
+    used?: boolean;
+  }) {
+    return request.get("/note", props);
+  },
+  delete(noteKey: string) {
+    return request.delete("/note", { noteKey });
+  },
+  edit(props: {
+    noteKey: string;
+    type: "text" | "outline" | "clip" | "link" | "file";
+    title: string;
+    content: JSONContent;
+    summary: string;
+    icon?: string;
+  }) {
+    return request.patch("/note", props);
+  },
+  detail(noteKey: string) {
+    return request.get("/note/detail", { noteKey });
+  },
+};
+
 export default {
   request,
+  qiniu,
+  note,
   setToken: (_token: string) => {
     localStorage.setItem("auth_token", _token);
     token = _token;
+  },
+  getToken: () => {
+    return token;
   },
   API_URL,
   AUTH_URL,
