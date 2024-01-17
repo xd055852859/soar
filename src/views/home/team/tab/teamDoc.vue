@@ -2,13 +2,16 @@
 import { ResultProps } from "@/interface/Common";
 import api from "@/services/api";
 import _ from "lodash";
-import { setMessage } from "@/services/util/common";
+import { commonscroll, setMessage } from "@/services/util/common";
 import appStore from "@/store";
 import fileCard from "@/components/fileCard/fileCard.vue";
 import { storeToRefs } from "pinia";
 
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { teamKey } = storeToRefs(appStore.teamStore);
+const props = defineProps<{
+  type?: string;
+}>();
 const subType = ref<string>("");
 const page = ref<number>(1);
 const fileList = ref<any>([]);
@@ -47,13 +50,16 @@ const docArray = [
 const getDocList = async () => {
   let fileRes = (await api.request.get("card", {
     teamKey: spaceKey.value,
-    projectKey: teamKey.value,
+    projectKey: props.type ? "" : teamKey.value,
     cardType: "doc",
     subType: subType.value,
     page: page.value,
     limit: 30,
   })) as ResultProps;
   if (fileRes.msg === "OK") {
+    if (page.value === 1) {
+      fileList.value = [];
+    }
     fileList.value = [...fileList.value, ...fileRes.data];
     total.value = fileRes.total as number;
   }
@@ -71,21 +77,18 @@ const addDoc = async (type, typeName) => {
   }
 };
 
-const scrollDoc = (e) => {
-  //文档内容实际高度（包括超出视窗的溢出部分）
-  let scrollHeight = e.target.scrollHeight;
-  //滚动条滚动距离
-  let scrollTop = e.target.scrollTop;
-  //窗口可视范围高度
-  let height = e.target.clientHeight;
-  if (
-    height + scrollTop >= scrollHeight &&
-    fileList.value.length < total.value
-  ) {
-    page.value++;
+const chooseCard = (key, type) => {
+  switch (type) {
+    case "choose":
+      break;
+    case "delete":
+      let index = _.findIndex(fileList.value, { _key: key });
+      if (index !== -1) {
+        fileList.value.splice(index, 1);
+      }
+      break;
   }
 };
-
 watchEffect(() => {
   getDocList();
 });
@@ -93,7 +96,13 @@ watchEffect(() => {
 <template>
   <div class="teamDoc">
     <div class="teamDoc-header">
-      <q-btn color="primary" label="创建" dense style="width: 120px">
+      <q-btn
+        color="primary"
+        label="创建"
+        dense
+        style="width: 120px"
+        v-if="!type"
+      >
         <q-menu>
           <q-list style="min-width: 100px">
             <q-item
@@ -108,6 +117,7 @@ watchEffect(() => {
           </q-list>
         </q-menu>
       </q-btn>
+      <q-space v-else />
       <q-select
         style="width: 150px"
         outlined
@@ -119,13 +129,19 @@ watchEffect(() => {
         map-options
       />
     </div>
-    <div class="teamDoc-box" @scroll="scrollDoc">
+    <div
+      class="teamDoc-box"
+      @scroll="
+        commonscroll($event, fileList, total, () => {
+          page++;
+        })
+      "
+    >
       <template v-for="(item, index) in fileList" :key="`file${index}`">
-        <fileCard :card="item" type="doc"/>
+        <fileCard :card="item" type="doc" @chooseCard="chooseCard" />
       </template>
     </div>
   </div>
-
 </template>
 <style scoped lang="scss">
 .teamDoc {
@@ -141,7 +157,6 @@ watchEffect(() => {
     height: calc(100% - 50px);
     @include scroll();
     @include p-number(10px, 10px);
- 
   }
 }
 .teamDoc-detail {

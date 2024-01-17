@@ -103,7 +103,7 @@ watch(
     if (newUser) {
       userAvatar.value = newUser?.userAvatar ? newUser.userAvatar : "";
       userName.value = newUser?.userName ? newUser.userName : "";
-      console.log(newUser)
+      console.log(newUser);
       console.log(userAvatar.value, userName.value);
       if (newUser && !newUser.userAvatar && !newUser.userName) {
         userVisible.value = true;
@@ -188,11 +188,36 @@ watch(userVisible, (newVisible) => {
           </q-menu>
         </div>
       </div>
-      <q-tabs vertical inline-label style="height: 160px">
-        <q-route-tab icon="mail" label="队友" to="/home/work" exact />
+      <q-list>
+        <q-item to="/home/task" exact>
+          <q-item-section avatar>
+            <q-icon name="alarm" />
+          </q-item-section>
+          <q-item-section> 事务 </q-item-section>
+          <q-item-section avatar>
+            <q-icon name="check_circle" />
+          </q-item-section>
+        </q-item>
+        <q-item to="/home/mate" exact>
+          <q-item-section avatar>
+            <q-icon name="mail" />
+          </q-item-section>
+
+          <q-item-section> 队友 </q-item-section>
+        </q-item>
+        <q-item to="/home/resource" exact>
+          <q-item-section avatar>
+            <q-icon name="movie" />
+          </q-item-section>
+
+          <q-item-section> 资源 </q-item-section>
+        </q-item>
+      </q-list>
+      <!-- <q-tabs vertical inline-label style="height: 160px">
         <q-route-tab icon="alarm" label="事务" to="/home/task" exact />
+        <q-route-tab icon="mail" label="队友" to="/home/work" exact />
         <q-route-tab icon="movie" label="资源" to="/home/resource" exact />
-      </q-tabs>
+      </q-tabs> -->
       <q-separator />
       <team />
     </div>
@@ -266,7 +291,7 @@ watch(userVisible, (newVisible) => {
   height: 100vh;
   @include flex(space-between, center, null);
   .left {
-    width: 240px;
+    width: 260px;
     height: 100vh;
     padding: 10px;
     box-sizing: border-box;
@@ -284,6 +309,7 @@ watch(userVisible, (newVisible) => {
     height: 100vh;
     position: relative;
     z-index: 1;
+    width: 0px;
   }
 }
 .form-container {

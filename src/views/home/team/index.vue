@@ -7,36 +7,11 @@ import { storeToRefs } from "pinia";
 
 const { teamMemberList, teamInfo, teamKey } = storeToRefs(appStore.teamStore);
 const { spaceMemberList } = storeToRefs(appStore.spaceStore);
-const viewArray = [
-  {
-    value: "taskTree",
-    label: "任务",
-  },
-  {
-    value: "doc",
-    label: "文档",
-  },
-  {
-    value: "file",
-    label: "文件",
-  },
-  {
-    value: "knowledgeBase",
-    label: "知识库",
-  },
-  {
-    value: "table",
-    label: "多维表",
-  },
-  {
-    value: "taskBox",
-    label: "任务盒子",
-  },
-];
+import { viewArray } from "@/services/config/config";
 </script>
 <template>
   <div class="team">
-    <c-header :title="teamInfo?.name" />
+    <c-header :title="teamInfo.name" v-if="teamInfo"/>
     <q-tabs v-if="teamInfo" dense align="left">
       <q-route-tab label="最近" :to="`/home/team/recent`" exact />
       <q-route-tab

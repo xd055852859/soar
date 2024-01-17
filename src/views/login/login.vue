@@ -83,7 +83,7 @@ const login = async () => {
         @click="login()"
       />
       <div class="login-prompt" @click="setLoginState('register')">
-        没有场景英语账户？<span>立即注册</span>
+        没有soar账户？<span>立即注册</span>
       </div>
     </div>
   </div>

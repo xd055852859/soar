@@ -11,14 +11,21 @@ const routes: Array<RouteRecordRaw> = [
     path: "/home",
     name: "home",
     component: () => import("@/views/home/index.vue"),
-    redirect: "/home/work",
+    redirect: "/home/task",
     children: [
       {
-        path: "work",
-        name: "work",
-        component: () => import("@/views/home/work/index.vue"),
+        path: "mate",
+        name: "mate",
+        component: () => import("@/views/home/mate/index.vue"),
         children: [],
       },
+      {
+        path: "mateSetting",
+        name: "mateSetting",
+        component: () => import("@/views/home/mate/setting.vue"),
+        children: [],
+      },
+      
       {
         path: "task",
         name: "task",
@@ -56,6 +63,13 @@ const routes: Array<RouteRecordRaw> = [
             children: [],
           },
           {
+            path: "knowledgeBase",
+            name: "teamKnowledgeBase",
+            component: () =>
+              import("@/views/home/team/tab/teamKnowledgeBase.vue"),
+            children: [],
+          },
+          {
             path: "taskTree",
             name: "teamTask",
             component: () => import("@/views/home/team/tab/teamTask.vue"),
@@ -64,6 +78,13 @@ const routes: Array<RouteRecordRaw> = [
         ],
       },
     ],
+  },
+  {
+    path: "/mateDetail/:mateKey",
+    name: "mateDetail",
+    component: () => import("@/views/home/mate/detail.vue"),
+    children: [],
+    props:true
   },
   {
     path: "/space",

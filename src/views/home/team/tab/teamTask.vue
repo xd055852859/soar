@@ -1,17 +1,21 @@
 <script setup lang="ts">
 import api from "@/services/api";
-import TeamTree from "./teamTree.vue";
+import fileCard from "@/components/fileCard/fileCard.vue";
 import { storeToRefs } from "pinia";
+import TeamTree from "@/components/tree/tree.vue";
 import appStore from "@/store";
 import { ResultProps } from "@/interface/Common";
-import { setMessage } from "@/services/util/common";
+import { commonscroll, setMessage } from "@/services/util/common";
+import { formatName, nameArray } from "@/services/config/config";
 import { useQuasar } from "quasar";
 import _ from "lodash";
 import riverChart from "@/components/chart/riverChart.vue";
+const props = defineProps<{
+  type?: string;
+}>();
 const { teamKey } = storeToRefs(appStore.teamStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
-const detailVisible = ref<boolean>(false);
-const taskDetail = ref<any>(null);
+
 const taskList = ref<any>([]);
 const page = ref<number>(1);
 const total = ref<number>(0);
@@ -19,24 +23,6 @@ const treeRef = ref<any>(null);
 const nodeKey = ref<string>("");
 const chartData = ref<any>(null);
 const chartName = ref<string[]>([]);
-const nameArray = [
-  {
-    label: "全部文件",
-    key: "totalDoc",
-  },
-  {
-    label: "全部文档",
-    key: "totalFile",
-  },
-  {
-    label: "全部任务",
-    key: "totalTask",
-  },
-  {
-    label: "全部完成",
-    key: "totalFinish",
-  },
-];
 const $q = useQuasar();
 onMounted(() => {
   getChartData();
@@ -60,15 +46,17 @@ const addTask = async () => {
     })) as ResultProps;
     if (taskRes.msg === "OK") {
       setMessage("success", `创建事务树成功`);
-      taskDetail.value = taskRes.data;
-      detailVisible.value = true;
+      taskList.value.push(taskRes.data);
+      nodeKey.value = taskRes.data._key;
+      // taskDetail.value = taskRes.data;
+      // detailVisible.value = true;
     }
   });
 };
 const getTaskList = async () => {
   let taskRes = (await api.request.get("card", {
     teamKey: spaceKey.value,
-    projectKey: teamKey.value,
+    projectKey: props.type ? "" : teamKey.value,
     cardType: "taskTree",
     page: page.value,
     limit: 30,
@@ -81,38 +69,38 @@ const getTaskList = async () => {
 const getChartData = async () => {
   let taskRes = (await api.request.get("user/active", {
     teamKey: spaceKey.value,
-    projectKey: teamKey.value,
+    projectKey: props.type ? "" : teamKey.value,
   })) as ResultProps;
   if (taskRes.msg === "OK") {
-    let taskArr = taskRes.data.map((item) => {
-      let arr: any = [];
-      for (let key in item) {
-        if (key !== "time") {
-          arr.push([
-            item.time,
-            item[key],
-            nameArray[_.findIndex(nameArray, { key: key })].label,
-          ]);
-          if (
-            chartName.value.indexOf(
-              nameArray[_.findIndex(nameArray, { key: key })].label
-            ) === -1
-          ) {
-            chartName.value.push(
-              nameArray[_.findIndex(nameArray, { key: key })].label
-            );
-          }
-        }
-      }
-      return arr;
-    });
-    chartData.value = _.flatten(taskArr);
-    console.log(chartName.value);
+    [chartData.value, chartName.value] = formatName(taskRes.data);
   }
 };
-const chooseTask = (detail) => {
-  taskDetail.value = detail;
-  nodeKey.value = detail._key;
+const scrollTask = (e) => {
+  //文档内容实际高度（包括超出视窗的溢出部分）
+  let scrollHeight = e.target.scrollHeight;
+  //滚动条滚动距离
+  let scrollTop = e.target.scrollTop;
+  //窗口可视范围高度
+  let height = e.target.clientHeight;
+  if (
+    height + scrollTop >= scrollHeight &&
+    taskList.value.length < total.value
+  ) {
+    page.value++;
+  }
+};
+const chooseCard = (key, type) => {
+  switch (type) {
+    case "choose":
+      nodeKey.value = key;
+      break;
+    case "delete":
+      let index = _.findIndex(taskList.value, { _key: key });
+      if (index !== -1) {
+        taskList.value.splice(index, 1);
+      }
+      break;
+  }
 };
 watchEffect(() => {
   getTaskList();
@@ -120,7 +108,7 @@ watchEffect(() => {
 </script>
 <template>
   <div class="teamTask">
-    <div class="teamTask-header">
+    <div class="teamTask-header" v-if="!type">
       <q-btn
         color="primary"
         label="创建事务树"
@@ -129,47 +117,23 @@ watchEffect(() => {
         @click="addTask"
       />
     </div>
-    <div class="teamTask-box">
-      <div class="teamTask-box-left">
-        <q-card
-          v-for="(item, index) in taskList"
-          :key="`file${index}`"
-          class="teamTask-box-container q-mb-md icon-point"
-          @click="chooseTask(item)"
-        >
-          <q-card-section class="full-width teamTask-box-top">
-            {{ item.title }}
-            <q-icon name="send" size="20px" @click="detailVisible = true" />
-          </q-card-section>
-          <q-card-section class="teamTask-box-bottom">
-            <q-circular-progress
-              v-for="(taskItem, taskIndex) in item.treeMember"
-              :key="`taskProgress${taskIndex}`"
-              show-value
-              font-size="10px"
-              class="q-mr-sm"
-              :value="
-                taskItem.totalTask === 0
-                  ? 0
-                  : (taskItem.finishTask / taskItem.totalTask) * 100
-              "
-              size="45px"
-              :thickness="0.25"
-              color="primary"
-              track-color="grey-3"
-            >
-              <q-avatar size="35px">
-                <img
-                  :src="
-                    taskItem.userAvatar
-                      ? taskItem.userAvatar
-                      : '/common/defaultPerson.png'
-                  "
-                />
-              </q-avatar>
-            </q-circular-progress>
-          </q-card-section>
-        </q-card>
+    <div class="teamTask-box" :style="type ? { height: '100%' } : null">
+      <div
+        class="teamTask-box-left"
+        @scroll="
+          commonscroll($event, taskList, total, () => {
+            page++;
+          })
+        "
+      >
+        <template v-for="(item, index) in taskList" :key="`task${index}`">
+          <fileCard
+            :card="item"
+            type="taskTree"
+            @chooseCard="chooseCard"
+            :outType="type"
+          />
+        </template>
       </div>
       <div class="teamTask-box-right">
         <TeamTree
@@ -187,11 +151,6 @@ watchEffect(() => {
       </div>
     </div>
   </div>
-  <Teleport to="body">
-    <div class="teamTask-detail" v-if="detailVisible">
-      <TeamTree :cardKey="taskDetail._key" ref="treeRef" viewType="tree" />
-    </div>
-  </Teleport>
 </template>
 <style scoped lang="scss">
 .teamTask {
@@ -211,32 +170,12 @@ watchEffect(() => {
       height: 100%;
       @include p-number(10px, 10px);
       @include scroll();
-      .teamTask-box-top {
-        width: 100%;
-        height: 30px;
-        @include flex(space-between, center, null);
-      }
-      .teamTask-box-bottom {
-        width: 100%;
-        height: 80px;
-        @include scroll();
-        @include flex(flex-start, center, null);
-      }
     }
     .teamTask-box-right {
       width: 70%;
       height: 100%;
     }
   }
-}
-.teamTask-detail {
-  width: 100vw;
-  height: 100vh;
-  position: fixed;
-  z-index: 10;
-  top: 0px;
-  left: 0px;
-  background-color: #fff;
 }
 </style>
 <style></style>

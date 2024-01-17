@@ -1,14 +1,24 @@
 <script setup lang="ts">
 const props = defineProps<{
   title: string;
+  backPath?: string;
+  type?: string;
+  noTitle?: boolean;
 }>();
 </script>
 <template>
   <div className="header">
-    <div className="header-title single-to-long">
-      {{ title }}
-      <slot name="subtitle"></slot>
+    <div
+      v-if="backPath"
+      @click="$router.push(backPath)"
+      class="icon-point q-mr-sm"
+    >
+      <q-icon name="navigate_before" size="32px" />
     </div>
+    <div className="header-title single-to-long">
+      <template v-if="!noTitle">{{ title }}</template>
+    </div>
+    <slot name="subtitle"></slot>
     <q-space />
     <slot name="button"></slot>
   </div>

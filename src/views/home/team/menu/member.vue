@@ -97,7 +97,7 @@ watch(
       @mouseenter="chooseKey = item._key"
     >
       <div class="member-item-left">
-        <q-avatar color="primary" text-color="white" size="lg" class="q-mr-sm">
+        <q-avatar color="primary" size="lg" class="q-mr-sm">
           <img
             :src="
               item?.userAvatar ? item.userAvatar : '/common/defaultPerson.png'
@@ -113,7 +113,10 @@ watch(
             <q-item
               clickable
               v-close-popup
-              v-for="(item, index) in ROLE_OPTIONS"
+              v-for="(item, index) in ROLE_OPTIONS.slice(
+                1,
+                ROLE_OPTIONS.length
+              )"
               :key="`role${index}`"
               @click="changeRole(item.value, memberIndex)"
             >
@@ -151,7 +154,7 @@ watch(
         :key="`search${item.userKey}`"
       >
         <div class="member-item-left" style="width: calc(100% - 120px)">
-          <q-avatar color="primary" text-color="white" size="lg">
+          <q-avatar color="primary" size="lg" class="q-mr-sm">
             <img
               :src="
                 item?.userAvatar ? item.userAvatar : '/common/defaultPerson.png'

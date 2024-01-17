@@ -3,80 +3,31 @@ import api from "@/services/api";
 import _ from "lodash";
 import { useQuasar } from "quasar";
 import cIframe from "@/components/common/cIframe.vue";
+import TeamTree from "@/components/tree/tree.vue";
 import { setMessage } from "@/services/util/common";
 import { storeToRefs } from "pinia";
 import appStore from "@/store";
 import { ResultProps } from "@/interface/Common";
+import { docArray, fileArray, viewArray } from "@/services/config/config";
 const $q = useQuasar();
 const dayjs: any = inject("dayjs");
 const { token } = storeToRefs(appStore.authStore);
 const props = defineProps<{
   type: string;
   card: any;
+  outType?:string
 }>();
+const emits = defineEmits<{
+  (e: "chooseCard", key: string, type: string): void;
+}>();
+
 const fileDetail = ref<any>(null);
 const detailVisible = ref<boolean>(false);
 const detailUrl = ref<string>("");
-const docArray = [
-  {
-    label: "全部类型",
-    value: "",
-  },
-  {
-    label: "文档",
-    value: "text",
-  },
-  {
-    label: "绘图",
-    value: "draw",
-  },
-  {
-    label: "脑图",
-    value: "mind",
-  },
-  {
-    label: "表格",
-    value: "table",
-  },
-  {
-    label: "演示",
-    value: "ppt",
-  },
-  {
-    label: "知识库",
-    value: "knowledgeBase",
-  },
-];
-const fileArray = [
-  {
-    label: "全部类型",
-    value: "",
-  },
-  {
-    label: "文档",
-    value: "text",
-  },
-  {
-    label: "绘图",
-    value: "draw",
-  },
-  {
-    label: "脑图",
-    value: "mind",
-  },
-  {
-    label: "表格",
-    value: "table",
-  },
-  {
-    label: "演示",
-    value: "ppt",
-  },
-  {
-    label: "知识库",
-    value: "knowledgeBase",
-  },
-];
+//任务
+const taskDetail = ref<any>(null);
+const nodeKey = ref<string>("");
+//文档
 const chooseDoc = (type, detail) => {
   fileDetail.value = detail;
   const getApi = api.API_URL + "card/detail";
@@ -104,10 +55,14 @@ const chooseDoc = (type, detail) => {
   }
   detailVisible.value = true;
 };
-const deleteDoc = async (key) => {
+const deleteCard = async (key) => {
   $q.dialog({
-    title: "删除文档",
-    message: "是否删除该文档",
+    title: `删除${
+      viewArray[_.findIndex(viewArray, { value: props.type })].label
+    }`,
+    message: `是否删除该${
+      viewArray[_.findIndex(viewArray, { value: props.type })].label
+    }`,
     cancel: {
       color: "grey-5",
       flat: true,
@@ -124,16 +79,65 @@ const deleteDoc = async (key) => {
     })
     .onCancel(() => {});
 };
+//任务
+const chooseTask = (detail) => {
+  taskDetail.value = detail;
+  nodeKey.value = detail._key;
+  emits("chooseCard", detail._key, "choose");
+};
 </script>
 <template>
-  <template v-if="type === 'taskTree'"></template>
+  <template v-if="type === 'taskTree'">
+    <q-card
+      class="teamTask-box-container q-mb-md icon-point"
+      @click="chooseTask(card)"
+    >
+      <q-card-section class="full-width teamTask-box-top">
+        <template v-if="outType"># {{card.projectInfo.name}} / </template> {{ card.title }}
+        <q-icon name="send" size="20px" @click.stop="detailVisible = true" />
+      </q-card-section>
+      <q-card-section class="teamTask-box-bottom">
+        <q-circular-progress
+          v-for="(taskItem, taskIndex) in card.treeMember"
+          :key="`taskProgress${taskIndex}`"
+          show-value
+          font-size="10px"
+          class="q-mr-sm"
+          :value="
+            taskItem.totalTask === 0
+              ? 0
+              : (taskItem.finishTask / taskItem.totalTask) * 100
+          "
+          size="45px"
+          :thickness="0.25"
+          color="primary"
+          track-color="grey-3"
+        >
+          <q-avatar size="35px">
+            <img
+              :src="
+                taskItem.userAvatar
+                  ? taskItem.userAvatar
+                  : '/common/defaultPerson.png'
+              "
+            />
+          </q-avatar>
+        </q-circular-progress>
+      </q-card-section>
+    </q-card>
+    <Teleport to="body">
+      <div class="fileCard-detail" v-if="detailVisible">
+        <TeamTree :cardKey="card._key" ref="treeRef" viewType="tree" />
+      </div>
+    </Teleport>
+  </template>
   <template v-else-if="type === 'doc'">
     <q-card
       class="teamDoc-box-container q-mb-md icon-point"
       @click="chooseDoc(card.subType, card)"
     >
-      <q-card-section class="fileCard-box-top">
-        <div>{{ card.title }}</div>
+      <q-card-section class="teamDoc-box-top">
+        <div><template v-if="outType"># {{card.projectInfo.name}} / </template> {{ card.title }}</div>
         <div>
           {{ docArray[_.findIndex(docArray, { value: card.subType })]?.label }}
           <q-chip>引用</q-chip>
@@ -146,7 +150,7 @@ const deleteDoc = async (key) => {
                 <q-item clickable v-close-popup>
                   <q-item-section>编辑</q-item-section>
                 </q-item>
-                <q-item clickable v-close-popup @click="deleteDoc(card._key)">
+                <q-item clickable v-close-popup @click="deleteCard(card._key)">
                   <q-item-section>删除</q-item-section>
                 </q-item>
               </q-list>
@@ -161,6 +165,11 @@ const deleteDoc = async (key) => {
         <div>{{ dayjs(card.updateTime).format("YYYY-MM-DD HH:mm") }}</div>
       </q-card-section>
     </q-card>
+    <Teleport to="body">
+      <div class="fileCard-detail" v-if="detailVisible">
+        <cIframe :url="detailUrl" :title="fileDetail.title" />
+      </div>
+    </Teleport>
   </template>
   <template v-else-if="type === 'file'">
     <q-card
@@ -168,7 +177,7 @@ const deleteDoc = async (key) => {
       @click="chooseDoc(card.subType, card)"
     >
       <q-card-section class="teamFile-box-top">
-        <div>{{ card.title }}</div>
+        <div><template v-if="outType"># {{card.projectInfo.name}} / </template> {{ card.title }}</div>
         <div>
           {{
             fileArray[_.findIndex(fileArray, { value: card.subType })]?.label
@@ -180,7 +189,7 @@ const deleteDoc = async (key) => {
                 <q-item clickable v-close-popup>
                   <q-item-section>编辑</q-item-section>
                 </q-item>
-                <q-item clickable v-close-popup @click="deleteDoc(card._key)">
+                <q-item clickable v-close-popup @click="deleteCard(card._key)">
                   <q-item-section>删除</q-item-section>
                 </q-item>
               </q-list>
@@ -197,11 +206,6 @@ const deleteDoc = async (key) => {
     </q-card>
   </template>
   <template v-else-if="type === 'knowledgeBase'"></template>
-  <Teleport to="body">
-    <div class="teamDoc-detail" v-if="detailVisible">
-      <cIframe :url="detailUrl" :title="fileDetail.title" />
-    </div>
-  </Teleport>
 </template>
 <style scoped lang="scss">
 .teamDoc-box-container {
@@ -227,6 +231,28 @@ const deleteDoc = async (key) => {
     height: 50px;
     @include flex(space-between, center, null);
   }
+}
+.teamTask-box-container {
+  .teamTask-box-top {
+    width: 100%;
+    height: 30px;
+    @include flex(space-between, center, null);
+  }
+  .teamTask-box-bottom {
+    width: 100%;
+    height: 80px;
+    @include scroll();
+    @include flex(flex-start, center, null);
+  }
+}
+.fileCard-detail {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  z-index: 10;
+  top: 0px;
+  left: 0px;
+  background-color: #fff;
 }
 </style>
 <style></style>

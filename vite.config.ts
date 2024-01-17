@@ -45,8 +45,7 @@ export default defineConfig(({ mode, command }) => {
           additionalData: "@import 'src/styles/mixin/mixin.scss';",
           javascriptEnabled: true,
         },
-         preprocessorOptions: {
-      },
+        preprocessorOptions: {},
       },
     },
     resolve: {
@@ -60,7 +59,7 @@ export default defineConfig(({ mode, command }) => {
       port: 8001, // 设置服务启动端口号
       open: true, // 设置服务启动时是否自动打开浏览器
       cors: true, // 允许跨域
-
+      hmr: true,
       // 设置代理，根据我们项目实际情况配置
     },
   };

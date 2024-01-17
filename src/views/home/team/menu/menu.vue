@@ -283,6 +283,7 @@ watch(teamInfo, (newInfo) => {
 </template>
 <style scoped lang="scss">
 .teamMenu {
+  @include p-number(0px,10px);
   .teamMenu-title {
     width: 100%;
     height: 40px;
@@ -291,6 +292,7 @@ watch(teamInfo, (newInfo) => {
     @include flex(space-between, center, null);
   }
   .teamMenu-list {
+
     .teamMenu-item {
       width: 100%;
       height: 30px;

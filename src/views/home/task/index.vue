@@ -1,13 +1,24 @@
 <script setup lang="ts">
 import cHeader from "@/components/common/cHeader.vue";
+import TeamTask from "../team/tab/teamTask.vue";
 </script>
 <template>
-  <div class="task"><cHeader title="事务" /></div>
+  <div class="task">
+    <cHeader title="事务" />
+    <div class="task-box">
+      <TeamTask type="resouce" />
+    </div>
+  </div>
 </template>
 <style scoped lang="scss">
 .task {
   width: 100%;
   height: 100%;
+  .task-box {
+    width: 100%;
+    height: calc(100% - 65px);
+    @include p-number(10px, 25px);
+  }
 }
 </style>
 <style></style>

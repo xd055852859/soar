@@ -7,9 +7,9 @@ const props = defineProps<{
   riverId: string;
   chartData: any;
   chartName?: string[];
+  type?: string;
   yData?: any;
   xData?: any;
-  lineData?: any;
 }>();
 const emits = defineEmits<{
   (e: "chooseDate", date: string, index: number): void;
@@ -25,7 +25,7 @@ const lineLeft = ref<string>("15%");
 onMounted(() => {
   let chartDom: any = document.getElementById(props.riverId);
   chart = echarts.init(chartDom);
-  option = {
+  let option: any = {
     tooltip: {
       trigger: "axis",
       axisPointer: {
@@ -36,9 +36,6 @@ onMounted(() => {
           type: "solid",
         },
       },
-    },
-    legend: {
-      data: props.chartName,
     },
     singleAxis: {
       top: 50,
@@ -59,6 +56,7 @@ onMounted(() => {
           opacity: 0.2,
         },
       },
+      // axisLine: { show: true }
     },
     series: [
       {
@@ -73,6 +71,19 @@ onMounted(() => {
       },
     ],
   };
+  if (!props.type) {
+    option.legend = {
+      data: props.chartName,
+    };
+  } else {
+    // option.singleAxis = {
+    //   // ...option.singleAxis,
+    //   axisLine: { show: false },
+    //   axisTick: { show: false },
+    //   axisLabel: { show: false },
+    //   splitLine: { show: false },
+    // };
+  }
 
   option && chart.setOption(option);
   //   chart.on("click", function (params) {
@@ -84,6 +95,22 @@ onMounted(() => {
   //     }
   //   });
 });
+watch(
+  () => props.chartData,
+  (newVal) => {
+    //@ts-ignore
+    chart.setOption<echarts.EChartsOption>({
+      series: [
+        {
+          data: newVal,
+        },
+      ],
+    });
+    //@ts-ignore
+    chart.resize();
+  },
+  { deep: true }
+);
 </script>
 <template>
   <div :id="riverId" class="line-chart"></div>
