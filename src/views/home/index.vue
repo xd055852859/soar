@@ -188,6 +188,7 @@ watch(userVisible, (newVisible) => {
           </q-menu>
         </div>
       </div>
+      <div @click="router.push('/home/note')">速记</div>
       <q-tabs vertical inline-label style="height: 160px">
         <q-route-tab icon="mail" label="队友" to="/home/work" exact />
         <q-route-tab icon="alarm" label="事务" to="/home/task" exact />
