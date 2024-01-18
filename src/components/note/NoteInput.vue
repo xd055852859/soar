@@ -1,5 +1,5 @@
 <template>
-  <div class="note-input">
+  <q-card flat bordered class="note-input">
     <Editor
       v-if="initData !== undefined"
       ref="editorRef"
@@ -7,18 +7,24 @@
       :auto-save="true"
       @on-change="handleChange"
     />
-    <q-btn color="primary" label="保存" @click="handlePost" />
-  </div>
+    <div class="buttons">
+      <q-btn color="primary" size="sm" label="保存" @click="handlePost" />
+    </div>
+  </q-card>
 </template>
 <script setup lang="ts">
 import Editor from "@/components/note/Editor.vue";
 import { Card } from "@/interface/Card";
+import { storeToRefs } from "pinia";
+import appStore from "@/store";
+
+const { notes } = storeToRefs(appStore.noteStore);
 
 const editorRef = ref();
 const initData = ref<Card | null>();
 const changed = ref(false);
 
-let timeout: any;
+let timeout: number;
 
 onMounted(() => {
   const str = localStorage.getItem("INPUT_DATA");
@@ -27,6 +33,16 @@ onMounted(() => {
     initData.value = json;
   } else {
     initData.value = null;
+  }
+});
+
+watch(notes, (newVal, oldVal) => {
+  if (newVal.length - oldVal.length === 1) {
+    // 提交成功后删除本地缓存
+    localStorage.removeItem("INPUT_DATA");
+    if (editorRef.value) {
+      editorRef.value.clear();
+    }
   }
 });
 
@@ -50,4 +66,13 @@ const handlePost = () => {
   }
 };
 </script>
-<style scoped></style>
+<style scoped>
+.note-input {
+}
+.buttons {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  padding: 15px;
+}
+</style>

@@ -9,16 +9,22 @@ export const noteStore = defineStore("noteStore", () => {
   const notes = ref<Card[]>([]);
   const note = ref<Card | null>(null);
 
+  const clearNoteDetail = () => {
+    note.value = null;
+  };
+
   const createNote = async (props: {
     type: "text" | "outline" | "clip" | "link" | "file";
     title: string;
-    content: JSONContent;
-    summary: string;
+    content?: JSONContent;
+    summary?: string;
     icon?: string;
+    link?: string;
   }) => {
     const res = (await api.note.create(props)) as ResultProps<Card>;
     if (res.status === 200) {
       note.value = res.data;
+      notes.value = [res.data, ...notes.value];
     }
   };
 
@@ -53,6 +59,20 @@ export const noteStore = defineStore("noteStore", () => {
     icon?: string;
   }) => {
     const res = (await api.note.edit(props)) as ResultProps<Card>;
+    if (res.status === 200) {
+      const index = notes.value.findIndex(
+        (note) => note._key === props.noteKey
+      );
+      if (index !== -1) {
+        notes.value[index] = {
+          ...notes.value[index],
+          title: props.title,
+          type: props.type,
+          summary: props.summary,
+          icon: props.icon,
+        };
+      }
+    }
   };
 
   const getNoteDetail = async (noteKey: string) => {
@@ -63,10 +83,13 @@ export const noteStore = defineStore("noteStore", () => {
   };
 
   return {
+    note,
+    notes,
     createNote,
     getNotes,
     deleteNote,
     editNote,
     getNoteDetail,
+    clearNoteDetail,
   };
 });

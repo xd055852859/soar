@@ -9,4 +9,5 @@ export interface Card {
   icon?: string;
   // 摘要
   summary?: string;
+  link?: string;
 }

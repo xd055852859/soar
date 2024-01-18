@@ -1,13 +1,16 @@
 <template>
   <div class="note-wrapper">
     <div class="cards-wrapper">
-      <NoteInput />
+      <NoteList />
     </div>
-    <div class="preview-wrapper"></div>
+    <div class="preview-wrapper">
+      <NoteEditor />
+    </div>
   </div>
 </template>
 <script setup lang="ts">
-import NoteInput from "@/components/note/NoteInput.vue";
+import NoteEditor from "./NoteEditor.vue";
+import NoteList from "./NoteList.vue";
 </script>
 <style scoped>
 .note-wrapper {
@@ -19,5 +22,9 @@ import NoteInput from "@/components/note/NoteInput.vue";
 }
 .cards-wrapper {
   border-right: 1px solid #ddd;
+  overflow: hidden;
+}
+.preview-wrapper {
+  overflow: auto;
 }
 </style>
