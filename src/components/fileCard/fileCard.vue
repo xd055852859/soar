@@ -79,7 +79,7 @@ const deleteCard = async (detail) => {
             viewArray[_.findIndex(viewArray, { value: props.type })].label
           }成功`
         );
-        emits("chooseCard", detail, "choose");
+        emits("chooseCard", detail, "delete");
         // fileList.value.splice(index, 1);
       }
     })
@@ -125,7 +125,7 @@ const finishTask = async (detail) => {
 const chooseTask = (detail) => {
   taskDetail.value = detail;
   nodeKey.value = detail._key;
-  emits("chooseCard", detail, "choose");
+  emits("chooseCard", detail, "search");
 };
 const handleDownload = (detail) => {
   // let a = document.createElement("a");
@@ -151,7 +151,7 @@ const handleDownload = (detail) => {
       <q-card-section class="full-width teamTask-box-top">
         <template v-if="outType"># {{ card.projectInfo.name }} / </template>
         {{ card.title }}
-        <q-icon name="send" size="20px" @click.stop="detailVisible = true" />
+        <q-icon name="o_send" size="20px" @click.stop="detailVisible = true" />
       </q-card-section>
       <q-card-section class="teamTask-box-bottom">
         <q-circular-progress
@@ -203,7 +203,7 @@ const handleDownload = (detail) => {
           <q-chip>引用</q-chip>
           <q-chip>浏览</q-chip>
 
-          <q-btn flat round icon="more_horiz" size="12px" @click.stop="">
+          <q-btn flat round icon="o_more_horiz" size="12px" @click.stop="">
             <q-menu anchor="top right" self="top left" class="q-pa-sm">
               <q-list dense>
                 <!--  @click="editFile(item._key, index)" -->

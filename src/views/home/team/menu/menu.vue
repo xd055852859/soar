@@ -192,7 +192,7 @@ watch(teamInfo, (newInfo) => {
   <div class="teamMenu">
     <div class="teamMenu-title">
       <div>小组</div>
-      <q-btn flat round icon="add_circle" @click="toggleTeam(null, true)" />
+      <q-btn flat round icon="o_add_circle" @click="toggleTeam(null, true)" />
     </div>
     <div class="teamMenu-list">
       <div
@@ -207,7 +207,7 @@ watch(teamInfo, (newInfo) => {
       >
         <div># {{ item.name }}</div>
         <div class="teamMenu-item-icon" v-if="overKey === item._key">
-          <q-btn flat round icon="more_horiz" size="12px"> </q-btn>
+          <q-btn flat round icon="o_more_horiz" size="12px"> </q-btn>
           <q-menu anchor="top right" self="top left" class="q-pa-sm">
             <q-list dense>
               <q-item clickable v-close-popup @click="toggleTeam(item, true)">

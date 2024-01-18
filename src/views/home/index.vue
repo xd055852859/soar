@@ -148,7 +148,7 @@ watch(userVisible, (newVisible) => {
             {{ spaceInfo?.name }}
           </div>
 
-          <q-icon name="keyboard_arrow_down" size="28px" />
+          <q-icon name="o_keyboard_arrow_down" size="28px" />
           <q-menu style="width: 220px; padding: 10px">
             <div
               class="select-third-item icon-point"
@@ -193,23 +193,23 @@ watch(userVisible, (newVisible) => {
       <q-list>
         <q-item to="/home/task" exact>
           <q-item-section avatar>
-            <q-icon name="alarm" />
+            <q-icon name="o_alarm" />
           </q-item-section>
           <q-item-section> 事务 </q-item-section>
           <q-item-section avatar>
-            <q-icon name="check_circle" />
+            <q-icon name="o_check_circle" />
           </q-item-section>
         </q-item>
         <q-item to="/home/mate" exact>
           <q-item-section avatar>
-            <q-icon name="mail" />
+            <q-icon name="o_mail" />
           </q-item-section>
 
           <q-item-section> 队友 </q-item-section>
         </q-item>
         <q-item to="/home/resource" exact>
           <q-item-section avatar>
-            <q-icon name="movie" />
+            <q-icon name="o_movie" />
           </q-item-section>
 
           <q-item-section> 资源 </q-item-section>
