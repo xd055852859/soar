@@ -15,7 +15,7 @@ const { token } = storeToRefs(appStore.authStore);
 const props = defineProps<{
   type: string;
   card: any;
-  outType?:string
+  outType?: string;
 }>();
 const emits = defineEmits<{
   (e: "chooseCard", key: string, type: string): void;
@@ -55,7 +55,7 @@ const chooseDoc = (type, detail) => {
   }
   detailVisible.value = true;
 };
-const deleteCard = async (key) => {
+const deleteCard = async (detail) => {
   $q.dialog({
     title: `删除${
       viewArray[_.findIndex(viewArray, { value: props.type })].label
@@ -70,20 +70,76 @@ const deleteCard = async (key) => {
   })
     .onOk(async () => {
       let fileRes = (await api.request.delete("card", {
-        cardKey: key,
+        cardKey: detail._key,
       })) as ResultProps;
       if (fileRes.msg === "OK") {
-        setMessage("success", "删除文档成功");
+        setMessage(
+          "success",
+          `删除${
+            viewArray[_.findIndex(viewArray, { value: props.type })].label
+          }成功`
+        );
+        emits("chooseCard", detail, "choose");
         // fileList.value.splice(index, 1);
       }
     })
     .onCancel(() => {});
 };
+const updatCard = async (key, value, detail) => {
+  let detailRes = (await api.request.patch("card", {
+    cardKey: detail._key,
+    [key]: value,
+  })) as ResultProps;
+  if (detailRes.msg === "OK") {
+    setMessage("success", "编辑成功");
+    detail[key] = value;
+    emits("chooseCard", detail, "update");
+  }
+};
+const updateTitle = async (detail) => {
+  $q.dialog({
+    title: "重命名",
+    prompt: {
+      model: detail.title,
+      type: "text", // optional
+    },
+    cancel: {
+      color: "grey-5",
+      flat: true,
+    },
+  }).onOk((data) => {
+    updatCard("title", data, detail);
+  });
+};
+const finishTask = async (detail) => {
+  let detailRes = (await api.request.patch("node/finish", {
+    nodeKey: detail._key,
+    hasDone: !detail.hasDone,
+  })) as ResultProps;
+  if (detailRes.msg === "OK") {
+    detail.hasDone = !detail.hasDone;
+    emits("chooseCard", detail, "update");
+  }
+};
 //任务
 const chooseTask = (detail) => {
   taskDetail.value = detail;
   nodeKey.value = detail._key;
-  emits("chooseCard", detail._key, "choose");
+  emits("chooseCard", detail, "choose");
+};
+const handleDownload = (detail) => {
+  // let a = document.createElement("a");
+  // a.href = detail.url;
+  // a.download = detail.name;
+  // a.click();
+
+  const a = document.createElement("a");
+  a.setAttribute("href", detail.url);
+  a.setAttribute("download", detail.name);
+  a.style.display = "none";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 };
 </script>
 <template>
@@ -93,7 +149,8 @@ const chooseTask = (detail) => {
       @click="chooseTask(card)"
     >
       <q-card-section class="full-width teamTask-box-top">
-        <template v-if="outType"># {{card.projectInfo.name}} / </template> {{ card.title }}
+        <template v-if="outType"># {{ card.projectInfo.name }} / </template>
+        {{ card.title }}
         <q-icon name="send" size="20px" @click.stop="detailVisible = true" />
       </q-card-section>
       <q-card-section class="teamTask-box-bottom">
@@ -137,7 +194,10 @@ const chooseTask = (detail) => {
       @click="chooseDoc(card.subType, card)"
     >
       <q-card-section class="teamDoc-box-top">
-        <div><template v-if="outType"># {{card.projectInfo.name}} / </template> {{ card.title }}</div>
+        <div>
+          <template v-if="outType"># {{ card.projectInfo.name }} / </template>
+          {{ card.title }}
+        </div>
         <div>
           {{ docArray[_.findIndex(docArray, { value: card.subType })]?.label }}
           <q-chip>引用</q-chip>
@@ -147,10 +207,10 @@ const chooseTask = (detail) => {
             <q-menu anchor="top right" self="top left" class="q-pa-sm">
               <q-list dense>
                 <!--  @click="editFile(item._key, index)" -->
-                <q-item clickable v-close-popup>
-                  <q-item-section>编辑</q-item-section>
+                <q-item clickable v-close-popup @click="updateTitle(card)">
+                  <q-item-section>重命名</q-item-section>
                 </q-item>
-                <q-item clickable v-close-popup @click="deleteCard(card._key)">
+                <q-item clickable v-close-popup @click="deleteCard(card)">
                   <q-item-section>删除</q-item-section>
                 </q-item>
               </q-list>
@@ -177,7 +237,10 @@ const chooseTask = (detail) => {
       @click="chooseDoc(card.subType, card)"
     >
       <q-card-section class="teamFile-box-top">
-        <div><template v-if="outType"># {{card.projectInfo.name}} / </template> {{ card.title }}</div>
+        <div>
+          <template v-if="outType"># {{ card.projectInfo.name }} / </template>
+          {{ card.title }}
+        </div>
         <div>
           {{
             fileArray[_.findIndex(fileArray, { value: card.subType })]?.label
@@ -187,9 +250,16 @@ const chooseTask = (detail) => {
               <q-list dense>
                 <!--  @click="editFile(item._key, index)" -->
                 <q-item clickable v-close-popup>
-                  <q-item-section>编辑</q-item-section>
+                  <q-item-section @click="updateTitle(card)"
+                    >重命名</q-item-section
+                  >
                 </q-item>
-                <q-item clickable v-close-popup @click="deleteCard(card._key)">
+                <q-item clickable v-close-popup>
+                  <q-item-section @click="handleDownload(card)"
+                    >下载</q-item-section
+                  >
+                </q-item>
+                <q-item clickable v-close-popup @click="deleteCard(card)">
                   <q-item-section>删除</q-item-section>
                 </q-item>
               </q-list>
@@ -205,6 +275,68 @@ const chooseTask = (detail) => {
       </q-card-section>
     </q-card>
   </template>
+  <template v-else-if="type === 'task'">
+    <q-card class="teamFile-box-container q-mb-md icon-point">
+      <q-card-section class="teamFile-box-top">
+        <div>
+          <template v-if="outType"># {{ card.projectInfo.name }}</template>
+        </div>
+        <div>
+          {{ dayjs(card.updateTime).fromNow() }}
+          <q-btn flat round icon="more_horiz" size="12px" @click.stop="">
+            <q-menu anchor="top right" self="top left" class="q-pa-sm">
+              <q-list dense>
+                <!--  @click="editFile(item._key, index)" -->
+                <!-- <q-item clickable v-close-popup>
+                  <q-item-section>编辑</q-item-section>
+                </q-item> -->
+                <q-item clickable v-close-popup @click="deleteCard(card)">
+                  <q-item-section>删除</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
+        </div>
+      </q-card-section>
+      <q-card-section class="teamFile-box-center">
+        <q-icon
+          :name="card.hasDone ? 'o_check_circle' : 'o_circle'"
+          size="20px"
+          class="q-mr-sm"
+          @click="finishTask(card)"
+        />
+        {{ card.name }}
+      </q-card-section>
+      <q-card-section class="teamFile-box-bottom">
+        <div>
+          <!-- <span v-for="(personItem,personIndex) in item."></span> -->
+        </div>
+        <div class="dp-center-center">
+          <q-avatar size="30px" class="q-mr-sm">
+            <img
+              :src="
+                card.assignorInfo?.userAvatar
+                  ? card.assignorInfo.userAvatar
+                  : '/common/defaultGroup.png'
+              "
+            />
+          </q-avatar>
+          {{ card.assignorInfo?.userName }}
+          <q-icon name="arrow_right_alt" size="20px" class="q-ma-sm" />
+          <q-avatar size="30px" class="q-mr-sm">
+            <img
+              :src="
+                card.executorInfo?.userAvatar
+                  ? card.executorInfo.userAvatar
+                  : '/common/defaultGroup.png'
+              "
+            />
+          </q-avatar>
+          {{ card.executorInfo?.userName }}
+        </div>
+      </q-card-section>
+    </q-card></template
+  >
   <template v-else-if="type === 'knowledgeBase'"></template>
 </template>
 <style scoped lang="scss">
@@ -237,6 +369,8 @@ const chooseTask = (detail) => {
     width: 100%;
     height: 30px;
     @include flex(space-between, center, null);
+  }
+  .teamFile-box-center {
   }
   .teamTask-box-bottom {
     width: 100%;

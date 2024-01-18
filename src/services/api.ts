@@ -13,7 +13,6 @@ axios.interceptors.response.use(
     if (response.data.status === 701) {
       setMessage("error", "请登录");
       localStorage.clear();
-      sessionStorage.clear();
       router.replace("/");
       token = "";
       commonStore().clearStore();

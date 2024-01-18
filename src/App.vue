@@ -47,12 +47,12 @@ onMounted(() => {
     request.setToken(token);
     setToken(token);
     setSpaceKey(
-      sessionStorage.getItem("spaceKey")
-        ? sessionStorage.getItem("spaceKey")
+      localStorage.getItem("spaceKey")
+        ? localStorage.getItem("spaceKey")
         : ""
     );
     setTeamKey(
-      sessionStorage.getItem("teamKey") ? sessionStorage.getItem("teamKey") : ""
+      localStorage.getItem("teamKey") ? localStorage.getItem("teamKey") : ""
     );
   } else {
     router.replace("/");

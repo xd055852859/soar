@@ -7,22 +7,13 @@ import { ResultProps } from "@/interface/Common";
 import { storeToRefs } from "pinia";
 import appStore from "@/store";
 const { spaceKey } = storeToRefs(appStore.spaceStore);
+const { mateList } = storeToRefs(appStore.mateStore);
+const { getMateList } = appStore.mateStore;
 const chartData = ref<any>(null);
 const chartName = ref<string[]>([]);
-const mateList = ref<any>([]);
+
 const days = ref<number>(7);
-const getMateList = async () => {
-  let mateRes = (await api.request.get("teamMate", {
-    teamKey: spaceKey.value,
-  })) as ResultProps;
-  if (mateRes.msg === "OK") {
-    mateRes.data = mateRes.data.map((item) => {
-      [item.chartData, item.chartName] = formatName(item.activeList);
-      return item;
-    });
-    mateList.value = [...mateRes.data];
-  }
-};
+
 const getChartData = async () => {
   let mateRes = (await api.request.get("teamMate/active/all", {
     teamKey: spaceKey.value,
@@ -32,9 +23,6 @@ const getChartData = async () => {
     [chartData.value, chartName.value] = formatName(mateRes.data);
   }
 };
-watchEffect(() => {
-  getMateList();
-});
 watchEffect(() => {
   getChartData();
 });
@@ -94,7 +82,7 @@ watchEffect(() => {
             {{ item.userName }}
           </q-card-section>
 
-          <q-card-section style="height: 150px">
+          <q-card-section style="height: 100px">
             <riverChart
               :riverId="`mate${item._key}River`"
               :chartData="item.chartData"

@@ -16,12 +16,6 @@ const emits = defineEmits<{
 }>();
 const dayjs: any = inject("dayjs");
 let chart: any | null = null;
-let option: echarts.EChartsOption | null = null;
-const xAxisData = ref<any>(null);
-const seriesData = ref<any>(null);
-const nameData = ref<any>(null);
-const lineWidth = ref<number>(0);
-const lineLeft = ref<string>("15%");
 onMounted(() => {
   let chartDom: any = document.getElementById(props.riverId);
   chart = echarts.init(chartDom);
@@ -45,9 +39,9 @@ onMounted(() => {
       type: "time",
       axisPointer: {
         animation: true,
-        label: {
-          show: true,
-        },
+        // label: {
+        //   show: true,
+        // },
       },
       splitLine: {
         show: true,
@@ -68,6 +62,9 @@ onMounted(() => {
           },
         },
         data: props.chartData,
+        label: {
+          show: false,
+        },
       },
     ],
   };
@@ -76,13 +73,13 @@ onMounted(() => {
       data: props.chartName,
     };
   } else {
-    // option.singleAxis = {
-    //   // ...option.singleAxis,
-    //   axisLine: { show: false },
-    //   axisTick: { show: false },
-    //   axisLabel: { show: false },
-    //   splitLine: { show: false },
-    // };
+    option.singleAxis = {
+      ...option.singleAxis,
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { show: false },
+      splitLine: { show: false },
+    };
   }
 
   option && chart.setOption(option);

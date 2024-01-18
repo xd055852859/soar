@@ -1,4 +1,4 @@
-import { Notify } from "quasar";
+import { Notify, Loading } from "quasar";
 export const setMessage = (type: string, text: string) => {
   let icon: string = "";
   let color: string = "";
@@ -22,6 +22,9 @@ export const setMessage = (type: string, text: string) => {
     message: text,
     position: "top",
   });
+};
+export const setLoading = (visible: boolean) => {
+  visible ? Loading.show() : Loading.hide();
 };
 export const commonscroll = (e, list, total, callback) => {
   //文档内容实际高度（包括超出视窗的溢出部分）

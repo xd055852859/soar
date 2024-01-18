@@ -9,10 +9,9 @@ import { useQuasar } from "quasar";
 import _ from "lodash";
 import member from "./member.vue";
 const { spaceKey } = storeToRefs(appStore.spaceStore);
-const { teamKey, teamInfo, teamMemberList, teamList } = storeToRefs(
-  appStore.teamStore
-);
-const { setTeamKey, setTeamList } = appStore.teamStore;
+const { teamKey, teamInfo, teamMemberList, teamList, teamFoldList } =
+  storeToRefs(appStore.teamStore);
+const { setTeamKey, setTeamList, setTeamFoldList } = appStore.teamStore;
 const $q = useQuasar();
 const addVisible = ref<boolean>(false);
 const memberVisible = ref<boolean>(false);
@@ -142,6 +141,33 @@ const deleteTeam = (key) => {
     })
     .onCancel(() => {});
 };
+const foldTeam = async (key, state) => {
+  const teamRes = (await api.request.patch("project/fold", {
+    projectKey: key,
+    fold: state,
+  })) as ResultProps;
+  if (teamRes.msg === "OK") {
+    let list = _.cloneDeep(teamList.value);
+    let foldList = _.cloneDeep(teamFoldList.value);
+    if (state) {
+      setMessage("success", "折叠小组成功");
+      let index = _.findIndex(list, { _key: key });
+      if (index !== -1) {
+        let item = list.splice(index, 1)[0];
+        foldList.push(item);
+      }
+    } else {
+      setMessage("success", "取消折叠小组成功");
+      let index = _.findIndex(foldList, { _key: key });
+      if (index !== -1) {
+        let item = foldList.splice(index, 1)[0];
+        list.push(item);
+      }
+    }
+    setTeamList(list);
+    setTeamFoldList(foldList);
+  }
+};
 watchEffect(() => {
   if (views.value.length === 0) {
     views.value = ["taskTree", "doc", "file"];
@@ -207,7 +233,11 @@ watch(teamInfo, (newInfo) => {
               <q-item clickable v-close-popup @click="deleteTeam(item._key)">
                 <q-item-section>删除</q-item-section>
               </q-item>
-              <q-item clickable v-close-popup @click="">
+              <q-item
+                clickable
+                v-close-popup
+                @click="foldTeam(item._key, true)"
+              >
                 <q-item-section>折叠</q-item-section>
               </q-item>
             </q-list>
@@ -218,7 +248,31 @@ watch(teamInfo, (newInfo) => {
     <div class="teamMenu-title">
       <div>折叠的小组</div>
     </div>
-    <div></div>
+    <div class="teamMenu-list">
+      <div
+        class="teamMenu-item icon-point"
+        v-for="(item, index) in teamFoldList"
+        @mouseenter="overKey = item._key"
+        :key="`foldTeam${index}`"
+      >
+        <div># {{ item.name }}</div>
+        <div class="teamMenu-item-icon" v-if="overKey === item._key">
+          <q-btn flat round icon="more_horiz" size="12px">
+            <q-menu anchor="top right" self="top left" class="q-pa-sm">
+              <q-list dense>
+                <q-item
+                  clickable
+                  v-close-popup
+                  @click="foldTeam(item._key, false)"
+                >
+                  <q-item-section>取消折叠</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
+        </div>
+      </div>
+    </div>
   </div>
   <cDialog
     :visible="addVisible"
@@ -283,7 +337,7 @@ watch(teamInfo, (newInfo) => {
 </template>
 <style scoped lang="scss">
 .teamMenu {
-  @include p-number(0px,10px);
+  @include p-number(0px, 10px);
   .teamMenu-title {
     width: 100%;
     height: 40px;
@@ -292,7 +346,6 @@ watch(teamInfo, (newInfo) => {
     @include flex(space-between, center, null);
   }
   .teamMenu-list {
-
     .teamMenu-item {
       width: 100%;
       height: 30px;

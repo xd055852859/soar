@@ -46,14 +46,23 @@ const getChartData = async () => {
     [chartData.value, chartName.value] = formatName(taskRes.data);
   }
 };
-const chooseCard = (key, type) => {
+const chooseCard = (detail, type) => {
   switch (type) {
-    case "choose":
+    case "search":
+      break;
+    case "update":
+      let updateIndex = _.findIndex(recentList.value, { _key: detail._key });
+      if (updateIndex !== -1) {
+        recentList.value[updateIndex] = {
+          ...recentList.value[updateIndex],
+          ...detail,
+        };
+      }
       break;
     case "delete":
-      let index = _.findIndex(recentList.value, { _key: key });
-      if (index !== -1) {
-        recentList.value.splice(index, 1);
+      let delIndex = _.findIndex(recentList.value, { _key: detail._key });
+      if (delIndex !== -1) {
+        recentList.value.splice(delIndex, 1);
       }
       break;
   }

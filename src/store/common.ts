@@ -2,6 +2,9 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 import { authStore } from "./auth";
 import { spaceStore } from "./space";
+import { mateStore } from "./mate";
+import { noteStore } from "./note";
+import { teamStore } from "./team";
 // 使用setup模式定义
 export const commonStore = defineStore("commonStore", () => {
   const deviceType = ref<string>("pc");
@@ -55,6 +58,9 @@ export const commonStore = defineStore("commonStore", () => {
   };
   const clearStore = () => {
     authStore().$reset();
+    noteStore().$reset();
+    teamStore().$reset();
+    mateStore().$reset();
     spaceStore().$reset();
   };
   return {

@@ -2,8 +2,9 @@ import { authStore } from "@/store/auth";
 import { commonStore } from "@/store/common";
 import { spaceStore } from "@/store/space";
 import { teamStore } from "@/store/team";
-import { createPinia } from "pinia";
 import { noteStore } from "@/store/note";
+import { mateStore } from "@/store/mate";
+import { createPinia } from "pinia";
 
 export interface IAppStore {
   authStore: ReturnType<typeof authStore>;
@@ -11,6 +12,7 @@ export interface IAppStore {
   spaceStore: ReturnType<typeof spaceStore>;
   teamStore: ReturnType<typeof teamStore>;
   noteStore: ReturnType<typeof noteStore>;
+  mateStore: ReturnType<typeof mateStore>;
 }
 
 const appStore: IAppStore = {} as IAppStore;
@@ -24,6 +26,7 @@ export const registerStore = () => {
   appStore.spaceStore = spaceStore();
   appStore.teamStore = teamStore();
   appStore.noteStore = noteStore();
+  appStore.mateStore = mateStore();
 };
 
 export default appStore;

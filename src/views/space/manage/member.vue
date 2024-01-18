@@ -66,10 +66,10 @@ const columns: any = [
     field: "operate",
   },
 ];
-const getSpaceMemberList = async (keyword) => {
+const getSpaceMemberList = async () => {
   let memberRes = (await api.request.get("teamMember", {
     teamKey: spaceKey.value,
-    keyWord: keyword,
+    keyWord: searchName.value,
   })) as ResultProps;
   if (memberRes.msg === "OK") {
     memberList.value = [...memberRes.data];
@@ -135,18 +135,9 @@ const deleteMember = (memberKey) => {
     })
     .onCancel(() => {});
 };
-watch(
-  spaceKey,
-  (newKey) => {
-    if (newKey) {
-      getSpaceMemberList("");
-    }
-  },
-  { immediate: true }
-);
-watch(searchName, (newName) => {
-  if (!newName) {
-    getSpaceMemberList("");
+watchEffect(() => {
+  if (spaceKey.value) {
+    getSpaceMemberList();
   }
 });
 watch(memberInput, (newName) => {
@@ -168,7 +159,7 @@ watch(memberInput, (newName) => {
           dense
           style="width: 250px"
           clearable
-          @keyup.enter="getSpaceMemberList(searchName)"
+          @keyup.enter="getSpaceMemberList()"
         >
           <template v-slot:prepend>
             <q-icon name="search" />

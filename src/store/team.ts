@@ -11,14 +11,15 @@ export const teamStore = defineStore(
   "teamStore",
   () => {
     const teamKey = ref<string>("");
-    const teamList = ref<any[]>([]);
+    const teamList = ref<any>([]);
+    const teamFoldList = ref<any>([]);
     const teamMemberList = ref<any[]>([]);
     const teamInfo = ref<any | null>(null);
     const teamRole = ref<number>(5);
     const createState = ref<boolean>(false);
     const setTeamKey = (newKey) => {
       teamKey.value = newKey;
-      sessionStorage.setItem("teamKey", newKey);
+      localStorage.setItem("teamKey", newKey);
     };
     const getTeamList = async (key) => {
       let teamRes = (await api.request.get("project", {
@@ -31,7 +32,18 @@ export const teamStore = defineStore(
     const setTeamList = async (newList) => {
       teamList.value = newList;
     };
-
+    const getTeamFoldList = async (key) => {
+      let teamRes = (await api.request.get("project", {
+        teamKey: key,
+        fold: true,
+      })) as ResultProps;
+      if (teamRes.msg === "OK") {
+        teamFoldList.value = teamRes.data;
+      }
+    };
+    const setTeamFoldList = async (newList) => {
+      teamFoldList.value = newList;
+    };
     const getTeamMemberList = async () => {
       let memberRes = (await api.request.get("projectMember", {
         projectKey: teamKey.value,
@@ -72,6 +84,9 @@ export const teamStore = defineStore(
       teamList,
       setTeamList,
       getTeamList,
+      teamFoldList,
+      setTeamFoldList,
+      getTeamFoldList,
       teamMemberList,
       setTeamMemberList,
       createState,

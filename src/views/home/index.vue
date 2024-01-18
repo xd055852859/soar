@@ -16,7 +16,7 @@ const { user } = storeToRefs(appStore.authStore);
 const { spaceKey, spaceInfo, spaceList } = storeToRefs(appStore.spaceStore);
 
 const { setUserInfo } = appStore.authStore;
-const { getTeamList } = appStore.teamStore;
+const { getTeamList,getTeamFoldList } = appStore.teamStore;
 const { setSpaceKey, setSpaceList } = appStore.spaceStore;
 
 const noticeVisible = ref<boolean>(false);
@@ -93,6 +93,7 @@ watch(
     if (newKey) {
       setSpaceKey(newKey);
       getTeamList(newKey);
+      getTeamFoldList(newKey)
     }
   },
   { immediate: true }
