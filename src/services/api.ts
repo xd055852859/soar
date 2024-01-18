@@ -110,14 +110,12 @@ const request = {
 
 const qiniu = {
   getUptoken() {
-    return request.get(AUTH_URL + "/upTokenQiniu/getQiNiuUpToken", {
-      token: token,
-      type: 2,
-      bucketType: 7,
+    return request.get("account/qiniuToken", {
+      target: "cdn-soar",
     });
   },
   getUptokenOverWrite(key: string) {
-    return request.get(AUTH_URL + "/upTokenQiniu/getQiNiuUpTokenKey", {
+    return request.get("/upTokenQiniu/getQiNiuUpTokenKey", {
       token: token,
       type: 2,
       key,
@@ -125,7 +123,7 @@ const qiniu = {
     });
   },
   qiniuRemain(fileSize: number, cardKey?: string, tagKey?: string) {
-    return request.get(API_URL + "/qiniu/remain", {
+    return request.get("/qiniu/remain", {
       fileSize,
       cardKey,
       tagKey,
@@ -137,7 +135,7 @@ const qiniu = {
     fileSize: number,
     nodeKey?: string
   ) {
-    return request.post(API_URL + "/qiniu", {
+    return request.post("/qiniu", {
       cardKey,
       nodeKey,
       url,
@@ -150,9 +148,10 @@ const note = {
   create(props: {
     type: "text" | "outline" | "clip" | "link" | "file";
     title: string;
-    content: JSONContent;
-    summary: string;
+    content?: JSONContent;
+    summary?: string;
     icon?: string;
+    link?: string;
   }) {
     return request.post("/note", props);
   },

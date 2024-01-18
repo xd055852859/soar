@@ -10,9 +10,8 @@
       @click="handleSelect"
       v-clickoutside="handleClickOutside"
     >
-      <el-image
+      <img
         :src="src"
-        :preview-src-list="editable ? undefined : [src]"
         :style="`width:${width ? `${width}px` : 'unset'}; max-width:100%`"
       />
       <div v-if="selected" class="selected-border" data-drag-handle></div>

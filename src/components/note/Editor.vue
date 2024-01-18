@@ -6,7 +6,7 @@
       <!-- <span v-if="taskInfo.total">{{
         `${taskInfo.checked}/${taskInfo.total}${$t("notes.tasks")}`
       }}</span> -->
-      <span>{{ editor.storage.characterCount.characters() }}</span>
+      <span>{{ `${editor.storage.characterCount.characters()}字` }}</span>
     </div>
   </div>
 </template>
@@ -17,8 +17,6 @@ import {
   useEditor,
   VueNodeViewRenderer,
 } from "@tiptap/vue-3";
-import appStore from "@/store";
-const { createNote, editNote } = appStore.noteStore;
 import StarterKit from "@tiptap/starter-kit";
 import Blockquote from "@tiptap/extension-blockquote";
 import BulletList from "@tiptap/extension-bullet-list";
@@ -74,7 +72,7 @@ import Image from "./extensions/image";
 // import Tips from "./extensions/tips";
 // import TaskBlock from "./extensions/taskBlock";
 import { ref, watch, computed, onBeforeUnmount, onMounted } from "vue";
-// import EditorMenu from "./EditorMenu.vue";
+import EditorMenu from "./EditorMenu.vue";
 // load all highlight.js languages
 // @ts-ignore
 import { lowlight } from "lowlight";
@@ -82,8 +80,8 @@ import { EditorView } from "prosemirror-view";
 import api from "@/services/api";
 import { uploadImg } from "@/services/util/uploadImage";
 import { Card } from "@/interface/Card";
-
-let timeout: any; // 定时器变
+import appStore from "@/store";
+const { createNote, editNote } = appStore.noteStore;
 
 const props = defineProps<{
   initData?: Card | null;
@@ -502,6 +500,7 @@ const insertFiles = async (
       // if (index === 0) {
       //   store.dispatch("common/loading", true);
       // }
+
       const url = await uploadImg({
         file,
         cardKey: props.initData?._key || "",
@@ -784,7 +783,7 @@ defineExpose({
 
 /* Placeholder (at the top) */
 .ProseMirror h1.is-empty:first-child::before,
-.ProseMirror p.is-empty:first-child::before {
+.ProseMirror p.is-empty::before {
   color: #adb5bd;
   content: attr(data-placeholder);
   float: left;

@@ -79,7 +79,7 @@ export const uploadImg = ({
     useCdnDomain: true,
     disableStatisticsReport: false,
     retryCount: 5,
-    region: qiniu.region.z0,
+    region: qiniu.region.z2,
     // https://blog.csdn.net/Wuyo_7/article/details/112478365
     forceDirect: true,
   };
@@ -89,6 +89,8 @@ export const uploadImg = ({
     : `${guid(8, 16)}${
         file.name ? file.name.substr(file.name.lastIndexOf(".")) : ".png"
       }`;
+
+  console.log("---fileName---", fileName);
 
   return new Promise(async function (resolve, reject) {
     try {
