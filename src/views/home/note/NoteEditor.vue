@@ -36,7 +36,7 @@ const changed = ref(false);
 const editorRef = ref();
 
 onMounted(() => {
-  setSingleSizeLimit(1024 * 1024 * 20 * 1025);
+  setSingleSizeLimit(1024 * 1024 * 20);
 });
 
 const handleChange = () => {

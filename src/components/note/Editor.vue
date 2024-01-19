@@ -45,8 +45,8 @@ import Highlight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link";
 // import Mention from "./extensions/mentions";
 // import mentionSuggestion from "./extensions/mentions/suggestion";
-// import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
-// import CodeBlockComponent from "./extensions/code-block/CodeBlockComponent.vue";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import CodeBlockComponent from "./extensions/code-block/CodeBlockComponent.vue";
 // import { ColorHighlighter } from "./extensions/clever-editor/ColorHighlighter";
 // import { SmilieReplacer } from "./extensions/clever-editor/SmilieReplacer";
 import Table from "@tiptap/extension-table";
@@ -81,6 +81,7 @@ import api from "@/services/api";
 import { uploadImg } from "@/services/util/uploadImage";
 import { Card } from "@/interface/Card";
 import appStore from "@/store";
+import { isOutline } from "@/services/util/util";
 const { createNote, editNote } = appStore.noteStore;
 
 const props = defineProps<{
@@ -128,49 +129,64 @@ const limit = 40000;
 const editor = useEditor({
   content: defaultContent,
   extensions: [
-    // Blockquote,
-    // BulletList,
-    // // CodeBlock,
-    // HardBreak,
-    // Heading.extend({
-    //   draggable: true,
-    //   addNodeView() {
-    //     return VueNodeViewRenderer(HeadingNodeView);
-    //   },
-    // }),
-    // HorizontalRule.extend({
-    //   draggable: true,
-    //   addNodeView() {
-    //     return VueNodeViewRenderer(HorizontalRuleNodeView);
-    //   },
-    // }),
-    // OrderedList,
-    // Document,
-    // ListItem.extend({
-    //   draggable: true,
-    //   addNodeView() {
-    //     return VueNodeViewRenderer(ListItemNodeView);
-    //   },
-    // }),
-    // Paragraph.extend({
-    //   draggable: true,
-    //   addNodeView() {
-    //     return VueNodeViewRenderer(ParagraphNodeView);
-    //   },
-    // }),
-    // Text,
-    // Bold,
-    // Code,
-    // Italic,
-    // Strike,
-    // Dropcursor.configure({ color: "#FF5660", width: 2 }),
-    // History,
-    StarterKit.configure({
-      dropcursor: {
-        color: "#409eff",
-        width: 2,
+    Blockquote,
+    BulletList,
+    HardBreak,
+    Heading.extend({
+      // draggable: true,
+      // addNodeView() {
+      //   return VueNodeViewRenderer(HeadingNodeView);
+      // },
+    }),
+    HorizontalRule.extend({
+      // draggable: true,
+      // addNodeView() {
+      //   return VueNodeViewRenderer(HorizontalRuleNodeView);
+      // },
+    }),
+    OrderedList,
+    Document,
+    ListItem.extend({
+      // draggable: true,
+      // addNodeView() {
+      //   return VueNodeViewRenderer(ListItemNodeView);
+      // },
+    }),
+    Paragraph.extend({
+      // draggable: true,
+      // addNodeView() {
+      //   return VueNodeViewRenderer(ParagraphNodeView);
+      // },
+      addKeyboardShortcuts() {
+        return {
+          Tab: () => {
+            if (
+              !(
+                this.editor.isActive("bulletList") ||
+                this.editor.isActive("orderedList") ||
+                this.editor.isActive("taskList")
+              )
+            ) {
+              return this.editor.commands.toggleBulletList();
+            }
+            return false;
+          },
+        };
       },
     }),
+    Text,
+    Bold,
+    Code,
+    Italic,
+    Strike,
+    Dropcursor.configure({ color: "#FF5660", width: 2 }),
+    History,
+    // StarterKit.configure({
+    //   dropcursor: {
+    //     color: "#409eff",
+    //     width: 2,
+    //   },
+    // }),
     TextAlign.configure({
       types: ["heading", "paragraph"],
     }),
@@ -184,12 +200,7 @@ const editor = useEditor({
     Typography,
     // ColorHighlighter,
     // SmilieReplacer,
-    // CodeBlockLowlight.extend({
-    //   draggable: true,
-    //   addNodeView() {
-    //     return VueNodeViewRenderer(CodeBlockComponent);
-    //   },
-    // }).configure({ lowlight }),
+    CodeBlockLowlight.configure({ lowlight }),
     // TaskItem.extend({
     //   draggable: true,
     //   addNodeView() {
@@ -211,7 +222,6 @@ const editor = useEditor({
     CharacterCount.configure({
       limit,
     }),
-    Gapcursor,
     Table.configure({
       resizable: true,
     }),
@@ -388,6 +398,8 @@ function handlePost() {
     .replace(/\n/g, "")
     .substring(0, 200);
 
+  const outline = isOutline(json);
+
   if (props.initData && props.initData._key) {
     // 有初始数据，更新数据
     if (props.handleSave) {
@@ -395,7 +407,7 @@ function handlePost() {
     } else {
       editNote({
         noteKey: props.initData._key,
-        type: "text",
+        type: outline ? "outline" : "text",
         title,
         content: json,
         summary,
@@ -404,7 +416,7 @@ function handlePost() {
   } else if (!props.handleSave) {
     // 创建数据
     createNote({
-      type: "text",
+      type: outline ? "outline" : "text",
       title,
       content: json,
       summary,

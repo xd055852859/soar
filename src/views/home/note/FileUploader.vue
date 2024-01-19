@@ -60,7 +60,6 @@ const handleDrop = (event: DragEvent) => {
   if (!droppedFile) {
     return;
   }
-
   uploadFile(droppedFile);
 };
 

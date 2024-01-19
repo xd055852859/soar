@@ -300,3 +300,20 @@ export function isUrl(text: string): boolean {
   const urlPattern = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
   return urlPattern.test(text);
 }
+
+export function isOutline(json: JSONContent): boolean {
+  let outline = false;
+  const content = json.content;
+  for (let index = 0; content && index < content.length; index++) {
+    const item = content[index];
+    if (item.type === "bulletList" || item.type === "orderedList") {
+      outline = true;
+      return outline;
+    }
+    outline = isOutline(content);
+    if (outline) {
+      return outline;
+    }
+  }
+  return outline;
+}

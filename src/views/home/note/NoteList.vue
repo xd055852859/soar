@@ -2,6 +2,15 @@
   <div class="noteList">
     <div class="head">
       <span class="title">速记</span>
+      <q-btn
+        v-if="closable"
+        flat
+        round
+        icon="close"
+        class="options"
+        @click="emit('close')"
+      >
+      </q-btn>
     </div>
     <div class="input-wrapper">
       <NoteInput />
@@ -29,12 +38,29 @@ import FileUploader from "./FileUploader.vue";
 
 const props = defineProps<{
   draggable?: boolean;
+  closable?: boolean;
+}>();
+
+const emit = defineEmits<{
+  (e: "close"): void;
 }>();
 
 const { user } = storeToRefs(appStore.authStore);
 const { notes } = storeToRefs(appStore.noteStore);
 const { getNotes, getNoteDetail, clearNoteDetail } = appStore.noteStore;
 const selectedNoteKey = ref("");
+
+watch(notes, (newVal, oldVal) => {
+  if (newVal.length - oldVal.length === 1) {
+    selectedNoteKey.value = newVal[0]._key;
+  }
+});
+
+watch(notes, (newVal, oldVal) => {
+  if (newVal.length && !oldVal.length) {
+    selectedNoteKey.value = newVal[0]._key;
+  }
+});
 
 watchEffect(() => {
   if (user && notes.value.length === 0) {
@@ -63,9 +89,12 @@ watch(selectedNoteKey, (newVal) => {
 .title {
   font-weight: bold;
   font-size: 23px;
+  flex: 1;
 }
 .head {
   padding: 15px;
+  display: flex;
+  align-items: center;
 }
 .input-wrapper,
 .file-wrapper {

@@ -8,7 +8,12 @@
       @on-change="handleChange"
     />
     <div class="buttons">
-      <q-btn color="primary" size="sm" label="保存" @click="handlePost" />
+      <q-btn
+        color="primary"
+        size="sm"
+        :label="outline ? '保存大纲' : '保存文本'"
+        @click="handlePost"
+      />
     </div>
   </q-card>
 </template>
@@ -17,12 +22,14 @@ import Editor from "@/components/note/Editor.vue";
 import { Card } from "@/interface/Card";
 import { storeToRefs } from "pinia";
 import appStore from "@/store";
+import { isOutline } from "@/services/util/util";
 
 const { notes } = storeToRefs(appStore.noteStore);
 
 const editorRef = ref();
 const initData = ref<Card | null>();
 const changed = ref(false);
+const outline = ref(false);
 
 let timeout: number;
 
@@ -52,6 +59,7 @@ const handleChange = () => {
   timeout = setTimeout(() => {
     if (editorRef.value) {
       const json = editorRef.value.handleGetJSON();
+      outline.value = isOutline(json);
       if (json) {
         localStorage.setItem("INPUT_DATA", JSON.stringify({ content: json }));
       }

@@ -1,6 +1,7 @@
 import * as qiniu from "qiniu-js";
 import { guid, getFileTypeByName } from "./util";
 import api from "@/services/api";
+import { setLoading } from "./common";
 const DOMAIN = import.meta.env.VITE_QINIU_CDN;
 let singleSizeLimit = 0;
 
@@ -101,10 +102,12 @@ export const uploadImg = ({
           }
         },
         error(err: any) {
+          setLoading(false);
           console.log("---上传失败---", err);
           reject(err);
         },
         complete(res: any) {
+          setLoading(false);
           const url =
             (getUptokenApi
               ? `https://${getUptokenApi.params.target}.qingtime.cn/`
@@ -174,6 +177,7 @@ export const uploadImg = ({
           qiniuConfig
         );
         // 上传开始
+        setLoading(true);
         observable.subscribe(observer);
       } else {
         return reject({
