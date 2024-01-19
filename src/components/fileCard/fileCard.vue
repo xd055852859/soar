@@ -2,8 +2,7 @@
 import api from "@/services/api";
 import _ from "lodash";
 import { useQuasar } from "quasar";
-import cIframe from "@/components/common/cIframe.vue";
-import TeamTree from "@/components/tree/tree.vue";
+
 import { setMessage } from "@/services/util/common";
 import { storeToRefs } from "pinia";
 import appStore from "@/store";
@@ -12,6 +11,9 @@ import { docArray, fileArray, viewArray } from "@/services/config/config";
 const $q = useQuasar();
 const dayjs: any = inject("dayjs");
 const { token } = storeToRefs(appStore.authStore);
+const { cardKey } = storeToRefs(appStore.cardStore);
+
+const { setCardKey, setCardVisible } = appStore.cardStore;
 const props = defineProps<{
   type: string;
   card: any;
@@ -22,14 +24,21 @@ const emits = defineEmits<{
 }>();
 
 const fileDetail = ref<any>(null);
-const detailVisible = ref<boolean>(false);
-const detailUrl = ref<string>("");
+
 //任务
-const taskDetail = ref<any>(null);
-const nodeKey = ref<string>("");
+const chooseTaskTree = (detail) => {
+  setCardKey(detail._key);
+  emits("chooseCard", detail, "search");
+};
+const openTree = (detail) => {
+  setCardKey(detail._key);
+  setCardVisible(true, "tasktree");
+};
 //文档
 const chooseDoc = (type, detail) => {
+  setCardKey(detail._key);
   fileDetail.value = detail;
+  let detailUrl = "";
   const getApi = api.API_URL + "card/detail";
   const getParams = `{"cardKey": "${detail._key}" }`;
   const patchApi = api.API_URL + "card";
@@ -38,22 +47,30 @@ const chooseDoc = (type, detail) => {
   const uptokenParams = `{"target": "cdn-soar"}`;
   switch (type) {
     case "text":
-      detailUrl.value = `https://notecute.com/#/editor?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
+      detailUrl = `https://notecute.com/#/editor?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
       break;
     case "draw":
-      detailUrl.value = `https://draw.workfly.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":${patchData}}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
+      detailUrl = `https://draw.workfly.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":${patchData}}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
       break;
     case "mind":
-      detailUrl.value = `https://mind.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
+      detailUrl = `https://mind.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
       break;
     case "ppt":
-      detailUrl.value = `https://ppt.mindcute.com/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
+      detailUrl = `https://ppt.mindcute.com/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
       break;
     case "table":
-      detailUrl.value = `https://sheets.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
+      detailUrl = `https://sheets.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
       break;
   }
-  detailVisible.value = true;
+  setCardVisible(true, "doc", detailUrl);
+};
+const chooseFile = (detail) => {
+  setCardKey(detail._key);
+  emits("chooseCard", detail, "search");
+};
+const chooseTask = (detail) => {
+  setCardKey(detail._key);
+  emits("chooseCard", detail, "search");
 };
 const deleteCard = async (detail) => {
   $q.dialog({
@@ -111,6 +128,7 @@ const updateTitle = async (detail) => {
     updatCard("title", data, detail);
   });
 };
+
 const finishTask = async (detail) => {
   let detailRes = (await api.request.patch("node/finish", {
     nodeKey: detail._key,
@@ -121,12 +139,7 @@ const finishTask = async (detail) => {
     emits("chooseCard", detail, "update");
   }
 };
-//任务
-const chooseTask = (detail) => {
-  taskDetail.value = detail;
-  nodeKey.value = detail._key;
-  emits("chooseCard", detail, "search");
-};
+
 const handleDownload = (detail) => {
   // let a = document.createElement("a");
   // a.href = detail.url;
@@ -146,14 +159,82 @@ const handleDownload = (detail) => {
   <template v-if="type === 'taskTree'">
     <q-card
       class="teamTask-box-container q-mb-md icon-point"
-      @click="chooseTask(card)"
+      @click="outType === 'recent' ? openTree(card) : chooseTaskTree(card)"
+      :style="
+        cardKey === card._key ? { borderLeft: '6px solid #07be51' } : null
+      "
     >
+      <!-- red amber green -->
       <q-card-section class="full-width teamTask-box-top">
-        <template v-if="outType"># {{ card.projectInfo.name }} / </template>
+        <template v-if="outType && outType !== 'recent'"
+          ># {{ card.projectInfo?.name }} /
+        </template>
         {{ card.title }}
-        <q-icon name="o_send" size="20px" @click.stop="detailVisible = true" />
+        <q-card-section class="justify-end q-pa-none">
+          <q-btn
+            flat
+            round
+            icon="o_account_tree"
+            :color="
+              card.iconState === 2
+                ? 'amber'
+                : card.iconState === 3
+                ? 'red'
+                : 'green'
+            "
+            size="12px"
+          >
+            <q-menu class="q-pa-sm">
+              <q-list dense>
+                <!--  @click="editFile(item._key, index)" -->
+                <q-item
+                  clickable
+                  v-close-popup
+                  @click="updatCard('iconState', 1, card)"
+                  class="bg-green"
+                >
+                  <q-item-section class="text-white"> 正常</q-item-section>
+                </q-item>
+                <q-item
+                  clickable
+                  v-close-popup
+                  @click="updatCard('iconState', 2, card)"
+                  class="bg-amber q-my-xs"
+                >
+                  <q-item-section class="text-white"> 警戒</q-item-section>
+                </q-item>
+                <q-item
+                  clickable
+                  v-close-popup
+                  @click="updatCard('iconState', 3, card)"
+                  class="bg-red"
+                >
+                  <q-item-section class="text-white">异常</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
+          <q-icon
+            name="o_fullscreen"
+            size="25px"
+            @click.stop="openTree(card)"
+          />
+          <q-btn flat round icon="o_more_horiz" size="12px" @click.stop="">
+            <q-menu anchor="top right" self="top left" class="q-pa-sm">
+              <q-list dense>
+                <!--  @click="editFile(item._key, index)" -->
+                <q-item clickable v-close-popup @click="updateTitle(card)">
+                  <q-item-section>重命名</q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup @click="deleteCard(card)">
+                  <q-item-section>删除</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
+        </q-card-section>
       </q-card-section>
-      <q-card-section class="teamTask-box-bottom">
+      <q-card-section class="teamTaskTree-box-bottom">
         <q-circular-progress
           v-for="(taskItem, taskIndex) in card.treeMember"
           :key="`taskProgress${taskIndex}`"
@@ -178,31 +259,35 @@ const handleDownload = (detail) => {
                   : '/common/defaultPerson.png'
               "
             />
+            <q-tooltip :offset="[10, 5]">
+              {{ taskItem.userName }}
+            </q-tooltip>
           </q-avatar>
         </q-circular-progress>
       </q-card-section>
     </q-card>
-    <Teleport to="body">
-      <div class="fileCard-detail" v-if="detailVisible">
-        <TeamTree :cardKey="card._key" ref="treeRef" viewType="tree" />
-      </div>
-    </Teleport>
   </template>
   <template v-else-if="type === 'doc'">
     <q-card
       class="teamDoc-box-container q-mb-md icon-point"
       @click="chooseDoc(card.subType, card)"
+      :style="
+        cardKey === card._key ? { borderLeft: '6px solid #07be51' } : null
+      "
     >
       <q-card-section class="teamDoc-box-top">
         <div>
-          <template v-if="outType"># {{ card.projectInfo.name }} / </template>
+          <template v-if="outType && outType !== 'recent'"
+            ># {{ card.projectInfo?.name }} /
+          </template>
           {{ card.title }}
         </div>
         <div>
-          {{ docArray[_.findIndex(docArray, { value: card.subType })]?.label }}
-          <q-chip>引用</q-chip>
-          <q-chip>浏览</q-chip>
-
+          <q-chip color="teal" text-color="white" icon="description">
+            {{
+              docArray[_.findIndex(docArray, { value: card.subType })]?.label
+            }}
+          </q-chip>
           <q-btn flat round icon="o_more_horiz" size="12px" @click.stop="">
             <q-menu anchor="top right" self="top left" class="q-pa-sm">
               <q-list dense>
@@ -220,31 +305,40 @@ const handleDownload = (detail) => {
       </q-card-section>
       <q-card-section class="teamDoc-box-bottom">
         <div>
+          <q-btn dense flat color="grey-6" round icon="o_link">
+            <!-- <q-badge color="red" floating>0</q-badge> -->
+          </q-btn>
+          <q-btn dense flat color="grey-6" round icon="o_visibility">
+            <!-- <q-badge color="red" floating>4</q-badge> -->
+          </q-btn>
           <!-- <span v-for="(personItem,personIndex) in item."></span> -->
         </div>
         <div>{{ dayjs(card.updateTime).format("YYYY-MM-DD HH:mm") }}</div>
       </q-card-section>
     </q-card>
-    <Teleport to="body">
-      <div class="fileCard-detail" v-if="detailVisible">
-        <cIframe :url="detailUrl" :title="fileDetail.title" />
-      </div>
-    </Teleport>
   </template>
   <template v-else-if="type === 'file'">
     <q-card
       class="teamFile-box-container q-mb-md icon-point"
-      @click="chooseDoc(card.subType, card)"
+      @click="chooseFile(card)"
+      :style="
+        cardKey === card._key ? { borderLeft: '6px solid #07be51' } : null
+      "
     >
       <q-card-section class="teamFile-box-top">
         <div>
-          <template v-if="outType"># {{ card.projectInfo.name }} / </template>
+          <template v-if="outType && outType !== 'recent'"
+            ># {{ card.projectInfo?.name }} /
+          </template>
           {{ card.title }}
         </div>
         <div>
-          {{
-            fileArray[_.findIndex(fileArray, { value: card.subType })]?.label
-          }}
+          <q-chip color="cyan" text-color="white" icon="cloud_upload">
+            {{
+              docArray[_.findIndex(fileArray, { value: card.subType })]?.label
+            }}
+          </q-chip>
+
           <q-btn flat round icon="more_horiz" size="12px" @click.stop="">
             <q-menu anchor="top right" self="top left" class="q-pa-sm">
               <q-list dense>
@@ -276,8 +370,15 @@ const handleDownload = (detail) => {
     </q-card>
   </template>
   <template v-else-if="type === 'task'">
-    <q-card class="teamFile-box-container q-mb-md icon-point">
-      <q-card-section class="teamFile-box-top">
+    <q-card
+      class="teamTask-box-container q-mb-md icon-point"
+      @click="chooseTask(card)"
+      :dense="!outType"
+      :style="
+        cardKey === card._key ? { borderLeft: '6px solid #07be51' } : null
+      "
+    >
+      <q-card-section class="teamTask-box-top">
         <div>
           <template v-if="outType"># {{ card.projectInfo.name }}</template>
         </div>
@@ -298,7 +399,7 @@ const handleDownload = (detail) => {
           </q-btn>
         </div>
       </q-card-section>
-      <q-card-section class="teamFile-box-center">
+      <q-card-section class="teamTask-box-center">
         <q-icon
           :name="card.hasDone ? 'o_check_circle' : 'o_circle'"
           size="20px"
@@ -307,7 +408,7 @@ const handleDownload = (detail) => {
         />
         {{ card.name }}
       </q-card-section>
-      <q-card-section class="teamFile-box-bottom">
+      <q-card-section class="teamTask-box-bottom">
         <div>
           <!-- <span v-for="(personItem,personIndex) in item."></span> -->
         </div>
@@ -365,28 +466,27 @@ const handleDownload = (detail) => {
   }
 }
 .teamTask-box-container {
+  padding: 5px 0px;
   .teamTask-box-top {
     width: 100%;
     height: 30px;
     @include flex(space-between, center, null);
   }
-  .teamFile-box-center {
+  .teamTask-box-center {
+    width: 100%;
+    min-height: 50px;
   }
-  .teamTask-box-bottom {
+  .teamTaskTree-box-bottom {
     width: 100%;
     height: 80px;
     @include scroll();
     @include flex(flex-start, center, null);
   }
-}
-.fileCard-detail {
-  width: 100vw;
-  height: 100vh;
-  position: fixed;
-  z-index: 10;
-  top: 0px;
-  left: 0px;
-  background-color: #fff;
+  .teamTask-box-bottom {
+    width: 100%;
+    height: 50px;
+    @include flex(flex-end, center, null);
+  }
 }
 </style>
 <style></style>

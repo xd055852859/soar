@@ -159,7 +159,7 @@ import { getStartAdornment, getEndAdornment } from "./treesvg";
 //   },
 // };
 const CustomTree = React.forwardRef((props, ref) => {
-  const { rootKey, zoomRatio, viewType, showMenu } = props;
+  const { rootKey, zoomRatio, viewType, onShowMenu, onChangePath } = props;
   const treeRef = useRef(null);
   const moveRef = useRef(null);
   const [nodes, setNodes] = useState(null);
@@ -176,6 +176,11 @@ const CustomTree = React.forwardRef((props, ref) => {
       getNodeList(rootKey);
     }
   }, [rootKey]);
+  useEffect(() => {
+    if (startId) {
+      onChangePath(startId, rootKey, true);
+    }
+  }, [startId]);
 
   const getNodeList = async (key, type) => {
     let dataRes = await api.request.get("node/tree", {
@@ -253,7 +258,7 @@ const CustomTree = React.forwardRef((props, ref) => {
   };
   const clickDot = (node) => {
     // setStartId(node._key);
-    getNodeList(node._key);
+    getNodeList(node._key, "child");
     setStartId(node._key);
     setSelectedId(node._key);
     // getNodePath(node._key, boardDetail?.rootKey, true);
@@ -502,6 +507,7 @@ const CustomTree = React.forwardRef((props, ref) => {
     // if (rootKey && card?.content && card.content[rootKey]) {
     // console.log(props);
     if (nodes) {
+      console.log(nodes);
       if (viewType.includes("tree")) {
         return (
           <Tree
@@ -537,7 +543,7 @@ const CustomTree = React.forwardRef((props, ref) => {
             }}
             handleContextMenu={(selectedNode, e) => {
               setSelectedId(selectedNode);
-              props.onShowMenu(nodes[selectedNode], e.target);
+              onShowMenu(nodes[selectedNode], e.target);
             }}
             handleDeleteNode={deleteNode}
             handlePaste={pasteNode}
@@ -591,6 +597,7 @@ const CustomTree = React.forwardRef((props, ref) => {
     updateNode,
     updateNodeObj,
     setNodes,
+    setStartId,
     getNodeInfo,
     formatNode,
     // handleAddNext,

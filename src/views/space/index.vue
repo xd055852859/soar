@@ -10,6 +10,7 @@ import api from "@/services/api";
 import router from "@/router";
 import { setMessage } from "@/services/util/common";
 import { uploadFile } from "@/services/util/file";
+const { deviceType } = storeToRefs(appStore.commonStore);
 const { closeNum } = storeToRefs(appStore.commonStore);
 const { user } = storeToRefs(appStore.authStore);
 const { spaceKey, spaceInfo, spaceList } = storeToRefs(appStore.spaceStore);
@@ -86,19 +87,58 @@ const uploadImage = (file, type) => {
 // };
 </script>
 <template>
-  <div class="space">
+  <div
+    class="space"
+    :style="{
+      backgroundImage: `url('/common/${
+        deviceType === 'pc' ? 'commonBg' : 'commonPhoneBg'
+      }.png')`,
+    }"
+  >
     <div class="left">
       <div class="left-title icon-point" @click="router.push('/home')">
-        <q-icon name="navigate_before" size="28px" />
+        <q-icon name="o_navigate_before" size="40px" />
         返回空间
       </div>
-      <q-tabs vertical inline-label>
+      <!-- <q-tabs vertical inline-label>
         <q-route-tab label="空间设置" :to="`/space/setting`" />
         <q-route-tab label="成员管理" :to="`/space/member`" />
         <q-route-tab label="小组管理" :to="`/space/group`" />
         <q-route-tab label="安全性" :to="`/space/safety`" />
         <q-route-tab label="升级/续费" :to="`/space/vip`" />
-      </q-tabs>
+      </q-tabs> -->
+      <q-list>
+        <q-item to="/space/setting" exact>
+          <q-item-section avatar>
+            <q-icon name="o_settings" />
+          </q-item-section>
+          <q-item-section>空间设置</q-item-section>
+        </q-item>
+        <q-item to="/space/member" exact>
+          <q-item-section avatar>
+            <q-icon name="o_person" />
+          </q-item-section>
+          <q-item-section>成员管理</q-item-section>
+        </q-item>
+        <q-item to="/space/group" exact>
+          <q-item-section avatar>
+            <q-icon name="o_group" />
+          </q-item-section>
+          <q-item-section>小组管理</q-item-section>
+        </q-item>
+        <q-item to="/space/safety" exact>
+          <q-item-section avatar>
+            <q-icon name="o_lock" />
+          </q-item-section>
+          <q-item-section>安全性</q-item-section>
+        </q-item>
+        <q-item to="/space/vip" exact>
+          <q-item-section avatar>
+            <q-icon name="o_paid" />
+          </q-item-section>
+          <q-item-section>升级/续费</q-item-section>
+        </q-item>
+      </q-list>
     </div>
     <div class="right">
       <router-view></router-view>
@@ -115,14 +155,13 @@ const uploadImage = (file, type) => {
     height: 100vh;
     padding: 20px 0px 10px 0px;
     box-sizing: border-box;
-    background: $grey-2;
+    background-color: #f2f3f6;
     box-shadow: 1px 0px 0px 0px #e1e1e1;
     position: relative;
     z-index: 10;
     .left-title {
       width: 100%;
       margin-bottom: 20px;
-      padding: 0px 0px 0px 20px;
       box-sizing: border-box;
     }
   }
@@ -130,6 +169,7 @@ const uploadImage = (file, type) => {
     flex: 1;
     height: 100vh;
     position: relative;
+    background-color: #fafafb;
     z-index: 1;
     width: 0;
   }

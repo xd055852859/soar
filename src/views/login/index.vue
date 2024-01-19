@@ -15,15 +15,18 @@ onMounted(() => {
 });
 </script>
 <template>
-  <!--   :style="{
+  <div
+    class="login"
+    :style="{
       backgroundImage: `url('/common/${
         deviceType === 'pc' ? 'commonBg' : 'commonPhoneBg'
       }.png')`,
-    }" -->
-  <div class="login" :class="{ 'login-phone': deviceType === 'phone' }">
+    }"
+    :class="{ 'login-phone': deviceType === 'phone' }"
+  >
     <div class="login-box" v-if="showLogin">
       <div class="login-logo">
-        <!-- <img src="/common/logoTitle.svg" alt="" /> -->
+        <img src="/common/titleLogo.svg" alt="" />
       </div>
       <div class="login-container">
         <Login v-if="loginState === 'login'" />
@@ -39,17 +42,20 @@ onMounted(() => {
       </div>
     </div>
     <div class="title-box" v-else>
-      <!-- <img class="title-login-logo" src="/login/titleLogo.svg" alt="" /> -->
-      <div class="title-header">
-        <!-- <img class="title-header-logo" src="/common/homeLogo.svg" alt="" /> -->
-        <q-btn
-          rounded
-          class="title-login-button"
-          color="primary"
-          label="立即体验"
-          @click="token ? $router.replace('/home') : (showLogin = true)"
-        />
+      <img class="title-box-logo" src="/common/titleLogo.svg" alt="" />
+
+      <div class="title-box-title">知行合一 协作如飞</div>
+      <div class="title-box-subtitle">
+        Integration of knowledge and action,Cooperate like flying
       </div>
+
+      <q-btn
+        rounded
+        color="primary"
+        label="登录"
+        class="title-box-button"
+        @click="token ? $router.replace('/home') : (showLogin = true)"
+      />
     </div>
   </div>
 </template>
@@ -79,8 +85,7 @@ onMounted(() => {
       @include flex(center, center, null);
 
       img {
-        width: 163px;
-        height: 58px;
+        width: 40%;
       }
     }
 
@@ -144,41 +149,49 @@ onMounted(() => {
   }
 
   .title-box {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    z-index: 1;
+    width: 100vw;
+    height: 100vh;
+    align-content: center;
     @include flex(center, center, wrap);
 
-    .title-login-logo {
-      width: 30%;
-      position: absolute;
-      z-index: 2;
+    .title-box-logo {
+      width: 50%;
+      margin-bottom: 50px;
+
+      img {
+        width: 100%;
+        height: 100%;
+      }
     }
 
-    .title-header {
+    .title-box-title {
       width: 100%;
-      position: absolute;
+      height: 65px;
+      font-size: 60px;
+      font-weight: 600;
+      color: #11151d;
+      line-height: 65px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .title-box-subtitle {
+      width: 100%;
+      height: 30px;
+      font-size: 20px;
+      color: #b3b3b3;
+      line-height: 30px;
+      text-align: center;
+      font-family: Arial, Arial-Regular;
+    }
+
+    .title-box-button {
+      width: 180px;
+      height: 50px;
+      position: fixed;
       z-index: 2;
-      top: 40px;
-      left: 0px;
-      padding: 0px 57px;
-      box-sizing: border-box;
-      @include flex(space-between, center, wrap);
-
-      .title-header-logo {
-        width: 146px;
-        height: 31px;
-      }
-
-      .title-login-button {
-        width: 158px;
-        height: 52px;
-
-        font-size: 18px;
-        font-weight: 500;
-        color: #ffffff;
-      }
+      top: 30px;
+      right: 30px;
     }
   }
 }

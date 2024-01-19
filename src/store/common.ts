@@ -53,6 +53,7 @@ export const commonStore = defineStore("commonStore", () => {
   const setUserVisible = (visible) => {
     userVisible.value = visible;
   };
+
   const setClose = (newNum) => {
     closeNum.value = newNum;
   };
@@ -80,5 +81,6 @@ export const commonStore = defineStore("commonStore", () => {
     closeNum,
     setClose,
     clearStore,
+
   };
 });

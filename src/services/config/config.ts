@@ -73,7 +73,7 @@ export const docArray = [
 export const viewArray = [
   {
     value: "taskTree",
-    label: "任务",
+    label: "事务",
   },
   {
     value: "doc",

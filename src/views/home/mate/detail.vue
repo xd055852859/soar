@@ -76,9 +76,7 @@ const getMateCard = async () => {
     total.value = detailRes.total as number;
   }
 };
-const joinTeam = async () => {
-  
-};
+const joinTeam = async () => {};
 watch(
   mateKey,
   (newKey) => {
@@ -227,7 +225,7 @@ watchEffect(() => {
             v-if="chartData"
           />
           <q-select
-            style="width: 150px"
+            style="width: 70px"
             v-model="days"
             :options="dayArray"
             dense
@@ -240,7 +238,13 @@ watchEffect(() => {
       </q-card>
       <q-card flat bordered class="mateDetail-right-card">
         <q-card-section>
-          <q-tabs v-model="mateTab" dense align="left">
+          <q-tabs
+            v-model="mateTab"
+            dense
+            align="left"
+            indicator-color="primary"
+            active-class="text-primary"
+          >
             <q-tab name="task" label="任务" />
             <q-tab name="doc" label="文档" />
             <q-tab name="file" label="文件" />
@@ -268,6 +272,13 @@ watchEffect(() => {
         </q-card-section>
       </q-card>
     </div>
+    <q-btn
+      color="primary"
+      round
+      icon="navigate_before"
+      class="mateDetail-back"
+      @click="$router.back()"
+    />
   </div>
 </template>
 <style scoped lang="scss">
@@ -364,6 +375,12 @@ watchEffect(() => {
       @include p-number(10px, 20px);
       @include scroll();
     }
+  }
+  .mateDetail-back {
+    position: fixed;
+    z-index: 20;
+    top: 10px;
+    left: 10px;
   }
 }
 </style>

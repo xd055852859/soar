@@ -204,6 +204,7 @@ watch(teamInfo, (newInfo) => {
           setTeamKey(item._key);
           $router.push(`/home/team`);
         "
+        :style="teamKey === item._key ? { background: '#e0e0e0' } : null"
       >
         <div># {{ item.name }}</div>
         <div class="teamMenu-item-icon" v-if="overKey === item._key">
@@ -254,6 +255,7 @@ watch(teamInfo, (newInfo) => {
         v-for="(item, index) in teamFoldList"
         @mouseenter="overKey = item._key"
         :key="`foldTeam${index}`"
+        :style="teamKey === item._key ? { background: '#e0e0e0' } : null"
       >
         <div># {{ item.name }}</div>
         <div class="teamMenu-item-icon" v-if="overKey === item._key">
@@ -348,11 +350,14 @@ watch(teamInfo, (newInfo) => {
   .teamMenu-list {
     .teamMenu-item {
       width: 100%;
-      height: 30px;
+      height: 40px;
       padding-left: 10px;
       box-sizing: border-box;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
       @include flex(space-between, center, null);
+      &:hover {
+        background: #e0e0e0;
+      }
     }
   }
 }

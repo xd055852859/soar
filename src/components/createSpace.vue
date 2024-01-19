@@ -48,7 +48,7 @@ const industryArray = [
     value: "农林牧渔业",
   },
   {
-    key: "other_industries",
+    key: "otheo_industries",
     value: "其他行业",
   },
 ];

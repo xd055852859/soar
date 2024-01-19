@@ -14,6 +14,12 @@ const routes: Array<RouteRecordRaw> = [
     redirect: "/home/task",
     children: [
       {
+        path: "explore",
+        name: "explore",
+        component: () => import("@/views/home/explore/index.vue"),
+        children: [],
+      },
+      {
         path: "mate",
         name: "mate",
         component: () => import("@/views/home/mate/index.vue"),
@@ -69,6 +75,12 @@ const routes: Array<RouteRecordRaw> = [
             children: [],
           },
           {
+            path: "task",
+            name: "teamTask",
+            component: () => import("@/views/home/team/tab/teamTask.vue"),
+            children: [],
+          },
+          {
             path: "knowledgeBase",
             name: "teamKnowledgeBase",
             component: () =>
@@ -77,8 +89,8 @@ const routes: Array<RouteRecordRaw> = [
           },
           {
             path: "taskTree",
-            name: "teamTask",
-            component: () => import("@/views/home/team/tab/teamTask.vue"),
+            name: "teamTaskTree",
+            component: () => import("@/views/home/team/tab/teamTaskTree.vue"),
             children: [],
           },
         ],

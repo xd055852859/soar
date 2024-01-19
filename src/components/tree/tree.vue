@@ -34,6 +34,7 @@ const commentList = ref<string>("");
 const comment = ref<string>("");
 const nodeUrl = ref<string>("");
 const nodeUrlText = ref<string>("");
+const pathList = ref<any>([]);
 // const imageUrl = ref<string>("");
 // const imageHeight = ref<number>(0);
 // const imageWidth = ref<number>(0);
@@ -177,19 +178,16 @@ const uploadImage = (file) => {
     });
   }
 };
-imageHeight: 134;
-imageUrl: "https://cdn-notes.qingtime.cn/24DA2028.svg";
-imageWidth: 134;
-// const getCommentList=async()=>{
-//   let commentRes = (await api.request.get("card/detail", {
-//     cardKey: key,
-//   })) as ResultProps;
-//   if (cardRes.msg === "OK") {
-//     cardDetail.value = cardRes.data;
-//     rootKey.value = cardRes.data.rootKey;
-//     console.log(rootKey.value);
-//   }
-// }
+const changePath = async (nodeKey, startNodeKey, includeStartNodeKey) => {
+  let pathRes = (await api.request.get("node/way", {
+    nodeKey: nodeKey,
+    startNodeKey: startNodeKey,
+    includeStartNodeKey: includeStartNodeKey,
+  })) as ResultProps;
+  if (pathRes.msg === "OK") {
+    pathList.value = pathRes.data;
+  }
+};
 watch(
   () => props.cardKey,
   (newKey) => {
@@ -201,11 +199,25 @@ watch(
 <template>
   <div class="teamTree" id="teamTree">
     <!-- <button :draggable="true">测试</button> -->
+    <div class="teamTree-path">
+      <q-breadcrumbs gutter="xs">
+        <template v-slot:separator>
+          <q-icon size="1.5em" name="chevron_right" color="primary" />
+        </template>
+        <q-breadcrumbs-el
+          v-for="(item, index) in pathList"
+          :key="`path${index}`"
+          :label="item.name"
+          @click="treeRef.__veauryReactRef__.setStartId(item._key)"
+        />
+      </q-breadcrumbs>
+    </div>
     <CustomTree
       ref="treeRef"
       :rootKey="rootKey"
       :viewType="viewType"
       @showMenu="showMenu"
+      @changePath="changePath"
     />
 
     <q-menu :target="targetEl" v-model="menuVisible">
@@ -259,7 +271,7 @@ watch(
           </q-menu>
         </q-avatar>
       </q-btn>
-      <q-btn flat round icon="format_size">
+      <q-btn flat round icon="o_format_size">
         <q-menu class="row items-center">
           <q-btn flat round icon="format_bold" @click="updateStyle('bold')" />
           <q-btn
@@ -321,14 +333,14 @@ watch(
           </q-card>
         </q-menu>
       </q-btn>
-      <q-btn flat round icon="alternate_email" />
-      <q-btn flat round icon="sell" />
-      <q-btn flat round icon="calendar_month">
+      <q-btn flat round icon="o_alternate_email" />
+      <q-btn flat round icon="o_sell" />
+      <q-btn flat round icon="o_calendar_month">
         <q-menu style="width: 250px">
           <cCalendar :calendarTimeList="[]" />
         </q-menu>
       </q-btn>
-      <q-btn flat round icon="group">
+      <q-btn flat round icon="o_group">
         <q-menu auto-close>
           <q-list>
             <q-item clickable class="row items-center justify-between">
@@ -364,9 +376,9 @@ watch(
           </q-list>
         </q-menu>
       </q-btn>
-      <q-btn flat round icon="description" />
+      <!-- <q-btn flat round icon="o_description" /> -->
       <q-btn flat round class="upload-button">
-        <q-icon name="image" size="28px" />
+        <q-icon name="o_image" size="28px" />
         <input
           type="file"
           accept="image/*"
@@ -438,6 +450,16 @@ watch(
 .teamTree {
   width: 100%;
   height: 100%;
+  position: relative;
+  z-index: 1;
+  .teamTree-path {
+    height: 40px;
+    position: absolute;
+    z-index: 2;
+    top: 10px;
+    left: 10px;
+    @include flex(center, center, null);
+  }
 }
 </style>
 <style></style>

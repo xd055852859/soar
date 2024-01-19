@@ -132,7 +132,6 @@ watchEffect(() => {
         outlined
         v-model="subType"
         :options="docArray"
-        label="类型"
         dense
         emit-value
         map-options

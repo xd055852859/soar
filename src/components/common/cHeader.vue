@@ -27,7 +27,7 @@ const props = defineProps<{
 .header {
   width: 100%;
   height: 65px;
-  padding: 0px 15px 0px 25px;
+  padding: 0px 10px;
   box-sizing: border-box;
   font-size: 20px;
   font-weight: 600;

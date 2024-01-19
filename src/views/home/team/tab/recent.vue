@@ -20,9 +20,11 @@ const days = ref<number>(7);
 const chartData = ref<any>(null);
 const chartName = ref<string[]>([]);
 
-// onMounted(() => {
-//   getChartData();
-// });
+onMounted(() => {
+  if (!props.type) {
+    getChartData();
+  }
+});
 const getRecentList = async () => {
   let recentRes = (await api.request.get("card", {
     teamKey: spaceKey.value,
@@ -86,7 +88,7 @@ watchEffect(() => {
         v-if="chartData"
       />
       <q-select
-        style="width: 150px"
+        style="width: 70px"
         v-model="days"
         :options="dayArray"
         dense
@@ -105,7 +107,12 @@ watchEffect(() => {
       :style="type ? { height: '100%' } : null"
     >
       <template v-for="(item, index) in recentList" :key="`recent${index}`">
-        <fileCard :card="item" :type="item.type" @chooseCard="chooseCard" />
+        <fileCard
+          :card="item"
+          :type="item.type"
+          @chooseCard="chooseCard"
+          outType="recent"
+        />
       </template>
     </div>
   </div>
@@ -130,7 +137,7 @@ watchEffect(() => {
     width: 100%;
     height: calc(100% - 300px);
     @include scroll();
-    @include p-number(10px, 25px);
+    @include p-number(10px, 10px);
   }
 }
 </style>

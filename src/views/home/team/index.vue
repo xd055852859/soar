@@ -11,8 +11,15 @@ import { viewArray } from "@/services/config/config";
 </script>
 <template>
   <div class="team">
-    <c-header :title="teamInfo.name" v-if="teamInfo"/>
-    <q-tabs v-if="teamInfo" dense align="left">
+    <c-header :title="teamInfo.name" v-if="teamInfo" />
+    <q-tabs
+      v-if="teamInfo"
+      dense
+      align="left"
+      indicator-color="primary"
+      active-class="text-primary"
+      class="q-mx-md"
+    >
       <q-route-tab label="最近" :to="`/home/team/recent`" exact />
       <q-route-tab
         v-for="(item, index) in teamInfo.views"

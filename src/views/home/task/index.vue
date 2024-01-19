@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import cHeader from "@/components/common/cHeader.vue";
-import TeamTask from "../team/tab/teamTask.vue";
+import TeamTaskTree from "../team/tab/teamTaskTree.vue";
 </script>
 <template>
   <div class="task">
     <cHeader title="事务" />
     <div class="task-box">
-      <TeamTask type="resouce" />
+      <TeamTaskTree type="resouce" />
     </div>
   </div>
 </template>

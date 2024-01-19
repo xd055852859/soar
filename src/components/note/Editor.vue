@@ -915,7 +915,7 @@ ul[data-type="taskList"] {
     }
   }
 
-  .el-progress-bar__inner {
+  .el-progress-bao__inner {
     transition: unset;
   }
 

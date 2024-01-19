@@ -47,7 +47,7 @@ watchEffect(() => {
         v-if="chartData"
       />
       <q-select
-        style="width: 150px"
+      style="width: 70px"
         v-model="days"
         :options="dayArray"
         dense

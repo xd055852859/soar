@@ -18,7 +18,7 @@ const toSpace = (spaceKey) => {
   <div class="space">
     <div class="space-box">
       <div class="space-logo">
-        <!-- <img src="/login/logoTitle.svg" alt="" /> -->
+        <img src="/common/titleLogo.svg" alt="" />
       </div>
       <div class="space-container" v-if="spaceList.length > 0">
         <div class="q-mb-sm">你可以进入以下企业空间</div>
@@ -85,8 +85,7 @@ const toSpace = (spaceKey) => {
       margin-bottom: 25px;
       @include flex(center, center, null);
       img {
-        width: 180px;
-        height: 30px;
+        width: 40%;
       }
     }
     .space-container {

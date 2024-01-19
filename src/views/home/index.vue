@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ResultProps } from "@/interface/Common";
-
+import cIframe from "@/components/common/cIframe.vue";
+import TeamTree from "@/components/tree/tree.vue";
 import _ from "lodash";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
@@ -14,28 +15,18 @@ import createSpace from "@/components/createSpace.vue";
 const { closeNum } = storeToRefs(appStore.commonStore);
 const { user } = storeToRefs(appStore.authStore);
 const { spaceKey, spaceInfo, spaceList } = storeToRefs(appStore.spaceStore);
-
+const { cardKey, cardInfo, treeVisible, docVisible, docUrl } = storeToRefs(
+  appStore.cardStore
+);
 const { setUserInfo } = appStore.authStore;
-const { getTeamList,getTeamFoldList } = appStore.teamStore;
+const { getTeamList, getTeamFoldList, setTeamKey } = appStore.teamStore;
 const { setSpaceKey, setSpaceList } = appStore.spaceStore;
+const { setCardVisible } = appStore.cardStore;
 
-const noticeVisible = ref<boolean>(false);
 const spaceVisible = ref<boolean>(false);
-const memberVisible = ref<boolean>(false);
-const noVerify = ref<boolean>(false);
-const isPublic = ref<boolean>(false);
 const userVisible = ref<boolean>(false);
-const clearNum = ref<number>(0);
-const defaultRole = ref<number>(4);
-const bookIndex = ref<number>(-1);
-const spaceName = ref<string>("");
-const spaceLogo = ref<string>("");
-const bookName = ref<string>("");
-const infoState = ref<string>("create");
 const userName = ref<string>("");
 const userAvatar = ref<string>("");
-const showFold = ref<boolean>(true);
-const searchVisible = ref<boolean>(false);
 const chooseSpace = (key) => {
   setSpaceKey(key);
   router.push("/space");
@@ -93,7 +84,7 @@ watch(
     if (newKey) {
       setSpaceKey(newKey);
       getTeamList(newKey);
-      getTeamFoldList(newKey)
+      getTeamFoldList(newKey);
     }
   },
   { immediate: true }
@@ -174,7 +165,7 @@ watch(userVisible, (newVisible) => {
               >
                 <q-item-section>{{ item.name }}</q-item-section>
                 <q-icon
-                  name="settings"
+                  name="o_settings"
                   size="28px"
                   @click="chooseSpace(item._key)"
                 />
@@ -189,30 +180,68 @@ watch(userVisible, (newVisible) => {
           </q-menu>
         </div>
       </div>
-      <div @click="router.push('/home/note')">速记</div>
-      <q-list>
-        <q-item to="/home/task" exact>
+      <!-- <div @click="router.push('/home/note')">速记</div> -->
+
+      <q-list @click="setTeamKey('')">
+        <q-item
+          clickable
+          :active="$route.name === 'explore'"
+          @click="router.push('/home/explore')"
+        >
           <q-item-section avatar>
-            <q-icon name="o_alarm" />
+            <q-icon name="o_grid_view" />
           </q-item-section>
-          <q-item-section> 事务 </q-item-section>
+          <q-item-section>探索</q-item-section>
+          <q-item-section side @click.stop="router.push('/home/note')">
+            <q-icon
+              name="sym_o_package_2"
+              :color="$route.name === 'note' ? 'primary' : 'grey'"
+            >
+              <q-tooltip :offset="[10, 5]"> 速记 </q-tooltip>
+            </q-icon>
+          </q-item-section>
+        </q-item>
+        <!-- <q-item to="/home/mate" exact>
           <q-item-section avatar>
-            <q-icon name="o_check_circle" />
+            <q-icon name="o_group" />
+          </q-item-section>
+
+          <q-item-section>队友</q-item-section>
+        </q-item>
+        <q-item to="/home/resource" exact>
+          <q-item-section avatar>
+            <q-icon name="o_folder_open" />
+          </q-item-section>
+
+          <q-item-section>资源</q-item-section>
+        </q-item> -->
+        <q-separator />
+        <q-item
+          clickable
+          :active="$route.name === 'task'"
+          @click="router.push('/home/task')"
+        >
+          <q-item-section avatar>
+            <q-icon name="o_task" />
+          </q-item-section>
+          <q-item-section>事务</q-item-section>
+          <q-item-section side>
+            <q-icon name="o_task_alt" />
           </q-item-section>
         </q-item>
         <q-item to="/home/mate" exact>
           <q-item-section avatar>
-            <q-icon name="o_mail" />
+            <q-icon name="o_group" />
           </q-item-section>
 
-          <q-item-section> 队友 </q-item-section>
+          <q-item-section>队友</q-item-section>
         </q-item>
         <q-item to="/home/resource" exact>
           <q-item-section avatar>
-            <q-icon name="o_movie" />
+            <q-icon name="o_folder_open" />
           </q-item-section>
 
-          <q-item-section> 资源 </q-item-section>
+          <q-item-section>资源</q-item-section>
         </q-item>
       </q-list>
       <!-- <q-tabs vertical inline-label style="height: 160px">
@@ -289,6 +318,30 @@ watch(userVisible, (newVisible) => {
       </template>
     </cDialog>
   </div>
+  <Teleport to="body">
+    <div class="card-fullDialog" v-if="treeVisible">
+      <q-btn
+        color="primary"
+        round
+        icon="navigate_before"
+        class="card-back"
+        @click="setCardVisible(false, 'tasktree')"
+      />
+      <TeamTree :cardKey="cardKey" ref="treeRef" viewType="tree" />
+    </div>
+  </Teleport>
+  <Teleport to="body">
+    <div class="card-fullDialog" v-if="docVisible">
+      <q-btn
+        round
+        color="primary"
+        icon="navigate_before"
+        class="card-back"
+        @click="setCardVisible(false, 'doc')"
+      />
+      <cIframe :url="docUrl" :title="cardInfo?.title" />
+    </div>
+  </Teleport>
 </template>
 <style scoped lang="scss">
 .home {
@@ -300,7 +353,7 @@ watch(userVisible, (newVisible) => {
     height: 100vh;
     padding: 10px;
     box-sizing: border-box;
-    background: $grey-2;
+    background-color: #f2f3f6;
     box-shadow: 1px 0px 0px 0px #e1e1e1;
     position: relative;
     z-index: 10;
@@ -313,6 +366,7 @@ watch(userVisible, (newVisible) => {
     flex: 1;
     height: 100vh;
     position: relative;
+    background-color: #fafafb;
     z-index: 1;
     width: 0px;
   }
@@ -342,6 +396,21 @@ watch(userVisible, (newVisible) => {
   padding: 15px 34px;
   box-sizing: border-box;
   @include scroll();
+}
+.card-fullDialog {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  z-index: 10;
+  top: 0px;
+  left: 0px;
+  background-color: #fff;
+  .card-back {
+    position: absolute;
+    z-index: 20;
+    top: 10px;
+    left: 10px;
+  }
 }
 </style>
 

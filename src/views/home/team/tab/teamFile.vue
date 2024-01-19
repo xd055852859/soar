@@ -44,20 +44,6 @@ const getFileList = async () => {
   }
 };
 
-const scrollFile = (e) => {
-  //文档内容实际高度（包括超出视窗的溢出部分）
-  let scrollHeight = e.target.scrollHeight;
-  //滚动条滚动距离
-  let scrollTop = e.target.scrollTop;
-  //窗口可视范围高度
-  let height = e.target.clientHeight;
-  if (
-    height + scrollTop >= scrollHeight &&
-    fileList.value.length < total.value
-  ) {
-    page.value++;
-  }
-};
 const handleUpload = async (file: any) => {
   // const docTypeArr = ["pdf", "docx", "zip", "doc", "pptx"];
   const docTypeArr = ["docx", "doc"];
@@ -183,7 +169,6 @@ watchEffect(() => {
         outlined
         v-model="subType"
         :options="fileArray"
-        label="类型"
         dense
         emit-value
         map-options

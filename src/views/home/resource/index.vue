@@ -8,7 +8,7 @@ const resourceTab = ref<string>("all");
 <template>
   <div class="resource">
     <cHeader title="资源" />
-    <q-tabs v-model="resourceTab" dense align="left">
+    <q-tabs v-model="resourceTab" dense align="left"  indicator-color="primary" active-class="text-primary" class="q-mx-md">
       <q-tab name="all" label="全部" />
       <q-tab name="doc" label="文档" />
       <q-tab name="file" label="文件" />
