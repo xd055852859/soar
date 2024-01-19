@@ -1,7 +1,7 @@
 import { createApp } from "vue";
 import "./style.css";
 import App from "./App.vue";
-import { Quasar, Notify, AppVisibility, Dialog } from "quasar";
+import { Quasar, Notify, AppVisibility, Dialog, Loading } from "quasar";
 // Import icon libraries
 import "@quasar/extras/material-icons/material-icons.css";
 import { createPinia } from "pinia";
@@ -13,7 +13,7 @@ import duration from "dayjs/plugin/duration";
 import weekday from "dayjs/plugin/weekday";
 import dayjs from "dayjs";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
-import langDe from 'quasar/lang/zh-CN'
+import langDe from "quasar/lang/zh-CN";
 import "./styles/common/index.scss";
 // import "amfe-flexible/index.js";
 // Import Quasar css
@@ -41,7 +41,8 @@ app
     plugins: {
       Notify,
       AppVisibility,
-      Dialog
+      Dialog,
+      Loading,
     },
     config: {
       notify: {
@@ -50,6 +51,9 @@ app
       brand: {
         // primary: "#ff0000",
         // ...
+      },
+      loading: {
+        /* look at QuasarConfOptions from the API card */
       },
     },
   });

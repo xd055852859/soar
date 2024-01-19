@@ -5,6 +5,7 @@ import api from "@/services/api";
 import { ResultProps } from "@/interface/Common";
 import { Space, SpaceInfo, SpaceMember } from "@/interface/Space";
 import router from "@/router";
+import { mateStore } from "./mate";
 // 使用setup模式定义
 export const spaceStore = defineStore(
   "spaceStore",
@@ -17,7 +18,7 @@ export const spaceStore = defineStore(
     const createState = ref<boolean>(false);
     const setSpaceKey = (newKey) => {
       spaceKey.value = newKey;
-      sessionStorage.setItem("spaceKey", newKey);
+      localStorage.setItem("spaceKey", newKey);
     };
     const getSpaceList = async () => {
       let spaceRes = (await api.request.get("team")) as ResultProps;
@@ -50,7 +51,7 @@ export const spaceStore = defineStore(
       } else if (spaceRes.status === 202) {
         router.replace("/spaceList");
         spaceKey.value = "";
-        sessionStorage.removeItem("spaceKey");
+        localStorage.removeItem("spaceKey");
       }
     };
     const setSpaceInfo = (newInfo) => {
@@ -60,6 +61,7 @@ export const spaceStore = defineStore(
       if (newKey) {
         getSpaceInfo(newKey);
         getSpaceMemberList();
+        mateStore().getMateList(newKey);
       }
     });
     watch([spaceList, spaceKey], ([newList, newKey]) => {
@@ -69,7 +71,7 @@ export const spaceStore = defineStore(
           if (index === -1) {
             spaceKey.value = "";
             router.replace("/spaceList");
-            sessionStorage.removeItem("spaceKey");
+            localStorage.removeItem("spaceKey");
           }
         } else {
           getSpaceList();

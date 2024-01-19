@@ -89,15 +89,24 @@ const scrollTask = (e) => {
     page.value++;
   }
 };
-const chooseCard = (key, type) => {
+const chooseCard = (detail, type) => {
   switch (type) {
-    case "choose":
-      nodeKey.value = key;
+    case "search":
+      nodeKey.value = detail._key;
+      break;
+    case "update":
+      let updateIndex = _.findIndex(taskList.value, { _key: detail._key });
+      if (updateIndex !== -1) {
+        taskList.value[updateIndex] = {
+          ...taskList.value[updateIndex],
+          ...detail,
+        };
+      }
       break;
     case "delete":
-      let index = _.findIndex(taskList.value, { _key: key });
-      if (index !== -1) {
-        taskList.value.splice(index, 1);
+      let delIndex = _.findIndex(taskList.value, { _key: detail._key });
+      if (delIndex !== -1) {
+        taskList.value.splice(delIndex, 1);
       }
       break;
   }

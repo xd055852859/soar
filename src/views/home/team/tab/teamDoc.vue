@@ -77,14 +77,23 @@ const addDoc = async (type, typeName) => {
   }
 };
 
-const chooseCard = (key, type) => {
+const chooseCard = (detail, type) => {
   switch (type) {
-    case "choose":
+    case "search":
+      break;
+    case "update":
+      let updateIndex = _.findIndex(fileList.value, { _key: detail._key });
+      if (updateIndex !== -1) {
+        fileList.value[updateIndex] = {
+          ...fileList.value[updateIndex],
+          ...detail,
+        };
+      }
       break;
     case "delete":
-      let index = _.findIndex(fileList.value, { _key: key });
-      if (index !== -1) {
-        fileList.value.splice(index, 1);
+      let delIndex = _.findIndex(fileList.value, { _key: detail._key });
+      if (delIndex !== -1) {
+        fileList.value.splice(delIndex, 1);
       }
       break;
   }
