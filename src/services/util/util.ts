@@ -19,7 +19,7 @@ export const is_mobile = () => {
 export const guid = (len?: number, radix?: number) => {
   let chars =
     "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".split("");
-  let uuid:string[] = [],
+  let uuid: string[] = [],
     i;
   radix = radix || chars.length;
 
@@ -79,11 +79,17 @@ export function getFileTypeByName(name: string) {
 }
 
 export function download(url: string, fileName: string) {
-  var a = document.createElement("a");
-  var filename = fileName;
-  a.href = url;
-  a.download = filename;
-  a.click();
+  fetch(url).then((res) =>
+    res.blob().then((blob) => {
+      var a = document.createElement("a");
+      var url = window.URL.createObjectURL(blob);
+      var filename = fileName;
+      a.href = url;
+      a.download = filename;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    })
+  );
 }
 
 export function isElectron() {
@@ -287,4 +293,10 @@ export function jumpToTitle(titleText: string) {
       element.scrollIntoView({ behavior: "smooth" });
     }
   });
+}
+
+export function isUrl(text: string): boolean {
+  // 这里简单判断是否为 URL，你可能需要使用更复杂的正则表达式或其他方式进行判断
+  const urlPattern = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
+  return urlPattern.test(text);
 }

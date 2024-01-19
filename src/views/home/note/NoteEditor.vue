@@ -15,10 +15,15 @@
     <FilePreview
       v-if="note && note.type === 'file' && note.link"
       :file-url="note.link"
+      :name="note.title"
     />
+    <div class="link-preview" v-if="note && note.type === 'link' && note.link">
+      <Webview :src="note.link" width="100%" height="100%" />
+    </div>
   </div>
 </template>
 <script setup lang="ts">
+import Webview from "@/components/common/Webview.vue";
 import Editor from "@/components/note/Editor.vue";
 import FilePreview from "@/components/note/FilePreview.vue";
 import { setSingleSizeLimit } from "@/services/util/uploadImage";
@@ -31,7 +36,7 @@ const changed = ref(false);
 const editorRef = ref();
 
 onMounted(() => {
-  setSingleSizeLimit(1024 * 1024 * 20);
+  setSingleSizeLimit(1024 * 1024 * 20 * 1025);
 });
 
 const handleChange = () => {
@@ -54,12 +59,16 @@ function handleSave() {
   position: relative;
   width: 100%;
   height: 100%;
-  padding: 15px;
 }
 .save-status {
   color: #ddd;
   position: fixed;
   top: 30px;
   right: 25px;
+}
+.link-preview {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 </style>

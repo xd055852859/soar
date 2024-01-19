@@ -186,6 +186,16 @@ export default {
   request,
   qiniu,
   note,
+  getUrlInfo: (url: string) => {
+    return request.get(
+      "",
+      {
+        url,
+      },
+      undefined,
+      "https://nodeserver.qingtime.cn/linkInfo"
+    );
+  },
   setToken: (_token: string) => {
     localStorage.setItem("auth_token", _token);
     token = _token;
