@@ -9,6 +9,7 @@ import api from "@/services/api";
 import { storeToRefs } from "pinia";
 import appStore from "@/store";
 import { uploadFile } from "@/services/util/file";
+import NoteList from "@/views/home/note/NoteList.vue";
 
 const { teamMemberList } = storeToRefs(appStore.teamStore);
 const CustomTree = applyReactInVue(Tree);
@@ -38,6 +39,7 @@ const pathList = ref<any>([]);
 // const imageUrl = ref<string>("");
 // const imageHeight = ref<number>(0);
 // const imageWidth = ref<number>(0);
+const noteDialog = ref(false);
 
 const colorArray = [
   "rgb(89, 89, 89)",
@@ -444,10 +446,23 @@ watch(
         </q-card-section>
       </template>
     </cDialog>
+    <q-btn
+      class="note-button"
+      color="primary"
+      size="sm"
+      @click="noteDialog = true"
+      >速记</q-btn
+    >
+    <q-dialog v-model="noteDialog" position="right" class="note-list-dialog">
+      <q-card style="width: 350px; height: 100%">
+        <NoteList draggable closable @close="noteDialog = false" />
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 <style scoped lang="scss">
 .teamTree {
+  position: relative;
   width: 100%;
   height: 100%;
   position: relative;
@@ -461,5 +476,14 @@ watch(
     @include flex(center, center, null);
   }
 }
+.note-button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+}
 </style>
-<style></style>
+<style>
+.note-list-dialog > .q-dialog__backdrop {
+  display: none;
+}
+</style>

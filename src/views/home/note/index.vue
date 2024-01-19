@@ -1,7 +1,7 @@
 <template>
   <div class="note-wrapper">
     <div class="cards-wrapper">
-      <NoteList />
+      <NoteList draggable />
     </div>
     <div class="preview-wrapper">
       <NoteEditor />

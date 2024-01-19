@@ -46,7 +46,8 @@
     "unplugin-auto-import": "^0.17.3",
     "veaury": "^2.3.12",
     "vue": "^3.3.11",
-    "vue-router": "^4.2.5"
+    "vue-router": "^4.2.5",
+    "lowlight": "^2.6.1"
   },
   "devDependencies": {
     "@quasar/vite-plugin": "^1.6.0",

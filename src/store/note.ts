@@ -23,7 +23,7 @@ export const noteStore = defineStore("noteStore", () => {
   }) => {
     const res = (await api.note.create(props)) as ResultProps<Card>;
     if (res.status === 200) {
-      note.value = res.data;
+      // note.value = res.data;
       notes.value = [res.data, ...notes.value];
     }
   };

@@ -8,8 +8,10 @@
       selected ? 'selected' : ''
     }`"
   >
-    <div></div>
-    <div>
+    <div class="logo">
+      <i v-if="card.icon" :style="{ backgroundImage: `url(${card.icon})` }" />
+    </div>
+    <div class="content">
       <div class="title">
         {{ card.title }}
       </div>
@@ -57,6 +59,15 @@ const handleDelete = () => {
   width: 100%;
   margin-bottom: 15px;
   padding: 15px;
+  display: flex;
+}
+.content {
+  flex: 1;
+  overflow: hidden;
+  min-height: 45px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .note-card.selected {
   background-color: #f5f5f5;
@@ -70,11 +81,20 @@ const handleDelete = () => {
 }
 .options {
   position: absolute;
-  top: 15px;
-  right: 15px;
+  top: 8px;
+  right: 8px;
   opacity: 0;
 }
 .note-card:hover > .options {
   opacity: 1;
+}
+.logo > i {
+  width: 25px;
+  height: 25px;
+  display: block;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  margin-right: 8px;
 }
 </style>
