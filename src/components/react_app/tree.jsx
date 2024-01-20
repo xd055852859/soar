@@ -496,8 +496,9 @@ const CustomTree = React.forwardRef((props, ref) => {
     );
   };
   //外部拖入
-  const dragEndFromOutside = (node) => {
-    console.log(node);
+  const dragEndFromOutside = (node, text) => {
+    console.log(node, text);
+    alert(`将卡片${text}拖拽进节点${node._key}`);
   };
   //获取内部数据
   const getNodeInfo = () => {

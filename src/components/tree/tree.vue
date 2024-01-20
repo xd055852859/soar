@@ -10,9 +10,12 @@ import { storeToRefs } from "pinia";
 import appStore from "@/store";
 import { uploadFile } from "@/services/util/file";
 import NoteList from "@/views/home/note/NoteList.vue";
+import NoteEditor from "@/views/home/note/NoteEditor.vue";
 
 const { teamMemberList } = storeToRefs(appStore.teamStore);
+const { note } = storeToRefs(appStore.noteStore);
 const CustomTree = applyReactInVue(Tree);
+const { clearNoteDetail } = appStore.noteStore;
 
 const props = defineProps<{
   cardKey?: string;
@@ -40,6 +43,7 @@ const pathList = ref<any>([]);
 // const imageHeight = ref<number>(0);
 // const imageWidth = ref<number>(0);
 const noteDialog = ref(false);
+const detailDialog = ref(false);
 
 const colorArray = [
   "rgb(89, 89, 89)",
@@ -197,6 +201,18 @@ watch(
   },
   { immediate: true }
 );
+
+watch(note, (newVal, oldVal) => {
+  if (newVal && !oldVal) {
+    detailDialog.value = true;
+  }
+});
+
+watch(detailDialog, (newVal, oldVal) => {
+  if (!newVal) {
+    clearNoteDetail();
+  }
+});
 </script>
 <template>
   <div class="teamTree" id="teamTree">
@@ -456,6 +472,11 @@ watch(
     <q-dialog v-model="noteDialog" position="right" class="note-list-dialog">
       <q-card style="width: 350px; height: 100%">
         <NoteList draggable closable @close="noteDialog = false" />
+      </q-card>
+    </q-dialog>
+    <q-dialog v-model="detailDialog">
+      <q-card style="width: 80%; height: 100%; max-width: 420px">
+        <NoteEditor />
       </q-card>
     </q-dialog>
   </div>
