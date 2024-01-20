@@ -13,7 +13,7 @@ import Moveable from "./moveable";
 import { Dialog } from "quasar";
 import { setMessage } from "@/services/util/common";
 import { getStartAdornment, getEndAdornment } from "./treesvg";
-// const nodes = {
+
 //   "001": {
 //     _key: "001",
 //     name: "项目管理",
@@ -167,8 +167,6 @@ const CustomTree = React.forwardRef((props, ref) => {
   const [selectedId, setSelectedId] = useState("");
   const [selectedNode, setSelectedNode] = useState(null);
   const [selectedNodes, setSelectedNodes] = useState(null);
-  const [selectedPath, setSelectedPath] = useState([]);
-  const [moreState, setMoreState] = useState("");
 
   useEffect(() => {
     if (rootKey) {
@@ -489,8 +487,9 @@ const CustomTree = React.forwardRef((props, ref) => {
     );
   };
   //外部拖入
-  const dragEndFromOutside = (node) => {
-    console.log(node);
+  const dragEndFromOutside = (node, text) => {
+    console.log(node, text);
+    alert(`将卡片${text}拖拽进节点${node._key}`);
   };
   //获取内部数据
   const getNodeInfo = () => {

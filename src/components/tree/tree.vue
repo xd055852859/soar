@@ -14,10 +14,12 @@ import Icon from "../common/Icon.vue";
 import cDrawer from "../common/cDrawer.vue";
 import dayjs from "dayjs";
 import fileCard from "../fileCard/fileCard.vue";
-
+import NoteEditor from "@/views/home/note/NoteEditor.vue";
+const CustomTree = applyReactInVue(Tree);
 const { teamMemberList } = storeToRefs(appStore.teamStore);
 const { setCardKey, setCardVisible } = appStore.cardStore;
-const CustomTree = applyReactInVue(Tree);
+const { note } = storeToRefs(appStore.noteStore);
+const { clearNoteDetail } = appStore.noteStore;
 
 const props = defineProps<{
   cardKey?: string;
@@ -59,6 +61,7 @@ const searchList = ref<any>([]);
 // const imageHeight = ref<number>(0);
 // const imageWidth = ref<number>(0);
 const noteDialog = ref(false);
+const detailDialog = ref(false);
 
 const colorArray = [
   "rgb(89, 89, 89)",
@@ -345,6 +348,17 @@ watch(updateVisible, (newVisible) => {
 watch(fileInput, (newName) => {
   if (!newName) {
     searchList.value = [];
+  }
+});
+watch(note, (newVal, oldVal) => {
+  if (newVal && !oldVal) {
+    detailDialog.value = true;
+  }
+});
+
+watch(detailDialog, (newVal, oldVal) => {
+  if (!newVal) {
+    clearNoteDetail();
   }
 });
 </script>
@@ -708,6 +722,11 @@ watch(fileInput, (newName) => {
     <q-dialog v-model="noteDialog" position="right" class="note-list-dialog">
       <q-card style="width: 350px; height: 100%">
         <NoteList draggable closable @close="noteDialog = false" />
+      </q-card>
+    </q-dialog>
+    <q-dialog v-model="detailDialog">
+      <q-card style="width: 80%; height: 100%; max-width: 420px">
+        <NoteEditor />
       </q-card>
     </q-dialog>
   </div>

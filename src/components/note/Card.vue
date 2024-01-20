@@ -1,39 +1,40 @@
 <template>
-  <q-card
-    v-ripple
-    flat
-    bordered
-    :draggable="draggable"
-    :class="`note-card cursor-pointer q-hoverable ${
-      selected ? 'selected' : ''
-    }`"
-  >
-    <div class="logo">
-      <i v-if="card.icon" :style="{ backgroundImage: `url(${card.icon})` }" />
-    </div>
-    <div class="content">
-      <div class="title">
-        {{ card.title }}
-      </div>
-      <div>{{ card.summary }}</div>
-    </div>
-    <q-btn
+  <div :draggable="draggable" @dragstart="handleDragStart">
+    <q-card
+      v-ripple
       flat
-      round
-      icon="more_horiz"
-      size="sm"
-      class="options"
-      @click="handleClickOptions"
+      bordered
+      :class="`note-card cursor-pointer q-hoverable ${
+        selected ? 'selected' : ''
+      }`"
     >
-      <q-menu>
-        <q-list style="min-width: 100px">
-          <q-item clickable v-close-popup @click="handleDelete">
-            <q-item-section>删除</q-item-section>
-          </q-item>
-        </q-list>
-      </q-menu>
-    </q-btn>
-  </q-card>
+      <div class="logo">
+        <i v-if="card.icon" :style="{ backgroundImage: `url(${card.icon})` }" />
+      </div>
+      <div class="content">
+        <div class="title">
+          {{ card.title }}
+        </div>
+        <div>{{ card.summary }}</div>
+      </div>
+      <q-btn
+        flat
+        round
+        icon="more_horiz"
+        size="sm"
+        class="options"
+        @click="handleClickOptions"
+      >
+        <q-menu>
+          <q-list style="min-width: 100px">
+            <q-item clickable v-close-popup @click="handleDelete">
+              <q-item-section>删除</q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
+      </q-btn>
+    </q-card>
+  </div>
 </template>
 <script setup lang="ts">
 import { Card } from "@/interface/Card";
@@ -52,6 +53,10 @@ const handleClickOptions = (e: Event) => {
 
 const handleDelete = () => {
   deleteNote(props.card._key);
+};
+
+const handleDragStart = (event: DragEvent) => {
+  event.dataTransfer?.setData("text/plain", props.card._key);
 };
 </script>
 <style scoped>

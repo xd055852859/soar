@@ -57,7 +57,7 @@ watch(notes, (newVal, oldVal) => {
 });
 
 watch(notes, (newVal, oldVal) => {
-  if (newVal.length && !oldVal.length) {
+  if (newVal.length && !oldVal.length && !props.draggable) {
     selectedNoteKey.value = newVal[0]._key;
   }
 });
@@ -71,6 +71,10 @@ watchEffect(() => {
 watch(selectedNoteKey, (newVal) => {
   clearNoteDetail();
   getNoteDetail(newVal);
+});
+
+onUnmounted(() => {
+  clearNoteDetail();
 });
 </script>
 <style scoped>
