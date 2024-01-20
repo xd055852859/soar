@@ -69,8 +69,8 @@ const chooseFile = (detail) => {
   emits("chooseCard", detail, "search");
 };
 const chooseTask = (detail) => {
-  setCardKey(detail._key);
-  emits("chooseCard", detail, "search");
+  // setCardKey(detail._key);
+  // emits("chooseCard", detail, "search");
 };
 const deleteCard = async (detail) => {
   $q.dialog({

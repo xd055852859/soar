@@ -10,8 +10,13 @@ import { storeToRefs } from "pinia";
 import appStore from "@/store";
 import { uploadFile } from "@/services/util/file";
 import NoteList from "@/views/home/note/NoteList.vue";
+import Icon from "../common/Icon.vue";
+import cDrawer from "../common/cDrawer.vue";
+import dayjs from "dayjs";
+import fileCard from "../fileCard/fileCard.vue";
 
 const { teamMemberList } = storeToRefs(appStore.teamStore);
+const { setCardKey, setCardVisible } = appStore.cardStore;
 const CustomTree = applyReactInVue(Tree);
 
 const props = defineProps<{
@@ -26,16 +31,30 @@ const rootKey = ref<string>("");
 const treeRef = ref<any>(null);
 const targetEl = ref<any>(null);
 const menuVisible = ref<boolean>(false);
-const commentVisible = ref<boolean>(false);
+
 const nodeDetail = ref<any>(null);
 const nodeInfo = ref<any>(null);
 const nodes = ref<any>(null);
 const nodeContent = ref<string>("");
+
+const commentVisible = ref<boolean>(false);
 const commentList = ref<string>("");
 const comment = ref<string>("");
+
 const nodeUrl = ref<string>("");
 const nodeUrlText = ref<string>("");
+
 const pathList = ref<any>([]);
+
+const updateVisible = ref<boolean>(false);
+const updateList = ref<any>([]);
+
+const milestoneList = ref<any>([]);
+const milestoneTaskList = ref<any>([]);
+
+const fileVisible = ref<boolean>(false);
+const fileInput = ref<string>("");
+const searchList = ref<any>([]);
 // const imageUrl = ref<string>("");
 // const imageHeight = ref<number>(0);
 // const imageWidth = ref<number>(0);
@@ -114,16 +133,20 @@ const updateUrl = () => {
   //   });
   // },
   let newNode = { ...nodeInfo.value };
-  treeRef.value.__veauryReactRef__.updateNode(
-    "endAdornmentContent",
+  treeRef.value.__veauryReactRef__.updateNodeObj(
     {
-      link: { url: nodeUrl.value, text: nodeUrlText.value },
+      endAdornmentContent: {
+        ...newNode.endAdornmentContent,
+        link: { url: nodeUrl.value, text: nodeUrlText.value },
+      },
     },
     async (newNodes) => {
       newNodes[newNode._key].endAdornmentContent = {
+        ...newNodes[newNode._key].endAdornmentContent,
         link: { url: nodeUrl.value, text: nodeUrlText.value },
       };
       nodeInfo.value.endAdornmentContent = {
+        ...nodeInfo.value.endAdornmentContent,
         link: { url: nodeUrl.value, text: nodeUrlText.value },
       };
       newNodes[newNode._key] = treeRef.value.__veauryReactRef__.formatNode(
@@ -190,29 +213,191 @@ const changePath = async (nodeKey, startNodeKey, includeStartNodeKey) => {
     pathList.value = pathRes.data;
   }
 };
+
+const getUpdateList = async () => {
+  let updateRes = (await api.request.get("task/card", {
+    cardKey: props.cardKey,
+  })) as ResultProps;
+  if (updateRes.msg === "OK") {
+    updateList.value = [...updateRes.data];
+  }
+};
+const getmilestoneList = async (newKey) => {
+  let dataRes = (await api.request.get("node/milestone", {
+    cardKey: newKey,
+    startTime: dayjs().subtract(90, "day").startOf("day").valueOf(),
+    endTime: dayjs().valueOf(),
+  })) as ResultProps;
+  if (dataRes.msg === "OK") {
+    milestoneList.value = dataRes.data.map((item) => {
+      [item.year, item.month, item.day] = item.ctime.split("-");
+      item.time = dayjs(item.ctime).endOf("day").valueOf();
+      item.bgColor =
+        dayjs(item.ctime).endOf("day").valueOf() <
+        dayjs().endOf("day").valueOf()
+          ? "#07be51"
+          : "#f44336";
+      return item;
+    });
+  }
+};
+const updatemilestone = (date) => {
+  let newNode = { ...nodeInfo.value };
+  let endTime = dayjs(date).endOf("day").valueOf();
+  treeRef.value.__veauryReactRef__.updateNode(
+    "endTime",
+    endTime,
+    async (newNodes) => {
+      newNodes[newNode._key].endTime = endTime;
+      treeRef.value.__veauryReactRef__.updateNodeObj(
+        {
+          endAdornmentContent: {
+            ...newNode.endAdornmentContent,
+            milestone: {},
+          },
+        },
+        async (newNodes) => {
+          newNodes[newNode._key].endAdornmentContent = {
+            ...newNodes[newNode._key].endAdornmentContent,
+            milestone: {},
+          };
+          nodeInfo.value.endAdornmentContent = {
+            ...nodeInfo.value.endAdornmentContent,
+            milestone: {},
+          };
+          newNodes[newNode._key] = treeRef.value.__veauryReactRef__.formatNode(
+            newNodes[newNode._key]
+          );
+          nodeInfo.value = treeRef.value.__veauryReactRef__.formatNode(
+            newNodes[newNode._key]
+          );
+          treeRef.value.__veauryReactRef__.setNodes(newNodes);
+        },
+        nodeInfo.value._key
+      );
+    },
+    nodeInfo.value._key
+  );
+};
+const chooseMilestone = async (detail) => {
+  let dataRes = (await api.request.get("node/milestone/detail", {
+    cardKey: props.cardKey,
+    filterDate: detail.time,
+  })) as ResultProps;
+  if (dataRes.msg === "OK") {
+    milestoneTaskList.value = [...dataRes.data];
+  }
+};
+const searchFile = async () => {};
+const updateFile = (detail) => {
+  let newNode = { ...nodeInfo.value };
+  treeRef.value.__veauryReactRef__.updateNodeObj(
+    {
+      endAdornmentContent: {
+        ...newNode.endAdornmentContent,
+        file: { fileKey: detail._key },
+      },
+    },
+    async (newNodes) => {
+      newNodes[newNode._key].endAdornmentContent = {
+        ...newNodes[newNode._key].endAdornmentContent,
+        file: { fileKey: detail._key },
+      };
+      nodeInfo.value.endAdornmentContent = {
+        ...nodeInfo.value.endAdornmentContent,
+        file: { fileKey: detail._key },
+      };
+      newNodes[newNode._key] = treeRef.value.__veauryReactRef__.formatNode(
+        newNodes[newNode._key]
+      );
+      nodeInfo.value = treeRef.value.__veauryReactRef__.formatNode(
+        newNodes[newNode._key]
+      );
+      treeRef.value.__veauryReactRef__.setNodes(newNodes);
+      fileVisible.value = false;
+    },
+    nodeInfo.value._key
+  );
+};
+const openAlt = (node) => {
+  let fileKey = node.endAdornmentContent.file.fileKey;
+  setCardKey(fileKey);
+  setCardVisible(
+    true,
+    node.endAdornmentContent.file.fileType,
+    node.endAdornmentContent.url
+  );
+};
 watch(
   () => props.cardKey,
   (newKey) => {
     getTreeInfo(newKey);
+    getmilestoneList(newKey);
   },
   { immediate: true }
 );
+watch(updateVisible, (newVisible) => {
+  console.log(newVisible);
+  if (newVisible) {
+    getUpdateList();
+  }
+});
+watch(fileInput, (newName) => {
+  if (!newName) {
+    searchList.value = [];
+  }
+});
 </script>
 <template>
   <div class="teamTree" id="teamTree">
     <!-- <button :draggable="true">测试</button> -->
-    <div class="teamTree-path">
-      <q-breadcrumbs gutter="xs">
-        <template v-slot:separator>
-          <q-icon size="1.5em" name="chevron_right" color="primary" />
-        </template>
-        <q-breadcrumbs-el
-          v-for="(item, index) in pathList"
-          :key="`path${index}`"
-          :label="item.name"
-          @click="treeRef.__veauryReactRef__.setStartId(item._key)"
-        />
-      </q-breadcrumbs>
+    <div class="teamTree-header">
+      <div class="teamTree-header-path">
+        <q-breadcrumbs gutter="xs">
+          <template v-slot:separator>
+            <q-icon size="1.5em" name="chevron_right" color="primary" />
+          </template>
+          <q-breadcrumbs-el
+            v-for="(item, index) in pathList"
+            :key="`path${index}`"
+            :label="item.name"
+            @click="treeRef.__veauryReactRef__.setStartId(item._key)"
+          />
+        </q-breadcrumbs>
+      </div>
+      <div class="teamTree-header-button">
+        <q-btn flat round @click="noteDialog = true">
+          <Icon name="a-suji2" :size="22" />
+        </q-btn>
+        <q-btn flat round icon="o_update" @click="updateVisible = true" />
+      </div>
+    </div>
+    <div class="teamTree-footer">
+      <div
+        class="footer-milestone"
+        v-for="(item, index) in milestoneList"
+        :key="`milestone${index}`"
+        @click="chooseMilestone(item)"
+      >
+        <div class="footer-top" :style="{ backgroundColor: item.bgColor }">
+          {{ item.month }}
+        </div>
+        <div class="footer-bottom">{{ item.day }}</div>
+        <q-badge color="red" floating>{{ item.count }}</q-badge>
+        <q-menu
+          style="width: 350px"
+          anchor="top left"
+          self="bottom left"
+          class="q-px-md q-pt-md q-pb-xs milestone-menu"
+        >
+          <template
+            v-for="(taskItem, taskIndex) in milestoneTaskList"
+            :key="`taskItem${taskIndex}`"
+          >
+            <fileCard :card="taskItem" type="task" />
+          </template>
+        </q-menu>
+      </div>
     </div>
     <CustomTree
       ref="treeRef"
@@ -220,6 +405,7 @@ watch(
       :viewType="viewType"
       @showMenu="showMenu"
       @changePath="changePath"
+      @openAlt="openAlt"
     />
 
     <q-menu :target="targetEl" v-model="menuVisible">
@@ -306,7 +492,7 @@ watch(
       <!-- <q-btn flat round icon="sentiment_satisfied">
         <treeIcon />
       </q-btn> -->
-      <!-- <q-btn flat round icon="bookmark" @click="commentVisible = true" /> -->
+      <!-- <q-btn flat round icon="o_bookmarks" @click="commentVisible = true" /> -->
       <q-btn flat round icon="link">
         <q-menu style="width: 250px">
           <q-card>
@@ -339,7 +525,7 @@ watch(
       <q-btn flat round icon="o_sell" />
       <q-btn flat round icon="o_calendar_month">
         <q-menu style="width: 250px">
-          <cCalendar :calendarTimeList="[]" />
+          <cCalendar @clickDate="updatemilestone" />
         </q-menu>
       </q-btn>
       <q-btn flat round icon="o_group">
@@ -392,13 +578,13 @@ watch(
         />
       </q-btn>
     </q-menu>
-    <cDialog
+    <cDrawer
       :visible="commentVisible"
       @close="commentVisible = false"
-      title="备注"
-      :dialogStyle="{ width: '700px', maxWidth: '80vw' }"
+      :drawerStyle="{ width: '350px' }"
     >
       <template #content>
+        <q-card-section class="q-pt-none">备注</q-card-section>
         <q-card-section class="full-width">
           <q-input
             outlined
@@ -445,14 +631,80 @@ watch(
         /> -->
         </q-card-section>
       </template>
-    </cDialog>
-    <q-btn
-      class="note-button"
-      color="primary"
-      size="sm"
-      @click="noteDialog = true"
-      >速记</q-btn
+    </cDrawer>
+    <cDrawer
+      :visible="updateVisible"
+      @close="updateVisible = false"
+      title="更新动态"
+      :drawerStyle="{ width: '350px' }"
     >
+      <template #content>
+        <div class="update-box">
+          <template
+            v-for="(taskItem, taskIndex) in updateList"
+            :key="`taskItem${taskIndex}`"
+          >
+            <fileCard :card="taskItem" type="task" />
+          </template>
+        </div>
+      </template>
+    </cDrawer>
+    <cDialog
+      :visible="fileVisible"
+      title="搜索文件"
+      @close="fileVisible = false"
+    >
+      <template #content>
+        <div class="member-search">
+          <div class="member-search-title">
+            <q-input
+              rounded
+              outlined
+              v-model="fileInput"
+              placeholder="搜索用户名或手机号"
+              dense
+              class="full-width"
+              @keyup.enter="searchFile"
+              clearable
+            />
+          </div>
+          <div class="member-search-container">
+            <template v-if="searchList.length > 0">
+              <div
+                class="member-search-item"
+                v-for="(item, index) in searchList"
+                :key="`search${index}`"
+              >
+                <div class="member-search-left">
+                  <q-avatar color="primary" text-color="white" size="lg">
+                    <img
+                      :src="
+                        item.userAvatar
+                          ? item.row.userAvatar
+                          : '/common/defaultPerson.png'
+                      "
+                    />
+                  </q-avatar>
+                  <div>{{ item.userName }}</div>
+                </div>
+                <div class="member-search-right">
+                  <q-btn
+                    flat
+                    label="链接"
+                    color="primary"
+                    @click="updateFile(item)"
+                    :dense="true"
+                  />
+                </div>
+              </div>
+            </template>
+            <div class="dp-center-center" :style="{ height: '100%' }" v-else>
+              未搜索到尚未加入该空间的系统用户
+            </div>
+          </div>
+        </div>
+      </template>
+    </cDialog>
     <q-dialog v-model="noteDialog" position="right" class="note-list-dialog">
       <q-card style="width: 350px; height: 100%">
         <NoteList draggable closable @close="noteDialog = false" />
@@ -467,23 +719,65 @@ watch(
   height: 100%;
   position: relative;
   z-index: 1;
-  .teamTree-path {
+  .teamTree-header {
+    width: 100%;
     height: 40px;
     position: absolute;
     z-index: 2;
-    top: 10px;
-    left: 10px;
-    @include flex(center, center, null);
+    top: 20px;
+    left: 0px;
+    @include flex(space-between, center, null);
+    @include p-number(0px, 10px);
+    padding-left: 60px;
+    .teamTree-header-path {
+      height: 100%;
+      @include flex(center, center, null);
+    }
+    .teamTree-header-button {
+      @include flex(flex-end, center, null);
+    }
+  }
+  .teamTree-footer {
+    height: 70px;
+    position: absolute;
+    z-index: 2;
+    bottom: 20px;
+    left: 20px;
+    @include flex(space-between, center, null);
+    .footer-milestone {
+      width: 60px;
+      height: 70px;
+      margin-right: 5px;
+      border: 1px solid $grey-5;
+      cursor: pointer;
+      .footer-top {
+        width: 100%;
+        height: 25px;
+        text-align: center;
+        color: #fff;
+        line-height: 25px;
+        font-size: 16px;
+      }
+      .footer-bottom {
+        width: 100%;
+        height: 45px;
+        text-align: center;
+        line-height: 45px;
+        font-size: 24px;
+      }
+    }
   }
 }
-.note-button {
-  position: absolute;
-  top: 15px;
-  right: 15px;
+.update-box {
+  width: 100%;
+  height: 100%;
 }
 </style>
 <style>
 .note-list-dialog > .q-dialog__backdrop {
   display: none;
+}
+.milestone-menu {
+  max-height: 60vh !important;
 }
 </style>

@@ -46,7 +46,7 @@ import Link from "@tiptap/extension-link";
 // import Mention from "./extensions/mentions";
 // import mentionSuggestion from "./extensions/mentions/suggestion";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
-import CodeBlockComponent from "./extensions/code-block/CodeBlockComponent.vue";
+// import CodeBlockComponent from "./extensions/code-block/CodeBlockComponent.vue";
 // import { ColorHighlighter } from "./extensions/clever-editor/ColorHighlighter";
 // import { SmilieReplacer } from "./extensions/clever-editor/SmilieReplacer";
 import Table from "@tiptap/extension-table";

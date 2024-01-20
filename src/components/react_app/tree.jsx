@@ -159,7 +159,7 @@ import { getStartAdornment, getEndAdornment } from "./treesvg";
 //   },
 // };
 const CustomTree = React.forwardRef((props, ref) => {
-  const { rootKey, zoomRatio, viewType, onShowMenu, onChangePath } = props;
+  const { rootKey, zoomRatio, viewType, onShowMenu, onChangePath,onOpenAlt } = props;
   const treeRef = useRef(null);
   const moveRef = useRef(null);
   const [nodes, setNodes] = useState(null);
@@ -196,6 +196,9 @@ const CustomTree = React.forwardRef((props, ref) => {
           }
         }
         value.checked = value.hasDone;
+        if (value._key === rootKey) {
+          value.backgroundColor = "#07be51";
+        }
         value = formatNode(value);
       }
       if (type === "child") {
@@ -230,16 +233,6 @@ const CustomTree = React.forwardRef((props, ref) => {
       node.endAdornmentHeight = 18;
     }
     return node;
-  };
-  const getNodePath = async (nodeKey, startNodeKey, includeStartNodeKey) => {
-    let pathRes = await api.request.get("node/way", {
-      nodeKey: nodeKey,
-      startNodeKey: startNodeKey,
-      includeStartNodeKey: includeStartNodeKey,
-    });
-    if (pathRes.msg === "OK") {
-      setSelectedPath(pathRes.data);
-    }
   };
   const editNodeText = async (nodeId, text) => {
     setSelectedId(nodeId);
@@ -335,14 +328,10 @@ const CustomTree = React.forwardRef((props, ref) => {
     });
     if (updateRes.msg === "OK") {
       callback(newNodes);
-      if (key == "status" && value === 0) {
-        chooseNode(null);
-      } else {
-        setSelectedNode({
-          ...selectedNode,
-          ...obj,
-        });
-      }
+      setSelectedNode({
+        ...selectedNode,
+        ...obj,
+      });
     }
   };
   const deleteNode = async () => {
@@ -482,6 +471,10 @@ const CustomTree = React.forwardRef((props, ref) => {
       linkUrl = `https://${url}`;
     }
     window.open(linkUrl);
+    // console.log(nodes[nodeId].endAdornmentContent);
+  };
+  const handleOpenAlt = (node) => {
+    onOpenAlt(node)
     // console.log(nodes[nodeId].endAdornmentContent);
   };
   //修改图片大小

@@ -12,6 +12,7 @@ import router from "@/router";
 import { setMessage } from "@/services/util/common";
 import { uploadFile } from "@/services/util/file";
 import createSpace from "@/components/createSpace.vue";
+import Icon from "@/components/common/Icon.vue";
 const { closeNum } = storeToRefs(appStore.commonStore);
 const { user } = storeToRefs(appStore.authStore);
 const { spaceKey, spaceInfo, spaceList } = storeToRefs(appStore.spaceStore);
@@ -189,16 +190,22 @@ watch(userVisible, (newVisible) => {
           @click="router.push('/home/explore')"
         >
           <q-item-section avatar>
-            <q-icon name="o_grid_view" />
+            <Icon name="a-tansuo2" :size="20" />
+            <!-- <q-icon name="o_grid_view" /> -->
           </q-item-section>
           <q-item-section>探索</q-item-section>
           <q-item-section side @click.stop="router.push('/home/note')">
-            <q-icon
+            <Icon
+              name="a-suji2"
+              :size="20"
+              :color="$route.name === 'note' ? 'primary' : 'grey'"
+            />
+            <!-- <q-icon
               name="sym_o_package_2"
               :color="$route.name === 'note' ? 'primary' : 'grey'"
             >
               <q-tooltip :offset="[10, 5]"> 速记 </q-tooltip>
-            </q-icon>
+            </q-icon> -->
           </q-item-section>
         </q-item>
         <!-- <q-item to="/home/mate" exact>
@@ -222,7 +229,7 @@ watch(userVisible, (newVisible) => {
           @click="router.push('/home/task')"
         >
           <q-item-section avatar>
-            <q-icon name="o_task" />
+            <Icon name="a-mokexiaoshumiao-weixinyuan2" :size="22" />
           </q-item-section>
           <q-item-section>事务</q-item-section>
           <q-item-section side>
@@ -231,14 +238,14 @@ watch(userVisible, (newVisible) => {
         </q-item>
         <q-item to="/home/mate" exact>
           <q-item-section avatar>
-            <q-icon name="o_group" />
+            <Icon name="a-duiyou2" :size="20" />
           </q-item-section>
 
           <q-item-section>队友</q-item-section>
         </q-item>
         <q-item to="/home/resource" exact>
           <q-item-section avatar>
-            <q-icon name="o_folder_open" />
+            <Icon name="a-ziyuan2" :size="20" />
           </q-item-section>
 
           <q-item-section>资源</q-item-section>

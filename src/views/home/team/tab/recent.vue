@@ -20,11 +20,11 @@ const days = ref<number>(7);
 const chartData = ref<any>(null);
 const chartName = ref<string[]>([]);
 
-onMounted(() => {
-  if (!props.type) {
-    getChartData();
-  }
-});
+// onMounted(() => {
+//   if (!props.type) {
+//     getChartData();
+//   }
+// });
 const getRecentList = async () => {
   let recentRes = (await api.request.get("card", {
     teamKey: spaceKey.value,
@@ -73,7 +73,7 @@ watchEffect(() => {
   getRecentList();
 });
 watchEffect(() => {
-  if (!props.type) {
+  if (!props.type && teamKey.value) {
     getChartData();
   }
 });

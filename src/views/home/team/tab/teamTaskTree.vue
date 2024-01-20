@@ -25,11 +25,6 @@ const nodeKey = ref<string>("");
 const chartData = ref<any>(null);
 const chartName = ref<string[]>([]);
 const $q = useQuasar();
-onMounted(() => {
-  if (!props.type) {
-    getChartData();
-  }
-});
 const addTask = async () => {
   $q.dialog({
     title: "事务树标题",
@@ -122,6 +117,11 @@ const chooseCard = (detail, type) => {
 };
 watchEffect(() => {
   getTaskList();
+});
+watchEffect(() => {
+  if (!props.type && teamKey.value) {
+    getChartData();
+  }
 });
 </script>
 <template>
