@@ -15,8 +15,11 @@ import cDrawer from "../common/cDrawer.vue";
 import dayjs from "dayjs";
 import fileCard from "../fileCard/fileCard.vue";
 import NoteEditor from "@/views/home/note/NoteEditor.vue";
+import { tagArray } from "@/services/config/config";
 const CustomTree = applyReactInVue(Tree);
-const { teamMemberList } = storeToRefs(appStore.teamStore);
+const { token } = storeToRefs(appStore.authStore);
+const { spaceKey } = storeToRefs(appStore.spaceStore);
+const { teamMemberList, teamKey } = storeToRefs(appStore.teamStore);
 const { setCardKey, setCardVisible } = appStore.cardStore;
 const { note } = storeToRefs(appStore.noteStore);
 const { clearNoteDetail } = appStore.noteStore;
@@ -57,6 +60,7 @@ const milestoneTaskList = ref<any>([]);
 const fileVisible = ref<boolean>(false);
 const fileInput = ref<string>("");
 const searchList = ref<any>([]);
+const cardType = ref<string>("doc");
 // const imageUrl = ref<string>("");
 // const imageHeight = ref<number>(0);
 // const imageWidth = ref<number>(0);
@@ -72,6 +76,16 @@ const colorArray = [
   "rgb(169, 239, 230)",
   "rgb(223, 238, 150)",
   "rgb(222, 224, 227)",
+];
+const fileArray = [
+  {
+    value: "doc",
+    label: "文档",
+  },
+  {
+    value: "file",
+    label: "文件",
+  },
 ];
 onMounted(() => {
   treeWidth.value = document.getElementById("teamTree")!.offsetWidth;
@@ -125,6 +139,7 @@ const updateStyle = (key, value?: string) => {
       newNodes[newNode._key][key] = value ? value : !newNode[key];
       nodeInfo.value[key] = value ? value : !newNode[key];
       treeRef.value.__veauryReactRef__.setNodes(newNodes);
+      nodes.value = newNodes;
     },
     nodeInfo.value._key
   );
@@ -136,39 +151,9 @@ const updateUrl = () => {
   //   });
   // },
   let newNode = { ...nodeInfo.value };
-  treeRef.value.__veauryReactRef__.updateNodeObj(
-    {
-      endAdornmentContent: {
-        ...newNode.endAdornmentContent,
-        link: { url: nodeUrl.value, text: nodeUrlText.value },
-      },
-    },
-    async (newNodes) => {
-      newNodes[newNode._key].endAdornmentContent = {
-        ...newNodes[newNode._key].endAdornmentContent,
-        link: { url: nodeUrl.value, text: nodeUrlText.value },
-      };
-      nodeInfo.value.endAdornmentContent = {
-        ...nodeInfo.value.endAdornmentContent,
-        link: { url: nodeUrl.value, text: nodeUrlText.value },
-      };
-      newNodes[newNode._key] = treeRef.value.__veauryReactRef__.formatNode(
-        newNodes[newNode._key]
-      );
-      nodeInfo.value = treeRef.value.__veauryReactRef__.formatNode(
-        newNodes[newNode._key]
-      );
-      treeRef.value.__veauryReactRef__.setNodes(newNodes);
-    },
-    nodeInfo.value._key
-  );
-
-  // endAdornmentHeight
-  // :
-  // 18
-  // endAdornmentWidth
-  // :
-  // 20
+  setAdornmentContent(newNode, "endAdornmentContent", {
+    link: { url: nodeUrl.value, text: nodeUrlText.value },
+  });
 };
 const uploadImage = (file) => {
   console.log(file);
@@ -199,6 +184,7 @@ const uploadImage = (file) => {
             newNodes[newNode._key] = { ...newNodes[newNode._key], ...obj };
             treeRef.value.__veauryReactRef__.setNodes(newNodes);
             menuVisible.value = false;
+            nodes.value = newNodes;
           },
           nodeInfo.value._key
         );
@@ -225,11 +211,12 @@ const getUpdateList = async () => {
     updateList.value = [...updateRes.data];
   }
 };
+//里程碑
 const getmilestoneList = async (newKey) => {
   let dataRes = (await api.request.get("node/milestone", {
     cardKey: newKey,
-    startTime: dayjs().subtract(90, "day").startOf("day").valueOf(),
-    endTime: dayjs().valueOf(),
+    // startTime: dayjs().subtract(90, "day").startOf("day").valueOf(),
+    // endTime: dayjs().valueOf(),
   })) as ResultProps;
   if (dataRes.msg === "OK") {
     milestoneList.value = dataRes.data.map((item) => {
@@ -238,8 +225,8 @@ const getmilestoneList = async (newKey) => {
       item.bgColor =
         dayjs(item.ctime).endOf("day").valueOf() <
         dayjs().endOf("day").valueOf()
-          ? "#07be51"
-          : "#f44336";
+          ? "#f44336"
+          : "#07be51";
       return item;
     });
   }
@@ -252,32 +239,9 @@ const updatemilestone = (date) => {
     endTime,
     async (newNodes) => {
       newNodes[newNode._key].endTime = endTime;
-      treeRef.value.__veauryReactRef__.updateNodeObj(
-        {
-          endAdornmentContent: {
-            ...newNode.endAdornmentContent,
-            milestone: {},
-          },
-        },
-        async (newNodes) => {
-          newNodes[newNode._key].endAdornmentContent = {
-            ...newNodes[newNode._key].endAdornmentContent,
-            milestone: {},
-          };
-          nodeInfo.value.endAdornmentContent = {
-            ...nodeInfo.value.endAdornmentContent,
-            milestone: {},
-          };
-          newNodes[newNode._key] = treeRef.value.__veauryReactRef__.formatNode(
-            newNodes[newNode._key]
-          );
-          nodeInfo.value = treeRef.value.__veauryReactRef__.formatNode(
-            newNodes[newNode._key]
-          );
-          treeRef.value.__veauryReactRef__.setNodes(newNodes);
-        },
-        nodeInfo.value._key
-      );
+      setAdornmentContent(newNode, "bottomAdornmentContent", {
+        milestone: {},
+      });
     },
     nodeInfo.value._key
   );
@@ -291,31 +255,57 @@ const chooseMilestone = async (detail) => {
     milestoneTaskList.value = [...dataRes.data];
   }
 };
-const searchFile = async () => {};
+//文件筛选
+const searchFile = async () => {
+  let dataRes = (await api.request.get("card/search", {
+    teamKey: spaceKey.value,
+    projectKey: teamKey.value,
+    cardType: cardType.value,
+    keyword: fileInput.value,
+    // startTime: dayjs().subtract(90, "day").startOf("day").valueOf(),
+    // endTime: dayjs().valueOf(),
+  })) as ResultProps;
+  if (dataRes.msg === "OK") {
+    searchList.value = [...dataRes.data];
+  }
+};
 const updateFile = (detail) => {
   let newNode = { ...nodeInfo.value };
+  setAdornmentContent(newNode, "bottomAdornmentContent", {
+    file: {
+      fileKey: detail._key,
+      fileType: detail.type,
+      subType: detail.subType,
+    },
+  });
+};
+const setAdornmentContent = (node, adornmentContent, obj) => {
   treeRef.value.__veauryReactRef__.updateNodeObj(
     {
-      endAdornmentContent: {
-        ...newNode.endAdornmentContent,
-        file: { fileKey: detail._key },
+      bottomAdornmentContent: {
+        ...node[adornmentContent],
+        ...obj,
       },
     },
     async (newNodes) => {
-      newNodes[newNode._key].endAdornmentContent = {
-        ...newNodes[newNode._key].endAdornmentContent,
-        file: { fileKey: detail._key },
+      let adornmentContentObj = {};
+      if (nodes[node._key] && nodes[node._key][adornmentContent]) {
+        adornmentContentObj = { ...nodes[node._key][adornmentContent], ...obj };
+      } else {
+        adornmentContentObj = { ...obj };
+      }
+      newNodes[node._key][adornmentContent] = { ...adornmentContentObj };
+      nodeInfo.value[adornmentContent] = {
+        ...nodeInfo.value[adornmentContent],
+        ...obj,
       };
-      nodeInfo.value.endAdornmentContent = {
-        ...nodeInfo.value.endAdornmentContent,
-        file: { fileKey: detail._key },
-      };
-      newNodes[newNode._key] = treeRef.value.__veauryReactRef__.formatNode(
-        newNodes[newNode._key]
+      newNodes[node._key] = treeRef.value.__veauryReactRef__.formatNode(
+        newNodes[node._key]
       );
       nodeInfo.value = treeRef.value.__veauryReactRef__.formatNode(
-        newNodes[newNode._key]
+        newNodes[node._key]
       );
+      nodes.value = newNodes;
       treeRef.value.__veauryReactRef__.setNodes(newNodes);
       fileVisible.value = false;
     },
@@ -323,13 +313,108 @@ const updateFile = (detail) => {
   );
 };
 const openAlt = (node) => {
-  let fileKey = node.endAdornmentContent.file.fileKey;
-  setCardKey(fileKey);
-  setCardVisible(
-    true,
-    node.endAdornmentContent.file.fileType,
-    node.endAdornmentContent.url
-  );
+  let fileKey = node.bottomAdornmentContent.file.fileKey;
+  let fileType = node.bottomAdornmentContent.file.fileType;
+  let subType = node.bottomAdornmentContent.file.subType;
+  switch (fileType) {
+    case "doc":
+      chooseDoc(subType, fileKey);
+      break;
+    case "file":
+      chooseFile(fileKey);
+      break;
+  }
+};
+
+const updateTag = (color) => {
+  let newNode = { ...nodeInfo.value };
+  setAdornmentContent(newNode, "endAdornmentContent", {
+    tag: { color: color },
+  });
+};
+//文档
+const chooseDoc = (type, cardKey) => {
+  setCardKey(cardKey);
+  let detailUrl = "";
+  const getApi = api.API_URL + "card/detail";
+  const getParams = `{"cardKey": "${cardKey}" }`;
+  const patchApi = api.API_URL + "card";
+  const patchData = `["content", "title"]`;
+  const uptokenApi = api.API_URL + "account/qiniuToken";
+  const uptokenParams = `{"target": "cdn-soar"}`;
+  switch (type) {
+    case "text":
+      detailUrl = `https://notecute.com/#/editor?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
+      break;
+    case "draw":
+      detailUrl = `https://draw.workfly.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":${patchData}}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
+      break;
+    case "mind":
+      detailUrl = `https://mind.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
+      break;
+    case "ppt":
+      detailUrl = `https://ppt.mindcute.com/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
+      break;
+    case "table":
+      detailUrl = `https://sheets.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
+      break;
+  }
+  console.log(detailUrl);
+  setCardVisible(true, "doc", detailUrl);
+};
+const chooseFile = (cardKey) => {
+  setCardKey(cardKey);
+  // setCardVisible(true, "doc", detailUrl);
+};
+const chooseHighlight = (type, value?: string) => {
+  nodes.value = treeRef.value.__veauryReactRef__.getNodeInfo()[1];
+  switch (type) {
+    case "executor":
+      for (let key in nodes.value) {
+        let node = nodes.value[key];
+        let element = document.getElementById(`tree-node-${node._key}`);
+        element!.style.opacity = node.executor !== value ? "0.2" : "1";
+
+        // node.color = node.executor === value ? "#fff" : "#fafafa";
+        // node.backgroundColor = node.executor === value ? "#07be51" : "#f5f5f5";
+      }
+      break;
+    case "task":
+      for (let key in nodes.value) {
+        let node = nodes.value[key];
+        let element = document.getElementById(`tree-node-${node._key}`);
+        element!.style.opacity = node.executor !== value ? "0.2" : "1";
+      }
+      break;
+    case "finish":
+      for (let key in nodes.value) {
+        let node = nodes.value[key];
+        let element = document.getElementById(`tree-node-${node._key}`);
+        element!.style.opacity = node.hasDone && node.executor ? "0.2" : "1";
+        // node.color = node.hasDone && node.executor ? "#fafafa" : "";
+        // node.backgroundColor =
+        //   node.hasDone && node.executor
+        //     ? "#f5f5f5"
+        //     : node._key === rootKey.value
+        //     ? "#07be51"
+      }
+      break;
+    case "clear":
+      for (let key in nodes.value) {
+        let node = nodes.value[key];
+        let element = document.getElementById(`tree-node-${node._key}`);
+        element!.style.opacity = "1";
+
+        // node.color = "#595959";
+        // node.backgroundColor = "#f0f0f0";
+        // node.color = "";
+        // node.backgroundColor = node._key === rootKey.value ? "#07be51" : "";
+
+        //@ts-ignore
+      }
+      break;
+  }
+  treeRef.value.__veauryReactRef__.setNodes({ ...nodes.value });
 };
 watch(
   () => props.cardKey,
@@ -363,7 +448,7 @@ watch(detailDialog, (newVal, oldVal) => {
 });
 </script>
 <template>
-  <div class="teamTree" id="teamTree">
+  <div class="teamTree" id="teamTree" @click="chooseHighlight('clear')">
     <!-- <button :draggable="true">测试</button> -->
     <div class="teamTree-header">
       <div class="teamTree-header-path">
@@ -384,14 +469,28 @@ watch(detailDialog, (newVal, oldVal) => {
           <Icon name="a-suji2" :size="22" />
         </q-btn>
         <q-btn flat round icon="o_update" @click="updateVisible = true" />
+        <q-btn flat round icon="o_more_horiz" size="12px" @click.stop="">
+          <q-menu anchor="top right" self="top left" class="q-pa-sm">
+            <q-list dense>
+              <!--  @click="editFile(item._key, index)" -->
+              <q-item
+                clickable
+                v-close-popup
+                @click="chooseHighlight('finish')"
+              >
+                <q-item-section>隐藏已完成</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
       </div>
     </div>
     <div class="teamTree-footer">
       <div
         class="footer-milestone"
+        @click="chooseMilestone(item)"
         v-for="(item, index) in milestoneList"
         :key="`milestone${index}`"
-        @click="chooseMilestone(item)"
       >
         <div class="footer-top" :style="{ backgroundColor: item.bgColor }">
           {{ item.month }}
@@ -411,6 +510,41 @@ watch(detailDialog, (newVal, oldVal) => {
             <fileCard :card="taskItem" type="task" />
           </template>
         </q-menu>
+      </div>
+    </div>
+    <div class="teamTree-right">
+      <div
+        class="icon-point"
+        v-for="(item, index) in teamMemberList"
+        :key="`task${index}`"
+        @click.stop="chooseHighlight('executor', item.userKey)"
+      >
+        <!-- <q-circular-progress
+       
+          show-value
+          font-size="10px"
+          class="q-mr-sm"
+          :value="
+            taskItem.totalTask === 0
+              ? 0
+              : (taskItem.finishTask / taskItem.totalTask) * 100
+          "
+          size="45px"
+          :thickness="0.25"
+          color="primary"
+          track-color="grey-3"
+        > -->
+        <q-avatar size="35px" class="q-mb-sm">
+          <img
+            :src="
+              item.userAvatar ? item.userAvatar : '/common/defaultPerson.png'
+            "
+          />
+          <q-tooltip :offset="[10, 5]">
+            {{ item.userName }}
+          </q-tooltip>
+        </q-avatar>
+        <!-- </q-circular-progress> -->
       </div>
     </div>
     <CustomTree
@@ -535,10 +669,28 @@ watch(detailDialog, (newVal, oldVal) => {
           </q-card>
         </q-menu>
       </q-btn>
-      <q-btn flat round icon="o_alternate_email" />
-      <q-btn flat round icon="o_sell" />
+      <q-btn flat round icon="o_alternate_email" @click="fileVisible = true" />
+      <q-btn flat round icon="o_sell">
+        <q-menu>
+          <q-list dense>
+            <!--  @click="editFile(item._key, index)" -->
+            <q-item
+              clickable
+              v-close-popup
+              v-for="(item, index) in tagArray"
+              :key="`tag${index}`"
+              @click="updateTag(item.value)"
+              :style="{ backgroundColor: item.value }"
+            >
+              <q-item-section class="text-white">{{
+                item.label
+              }}</q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
+      </q-btn>
       <q-btn flat round icon="o_calendar_month">
-        <q-menu style="width: 250px">
+        <q-menu style="width: 250px" auto-close>
           <cCalendar @clickDate="updatemilestone" />
         </q-menu>
       </q-btn>
@@ -669,10 +821,18 @@ watch(detailDialog, (newVal, oldVal) => {
       @close="fileVisible = false"
     >
       <template #content>
-        <div class="member-search">
-          <div class="member-search-title">
+        <div class="file-search">
+          <div class="file-search-title">
+            <q-select
+              style="width: 150px; margin-right: 10px"
+              outlined
+              v-model="cardType"
+              :options="fileArray"
+              dense
+              emit-value
+              map-options
+            />
             <q-input
-              rounded
               outlined
               v-model="fileInput"
               placeholder="搜索用户名或手机号"
@@ -682,38 +842,37 @@ watch(detailDialog, (newVal, oldVal) => {
               clearable
             />
           </div>
-          <div class="member-search-container">
+          <div class="file-search-container">
             <template v-if="searchList.length > 0">
-              <div
-                class="member-search-item"
-                v-for="(item, index) in searchList"
-                :key="`search${index}`"
-              >
-                <div class="member-search-left">
-                  <q-avatar color="primary" text-color="white" size="lg">
-                    <img
-                      :src="
-                        item.userAvatar
-                          ? item.row.userAvatar
-                          : '/common/defaultPerson.png'
-                      "
+              <q-list bordered>
+                <q-item
+                  v-for="(item, index) in searchList"
+                  :key="`search${index}`"
+                  class="q-my-sm file-search-item"
+                >
+                  <q-item-section avatar>
+                    <q-icon name="description" />
+                  </q-item-section>
+
+                  <q-item-section>
+                    <q-item-label>{{ item.title }}</q-item-label>
+                  </q-item-section>
+
+                  <q-item-section side>
+                    <q-btn
+                      flat
+                      label="链接"
+                      color="primary"
+                      @click="updateFile(item)"
+                      :dense="true"
+                      class="file-search-button"
                     />
-                  </q-avatar>
-                  <div>{{ item.userName }}</div>
-                </div>
-                <div class="member-search-right">
-                  <q-btn
-                    flat
-                    label="链接"
-                    color="primary"
-                    @click="updateFile(item)"
-                    :dense="true"
-                  />
-                </div>
-              </div>
+                  </q-item-section>
+                </q-item>
+              </q-list>
             </template>
             <div class="dp-center-center" :style="{ height: '100%' }" v-else>
-              未搜索到尚未加入该空间的系统用户
+              未搜索到文件
             </div>
           </div>
         </div>
@@ -766,9 +925,11 @@ watch(detailDialog, (newVal, oldVal) => {
     .footer-milestone {
       width: 60px;
       height: 70px;
-      margin-right: 5px;
+      margin-right: 8px;
       border: 1px solid $grey-5;
       cursor: pointer;
+      position: relative;
+      z-index: 1;
       .footer-top {
         width: 100%;
         height: 25px;
@@ -786,10 +947,45 @@ watch(detailDialog, (newVal, oldVal) => {
       }
     }
   }
+  .teamTree-right {
+    width: 50px;
+    height: calc(100% - 55px);
+    position: absolute;
+    z-index: 2;
+    top: 70px;
+    right: 0px;
+    align-content: flex-start;
+    @include flex(center, center, wrap);
+    @include scroll();
+  }
 }
 .update-box {
   width: 100%;
   height: 100%;
+}
+.file-search {
+  width: 500px;
+  .file-search-title {
+    width: 100%;
+    height: 50px;
+    margin-bottom: 10px;
+    @include flex(space-between, center, null);
+  }
+  .file-search-container {
+    width: 100%;
+    height: 50vh;
+    @include scroll();
+    .file-search-item {
+      .file-search-button {
+        display: none;
+      }
+      &:hover {
+        .file-search-button {
+          display: flex;
+        }
+      }
+    }
+  }
 }
 </style>
 <style>

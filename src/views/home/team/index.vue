@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import CHeader from "@/components/common/cHeader.vue";
+import cHeader from "@/components/common/cHeader.vue";
 import router from "@/router";
 import appStore from "@/store";
 import _ from "lodash";
@@ -11,7 +11,7 @@ import { viewArray } from "@/services/config/config";
 </script>
 <template>
   <div class="team">
-    <c-header :title="teamInfo.name" v-if="teamInfo" />
+    <cHeader :title="teamInfo.name" v-if="teamInfo" />
     <q-tabs
       v-if="teamInfo"
       dense

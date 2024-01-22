@@ -2250,7 +2250,7 @@ to-regex-range@^5.0.1:
 
 tree-graph-react@^2.4.0:
   version "2.4.0"
-  resolved "https://registry.yarnpkg.com/tree-graph-react/-/tree-graph-react-2.4.0.tgz#462d883161e5fff24c2a0de6fa63622e5898b466"
+  resolved "https://registry.npmmirror.com/tree-graph-react/-/tree-graph-react-2.4.0.tgz#462d883161e5fff24c2a0de6fa63622e5898b466"
   integrity sha512-OUBxzhoeLLgRIRhQKJjrnA6sRXREch6LTkKOWTJvxcqwAQBtob6SfvawsRUOEdtV58fEAGLDV5cUlEHof8tedg==
   dependencies:
     jspdf "^2.5.1"

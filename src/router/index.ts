@@ -31,11 +31,17 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("@/views/home/mate/setting.vue"),
         children: [],
       },
-      
+
       {
         path: "task",
         name: "task",
         component: () => import("@/views/home/task/index.vue"),
+        children: [],
+      },
+      {
+        path: "taskBoard",
+        name: "taskBoard",
+        component: () => import("@/views/home/task/taskBoard/index.vue"),
         children: [],
       },
       {
@@ -102,7 +108,7 @@ const routes: Array<RouteRecordRaw> = [
     name: "mateDetail",
     component: () => import("@/views/home/mate/detail.vue"),
     children: [],
-    props:true
+    props: true,
   },
   {
     path: "/space",

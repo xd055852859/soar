@@ -12,7 +12,11 @@ import api from "@/services/api";
 import Moveable from "./moveable";
 import { Dialog } from "quasar";
 import { setMessage } from "@/services/util/common";
-import { getStartAdornment, getEndAdornment } from "./treesvg";
+import {
+  getStartAdornment,
+  getEndAdornment,
+  getBottomAdornment,
+} from "./treesvg";
 
 //   "001": {
 //     _key: "001",
@@ -159,7 +163,8 @@ import { getStartAdornment, getEndAdornment } from "./treesvg";
 //   },
 // };
 const CustomTree = React.forwardRef((props, ref) => {
-  const { rootKey, zoomRatio, viewType, onShowMenu, onChangePath,onOpenAlt } = props;
+  const { rootKey, zoomRatio, viewType, onShowMenu, onChangePath, onOpenAlt } =
+    props;
   const treeRef = useRef(null);
   const moveRef = useRef(null);
   const [nodes, setNodes] = useState(null);
@@ -197,6 +202,7 @@ const CustomTree = React.forwardRef((props, ref) => {
         if (value._key === rootKey) {
           value.backgroundColor = "#07be51";
         }
+        value.disabled = true;
         value = formatNode(value);
       }
       if (type === "child") {
@@ -229,6 +235,16 @@ const CustomTree = React.forwardRef((props, ref) => {
       node.endAdornmentWidth =
         Object.keys(node.endAdornmentContent).length * (18 + 2);
       node.endAdornmentHeight = 18;
+    }
+    if (node.bottomAdornmentContent) {
+      node.bottomAdornment = getBottomAdornment(
+        node.bottomAdornmentContent,
+        { file: handleOpenAlt },
+        node
+      );
+      node.bottomAdornmentWidth =
+        Object.keys(node.bottomAdornmentContent).length * (18 + 2);
+      node.bottomAdornmentHeight = 18;
     }
     return node;
   };
@@ -472,7 +488,8 @@ const CustomTree = React.forwardRef((props, ref) => {
     // console.log(nodes[nodeId].endAdornmentContent);
   };
   const handleOpenAlt = (node) => {
-    onOpenAlt(node)
+    console.log(node);
+    onOpenAlt(node);
     // console.log(nodes[nodeId].endAdornmentContent);
   };
   //修改图片大小

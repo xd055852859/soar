@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 import _ from "lodash";
 import api from "@/services/api";
 import { ResultProps } from "@/interface/Common";
+import { teamStore } from "./team";
 // 使用setup模式定义
 export const cardStore = defineStore(
   "cardStore",
@@ -12,9 +13,10 @@ export const cardStore = defineStore(
     const treeVisible = ref<boolean>(false);
     const docVisible = ref<boolean>(false);
     const docUrl = ref<string>("");
+    const taskVisible = ref<boolean>(false);
     const fileVisible = ref<boolean>(false);
     const setCardKey = (newKey) => {
-      console.log("???")
+      console.log("???");
       cardKey.value = newKey;
     };
     const setCardInfo = (newInfo) => {
@@ -26,6 +28,7 @@ export const cardStore = defineStore(
       })) as ResultProps;
       if (cardRes.msg === "OK") {
         cardInfo.value = cardRes.data;
+        teamStore().teamKey = cardRes.data.projectKey;
       }
     };
     const setCardVisible = (
@@ -47,7 +50,7 @@ export const cardStore = defineStore(
       }
     };
     watch(cardKey, (newKey) => {
-      console.log(newKey)
+      console.log(newKey);
       if (newKey) {
         getCardInfo();
       }

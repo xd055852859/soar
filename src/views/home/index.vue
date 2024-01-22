@@ -232,7 +232,7 @@ watch(userVisible, (newVisible) => {
             <Icon name="a-mokexiaoshumiao-weixinyuan2" :size="22" />
           </q-item-section>
           <q-item-section>事务</q-item-section>
-          <q-item-section side>
+          <q-item-section side @click.stop="router.push('/home/taskBoard')">
             <q-icon name="o_task_alt" />
           </q-item-section>
         </q-item>
@@ -326,7 +326,7 @@ watch(userVisible, (newVisible) => {
     </cDialog>
   </div>
   <Teleport to="body">
-    <div class="card-fullDialog" v-if="treeVisible">
+    <div class="card-fullDialog" v-if="treeVisible" style="z-index: 10">
       <q-btn
         color="primary"
         round
@@ -338,7 +338,7 @@ watch(userVisible, (newVisible) => {
     </div>
   </Teleport>
   <Teleport to="body">
-    <div class="card-fullDialog" v-if="docVisible">
+    <div class="card-fullDialog" v-if="docVisible" style="z-index: 20">
       <q-btn
         round
         color="primary"

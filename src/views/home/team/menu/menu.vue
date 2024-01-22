@@ -168,6 +168,37 @@ const foldTeam = async (key, state) => {
     setTeamFoldList(foldList);
   }
 };
+const topTeam = async (item, index, state) => {
+  const teamRes = (await api.request.patch("project/top", {
+    projectKey: item._key,
+    top: state,
+  })) as ResultProps;
+  if (teamRes.msg === "OK") {
+    setMessage("success", state ? "置顶小组成功" : "取消置顶小组成功");
+    let list = _.cloneDeep(teamList.value);
+    list.splice(index, 1);
+    item.top = !item.top;
+    let topIndex = -1;
+    if (state) {
+      list.forEach((listItem, listIndex) => {
+        console.log(listItem.createTime, item.createTime);
+        if (listItem.top && listItem.createTime > item.createTime) {
+          topIndex = listIndex;
+        }
+      });
+    } else {
+      list.forEach((listItem, listIndex) => {
+        console.log(!listItem.top, listItem.createTime > item.createTime);
+        if (!listItem.top && listItem.createTime > item.createTime) {
+          topIndex = listIndex;
+        }
+      });
+    }
+    console.log(topIndex);
+    list.splice(topIndex + 1, 0, item);
+    setTeamList(list);
+  }
+};
 watchEffect(() => {
   if (views.value.length === 0) {
     views.value = ["taskTree", "doc", "file"];
@@ -204,7 +235,10 @@ watch(teamInfo, (newInfo) => {
           setTeamKey(item._key);
           $router.push(`/home/team`);
         "
-        :style="teamKey === item._key ? { background: '#e0e0e0' } : null"
+        :style="{
+          borderLeft: item.top ? '5px solid #f44336' : '',
+          background: teamKey === item._key ? '#e0e0e0' : '',
+        }"
       >
         <div># {{ item.name }}</div>
         <div class="teamMenu-item-icon" v-if="overKey === item._key">
@@ -219,8 +253,14 @@ watch(teamInfo, (newInfo) => {
                   item.watch ? "取消关注" : "关注"
                 }}</q-item-section>
               </q-item>
-              <q-item clickable v-close-popup @click="">
-                <q-item-section>置顶</q-item-section>
+              <q-item
+                clickable
+                v-close-popup
+                @click="topTeam(item, index, !item.top)"
+              >
+                <q-item-section>{{
+                  item.top ? "取消置顶" : "置顶"
+                }}</q-item-section>
               </q-item>
               <q-item clickable v-close-popup @click="memberVisible = true">
                 <q-item-section>成员</q-item-section>

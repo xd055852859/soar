@@ -29,27 +29,16 @@ export function getStartAdornment(startAdornment, handleClickIcon) {
 
 export function getEndAdornment(endAdornment, handleClick, node) {
   const keys = Object.keys(endAdornment);
-  const order = ["note", "link", "milestone", "file"];
+  const order = ["note", "link"];
   const orderedKeys = keys.sort((a, b) => {
     return order.indexOf(a) - order.indexOf(b);
   });
   return ({ x, y, nodeKey }) => (
     <g>
       {orderedKeys.map((key, index) => {
-        console.log(key);
         let viewBox = "";
         let fill = "#333";
         switch (key) {
-          case "milestone":
-            console.log(new Date());
-            let time = new Date().setHours(23, 59, 59, 999);
-            viewBox = "0 -960 960 960";
-            console.log(node, time);
-            fill = node.endTime <= time ? "#07be51" : "#f44336";
-            break;
-          case "file":
-            viewBox = "0 -960 960 960";
-            break;
           default:
             viewBox = "0 0 1024 1024";
         }
@@ -73,7 +62,53 @@ export function getEndAdornment(endAdornment, handleClick, node) {
     </g>
   );
 }
-
+export function getBottomAdornment(bottomAdornment, handleClick, node) {
+  const keys = Object.keys(bottomAdornment);
+  const order = ["milestone", "file","tag"];
+  const orderedKeys = keys.sort((a, b) => {
+    return order.indexOf(a) - order.indexOf(b);
+  });
+  return ({ x, y, nodeKey }) => (
+    <g>
+      {orderedKeys.map((key, index) => {
+        let viewBox = "";
+        let fill = "#333";
+        switch (key) {
+          case "milestone":
+            let time = new Date().setHours(23, 59, 59, 999);
+            viewBox = "0 -960 960 960";
+            fill = node.endTime < time ? "#f44336" : "#07be51";
+            break;
+          case "file":
+            viewBox = "0 -960 960 960";
+            break;
+          case "tag":
+            viewBox = "0 -960 960 960";
+            fill = bottomAdornment.tag.color;
+            break;
+          default:
+            viewBox = "0 0 1024 1024";
+        }
+        return (
+          <svg
+            key={index}
+            viewBox={viewBox}
+            version="1.1"
+            width="18"
+            height="18"
+            x={x + (18 + 2) * index}
+            y={y}
+            onClick={(event) => handleClick[key](node)}
+            fill={fill}
+          >
+            <rect x={0} y={0} width="1024" height="1024" fillOpacity={0} />
+            {bottomAdornments[key]}
+          </svg>
+        );
+      })}
+    </g>
+  );
+}
 export const priority = [
   // <g>
   //   <path
@@ -1208,6 +1243,9 @@ export const milestone = (
 export const file = (
   <path d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480v58q0 59-40.5 100.5T740-280q-35 0-66-15t-52-43q-29 29-65.5 43.5T480-280q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480v58q0 26 17 44t43 18q26 0 43-18t17-44v-58q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93h160q17 0 28.5 11.5T680-120q0 17-11.5 28.5T640-80H480Zm0-280q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35Z" />
 );
+export const tag = (
+  <path d="M570-104q-23 23-57 23t-57-23L104-456q-11-11-17.5-26T80-514v-286q0-33 23.5-56.5T160-880h286q17 0 32 6.5t26 17.5l352 353q23 23 23 56.5T856-390L570-104Zm-57-56 286-286-353-354H160v286l353 354ZM260-640q25 0 42.5-17.5T320-700q0-25-17.5-42.5T260-760q-25 0-42.5 17.5T200-700q0 25 17.5 42.5T260-640ZM160-800Z" />
+);
 export const startAdornments = {
   priority,
   progress,
@@ -1220,5 +1258,9 @@ export const startAdornments = {
 export const endAdornments = {
   note,
   link,
+};
+export const bottomAdornments = {
   milestone,
+  file,
+  tag,
 };
