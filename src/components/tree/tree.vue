@@ -289,15 +289,14 @@ const setAdornmentContent = (node, adornmentContent, obj) => {
     },
     async (newNodes) => {
       let adornmentContentObj = {};
-      if (nodes[node._key] && nodes[node._key][adornmentContent]) {
-        adornmentContentObj = { ...nodes[node._key][adornmentContent], ...obj };
+      if (newNodes[node._key] && newNodes[node._key][adornmentContent]) {
+        adornmentContentObj = { ...newNodes[node._key][adornmentContent], ...obj };
       } else {
         adornmentContentObj = { ...obj };
       }
       newNodes[node._key][adornmentContent] = { ...adornmentContentObj };
       nodeInfo.value[adornmentContent] = {
-        ...nodeInfo.value[adornmentContent],
-        ...obj,
+        ...adornmentContentObj,
       };
       newNodes[node._key] = treeRef.value.__veauryReactRef__.formatNode(
         newNodes[node._key]
@@ -328,7 +327,7 @@ const openAlt = (node) => {
 
 const updateTag = (color) => {
   let newNode = { ...nodeInfo.value };
-  setAdornmentContent(newNode, "endAdornmentContent", {
+  setAdornmentContent(newNode, "bottomAdornmentContent", {
     tag: { color: color },
   });
 };
@@ -466,7 +465,7 @@ watch(detailDialog, (newVal, oldVal) => {
       </div>
       <div class="teamTree-header-button">
         <q-btn flat round @click="noteDialog = true">
-          <Icon name="a-suji2" :size="22" />
+          <Icon name="a-suji21" :size="22" />
         </q-btn>
         <q-btn flat round icon="o_update" @click="updateVisible = true" />
         <q-btn flat round icon="o_more_horiz" size="12px" @click.stop="">

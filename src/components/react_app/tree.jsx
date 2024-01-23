@@ -202,7 +202,6 @@ const CustomTree = React.forwardRef((props, ref) => {
         if (value._key === rootKey) {
           value.backgroundColor = "#07be51";
         }
-        value.disabled = true;
         value = formatNode(value);
       }
       if (type === "child") {
@@ -516,7 +515,6 @@ const CustomTree = React.forwardRef((props, ref) => {
     // if (rootKey && card?.content && card.content[rootKey]) {
     // console.log(props);
     if (nodes) {
-      console.log(nodes);
       if (viewType.includes("tree")) {
         return (
           <Tree

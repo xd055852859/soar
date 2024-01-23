@@ -24,21 +24,21 @@ const props = defineProps({
   color: String,
 });
 
-// watchEffect(() => {
-//   if (props.color) {
-//     color.value = props.color;
-//   } else {
-//     if (dark.value) {
-//       color.value =
-//         darkColors.find((item) => item.name === "--el-text-color-primary")
-//           ?.value || "";
-//     } else {
-//       color.value =
-//         lightColors.find((item) => item.name === "--el-text-color-primary")
-//           ?.value || "";
-//     }
-//   }
-// });
+watchEffect(() => {
+  if (props.color) {
+    color.value = props.color;
+    //   } else {
+    //     if (dark.value) {
+    //       color.value =
+    //         darkColors.find((item) => item.name === "--el-text-color-primary")
+    //           ?.value || "";
+    //     } else {
+    //       color.value =
+    //         lightColors.find((item) => item.name === "--el-text-color-primary")
+    //           ?.value || "";
+    //     }
+  }
+});
 </script>
 <style>
 .iconfont {

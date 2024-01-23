@@ -8,6 +8,7 @@ import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
 import _ from "lodash";
 import member from "./member.vue";
+import Icon from "@/components/common/Icon.vue";
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { teamKey, teamInfo, teamMemberList, teamList, teamFoldList } =
   storeToRefs(appStore.teamStore);
@@ -223,7 +224,12 @@ watch(teamInfo, (newInfo) => {
   <div class="teamMenu">
     <div class="teamMenu-title">
       <div>小组</div>
-      <q-btn flat round icon="o_add_circle" @click="toggleTeam(null, true)" />
+      <q-btn flat round @click="toggleTeam(null, true)">
+        <Icon
+          name="a-chuangjian2"
+          :size="20"
+        />
+      </q-btn>
     </div>
     <div class="teamMenu-list">
       <div

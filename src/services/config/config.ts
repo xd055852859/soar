@@ -136,6 +136,33 @@ export const tagArray = [
     label: "顶级优先",
   },
 ];
+export const planArray=[
+  {
+    value: "",
+    label: "全部",
+  },
+  {
+    value: "today",
+    label: "今日",
+  },
+  {
+    value: "tomorrow",
+    label: "明日",
+  },
+  {
+    value: "weekend",
+    label: "本周截止",
+  },
+  {
+    value: "monthend",
+    label: "本月截止",
+  },
+
+  {
+    value: "future",
+    label: "未来",
+  },
+]
 export const formatName = (list) => {
   let chartArray = [];
   let chartNameArray: any = [];

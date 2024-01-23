@@ -190,15 +190,15 @@ watch(userVisible, (newVisible) => {
           @click="router.push('/home/explore')"
         >
           <q-item-section avatar>
-            <Icon name="a-tansuo2" :size="20" />
+            <Icon name="a-tansuo3" :size="20" color="#333" />
             <!-- <q-icon name="o_grid_view" /> -->
           </q-item-section>
           <q-item-section>探索</q-item-section>
           <q-item-section side @click.stop="router.push('/home/note')">
             <Icon
-              name="a-suji2"
+              name="a-suji21"
               :size="20"
-              :color="$route.name === 'note' ? 'primary' : 'grey'"
+              :color="$route.name === 'note' ? '#07be51' : '#333'"
             />
             <!-- <q-icon
               name="sym_o_package_2"
@@ -207,6 +207,13 @@ watch(userVisible, (newVisible) => {
               <q-tooltip :offset="[10, 5]"> 速记 </q-tooltip>
             </q-icon> -->
           </q-item-section>
+        </q-item>
+        <q-item clickable to="/home/calendar" exact>
+          <q-item-section avatar>
+            <Icon name="a-richeng2" :size="20" color="#333" />
+            <!-- <q-icon name="o_grid_view" /> -->
+          </q-item-section>
+          <q-item-section>日程</q-item-section>
         </q-item>
         <!-- <q-item to="/home/mate" exact>
           <q-item-section avatar>
@@ -233,7 +240,11 @@ watch(userVisible, (newVisible) => {
           </q-item-section>
           <q-item-section>事务</q-item-section>
           <q-item-section side @click.stop="router.push('/home/taskBoard')">
-            <q-icon name="o_task_alt" />
+            <Icon
+              name="a-renwuchi2"
+              :size="20"
+              :color="$route.name === 'taskBoard' ? '#07be51' : '#333'"
+            />
           </q-item-section>
         </q-item>
         <q-item to="/home/mate" exact>
@@ -245,7 +256,7 @@ watch(userVisible, (newVisible) => {
         </q-item>
         <q-item to="/home/resource" exact>
           <q-item-section avatar>
-            <Icon name="a-ziyuan2" :size="20" />
+            <Icon name="a-ziyuan21" :size="20" />
           </q-item-section>
 
           <q-item-section>资源</q-item-section>
