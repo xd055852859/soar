@@ -65,10 +65,10 @@ export const docArray = [
     label: "演示",
     value: "ppt",
   },
-  {
-    label: "知识库",
-    value: "knowledgeBase",
-  },
+  // {
+  //   label: "知识库",
+  //   value: "knowledgeBase",
+  // },
 ];
 export const viewArray = [
   {

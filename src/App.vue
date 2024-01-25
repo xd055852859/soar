@@ -19,7 +19,7 @@ const {
 const { setToken, getUserInfo } = appStore.authStore;
 const { setSpaceKey } = appStore.spaceStore;
 const { setTeamKey } = appStore.teamStore;
-const { setDeviceInfo, setDeviceType } = appStore.commonStore;
+const { setDeviceInfo, setDeviceType, setClose } = appStore.commonStore;
 const musicRef = ref<any>(null);
 onMounted(() => {
   changeDevice();
@@ -35,7 +35,9 @@ onMounted(() => {
     changeDevice
     // _.debounce(changeDevice, 1000)
   );
-
+  setClose(
+    localStorage.getItem("closeNum") ? +localStorage.getItem("closeNum")! : -1
+  );
   const search = window.location.search
     ? window.location.search.split("?")[1]
     : window.location.hash.split("?")[1];
@@ -47,9 +49,7 @@ onMounted(() => {
     request.setToken(token);
     setToken(token);
     setSpaceKey(
-      localStorage.getItem("spaceKey")
-        ? localStorage.getItem("spaceKey")
-        : ""
+      localStorage.getItem("spaceKey") ? localStorage.getItem("spaceKey") : ""
     );
     setTeamKey(
       localStorage.getItem("teamKey") ? localStorage.getItem("teamKey") : ""

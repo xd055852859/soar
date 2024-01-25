@@ -52,6 +52,7 @@ const downloadFile = () => {
 // 获取文件类型
 function getFileType(url: string): string {
   const extension = url.split(".").pop()?.toLowerCase();
+
   switch (extension) {
     case "png":
     case "jpg":

@@ -1,21 +1,26 @@
 <script setup lang="ts">
 import { ResultProps } from "@/interface/Common";
+import cIframe from "@/components/common/cIframe.vue";
 import api from "@/services/api";
 import _ from "lodash";
 import { commonscroll, setMessage } from "@/services/util/common";
 import appStore from "@/store";
 import fileCard from "@/components/fileCard/fileCard.vue";
 import { storeToRefs } from "pinia";
-
+const { token } = storeToRefs(appStore.authStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { teamKey } = storeToRefs(appStore.teamStore);
+const { cardInfo, cardKey } = storeToRefs(appStore.cardStore);
+const { setCardKey, setCardInfo } = appStore.cardStore;
 const props = defineProps<{
   type?: string;
 }>();
 const subType = ref<string>("");
 const page = ref<number>(1);
 const fileList = ref<any>([]);
-
+const docUrl = ref<string>("");
+const fileKey = ref<string>("");
+const fileInfo = ref<any>(null);
 const total = ref<number>(0);
 const docArray = [
   {
@@ -61,7 +66,38 @@ const getDocList = async () => {
       fileList.value = [];
     }
     fileList.value = [...fileList.value, ...fileRes.data];
+    if (fileRes.data.length > 0 && !fileKey.value) {
+      // setCardKey(fileRes.data[0]._key);
+      // // setCardKey(fileRes.data[0]._key);
+      fileKey.value = fileRes.data[0]._key;
+      fileInfo.value = fileRes.data[0];
+    }
     total.value = fileRes.total as number;
+  }
+};
+const formatUrl = (detail) => {
+  const getApi = api.API_URL + "card/detail";
+  const getParams = `{"cardKey": "${detail._key}" }`;
+  const patchApi = api.API_URL + "card";
+  const patchData = `["content", "title"]`;
+  const uptokenApi = api.API_URL + "account/qiniuToken";
+  const uptokenParams = `{"target": "cdn-soar"}`;
+  switch (detail.subType) {
+    case "text":
+      docUrl.value = `https://notecute.com/#/editor?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
+      break;
+    case "draw":
+      docUrl.value = `https://draw.workfly.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":${patchData}}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
+      break;
+    case "mind":
+      docUrl.value = `https://mind.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
+      break;
+    case "ppt":
+      docUrl.value = `https://ppt.mindcute.com/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
+      break;
+    case "table":
+      docUrl.value = `https://sheets.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
+      break;
   }
 };
 const addDoc = async (type, typeName) => {
@@ -76,10 +112,17 @@ const addDoc = async (type, typeName) => {
     fileList.value.unshift(fileRes.data);
   }
 };
-
+watch(fileInfo, (newInfo) => {
+  if (newInfo) {
+    formatUrl(newInfo);
+  }
+});
 const chooseCard = (detail, type) => {
   switch (type) {
     case "search":
+      fileKey.value = detail._key;
+      fileInfo.value = detail;
+      console.log(fileKey.value,fileInfo.value)
       break;
     case "update":
       let updateIndex = _.findIndex(fileList.value, { _key: detail._key });
@@ -137,17 +180,26 @@ watchEffect(() => {
         map-options
       />
     </div>
-    <div
-      class="teamDoc-box"
-      @scroll="
-        commonscroll($event, fileList, total, () => {
-          page++;
-        })
-      "
-    >
-      <template v-for="(item, index) in fileList" :key="`file${index}`">
-        <fileCard :card="item" type="doc" @chooseCard="chooseCard" />
-      </template>
+    <div class="teamDoc-box">
+      <div
+        class="teamDoc-box-left"
+        @scroll="
+          commonscroll($event, fileList, total, () => {
+            page++;
+          })
+        "
+      >
+        <template v-for="(item, index) in fileList" :key="`file${index}`">
+          <fileCard :card="item" type="doc" @chooseCard="chooseCard" :chooseKey="fileKey"/>
+        </template>
+      </div>
+      <div class="teamDoc-box-right">
+        <c-iframe
+          :url="docUrl"
+          :title="fileInfo.title"
+          v-if="fileInfo"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -155,6 +207,7 @@ watchEffect(() => {
 .teamDoc {
   width: 100%;
   height: 100%;
+  @include p-number(10px, 25px);
   .teamDoc-header {
     width: 100%;
     height: 50px;
@@ -163,8 +216,17 @@ watchEffect(() => {
   .teamDoc-box {
     width: 100%;
     height: calc(100% - 50px);
-    @include scroll();
-    @include p-number(10px, 10px);
+    @include flex(space-between, center, null);
+    .teamDoc-box-left {
+      width: 35%;
+      height: 100%;
+      @include p-number(10px, 10px);
+      @include scroll();
+    }
+    .teamDoc-box-right {
+      width: 65%;
+      height: 100%;
+    }
   }
 }
 .teamDoc-detail {

@@ -31,7 +31,7 @@ const initData = ref<Card | null>();
 const changed = ref(false);
 const outline = ref(false);
 
-let timeout: number;
+let timeout: any;
 
 onMounted(() => {
   const str = localStorage.getItem("INPUT_DATA");

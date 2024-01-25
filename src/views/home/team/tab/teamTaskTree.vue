@@ -15,6 +15,7 @@ const props = defineProps<{
 }>();
 const { teamKey } = storeToRefs(appStore.teamStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
+const { cardInfo } = storeToRefs(appStore.cardStore);
 const { setCardKey } = appStore.cardStore;
 
 const taskList = ref<any>([]);
@@ -61,7 +62,7 @@ const getTaskList = async () => {
       taskList.value = [...taskRes.data];
       if (taskRes.data.length > 0) {
         nodeKey.value = taskRes.data[0]._key;
-        setCardKey(taskRes.data[0]._key);
+        // setCardKey(taskRes.data[0]._key);
       }
       console.log(taskList.value);
       total.value = taskList.value.length;
@@ -116,7 +117,9 @@ const chooseCard = (detail, type) => {
   }
 };
 watchEffect(() => {
-  getTaskList();
+  if (spaceKey.value) {
+    getTaskList();
+  }
 });
 watchEffect(() => {
   if (!props.type && teamKey.value) {
@@ -157,6 +160,7 @@ watchEffect(() => {
             type="taskTree"
             @chooseCard="chooseCard"
             :outType="type"
+            :chooseKey="nodeKey"
           />
         </template>
       </div>
@@ -181,6 +185,7 @@ watchEffect(() => {
 .teamTaskTree {
   width: 100%;
   height: 100%;
+  @include p-number(10px, 25px);
   .teamTaskTree-header {
     width: 100%;
     height: 50px;

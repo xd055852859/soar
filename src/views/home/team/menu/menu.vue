@@ -12,7 +12,8 @@ import Icon from "@/components/common/Icon.vue";
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { teamKey, teamInfo, teamMemberList, teamList, teamFoldList } =
   storeToRefs(appStore.teamStore);
-const { setTeamKey, setTeamList, setTeamFoldList } = appStore.teamStore;
+const { setTeamKey, setTeamList, setTeamFoldList, setTeamInfo } =
+  appStore.teamStore;
 const $q = useQuasar();
 const addVisible = ref<boolean>(false);
 const memberVisible = ref<boolean>(false);
@@ -68,6 +69,7 @@ const updateTeam = async () => {
     })) as ResultProps;
     if (teamRes.msg === "OK") {
       let list = _.cloneDeep(teamList.value);
+      let info = _.cloneDeep(teamInfo.value);
       setMessage("success", "编辑小组成功");
       let index = _.findIndex(list, { _key: overKey.value });
       console.log(index, overKey.value, list);
@@ -76,7 +78,12 @@ const updateTeam = async () => {
           ...list[index],
           name: name.value,
         };
+        info = {
+          ...info,
+          ...teamRes.data,
+        };
         setTeamList(list);
+        setTeamInfo(info);
       }
       addVisible.value = false;
     }
@@ -225,10 +232,7 @@ watch(teamInfo, (newInfo) => {
     <div class="teamMenu-title">
       <div>小组</div>
       <q-btn flat round @click="toggleTeam(null, true)">
-        <Icon
-          name="a-chuangjian2"
-          :size="20"
-        />
+        <Icon name="a-chuangjian2" :size="20" />
       </q-btn>
     </div>
     <div class="teamMenu-list">

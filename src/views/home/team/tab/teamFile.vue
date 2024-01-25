@@ -10,6 +10,7 @@ import { storeToRefs } from "pinia";
 import cIframe from "@/components/common/cIframe.vue";
 import { uploadFile } from "@/services/util/file";
 import { fileArray } from "@/services/config/config";
+import FilePreview from "@/components/note/FilePreview.vue";
 const $q = useQuasar();
 const dayjs: any = inject("dayjs");
 const props = defineProps<{
@@ -18,14 +19,17 @@ const props = defineProps<{
 const { token } = storeToRefs(appStore.authStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { teamKey } = storeToRefs(appStore.teamStore);
+const { cardInfo, cardKey } = storeToRefs(appStore.cardStore);
+const { setCardKey, setCardInfo } = appStore.cardStore;
 const subType = ref<string>("");
 const page = ref<number>(1);
 const fileList = ref<any>([]);
+const fileKey = ref<string>("");
+const fileInfo = ref<any>(null);
 const fileDetail = ref<any>(null);
 const detailVisible = ref<boolean>(false);
 const detailUrl = ref<string>("");
 const total = ref<number>(0);
-
 const getFileList = async () => {
   let fileRes = (await api.request.get("card", {
     teamKey: spaceKey.value,
@@ -40,87 +44,116 @@ const getFileList = async () => {
       fileList.value = [];
     }
     fileList.value = [...fileList.value, ...fileRes.data];
+    if (fileRes.data.length > 0 && !fileKey.value) {
+      // setCardKey(fileRes.data[0]._key);
+      // // setCardKey(fileRes.data[0]._key);
+      fileKey.value = fileRes.data[0]._key;
+      fileInfo.value = fileRes.data[0];
+    }
     total.value = fileRes.total as number;
   }
 };
+// 获取文件类型
+function getFileType(url: string): string {
+  const extension = url.split(".").pop()?.toLowerCase();
 
+  switch (extension) {
+    case "png":
+    case "jpg":
+    case "jpeg":
+    case "gif":
+      return "image/" + extension;
+    case "mp4":
+    case "mov":
+      return "video/" + extension;
+    case "mp3":
+      return "audio/mp3";
+    case "pdf":
+      return "application/pdf";
+    case "doc":
+    case "docx":
+    case "xls":
+    case "xlsx":
+      return "application/ms";
+    default:
+      return "application/octet-stream"; // 默认二进制流，用于其他文件类型
+  }
+}
 const handleUpload = async (file: any) => {
   // const docTypeArr = ["pdf", "docx", "zip", "doc", "pptx"];
   const docTypeArr = ["docx", "doc"];
   const imgTypeArr = ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg"];
-  let subType: string = "";
-  if (
-    file.type ===
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-    file.name.split(".")[1].indexOf("docx") !== -1 ||
-    file.name.split(".")[1].indexOf("doc") !== -1 ||
-    file.type === "application/msword"
-  ) {
-    if (file.size === 0) {
-      setMessage("error", "请上传有内容的docx文件");
-      return;
+  // let subType: string = "";
+  // if (
+  //   file.type ===
+  //     "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+  //   file.name.split(".")[1].indexOf("docx") !== -1 ||
+  //   file.name.split(".")[1].indexOf("doc") !== -1 ||
+  //   file.type === "application/msword"
+  // ) {
+  //   if (file.size === 0) {
+  //     setMessage("error", "请上传有内容的docx文件");
+  //     return;
+  //   }
+  //   subType = "doc";
+  //   // } else if (file.type === "application/pdf") {
+  //   //   subType = "pdf";
+  //   // } else if (file.type === "application/msword") {
+  //   //   subType = "doc";
+  //   // } else if (
+  //   //   file.type === "application/x-zip-compressed" ||
+  //   //   file.type === "application/zip"
+  //   // ) {
+  //   //   subType = "zip";
+  //   // } else if (
+  //   //   file.type === "application/x-rar" ||
+  //   //   file.name.indexOf("rar") !== -1
+  //   // ) {
+  //   //   subType = "rar";
+  // } else if (file.type === "audio/mpeg") {
+  //   subType = "mp3";
+  // } else if (file.type === "video/mp4") {
+  //   subType = "mp4";
+  //   // } else if (
+  //   //   file.type ===
+  //   //   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  //   // ) {
+  //   //   subType = "xlsx";
+  //   // } else if (
+  //   //   file.type === "application/vnd.ms-powerpoint" ||
+  //   //   file.name.indexOf("pptx") !== -1 ||
+  //   //   file.name.split(".")[1].indexOf("ppt") !== -1
+  //   // ) {
+  //   //   subType = "pptx";
+  // } else if (file.type.indexOf("image") !== -1) {
+  //   subType = "image";
+  // } else {
+  //   // setMessage("error", "仅支持pdf,docx,xlsx,zip,rar,mp3,mp4,ppt和图片格式");
+  //   setMessage("error", "仅支持图片格式和docx,mp3,mp4");
+  //   return;
+  // }
+  let subType = getFileType(file.name).split("/")[1];
+  uploadFile(file, ["*"], async (url) => {
+    let title = file.name.split(".")[0] ? file.name.split(".")[0] : "新文件";
+    let fileRes = (await api.request.post("card", {
+      projectKey: teamKey.value,
+      type: "file",
+      subType: subType,
+      url: url,
+      fileSize: file.size,
+      title: title,
+    })) as ResultProps;
+    if (fileRes.msg === "OK") {
+      setMessage("success", `创建${title}成功`);
+      fileList.value.unshift(fileRes.data);
     }
-    subType = "doc";
-    // } else if (file.type === "application/pdf") {
-    //   subType = "pdf";
-    // } else if (file.type === "application/msword") {
-    //   subType = "doc";
-    // } else if (
-    //   file.type === "application/x-zip-compressed" ||
-    //   file.type === "application/zip"
-    // ) {
-    //   subType = "zip";
-    // } else if (
-    //   file.type === "application/x-rar" ||
-    //   file.name.indexOf("rar") !== -1
-    // ) {
-    //   subType = "rar";
-  } else if (file.type === "audio/mpeg") {
-    subType = "mp3";
-  } else if (file.type === "video/mp4") {
-    subType = "mp4";
-    // } else if (
-    //   file.type ===
-    //   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    // ) {
-    //   subType = "xlsx";
-    // } else if (
-    //   file.type === "application/vnd.ms-powerpoint" ||
-    //   file.name.indexOf("pptx") !== -1 ||
-    //   file.name.split(".")[1].indexOf("ppt") !== -1
-    // ) {
-    //   subType = "pptx";
-  } else if (file.type.indexOf("image") !== -1) {
-    subType = "image";
-  } else {
-    // setMessage("error", "仅支持pdf,docx,xlsx,zip,rar,mp3,mp4,ppt和图片格式");
-    setMessage("error", "仅支持图片格式和docx,mp3,mp4");
-    return;
-  }
-  uploadFile(
-    file,
-    [...imgTypeArr, ...docTypeArr, "audio/*", "video/*"],
-    async (url) => {
-      let title = file.name.split(".")[0] ? file.name.split(".")[0] : "新文件";
-      let fileRes = (await api.request.post("card", {
-        projectKey: teamKey.value,
-        type: "file",
-        subType: subType,
-        url: url,
-        fileSize: file.size,
-        title: title,
-      })) as ResultProps;
-      if (fileRes.msg === "OK") {
-        setMessage("success", `创建${title}成功`);
-        fileList.value.unshift(fileRes.data);
-      }
-    },
-    subType === "image" ? undefined : subType
-  );
+  });
 };
 const chooseCard = (detail, type) => {
   switch (type) {
     case "search":
+      fileKey.value = detail._key;
+      fileInfo.value = detail;
       break;
     case "update":
       let updateIndex = _.findIndex(fileList.value, { _key: detail._key });
@@ -182,21 +215,38 @@ watchEffect(() => {
         })
       "
     >
-      <template v-for="(item, index) in fileList" :key="`file${index}`">
-        <fileCard :card="item" type="file" @chooseCard="chooseCard" />
-      </template>
+      <div
+        class="teamFile-box-left"
+        @scroll="
+          commonscroll($event, fileList, total, () => {
+            page++;
+          })
+        "
+      >
+        <template v-for="(item, index) in fileList" :key="`file${index}`">
+          <fileCard :card="item" type="file" @chooseCard="chooseCard"  :chooseKey="fileKey"/>
+        </template>
+      </div>
+      <div class="teamFile-box-right">
+        <FilePreview
+          :file-url="fileInfo.url"
+          :name="fileInfo.title"
+          v-if="fileInfo"
+        />
+      </div>
     </div>
   </div>
-  <Teleport to="body">
+  <!-- <Teleport to="body">
     <div class="teamFile-detail" v-if="detailVisible">
       <cIframe :url="detailUrl" :title="fileDetail.title" />
     </div>
-  </Teleport>
+  </Teleport> -->
 </template>
 <style scoped lang="scss">
 .teamFile {
   width: 100%;
   height: 100%;
+  @include p-number(10px, 25px);
   .teamFile-header {
     width: 100%;
     height: 50px;
@@ -206,16 +256,16 @@ watchEffect(() => {
     width: 100%;
     height: calc(100% - 50px);
     @include scroll();
-    @include p-number(10px, 10px);
-    .teamFile-box-top {
-      width: 100%;
-      height: 50px;
-      @include flex(space-between, center, null);
+    @include flex(space-between, center, null);
+    .teamFile-box-left {
+      width: 35%;
+      height: 100%;
+      @include p-number(10px, 10px);
+      @include scroll();
     }
-    .teamFile-box-bottom {
-      width: 100%;
-      height: 50px;
-      @include flex(space-between, center, null);
+    .teamFile-box-right {
+      width: 65%;
+      height: 100%;
     }
   }
 }

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import cHeader from "@/components/common/cHeader.vue";
 import { ResultProps } from "@/interface/Common";
 import riverChart from "@/components/chart/riverChart.vue";
 import fileCard from "@/components/fileCard/fileCard.vue";
@@ -112,6 +113,12 @@ watchEffect(() => {
 });
 </script>
 <template>
+  <cHeader
+    :title="`${mateInfo?.userName ? mateInfo?.userName : '队友详情'} - ${
+      mateTeamInfo?.name ? mateTeamInfo.name : '小组'
+    }`"
+    backPath="/home/mate"
+  />
   <div class="mateDetail">
     <div class="mateDetail-left q-mr-lg">
       <q-card flat bordered class="mateDetail-mateCard" v-if="mateInfo">
@@ -215,7 +222,7 @@ watchEffect(() => {
       </q-card>
     </div>
     <div class="mateDetail-right">
-      <div class="mateDetail-right-title">{{ mateTeamInfo?.name }}</div>
+      <!-- <div class="mateDetail-right-title">{{ mateTeamInfo?.name }}</div> -->
       <q-card flat bordered class="mateDetail-right-chart" v-if="mateInfo">
         <div class="right-chart-left">
           <riverChart
@@ -284,7 +291,7 @@ watchEffect(() => {
 <style scoped lang="scss">
 .mateDetail {
   width: 100%;
-  height: 100%;
+  height: calc(100% - 60px);
   @include p-number(0px, 50px);
   @include flex(space-between, center, null);
   .mateDetail-left {
@@ -355,7 +362,7 @@ watchEffect(() => {
     .mateDetail-right-chart {
       width: 100%;
       height: 250px;
-      margin: 10px 0px;
+      margin-bottom: 10px;
       .right-chart-left {
         width: 100%;
         height: 100%;
@@ -371,7 +378,7 @@ watchEffect(() => {
     }
     .mateDetail-right-box {
       width: 100%;
-      height: calc(100vh - 440px);
+      height: calc(100vh - 430px);
       @include p-number(10px, 20px);
       @include scroll();
     }

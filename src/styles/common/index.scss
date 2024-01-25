@@ -264,7 +264,7 @@ body,
 
 .common-table {
   /* height 或 max-height 很重要 */
-  width:100%;
+  width: 100%;
   height: 100%;
   /* 设置固定行的表头颜色 */
   thead tr:first-child th {
@@ -283,5 +283,16 @@ body,
   }
   thead tr:first-child th {
     top: 0;
+  }
+}
+
+.dialog-nomask {
+  .q-dialog__backdrop {
+    display: none;
+  }
+}
+.card-hover {
+  &:hover {
+    box-shadow: $shadow-3 !important;
   }
 }

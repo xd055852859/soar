@@ -30,7 +30,7 @@ import { setSingleSizeLimit } from "@/services/util/uploadImage";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 
-let timeout: number;
+let timeout: any;
 const { note } = storeToRefs(appStore.noteStore);
 const changed = ref(false);
 const editorRef = ref();

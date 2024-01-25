@@ -15,7 +15,7 @@ export const commonStore = defineStore("commonStore", () => {
   const deviceIconSize = ref<string>("20px");
   const musicSrc = ref<string>("");
   const musicNum = ref<number>(0);
-  const userVisible = ref<boolean>(false);
+
   const closeNum = ref<number>(-1);
   const setDeviceType = (newDeviceType: string) => {
     deviceType.value = newDeviceType;
@@ -50,12 +50,14 @@ export const commonStore = defineStore("commonStore", () => {
     musicNum.value = musicNum.value + 1;
     musicSrc.value = newSrc;
   };
-  const setUserVisible = (visible) => {
-    userVisible.value = visible;
-  };
 
   const setClose = (newNum) => {
     closeNum.value = newNum;
+    if (newNum === 0) {
+      localStorage.setItem("closeNum", "-2");
+    } else if (newNum === 1) {
+      localStorage.setItem("closeNum", "-1");
+    }
   };
   const clearStore = () => {
     authStore().$reset();
@@ -76,11 +78,8 @@ export const commonStore = defineStore("commonStore", () => {
     musicSrc,
     musicNum,
     setMusicSrc,
-    userVisible,
-    setUserVisible,
     closeNum,
     setClose,
     clearStore,
-
   };
 });

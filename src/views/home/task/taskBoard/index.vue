@@ -7,7 +7,6 @@ import { planArray } from "@/services/config/config";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import _ from "lodash";
-import VueMasonry from "vue-masonry-css";
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const boardList = ref<any>([]);
 const relationType = ref<number>(1);

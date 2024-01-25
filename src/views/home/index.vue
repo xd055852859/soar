@@ -1,66 +1,23 @@
 <script setup lang="ts">
-import { ResultProps } from "@/interface/Common";
 import cIframe from "@/components/common/cIframe.vue";
 import TeamTree from "@/components/tree/tree.vue";
 import _ from "lodash";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
-import cDialog from "@/components/common/cDialog.vue";
-import api from "@/services/api";
-import team from "@/views/home/team/menu/menu.vue";
-import router from "@/router";
-import { setMessage } from "@/services/util/common";
-import { uploadFile } from "@/services/util/file";
-import createSpace from "@/components/createSpace.vue";
+import Left from "./left/left.vue";
 import Icon from "@/components/common/Icon.vue";
+import FilePreview from "@/components/note/FilePreview.vue";
 const { closeNum } = storeToRefs(appStore.commonStore);
-const { user } = storeToRefs(appStore.authStore);
-const { spaceKey, spaceInfo, spaceList } = storeToRefs(appStore.spaceStore);
-const { cardKey, cardInfo, treeVisible, docVisible, docUrl } = storeToRefs(
-  appStore.cardStore
-);
-const { setUserInfo } = appStore.authStore;
-const { getTeamList, getTeamFoldList, setTeamKey } = appStore.teamStore;
-const { setSpaceKey, setSpaceList } = appStore.spaceStore;
-const { setCardVisible } = appStore.cardStore;
 
-const spaceVisible = ref<boolean>(false);
-const userVisible = ref<boolean>(false);
-const userName = ref<string>("");
-const userAvatar = ref<string>("");
-const chooseSpace = (key) => {
-  setSpaceKey(key);
-  router.push("/space");
-};
-const updateUser = async () => {
-  if (!userName.value) {
-    setMessage("error", "请输入用户名");
-    return;
-  }
-  let userRes = (await api.request.patch("user", {
-    userName: userName.value,
-    userAvatar: userAvatar.value,
-  })) as ResultProps;
-  if (userRes.msg === "OK") {
-    //@ts-ignore
-    let newUser: User = {
-      ...user.value,
-      userName: userName.value,
-      userAvatar: userAvatar.value,
-    };
-    setMessage("success", "编辑用户成功");
-    userVisible.value = false;
-    setUserInfo(newUser);
-  }
-};
-const uploadImage = (file, type) => {
-  let mimeType = ["image/*"];
-  if (file) {
-    uploadFile(file, mimeType, async (url, name) => {
-      userAvatar.value = url;
-    });
-  }
-};
+const { spaceKey } = storeToRefs(appStore.spaceStore);
+const { cardKey, cardInfo, treeVisible, docVisible, docUrl, fileVisible } =
+  storeToRefs(appStore.cardStore);
+
+const { getTeamList, getTeamFoldList } = appStore.teamStore;
+const { setSpaceKey } = appStore.spaceStore;
+const { setCardVisible, setCardKey, setCardInfo } = appStore.cardStore;
+const { setClose } = appStore.commonStore;
+const route = useRoute();
 // const outSpace = (index) => {
 //   ElMessageBox.confirm("是否退出该空间", "退出空间", {
 //     confirmButtonText: "确认",
@@ -90,251 +47,30 @@ watch(
   },
   { immediate: true }
 );
-watch(
-  user,
-  (newUser) => {
-    if (newUser) {
-      userAvatar.value = newUser?.userAvatar ? newUser.userAvatar : "";
-      userName.value = newUser?.userName ? newUser.userName : "";
-      console.log(newUser);
-      console.log(userAvatar.value, userName.value);
-      if (newUser && !newUser.userAvatar && !newUser.userName) {
-        userVisible.value = true;
-      }
-    }
-  },
-  { immediate: true }
-);
-watch(userVisible, (newVisible) => {
-  if (!newVisible) {
-    userAvatar.value = user.value?.userAvatar ? user.value.userAvatar : "";
-    userName.value = user.value?.userName ? user.value.userName : "";
-  }
-});
+// watch(route, () => {
+//   setCardKey("");
+//   setCardInfo(null);
+// });
 </script>
 <template>
-  <div class="home">
-    <div
-      class="left"
-      :style="
-        closeNum !== -1
-          ? {
-              animation: `${
-                closeNum === 0 ? 'moveLeft' : 'moveRight'
-              } 1s forwards`,
-            }
-          : {}
-      "
-    >
-      <div class="left-title icon-point">
-        <div class="select-third-item" style="width: 220px">
-          <q-avatar color="primary" text-color="white" size="lg">
-            <img
-              :src="
-                spaceInfo?.logo ? spaceInfo.logo : '/common/defaultGroup.png'
-              "
-            />
-          </q-avatar>
-
-          <div class="select-item-name single-to-long">
-            {{ spaceInfo?.name }}
-          </div>
-
-          <q-icon name="o_keyboard_arrow_down" size="28px" />
-          <q-menu style="width: 220px; padding: 10px">
-            <div
-              class="select-third-item icon-point"
-              @click="userVisible = true"
-            >
-              <q-avatar color="primary" text-color="white" size="lg">
-                <img
-                  :src="userAvatar ? userAvatar : '/common/defaultPerson.png'"
-                />
-              </q-avatar>
-              <div class="select-item-name single-to-long">
-                {{ userName }}
-              </div>
-            </div>
-            <q-list class="q-mb-md">
-              <q-item
-                v-for="(item, index) in spaceList"
-                :key="`space${index}`"
-                clickable
-                v-close-popup
-                class=""
-                @click="setSpaceKey(item._key)"
-              >
-                <q-item-section>{{ item.name }}</q-item-section>
-                <q-icon
-                  name="o_settings"
-                  size="28px"
-                  @click="chooseSpace(item._key)"
-                />
-              </q-item>
-            </q-list>
-            <q-btn
-              class="full-width"
-              label="创建空间"
-              color="primary"
-              @click="spaceVisible = true"
-            />
-          </q-menu>
-        </div>
-      </div>
-      <!-- <div @click="router.push('/home/note')">速记</div> -->
-
-      <q-list @click="setTeamKey('')">
-        <q-item
-          clickable
-          :active="$route.name === 'explore'"
-          @click="router.push('/home/explore')"
-        >
-          <q-item-section avatar>
-            <Icon name="a-tansuo3" :size="20" color="#333" />
-            <!-- <q-icon name="o_grid_view" /> -->
-          </q-item-section>
-          <q-item-section>探索</q-item-section>
-          <q-item-section side @click.stop="router.push('/home/note')">
-            <Icon
-              name="a-suji21"
-              :size="20"
-              :color="$route.name === 'note' ? '#07be51' : '#333'"
-            />
-            <!-- <q-icon
-              name="sym_o_package_2"
-              :color="$route.name === 'note' ? 'primary' : 'grey'"
-            >
-              <q-tooltip :offset="[10, 5]"> 速记 </q-tooltip>
-            </q-icon> -->
-          </q-item-section>
-        </q-item>
-        <q-item clickable to="/home/calendar" exact>
-          <q-item-section avatar>
-            <Icon name="a-richeng2" :size="20" color="#333" />
-            <!-- <q-icon name="o_grid_view" /> -->
-          </q-item-section>
-          <q-item-section>日程</q-item-section>
-        </q-item>
-        <!-- <q-item to="/home/mate" exact>
-          <q-item-section avatar>
-            <q-icon name="o_group" />
-          </q-item-section>
-
-          <q-item-section>队友</q-item-section>
-        </q-item>
-        <q-item to="/home/resource" exact>
-          <q-item-section avatar>
-            <q-icon name="o_folder_open" />
-          </q-item-section>
-
-          <q-item-section>资源</q-item-section>
-        </q-item> -->
-        <q-separator />
-        <q-item
-          clickable
-          :active="$route.name === 'task'"
-          @click="router.push('/home/task')"
-        >
-          <q-item-section avatar>
-            <Icon name="a-mokexiaoshumiao-weixinyuan2" :size="22" />
-          </q-item-section>
-          <q-item-section>事务</q-item-section>
-          <q-item-section side @click.stop="router.push('/home/taskBoard')">
-            <Icon
-              name="a-renwuchi2"
-              :size="20"
-              :color="$route.name === 'taskBoard' ? '#07be51' : '#333'"
-            />
-          </q-item-section>
-        </q-item>
-        <q-item to="/home/mate" exact>
-          <q-item-section avatar>
-            <Icon name="a-duiyou2" :size="20" />
-          </q-item-section>
-
-          <q-item-section>队友</q-item-section>
-        </q-item>
-        <q-item to="/home/resource" exact>
-          <q-item-section avatar>
-            <Icon name="a-ziyuan21" :size="20" />
-          </q-item-section>
-
-          <q-item-section>资源</q-item-section>
-        </q-item>
-      </q-list>
-      <!-- <q-tabs vertical inline-label style="height: 160px">
-      <div @click="router.push('/home/note')">速记</div>
-      <q-tabs vertical inline-label style="height: 160px">
-        <q-route-tab icon="mail" label="队友" to="/home/work" exact />
-        <q-route-tab icon="alarm" label="事务" to="/home/task" exact />
-        <q-route-tab icon="mail" label="队友" to="/home/work" exact />
-        <q-route-tab icon="movie" label="资源" to="/home/resource" exact />
-      </q-tabs> -->
-      <q-separator />
-      <team />
+  <div
+    class="home"
+    :class="{
+      homeLeft: closeNum === -1,
+      homeRight: closeNum === -2,
+      moveLeft: closeNum === 0,
+      moveRight: closeNum === 1,
+    }"
+  >
+    <div class="left">
+      <q-btn flat round class="left-arrow-button" @click="setClose(0)">
+        <Icon name="a-shousuo2" :size="36" />
+      </q-btn>
+      <Left />
     </div>
     <div class="right">
       <router-view></router-view>
     </div>
-    <cDialog
-      :visible="userVisible"
-      @close="userVisible = false"
-      title="用户设置"
-    >
-      <template #content>
-        <div className="form-container">
-          <div className="form-logo">
-            <div className="upload-button upload-img-button logo-box">
-              <img
-                :src="userAvatar"
-                alt=""
-                style="width: 100%, height:100%"
-                class="upload-cover"
-                v-if="userAvatar"
-              />
-              <q-icon name="add" style="color: #ebebeb" size="80px" v-else />
-              <input
-                type="file"
-                accept="image/*"
-                @change="
-                  //@ts-ignore
-                  uploadImage($event.target.files[0], 'avatar')
-                "
-                class="upload-img"
-              />
-            </div>
-          </div>
-          <div className="form-name">
-            <q-input
-              outlined
-              v-model="userName"
-              label="用户名"
-              :rules="[(val) => !!val || '用户名必填']"
-            />
-          </div>
-        </div>
-      </template>
-      <template #footer>
-        <q-btn
-          flat
-          label="取消"
-          color="grey-5"
-          @click="userVisible = false"
-          :dense="true" />
-        <q-btn label="确认" color="primary" @click="updateUser"
-      /></template>
-    </cDialog>
-    <cDialog
-      :visible="spaceVisible"
-      @close="spaceVisible = false"
-      title="创建团队"
-    >
-      <template #content>
-        <div class="spaceAdd-container">
-          <createSpace @close="spaceVisible = false" />
-        </div>
-      </template>
-    </cDialog>
   </div>
   <Teleport to="body">
     <div class="card-fullDialog" v-if="treeVisible" style="z-index: 10">
@@ -357,7 +93,23 @@ watch(userVisible, (newVisible) => {
         class="card-back"
         @click="setCardVisible(false, 'doc')"
       />
-      <cIframe :url="docUrl" :title="cardInfo?.title" />
+      <c-iframe :url="docUrl" :title="cardInfo.title" v-if="cardInfo" />
+    </div>
+  </Teleport>
+  <Teleport to="body">
+    <div class="card-fullDialog" v-if="fileVisible" style="z-index: 20">
+      <q-btn
+        round
+        color="primary"
+        icon="navigate_before"
+        class="card-back"
+        @click="setCardVisible(false, 'file')"
+      />
+      <FilePreview
+        :file-url="cardInfo.url"
+        :name="cardInfo.title"
+        v-if="cardInfo"
+      />
     </div>
   </Teleport>
 </template>
@@ -365,19 +117,27 @@ watch(userVisible, (newVisible) => {
 .home {
   width: 100%;
   height: 100vh;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 10;
   @include flex(space-between, center, null);
+
   .left {
-    width: 260px;
+    width: 250px;
     height: 100vh;
     padding: 10px;
     box-sizing: border-box;
     background-color: #f2f3f6;
     box-shadow: 1px 0px 0px 0px #e1e1e1;
-    position: relative;
-    z-index: 10;
-    .left-title {
-      width: 100%;
-      margin-bottom: 20px;
+    position: absolute;
+    z-index: 2;
+    left: 0px;
+    top: 0px;
+    .left-arrow-button {
+      position: absolute;
+      z-index: 2;
+      top: 14px;
+      right: 0px;
     }
   }
   .right {
@@ -389,32 +149,7 @@ watch(userVisible, (newVisible) => {
     width: 0px;
   }
 }
-.form-container {
-  width: 400px;
-  height: 380px;
-  .form-logo {
-    width: 100%;
-    height: 300px;
-    @include flex(center, center, null);
-    .logo-box {
-      width: 250px;
-      height: 250px;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-  }
-  .form-name {
-    width: 100%;
-    height: 50px;
-    margin: 10px 0px;
-  }
-}
-.spaceAdd-container {
-  width: 500px;
-  padding: 15px 34px;
-  box-sizing: border-box;
-  @include scroll();
-}
+
 .card-fullDialog {
   width: 100vw;
   height: 100vh;
@@ -430,27 +165,63 @@ watch(userVisible, (newVisible) => {
     left: 10px;
   }
 }
+.homeLeft {
+  padding-left: 250px;
+  .left {
+    left: 0px;
+  }
+}
+.homeRight {
+  padding-left: 0px;
+  .left {
+    left: -250px;
+  }
+}
+.moveLeft {
+  animation: toLeft 0.5s forwards;
+  .left {
+    animation: moveLeft 0.5s forwards;
+  }
+}
+.moveRight {
+  animation: toRight 0.5s forwards;
+  .left {
+    animation: moveRight 0.5s forwards;
+  }
+}
 </style>
 
 <style>
 @keyframes moveLeft {
   0% {
-    width: 240px;
-    opacity: 1;
+    left: 0px;
   }
   100% {
-    width: 0px;
-    opacity: 0;
+    left: -250px;
   }
 }
 @keyframes moveRight {
   0% {
-    width: 0px;
-    opacity: 0;
+    left: -250px;
   }
-  50% {
-    width: 240px;
-    opacity: 1;
+  100% {
+    left: 0px;
+  }
+}
+@keyframes toLeft {
+  0% {
+    padding-left: 250px;
+  }
+  100% {
+    padding-left: 0px;
+  }
+}
+@keyframes toRight {
+  0% {
+    padding-left: 0px;
+  }
+  100% {
+    padding-left: 250px;
   }
 }
 </style>

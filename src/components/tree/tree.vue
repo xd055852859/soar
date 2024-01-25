@@ -16,13 +16,14 @@ import dayjs from "dayjs";
 import fileCard from "../fileCard/fileCard.vue";
 import NoteEditor from "@/views/home/note/NoteEditor.vue";
 import { tagArray } from "@/services/config/config";
+import { setMessage } from "@/services/util/common";
 const CustomTree = applyReactInVue(Tree);
 const { token } = storeToRefs(appStore.authStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { teamMemberList, teamKey } = storeToRefs(appStore.teamStore);
 const { setCardKey, setCardVisible } = appStore.cardStore;
 const { note } = storeToRefs(appStore.noteStore);
-const { clearNoteDetail } = appStore.noteStore;
+const { clearNoteDetail, getNoteDetail } = appStore.noteStore;
 
 const props = defineProps<{
   cardKey?: string;
@@ -290,7 +291,10 @@ const setAdornmentContent = (node, adornmentContent, obj) => {
     async (newNodes) => {
       let adornmentContentObj = {};
       if (newNodes[node._key] && newNodes[node._key][adornmentContent]) {
-        adornmentContentObj = { ...newNodes[node._key][adornmentContent], ...obj };
+        adornmentContentObj = {
+          ...newNodes[node._key][adornmentContent],
+          ...obj,
+        };
       } else {
         adornmentContentObj = { ...obj };
       }
@@ -311,19 +315,6 @@ const setAdornmentContent = (node, adornmentContent, obj) => {
     nodeInfo.value._key
   );
 };
-const openAlt = (node) => {
-  let fileKey = node.bottomAdornmentContent.file.fileKey;
-  let fileType = node.bottomAdornmentContent.file.fileType;
-  let subType = node.bottomAdornmentContent.file.subType;
-  switch (fileType) {
-    case "doc":
-      chooseDoc(subType, fileKey);
-      break;
-    case "file":
-      chooseFile(fileKey);
-      break;
-  }
-};
 
 const updateTag = (color) => {
   let newNode = { ...nodeInfo.value };
@@ -331,40 +322,7 @@ const updateTag = (color) => {
     tag: { color: color },
   });
 };
-//文档
-const chooseDoc = (type, cardKey) => {
-  setCardKey(cardKey);
-  let detailUrl = "";
-  const getApi = api.API_URL + "card/detail";
-  const getParams = `{"cardKey": "${cardKey}" }`;
-  const patchApi = api.API_URL + "card";
-  const patchData = `["content", "title"]`;
-  const uptokenApi = api.API_URL + "account/qiniuToken";
-  const uptokenParams = `{"target": "cdn-soar"}`;
-  switch (type) {
-    case "text":
-      detailUrl = `https://notecute.com/#/editor?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
-      break;
-    case "draw":
-      detailUrl = `https://draw.workfly.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":${patchData}}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
-      break;
-    case "mind":
-      detailUrl = `https://mind.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
-      break;
-    case "ppt":
-      detailUrl = `https://ppt.mindcute.com/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
-      break;
-    case "table":
-      detailUrl = `https://sheets.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
-      break;
-  }
-  console.log(detailUrl);
-  setCardVisible(true, "doc", detailUrl);
-};
-const chooseFile = (cardKey) => {
-  setCardKey(cardKey);
-  // setCardVisible(true, "doc", detailUrl);
-};
+
 const chooseHighlight = (type, value?: string) => {
   nodes.value = treeRef.value.__veauryReactRef__.getNodeInfo()[1];
   switch (type) {
@@ -415,6 +373,70 @@ const chooseHighlight = (type, value?: string) => {
   }
   treeRef.value.__veauryReactRef__.setNodes({ ...nodes.value });
 };
+const chooseExecutor = (executorDetail) => {
+  nodeInfo.value = treeRef.value.__veauryReactRef__.getNodeInfo()[0];
+  if (!nodeInfo.value) {
+    setMessage("error", "请选择节点");
+    return;
+  }
+  if (nodeInfo.value._key === rootKey.value) {
+    setMessage("error", "不能选择根节点");
+    return;
+  }
+  updateExecutor(executorDetail.userKey, executorDetail.userAvatar);
+};
+
+const chooseAlt = (node) => {
+  let fileKey = node.bottomAdornmentContent.file.fileKey;
+  let fileType = node.bottomAdornmentContent.file.fileType;
+  let subType = node.bottomAdornmentContent.file.subType;
+  switch (fileType) {
+    case "doc":
+      chooseDoc(subType, fileKey);
+      break;
+    case "file":
+      chooseFile(fileKey);
+      break;
+  }
+};
+//文档
+const chooseDoc = (type, cardKey) => {
+  setCardKey(cardKey);
+  let detailUrl = "";
+  const getApi = api.API_URL + "card/detail";
+  const getParams = `{"cardKey": "${cardKey}" }`;
+  const patchApi = api.API_URL + "card";
+  const patchData = `["content", "title"]`;
+  const uptokenApi = api.API_URL + "account/qiniuToken";
+  const uptokenParams = `{"target": "cdn-soar"}`;
+  switch (type) {
+    case "text":
+      detailUrl = `https://notecute.com/#/editor?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
+      break;
+    case "draw":
+      detailUrl = `https://draw.workfly.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":${patchData}}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
+      break;
+    case "mind":
+      detailUrl = `https://mind.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
+      break;
+    case "ppt":
+      detailUrl = `https://ppt.mindcute.com/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
+      break;
+    case "table":
+      detailUrl = `https://sheets.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
+      break;
+  }
+  console.log(detailUrl);
+  setCardVisible(true, "doc", detailUrl);
+};
+const chooseFile = (cardKey) => {
+  setCardKey(cardKey);
+  // setCardVisible(true, "doc", detailUrl);
+};
+const chooseNote = (node) => {
+  clearNoteDetail();
+  getNoteDetail(node.endAdornmentContent.note.key);
+};
 watch(
   () => props.cardKey,
   (newKey) => {
@@ -464,8 +486,35 @@ watch(detailDialog, (newVal, oldVal) => {
         </q-breadcrumbs>
       </div>
       <div class="teamTree-header-button">
+        <q-btn flat round icon="o_filter_alt">
+          <q-menu class="q-pa-sm">
+            <q-list>
+              <q-item
+                v-for="(item, index) in teamMemberList"
+                :key="`filter${index}`"
+                clickable
+                @click="chooseHighlight('executor', item.userKey)"
+              >
+                <q-item-section avatar>
+                  <!--  @click="editFile(item._key, index)" -->
+                  <q-avatar size="35px" class="q-mb-sm">
+                    <img
+                      :src="
+                        item.userAvatar
+                          ? item.userAvatar
+                          : '/common/defaultPerson.png'
+                      "
+                    />
+                  </q-avatar>
+                </q-item-section>
+                <q-item-section> {{ item.userName }}</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
+
         <q-btn flat round @click="noteDialog = true">
-          <Icon name="a-suji21" :size="22" />
+          <Icon name="a-suji22" :size="22" />
         </q-btn>
         <q-btn flat round icon="o_update" @click="updateVisible = true" />
         <q-btn flat round icon="o_more_horiz" size="12px" @click.stop="">
@@ -516,7 +565,7 @@ watch(detailDialog, (newVal, oldVal) => {
         class="icon-point"
         v-for="(item, index) in teamMemberList"
         :key="`task${index}`"
-        @click.stop="chooseHighlight('executor', item.userKey)"
+        @click.stop="chooseExecutor(item)"
       >
         <!-- <q-circular-progress
        
@@ -533,7 +582,7 @@ watch(detailDialog, (newVal, oldVal) => {
           color="primary"
           track-color="grey-3"
         > -->
-        <q-avatar size="35px" class="q-mb-sm">
+        <q-avatar size="40px" class="q-mb-sm">
           <img
             :src="
               item.userAvatar ? item.userAvatar : '/common/defaultPerson.png'
@@ -552,7 +601,8 @@ watch(detailDialog, (newVal, oldVal) => {
       :viewType="viewType"
       @showMenu="showMenu"
       @changePath="changePath"
-      @openAlt="openAlt"
+      @chooseAlt="chooseAlt"
+      @chooseNote="chooseNote"
     />
 
     <q-menu :target="targetEl" v-model="menuVisible">

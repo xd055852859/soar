@@ -4,8 +4,10 @@ import router from "@/router";
 import api from "@/services/api";
 import { setMessage } from "@/services/util/common";
 import appStore from "@/store";
+import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
 const $q = useQuasar();
+const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { setToken, setLoginState } = appStore.authStore;
 
 const mobile = ref<string>("");
@@ -41,7 +43,11 @@ const login = async () => {
     setMessage("success", "登录成功");
     setToken(loginRes.data.token);
     api.setToken(loginRes.data.token);
-    router.replace("/spaceList");
+    if (spaceKey.value) {
+      router.replace("/home");
+    } else {
+      router.replace("/spaceList");
+    }
   }
 };
 </script>
@@ -56,7 +62,7 @@ const login = async () => {
     />
 
     <q-input
-    dense
+      dense
       outlined
       v-model="password"
       :type="isPwd ? 'password' : 'text'"

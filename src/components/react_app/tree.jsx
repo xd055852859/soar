@@ -163,8 +163,15 @@ import {
 //   },
 // };
 const CustomTree = React.forwardRef((props, ref) => {
-  const { rootKey, zoomRatio, viewType, onShowMenu, onChangePath, onOpenAlt } =
-    props;
+  const {
+    rootKey,
+    zoomRatio,
+    viewType,
+    onShowMenu,
+    onChangePath,
+    onChooseAlt,
+    onChooseNote,
+  } = props;
   const treeRef = useRef(null);
   const moveRef = useRef(null);
   const [nodes, setNodes] = useState(null);
@@ -361,7 +368,11 @@ const CustomTree = React.forwardRef((props, ref) => {
           flat: true,
         },
       }).onOk(async () => {
-        updateNode("status", 0, (newNodes) => {
+        let delRes = await api.request.delete("node", {
+          nodeKey: selectedId,
+        });
+        if (delRes.msg === "OK") {
+          let newNodes = _.cloneDeep(nodes);
           setMessage("success", "删除成功");
           let fatherKey = newNodes[selectedId].father;
           let index = newNodes[fatherKey].sortList.findIndex(
@@ -374,7 +385,8 @@ const CustomTree = React.forwardRef((props, ref) => {
           delete newNodes[selectedId];
           console.log(newNodes);
           setNodes(newNodes);
-        });
+          // fileList.value.splice(index, 1);
+        }
       });
     }
   };
@@ -416,6 +428,7 @@ const CustomTree = React.forwardRef((props, ref) => {
   };
   //黏贴剪切节点
   const pasteNode = async (pasteNodeKey, pasteType, targetNodeKey) => {
+    console.log(pasteNodeKey, pasteType, targetNodeKey);
     if (pasteType === "copy") {
       let copyRes = await api.request.post("node/copy", {
         nodeKey: pasteNodeKey,
@@ -430,6 +443,17 @@ const CustomTree = React.forwardRef((props, ref) => {
         dropNodeId: targetNodeKey,
         placement: "in",
       });
+    }
+  };
+  const pasteText = async (text) => {
+    // console.log(text.split(/\r?\n|\r/g),a,b);
+    // /node/batch
+    let copyRes = await api.request.post("node/batch", {
+      nodeKey: selectedId,
+      titleArr: text.split(/\r?\n|\r/g),
+    });
+    if (copyRes.msg === "OK") {
+      getNodeList(selectedId, "child");
     }
   };
   //完成任务
@@ -474,7 +498,9 @@ const CustomTree = React.forwardRef((props, ref) => {
 
   // 插槽功能
   const handleClickNodeIcon = () => {};
-  const handleOpenNote = () => {};
+  const handleOpenNote = (node) => {
+    onChooseNote(node);
+  };
   const handleOpenLink = (node, nodeId) => {
     let url = node.endAdornmentContent.link.url;
     let linkUrl = "";
@@ -488,7 +514,7 @@ const CustomTree = React.forwardRef((props, ref) => {
   };
   const handleOpenAlt = (node) => {
     console.log(node);
-    onOpenAlt(node);
+    onChooseAlt(node);
     // console.log(nodes[nodeId].endAdornmentContent);
   };
   //修改图片大小
@@ -503,13 +529,96 @@ const CustomTree = React.forwardRef((props, ref) => {
     );
   };
   //外部拖入
-  const dragEndFromOutside = (node, text) => {
+  const dragEndFromOutside = async (node, text) => {
     console.log(node, text);
-    alert(`将卡片${text}拖拽进节点${node._key}`);
+    console.log(`将卡片${text}拖拽进节点${node._key}`);
+    let dataRes = await api.request.get("note/detail", {
+      noteKey: text,
+    });
+    if (dataRes.msg === "OK") {
+      let note = dataRes.data;
+      switch (note.type) {
+        case "text":
+          //content
+          updateNodeObj(
+            { content: note.content },
+            async (newNodes) => {
+              newNodes[node._key] = {
+                ...newNodes[node._key],
+                content: note.content,
+              };
+              setNodes(newNodes);
+              setAdornmentContent(node, "endAdornmentContent", {
+                note: { content: note.content, type: "text", key: text },
+              });
+            },
+            node._key
+          );
+          break;
+        case "outline":
+          break;
+        case "clip":
+          updateNodeObj(
+            { content: note.content },
+            async (newNodes) => {
+              newNodes[node._key] = {
+                ...newNodes[node._key],
+                content: note.content,
+              };
+              setNodes(newNodes);
+              setAdornmentContent(node, "endAdornmentContent", {
+                note: { content: note.content, type: "clip", key: text },
+              });
+            },
+            node._key
+          );
+          break;
+        case "link":
+          setAdornmentContent(node, "endAdornmentContent", {
+            link: { url: note.link, text: note.title },
+          });
+          break;
+        case "file":
+          // setAdornmentContent(newNode, "bottomAdornmentContent", {
+          //   file: {
+          //     fileKey: detail._key,
+          //     fileType: detail.type,
+          //     subType: detail.subType,
+          //   },
+          // });
+          break;
+      }
+      console.log(dataRes.data);
+    }
   };
   //获取内部数据
   const getNodeInfo = () => {
     return [selectedNode, nodes];
+  };
+  const setAdornmentContent = (node, adornmentContent, obj) => {
+    updateNodeObj(
+      {
+        [adornmentContent]: {
+          ...node[adornmentContent],
+          ...obj,
+        },
+      },
+      async (newNodes) => {
+        let adornmentContentObj = {};
+        if (newNodes[node._key] && newNodes[node._key][adornmentContent]) {
+          adornmentContentObj = {
+            ...newNodes[node._key][adornmentContent],
+            ...obj,
+          };
+        } else {
+          adornmentContentObj = { ...obj };
+        }
+        newNodes[node._key][adornmentContent] = { ...adornmentContentObj };
+        newNodes[node._key] = formatNode(newNodes[node._key]);
+        setNodes(newNodes);
+      },
+      node._key
+    );
   };
   const tree = useMemo(() => {
     // if (rootKey && card?.content && card.content[rootKey]) {
@@ -590,6 +699,7 @@ const CustomTree = React.forwardRef((props, ref) => {
             }}
             handleDeleteNode={deleteNode}
             handlePaste={pasteNode}
+            handlePasteText={pasteText}
             handleResizeNodeImage={handleResizeNodeImage}
             dragEndFromOutside={dragEndFromOutside}
           />

@@ -20,6 +20,12 @@ const routes: Array<RouteRecordRaw> = [
         children: [],
       },
       {
+        path: "report",
+        name: "report",
+        component: () => import("@/views/home/report/index.vue"),
+        children: [],
+      },
+      {
         path: "calendar",
         name: "calendar",
         component: () => import("@/views/home/calendar/index.vue"),
@@ -29,13 +35,28 @@ const routes: Array<RouteRecordRaw> = [
         path: "mate",
         name: "mate",
         component: () => import("@/views/home/mate/index.vue"),
-        children: [],
-      },
-      {
-        path: "mateSetting",
-        name: "mateSetting",
-        component: () => import("@/views/home/mate/setting.vue"),
-        children: [],
+        redirect: "/home/mate/list",
+        children: [
+          {
+            path: "list",
+            name: "mateList",
+            component: () => import("@/views/home/mate/list.vue"),
+            children: [],
+          },
+          {
+            path: "detail/:mateKey",
+            name: "mateDetail",
+            component: () => import("@/views/home/mate/detail.vue"),
+            children: [],
+            props: true,
+          },
+          {
+            path: "setting",
+            name: "mateSetting",
+            component: () => import("@/views/home/mate/setting.vue"),
+            children: [],
+          },
+        ],
       },
 
       {
@@ -76,45 +97,38 @@ const routes: Array<RouteRecordRaw> = [
           },
           {
             path: "doc",
-            name: "teamDoc",
+            name: "teamdoc",
             component: () => import("@/views/home/team/tab/teamDoc.vue"),
             children: [],
           },
           {
             path: "file",
-            name: "teamFile",
+            name: "teamfile",
             component: () => import("@/views/home/team/tab/teamFile.vue"),
             children: [],
           },
           {
             path: "task",
-            name: "teamTask",
+            name: "teamtask",
             component: () => import("@/views/home/team/tab/teamTask.vue"),
             children: [],
           },
           {
             path: "knowledgeBase",
-            name: "teamKnowledgeBase",
+            name: "teamknowledgeBase",
             component: () =>
               import("@/views/home/team/tab/teamKnowledgeBase.vue"),
             children: [],
           },
           {
             path: "taskTree",
-            name: "teamTaskTree",
+            name: "teamtaskTree",
             component: () => import("@/views/home/team/tab/teamTaskTree.vue"),
             children: [],
           },
         ],
       },
     ],
-  },
-  {
-    path: "/mateDetail/:mateKey",
-    name: "mateDetail",
-    component: () => import("@/views/home/mate/detail.vue"),
-    children: [],
-    props: true,
   },
   {
     path: "/space",

@@ -16,7 +16,6 @@ export const cardStore = defineStore(
     const taskVisible = ref<boolean>(false);
     const fileVisible = ref<boolean>(false);
     const setCardKey = (newKey) => {
-      console.log("???");
       cardKey.value = newKey;
     };
     const setCardInfo = (newInfo) => {
@@ -28,6 +27,7 @@ export const cardStore = defineStore(
       })) as ResultProps;
       if (cardRes.msg === "OK") {
         cardInfo.value = cardRes.data;
+        console.log(cardRes.data);
         teamStore().teamKey = cardRes.data.projectKey;
       }
     };
@@ -52,6 +52,7 @@ export const cardStore = defineStore(
     watch(cardKey, (newKey) => {
       console.log(newKey);
       if (newKey) {
+        cardInfo.value = null;
         getCardInfo();
       }
     });
