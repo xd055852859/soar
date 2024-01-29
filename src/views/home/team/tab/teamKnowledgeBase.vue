@@ -8,7 +8,9 @@ const knowledgeBaseUrl = ref<string>("");
 onMounted(() => {});
 watchEffect(() => {
   if (token.value && teamInfo.value?.knowledgeBaseRoot) {
-    knowledgeBaseUrl.value = `https://knowledgebase.qingtime.cn/#/login?token=${token.value}&id=${teamInfo.value.knowledgeBaseRoot}`;
+    knowledgeBaseUrl.value = `https://soar.qingtime.cn/base/#/login?token=${
+      token.value
+    }&id=${teamInfo.value.knowledgeBaseRoot}&v=${new Date().getTime()}`;
   }
 });
 </script>

@@ -565,7 +565,7 @@ defineExpose({
 }
 
 .character-count {
-  margin: 1rem 0;
+  margin: 55px 0 15px;
   color: var(--notes-color-gray);
   text-align: end;
   font-size: 12px;
@@ -589,13 +589,14 @@ defineExpose({
 <style lang="scss">
 /* Basic editor styles */
 .ProseMirror {
+  font-size: 14px;
   > * + * {
     margin-top: 0.75em;
   }
 
   ul,
   ol {
-    padding: 0 1rem;
+    padding: 0 15px;
   }
 
   h1,

@@ -18,7 +18,7 @@
       :width="'100%'"
       :height="'100%'"
     />
-    <div v-else>
+    <div v-else class="other-file">
       <p>无法预览此文件类型</p>
       <q-btn color="primary" @click="downloadFile">下载文件</q-btn>
     </div>
@@ -33,16 +33,25 @@ import Webview from "@/components/common/Webview.vue";
 const props = defineProps<{
   name: string;
   fileUrl: string;
+  fileType: string;
 }>();
 
-const fileType = computed(() => getFileType(props.fileUrl));
-
 // 判断文件类型
-const isImage = computed(() => fileType.value.startsWith("image/"));
-const isVideo = computed(() => fileType.value.startsWith("video/"));
-const isAudio = computed(() => fileType.value.startsWith("audio/"));
-const isPdf = computed(() => fileType.value === "application/pdf");
-const isOffice = computed(() => fileType.value === "application/ms");
+const isImage = computed(() => props.fileType.startsWith("image/"));
+const isVideo = computed(() => props.fileType.startsWith("video/"));
+const isAudio = computed(() => props.fileType.startsWith("audio/"));
+const isPdf = computed(() => props.fileType === "application/pdf");
+const isOffice = computed(
+  () =>
+    props.fileType === "application/vnd.ms-excel" ||
+    props.fileType === "application/msword" ||
+    props.fileType ===
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+    props.fileType ===
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+    props.fileType ===
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+);
 
 // 下载文件
 const downloadFile = () => {
@@ -94,5 +103,11 @@ img,
 video {
   max-width: 100%;
   max-height: 100%;
+}
+.other-file {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 </style>

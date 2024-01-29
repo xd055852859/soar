@@ -13,12 +13,13 @@
       >{{ changed ? "有变更" : "已保存" }}</span
     >
     <FilePreview
-      v-if="note && note.type === 'file' && note.link"
-      :file-url="note.link"
+      v-if="note && note.type === 'file' && note.url && note.fileType"
+      :file-url="note.url"
+      :file-type="note.fileType"
       :name="note.title"
     />
-    <div class="link-preview" v-if="note && note.type === 'link' && note.link">
-      <Webview :src="note.link" width="100%" height="100%" />
+    <div class="link-preview" v-if="note && note.type === 'link' && note.url">
+      <Webview :src="note.url" width="100%" height="100%" />
     </div>
   </div>
 </template>
@@ -64,7 +65,8 @@ function handleSave() {
   color: #ddd;
   position: fixed;
   top: 30px;
-  right: 25px;
+  right: 55px;
+  font-size: 14px;
 }
 .link-preview {
   width: 100%;

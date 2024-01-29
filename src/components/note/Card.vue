@@ -15,7 +15,7 @@
         <div class="title">
           {{ card.title }}
         </div>
-        <div>{{ card.summary }}</div>
+        <div class="summary">{{ card.summary }}</div>
       </div>
       <q-btn
         flat
@@ -83,6 +83,17 @@ const handleDragStart = (event: DragEvent) => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.summary {
+  font-size: 14px;
+  color: var(--el-text-color-regular);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  /* autoprefixer: ignore next */
+  -webkit-box-orient: vertical;
 }
 .options {
   position: absolute;

@@ -151,7 +151,8 @@ const note = {
     content?: JSONContent;
     summary?: string;
     icon?: string;
-    link?: string;
+    url?: string;
+    fileType?: string;
   }) {
     return request.post("/note", props);
   },
