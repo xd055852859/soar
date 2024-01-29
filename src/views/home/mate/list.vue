@@ -2,8 +2,13 @@
 import cHeader from "@/components/common/cHeader.vue";
 import riverChart from "@/components/chart/riverChart.vue";
 import { storeToRefs } from "pinia";
+import { signatureArray } from "@/services/config/config";
 import appStore from "@/store";
+import _ from "lodash";
+const { user } = storeToRefs(appStore.authStore);
 const { mateList } = storeToRefs(appStore.mateStore);
+const signVisible = ref<boolean>(false);
+
 </script>
 <template>
   <cHeader title="队友">
@@ -45,6 +50,50 @@ const { mateList } = storeToRefs(appStore.mateStore);
           v-if="item.chartData"
         />
       </div>
+      <div class="mate-item-signature">
+        <q-btn
+          flat
+          dense
+          rounded
+          padding="2px 16px"
+          class="createSpace-button full-width"
+          :style="{
+            backgroundColor: `${
+              signatureArray[
+                _.findIndex(signatureArray, {
+                  label: item.signature ? item.signature : '在岗',
+                })
+              ].color
+            } !important`,
+            color: '#fff',
+          }"
+          :label="
+            signatureArray[
+              _.findIndex(signatureArray, {
+                label: item.signature ? item.signature : '在岗',
+              })
+            ].label
+          "
+          @click.stop="item._key === user?._key ? (signVisible = true) : null"
+        />
+        <!-- <q-menu v-model="signVisible">
+          <q-list>
+            <q-item
+              v-for="(item, index) in signatureArray"
+              :key="`signature${index}`"
+              clickable
+              v-close-popup
+              :style="{
+                backgroundColor: item.color,
+              }"
+            >
+              <q-item-section class="text-white common-title">
+                {{ item.label }}</q-item-section
+              ></q-item
+            >
+          </q-list>
+        </q-menu> -->
+      </div>
     </div>
   </div>
 </template>
@@ -62,7 +111,9 @@ const { mateList } = storeToRefs(appStore.mateStore);
     background: #ffffff;
     border-radius: 14px;
     margin-right: 60px;
-    @include p-number(30px,0px);
+    position: relative;
+    z-index: 1;
+    @include p-number(30px, 0px);
     @include scroll();
     .mate-box-avatar {
       width: 100%;
@@ -83,7 +134,7 @@ const { mateList } = storeToRefs(appStore.mateStore);
 
     .mate-item-name {
       width: 100%;
-      height:28px;
+      height: 28px;
       font-size: 20px;
       text-align: center;
       color: #161616;
@@ -92,7 +143,13 @@ const { mateList } = storeToRefs(appStore.mateStore);
     }
     .mate-item-chart {
       width: 100%;
-      height:40px;
+      height: 40px;
+    }
+    .mate-item-signature {
+      position: absolute;
+      z-index: 2;
+      top: 10px;
+      right: 10px;
     }
   }
 }

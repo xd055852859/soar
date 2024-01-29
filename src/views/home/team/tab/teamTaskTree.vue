@@ -13,9 +13,10 @@ import riverChart from "@/components/chart/riverChart.vue";
 const props = defineProps<{
   type?: string;
 }>();
+
 const { teamKey } = storeToRefs(appStore.teamStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
-const { cardInfo } = storeToRefs(appStore.cardStore);
+const { treeVisible } = storeToRefs(appStore.cardStore);
 const { setCardKey } = appStore.cardStore;
 const { setTeamKey } = appStore.teamStore;
 const taskList = ref<any>([]);
@@ -171,7 +172,7 @@ watchEffect(() => {
           :cardKey="nodeKey"
           ref="treeRef"
           viewType="mind-single"
-          v-if="nodeKey"
+          v-if="nodeKey && !treeVisible"
         />
         <riverChart
           riverId="taskRiver"

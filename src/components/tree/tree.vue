@@ -18,7 +18,7 @@ import NoteEditor from "@/views/home/note/NoteEditor.vue";
 import { tagArray } from "@/services/config/config";
 import { setMessage } from "@/services/util/common";
 const CustomTree = applyReactInVue(Tree);
-const { token } = storeToRefs(appStore.authStore);
+const { token, user } = storeToRefs(appStore.authStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { targetTeamKey, targetTeamMemberList, teamMemberList, teamKey } =
   storeToRefs(appStore.teamStore);
@@ -118,7 +118,7 @@ const updateContent = () => {
   );
 };
 const updateExecutor = async (userKey, avatarUri) => {
-  if (selectnodes.value) {
+  if (selectnodes.value.length > 0) {
     let selectIds = selectnodes.value.map((item) => {
       return item._key;
     });
@@ -353,7 +353,13 @@ const chooseHighlight = (type, value?: string) => {
       for (let key in nodes.value) {
         let node = nodes.value[key];
         let element = document.getElementById(`tree-node-${node._key}`);
-        element!.style.opacity = node.executor !== value ? "0.2" : "1";
+        console.log(value);
+        if (value === "all") {
+          element!.style.opacity = !node.executor ? "0.2" : "1";
+        } else {
+          element!.style.opacity = node.executor !== value ? "0.2" : "1";
+          console.log(element!.style.opacity);
+        }
 
         // node.color = node.executor === value ? "#fff" : "#fafafa";
         // node.backgroundColor = node.executor === value ? "#07be51" : "#f5f5f5";
@@ -496,6 +502,7 @@ watch(detailDialog, (newVal, oldVal) => {
 </script>
 <template>
   <div class="teamTree" id="teamTree" @click="chooseHighlight('clear')">
+    <!--     @contextmenu.prevent="menuVisible = false" -->
     <!-- <button :draggable="true">测试</button> -->
     <div class="teamTree-header">
       <div class="teamTree-header-path">
@@ -515,6 +522,9 @@ watch(detailDialog, (newVal, oldVal) => {
         <q-btn flat round icon="o_filter_alt">
           <q-menu class="q-pa-sm">
             <q-list>
+              <q-item clickable @click="chooseHighlight('executor', 'all')">
+                <q-item-section class="common-title">全部</q-item-section>
+              </q-item>
               <q-item
                 v-for="(item, index) in teamMemberList"
                 :key="`filter${index}`"
@@ -533,7 +543,12 @@ watch(detailDialog, (newVal, oldVal) => {
                     />
                   </q-avatar>
                 </q-item-section>
-                <q-item-section> {{ item.userName }}</q-item-section>
+                <q-item-section class="common-title">
+                  {{ item.userName }}
+                  {{
+                    item.userKey === user?._key ? "(我)" : ""
+                  }}</q-item-section
+                >
               </q-item>
             </q-list>
           </q-menu>
@@ -542,9 +557,9 @@ watch(detailDialog, (newVal, oldVal) => {
         <q-btn flat round @click="noteDialog = true">
           <Icon name="a-suji22" :size="22" />
         </q-btn>
-        <q-btn flat round icon="o_update" @click="updateVisible = true" />
+        <!-- <q-btn flat round icon="o_update" @click="updateVisible = true" /> -->
         <q-btn flat round icon="o_more_horiz" size="12px" @click.stop="">
-          <q-menu anchor="top right" self="top left" class="q-pa-sm">
+          <q-menu class="q-pa-sm">
             <q-list dense>
               <!--  @click="editFile(item._key, index)" -->
               <q-item
@@ -552,7 +567,7 @@ watch(detailDialog, (newVal, oldVal) => {
                 v-close-popup
                 @click="chooseHighlight('finish')"
               >
-                <q-item-section>隐藏已完成</q-item-section>
+                <q-item-section class="common-title">隐藏已完成</q-item-section>
               </q-item>
             </q-list>
           </q-menu>
@@ -626,6 +641,7 @@ watch(detailDialog, (newVal, oldVal) => {
       :rootKey="rootKey"
       :viewType="viewType"
       @showMenu="showMenu"
+      @closeMenu="menuVisible = false"
       @changePath="changePath"
       @openAlt="openAlt"
       @openNote="openNote"
@@ -646,7 +662,7 @@ watch(detailDialog, (newVal, oldVal) => {
             <q-list>
               <q-item
                 clickable
-                class="row items-center justify-between  common-title"
+                class="row items-center justify-between common-title"
                 @click="updateExecutor('', '')"
               >
                 无
@@ -667,7 +683,7 @@ watch(detailDialog, (newVal, oldVal) => {
                     "
                   />
                 </q-avatar>
-                <div class="single-to-long common-title" style="width: 120px" >
+                <div class="single-to-long common-title" style="width: 120px">
                   {{ item.userName }}
                 </div>
 
@@ -985,7 +1001,7 @@ watch(detailDialog, (newVal, oldVal) => {
     padding-left: 60px;
     .teamTree-header-path {
       height: 100%;
-      font-size:22px;
+      font-size: 22px;
       @include flex(center, center, null);
     }
     .teamTree-header-button {

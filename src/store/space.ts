@@ -61,7 +61,6 @@ export const spaceStore = defineStore(
       if (newKey) {
         getSpaceInfo(newKey);
         getSpaceMemberList();
-        mateStore().getMateList(newKey);
       }
     });
     watch([spaceList, spaceKey], ([newList, newKey]) => {

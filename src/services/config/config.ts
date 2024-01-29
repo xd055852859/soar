@@ -136,7 +136,7 @@ export const tagArray = [
     label: "顶级优先",
   },
 ];
-export const planArray=[
+export const planArray = [
   {
     value: "",
     label: "全部",
@@ -162,7 +162,25 @@ export const planArray=[
     value: "future",
     label: "未来",
   },
-]
+];
+export const signatureArray = [
+  {
+    color: "#16d4b1",
+    label: "在岗",
+  },
+  {
+    color: "#6887f3",
+    label: "外出",
+  },
+  {
+    color: "#8f8f8f",
+    label: "请假",
+  },
+  {
+    color: "#fcb64e",
+    label: "出差",
+  },
+];
 export const formatName = (list) => {
   let chartArray = [];
   let chartNameArray: any = [];

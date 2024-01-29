@@ -72,7 +72,7 @@ const getDocList = async () => {
       // // setCardKey(fileRes.data[0]._key);
       fileKey.value = fileRes.data[0]._key;
       fileInfo.value = fileRes.data[0];
-      setTeamKey(fileRes.data[0].projectInfo._key)
+      setTeamKey(fileRes.data[0].projectInfo._key);
     }
     total.value = fileRes.total as number;
   }
@@ -124,8 +124,8 @@ const chooseCard = (detail, type) => {
     case "search":
       fileKey.value = detail._key;
       fileInfo.value = detail;
-      setTeamKey(detail.projectInfo._key)
-      console.log(fileKey.value,fileInfo.value)
+      setTeamKey(detail.projectInfo._key);
+      console.log(fileKey.value, fileInfo.value);
       break;
     case "update":
       let updateIndex = _.findIndex(fileList.value, { _key: detail._key });
@@ -167,7 +167,9 @@ watchEffect(() => {
               v-close-popup
               @click="addDoc(item.value, item.label)"
             >
-              <q-item-section>{{ item.label }}</q-item-section>
+              <q-item-section class="common-title">{{
+                item.label
+              }}</q-item-section>
             </q-item>
           </q-list>
         </q-menu>
@@ -193,15 +195,16 @@ watchEffect(() => {
         "
       >
         <template v-for="(item, index) in fileList" :key="`file${index}`">
-          <fileCard :card="item" type="doc" @chooseCard="chooseCard" :chooseKey="fileKey"/>
+          <fileCard
+            :card="item"
+            type="doc"
+            @chooseCard="chooseCard"
+            :chooseKey="fileKey"
+          />
         </template>
       </div>
       <div class="teamDoc-box-right">
-        <c-iframe
-          :url="docUrl"
-          :title="fileInfo.title"
-          v-if="fileInfo"
-        />
+        <c-iframe :url="docUrl" :title="fileInfo.title" v-if="fileInfo" />
       </div>
     </div>
   </div>

@@ -42,13 +42,13 @@ function handle(e: any) {
         <cIframe :url="exploreUrl" :title="exploreTitle" v-if="exploreUrl" />
       </template>
       <template v-else>
-        <q-card
+        <!-- <q-card
           flat
           bordered
           class="explore-box-item col-xs-24 col-sm-12 col-md-8 col-lg-4"
           @click="openExplore('report')"
         >
-          <!-- <q-card-section horizontal>
+          <q-card-section horizontal>
             <q-img class="col-3" :src="'/common/defaultGroup.png'" />
             <q-card-section class="col-10">
               <div class="explore-content">
@@ -59,8 +59,8 @@ function handle(e: any) {
             <q-card-section class="col-3">
               <q-btn label="添加" @click="" />
             </q-card-section>
-          </q-card-section> -->
-        </q-card>
+          </q-card-section> 
+        </q-card>-->
       </template>
     </div>
   </div>

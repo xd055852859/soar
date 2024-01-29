@@ -15,7 +15,8 @@ module.exports = {
     "postcss-pxtorem": {
       rootValue: 192, // 设计稿宽度的1/ 10 例如设计稿按照 1920设计 此处就为192
       propList: ["*", "!border"], // 除 border 外所有px 转 rem
-      selectorBlackList: ["*",".q-"], // 过滤掉.el-开头的class，不进行rem转换
+      selectorBlackList: ["*", ".q-"], // 过滤掉.el-开头的class，不进行rem转换
+      exclude: ["node_modules"],
     },
   },
 };

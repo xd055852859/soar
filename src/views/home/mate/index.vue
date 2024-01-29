@@ -1,29 +1,17 @@
 <script setup lang="ts">
+import appStore from "@/store";
+import { storeToRefs } from "pinia";
 
-// import api from "@/services/api";
-// import { formatName, dayArray } from "@/services/config/config";
-// import { ResultProps } from "@/interface/Common";
-
-// const { spaceKey } = storeToRefs(appStore.spaceStore);
-
-// const { getMateList } = appStore.mateStore;
-// const chartData = ref<any>(null);
-// const chartName = ref<string[]>([]);
-
-// const days = ref<number>(7);
-
-// const getChartData = async () => {
-//   let mateRes = (await api.request.get("teamMate/active/all", {
-//     teamKey: spaceKey.value,
-//     days: days.value,
-//   })) as ResultProps;
-//   if (mateRes.msg === "OK") {
-//     [chartData.value, chartName.value] = formatName(mateRes.data);
-//   }
-// };
-// watchEffect(() => {
-//   getChartData();
-// });
+const { spaceKey } = storeToRefs(appStore.spaceStore);
+const { getMateList } = appStore.mateStore;
+onMounted(() => {
+  if (spaceKey.value) {
+    getMateList(spaceKey.value);
+  }
+});
+watch(spaceKey, (newKey) => {
+  getMateList(newKey);
+});
 </script>
 <template>
   <div class="mate">
@@ -63,7 +51,6 @@
       right: 10px;
     }
   }
-
 }
 </style>
 <style></style>

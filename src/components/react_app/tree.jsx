@@ -172,6 +172,7 @@ const CustomTree = React.forwardRef((props, ref) => {
     onOpenAlt,
     onOpenNote,
     onOpenFile,
+    onCloseMenu
   } = props;
   const treeRef = useRef(null);
   const moveRef = useRef(null);
@@ -461,8 +462,6 @@ const CustomTree = React.forwardRef((props, ref) => {
       newNodes[nodeKey].father = fatherKey;
     });
 
-
-
     let dragRes = await api.request.patch("node/drag/batch", {
       nodeKeyArr: nodeKeyArr,
       targetNodeKey: dragInfo.dropNodeId,
@@ -574,8 +573,6 @@ const CustomTree = React.forwardRef((props, ref) => {
   };
   //外部拖入
   const dragEndFromOutside = async (node, text) => {
-    console.log(node, text);
-    console.log(`将卡片${text}拖拽进节点${node._key}`);
     let dataRes = await api.request.get("note/detail", {
       noteKey: text,
     });
@@ -600,6 +597,13 @@ const CustomTree = React.forwardRef((props, ref) => {
           );
           break;
         case "outline":
+          let useRes = await api.request.patch("note/use", {
+            nodeKey: node._key,
+            noteKey: text,
+          });
+          if (useRes.msg === "OK") {
+            getNodeList(node._key, "child");
+          }
           break;
         case "clip":
           updateNodeObj(
@@ -804,6 +808,7 @@ const CustomTree = React.forwardRef((props, ref) => {
           left: 0,
           top: 0,
         }}
+        onCloseMenu={onCloseMenu}
         rightClickToStart={true}
       >
         <div>{tree}</div>

@@ -118,7 +118,7 @@ watchEffect(() => {
           v-for="(item, index) in boardList"
           :key="`taskTree${index}`"
         >
-          <q-card-section class="row items-center q-pb-none">
+          <q-card-section class="row items-center q-pb-none common-title">
             {{ item.title }}
           </q-card-section>
           <q-card-section class="q-pt-none">
@@ -158,7 +158,7 @@ watchEffect(() => {
                         />
                       </q-avatar>
                     </template>
-                    <div>
+                    <div class="common-title">
                       {{ prop.node.label }}
                     </div>
                   </div>

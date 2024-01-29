@@ -4,12 +4,14 @@ import { ResultProps } from "@/interface/Common";
 import riverChart from "@/components/chart/riverChart.vue";
 import fileCard from "@/components/fileCard/fileCard.vue";
 import api from "@/services/api";
-import { setLoading } from "@/services/util/common";
+import { setLoading, setMessage } from "@/services/util/common";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
+
 import _ from "lodash";
-import { formatName, dayArray } from "@/services/config/config";
+import { formatName, dayArray, signatureArray } from "@/services/config/config";
 import { commonscroll } from "@/services/util/common";
+
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { mateKey, mateList, mateInfo } = storeToRefs(appStore.mateStore);
 const { setMateKey, getMateList } = appStore.mateStore;
@@ -29,6 +31,8 @@ const days = ref<number>(7);
 const chartData = ref<any>(null);
 const chartName = ref<string[]>([]);
 const mateTab = ref<string>("task");
+const signature = ref<string>("");
+
 onMounted(() => {
   setMateKey(props.mateKey);
   // getMateDetail();
@@ -54,7 +58,7 @@ const getMateChart = async () => {
   })) as ResultProps;
   if (detailRes.msg === "OK") {
     [chartData.value, chartName.value] = formatName(detailRes.data);
-    console.log(chartData.value)
+    console.log(chartData.value);
     // mateTeamList.value = [...detailRes.data.cooperateList];
     // mateJoinList.value = [...detailRes.data.notJoinedList];
     // total.value = detailRes.total as number;
@@ -78,7 +82,23 @@ const getMateCard = async () => {
     total.value = detailRes.total as number;
   }
 };
-const joinTeam = async () => {};
+const joinTeam = async (key) => {
+  let joinRes = (await api.request.post("projectMember/apply", {
+    projectKey: key,
+  })) as ResultProps;
+  if (joinRes.msg === "OK") {
+    setMessage("success", "申请加入成功");
+    // mateTeamList.value = [...detailRes.data.cooperateList];
+    // mateJoinList.value = [...detailRes.data.notJoinedList];
+    // total.value = detailRes.total as number;
+    // mateTeamKey.value = mateTeamList.value[0]._key;
+  }
+};
+watch(mateInfo, (newInfo) => {
+  if (newInfo) {
+    signature.value = newInfo.signature ? newInfo.signature : "在岗";
+  }
+});
 watch(
   mateKey,
   (newKey) => {
@@ -141,6 +161,26 @@ watchEffect(() => {
           </div>
           <div class="mateCard-bottom">
             {{ mateInfo.post }}
+          </div>
+          <div class="mateCard-signature">
+            <q-btn
+              color="#fff"
+              dense
+              class="createSpace-button full-width"
+              :style="{
+                backgroundColor: '#fff',
+                color: `${
+                  signatureArray[
+                    _.findIndex(signatureArray, { label: signature })
+                  ]?.color
+                } !important`,
+              }"
+              :label="
+                signatureArray[
+                  _.findIndex(signatureArray, { label: signature })
+                ]?.label
+              "
+            />
           </div>
         </div>
         <q-menu style="width: 240px; padding: 10px 0px">
@@ -215,10 +255,9 @@ watchEffect(() => {
               class="teamMenu-item icon-point"
               v-for="(item, index) in mateJoinList"
               :key="`team${index}`"
-              @click="mateTeamKey = item._key"
             >
               <div># {{ item.name }}</div>
-              <div class="teamMenu-item-icon" @click="joinTeam">
+              <div @click="joinTeam(item._key)">
                 <q-btn color="primary" flat label="申请加入" size="12px" />
               </div>
             </div>
@@ -228,7 +267,7 @@ watchEffect(() => {
     </div>
     <div class="mateDetail-right">
       <!-- <div class="mateDetail-right-title">{{ mateTeamInfo?.name }}</div> -->
-      <q-card  class="mateDetail-right-chart" v-if="mateInfo">
+      <q-card class="mateDetail-right-chart" v-if="mateInfo">
         <div class="right-chart-left">
           <riverChart
             riverId="mateRiver"
@@ -262,7 +301,7 @@ watchEffect(() => {
         <!-- <q-tab name="mails" label="多维表" /> -->
         <!-- <q-tab name="mails" label="洞察" /> -->
       </q-tabs>
-      <q-card flat  class="mateDetail-right-card">
+      <q-card flat class="mateDetail-right-card">
         <q-card-section> </q-card-section>
         <q-card-section class="q-pa-none">
           <div
@@ -311,8 +350,16 @@ watchEffect(() => {
       border-radius: 14px;
       box-shadow: -3px -4px 11px 0px #ffffff;
       color: #fff;
+      position: relative;
+      z-index: 1;
       @include flex(space-between, center, null);
       @include p-number(35px, 20px);
+      .mateCard-signature {
+        position: absolute;
+        z-index: 2;
+        bottom: 15px;
+        right: 20px;
+      }
     }
     .mateCard-menu {
       width: 100%;
@@ -372,7 +419,7 @@ watchEffect(() => {
       background: #ffffff;
       border-radius: 14px;
       box-shadow: 0px 4px 6px 0px rgba(203, 203, 203, 0.5);
-      margin-bottom:40px;
+      margin-bottom: 40px;
       .right-chart-left {
         width: 100%;
         height: 100%;
@@ -391,7 +438,7 @@ watchEffect(() => {
       width: 100%;
       height: calc(100vh - 540px);
       background-color: transparent;
-      margin-top:40px;
+      margin-top: 40px;
       @include p-number(10px, 20px);
       @include scroll();
     }

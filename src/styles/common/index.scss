@@ -307,3 +307,17 @@ body,
 .common-title {
   font-size: 20px;
 }
+.q-item__section {
+  .q-item__label {
+    > span {
+      font-size: 0.1rem !important;
+    }
+  }
+}
+.q-dialog__title {
+  line-height: 0.2rem !important;
+  font-size: 0.12rem !important;
+}
+.ProseMirror{
+  font-size: 20px;
+}

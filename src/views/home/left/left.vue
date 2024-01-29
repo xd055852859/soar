@@ -3,6 +3,7 @@ import { ResultProps } from "@/interface/Common";
 import api from "@/services/api";
 import team from "@/views/home/team/menu/index.vue";
 import router from "@/router";
+import { VueDraggableNext } from "vue-draggable-next";
 import { setMessage } from "@/services/util/common";
 import { uploadFile } from "@/services/util/file";
 import appStore from "@/store";
@@ -13,18 +14,27 @@ import cDialog from "@/components/common/cDialog.vue";
 import createSpace from "@/components/createSpace.vue";
 const { spaceInfo, spaceList } = storeToRefs(appStore.spaceStore);
 const { user } = storeToRefs(appStore.authStore);
-
 const { clearStore } = appStore.commonStore;
 const { setUserInfo, setToken } = appStore.authStore;
-const { setSpaceKey } = appStore.spaceStore;
+const { setSpaceKey, setSpaceList } = appStore.spaceStore;
 const { setTeamKey } = appStore.teamStore;
 const userVisible = ref<boolean>(false);
 const userName = ref<string>("");
 const userAvatar = ref<string>("");
 const spaceVisible = ref<boolean>(false);
+const sortList = ref<any>([]);
 const chooseSpace = (key) => {
   setSpaceKey(key);
   router.push("/space");
+};
+const dragSpace = async () => {
+  let teamKeyArr = sortList.value.map((item) => item._key);
+  let teamRes = (await api.request.patch("team/order", {
+    teamKeyArr: teamKeyArr,
+  })) as ResultProps;
+  if (teamRes.msg === "OK") {
+    setSpaceList([...sortList.value]);
+  }
 };
 const updateUser = async () => {
   if (!userName.value) {
@@ -85,9 +95,17 @@ watch(userVisible, (newVisible) => {
     userName.value = user.value?.userName ? user.value.userName : "";
   }
 });
+watch(
+  spaceList,
+  (newList) => {
+    if (newList) {
+      sortList.value = [...newList];
+    }
+  },
+  { immediate: true }
+);
 </script>
 <template>
-
   <div class="left-title icon-point">
     <div class="select-third-item">
       <q-avatar rounded color="primary" text-color="white" size="lg">
@@ -111,21 +129,36 @@ watch(userVisible, (newVisible) => {
           </div>
         </div>
         <q-list class="q-mb-md left-space-item">
-          <q-item
-            v-for="(item, index) in spaceList"
-            :key="`space${index}`"
-            clickable
-            v-close-popup
-            class="left-space-title"
-            @click="setSpaceKey(item._key)"
-          >
-            <div>{{ item.name }}</div>
-            <q-icon
-              name="o_settings"
-              size="22px"
-              @click="chooseSpace(item._key)"
-            />
-          </q-item>
+          <VueDraggableNext v-model="sortList" item-key="id" @end="dragSpace">
+            <q-item
+              v-for="(item, index) in sortList"
+              :key="`space${index}`"
+              clickable
+              v-close-popup
+              class="left-space-title dp--center"
+              @click="setSpaceKey(item._key)"
+            >
+              <Icon name="a-huibaoyaosu-yidong21" :size="14" class="q-mr-sm" />
+              <div style="width: calc(100% - 40px)">
+                <q-avatar
+                  rounded
+                  color="primary"
+                  text-color="white"
+                  size="sm"
+                  class="q-mr-sm"
+                >
+                  <img
+                    :src="item.logo ? item.logo : '/common/defaultGroup.png'"
+                  /> </q-avatar
+                >{{ item.name }}
+              </div>
+              <q-icon
+                name="o_settings"
+                size="22px"
+                @click="chooseSpace(item._key)"
+              />
+            </q-item>
+          </VueDraggableNext>
         </q-list>
         <q-btn
           class="full-width"
@@ -233,7 +266,7 @@ watch(userVisible, (newVisible) => {
       <q-item-section class="left-common-title">队友</q-item-section>
     </q-item>
     <q-item to="/home/resource" class="left-menu-item" exact>
-      <q-item-section avatar  class="left-menu-avatar">
+      <q-item-section avatar class="left-menu-avatar">
         <Icon name="ziyuan" :size="20" />
       </q-item-section>
 

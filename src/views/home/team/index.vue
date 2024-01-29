@@ -4,21 +4,42 @@ import cDialog from "@/components/common/cDialog.vue";
 import Menu from "@/views/home/team/menu/menu.vue";
 import Detail from "@/views/home/team/menu/detail.vue";
 import NoteList from "@/views/home/note/NoteList.vue";
+import { VueDraggableNext } from "vue-draggable-next";
 import router from "@/router";
 import appStore from "@/store";
 import _ from "lodash";
 import { storeToRefs } from "pinia";
-const route = useRoute();
-const { teamInfo, teamKey } = storeToRefs(appStore.teamStore);
-const { spaceKey } = storeToRefs(appStore.spaceStore);
 import { viewArray } from "@/services/config/config";
 import api from "@/services/api";
 import Member from "./menu/member.vue";
 import Icon from "@/components/common/Icon.vue";
+import { setMessage } from "@/services/util/common";
+import { ResultProps } from "@/interface/Common";
+
+const route = useRoute();
+const { teamInfo, teamKey } = storeToRefs(appStore.teamStore);
+const { spaceKey } = storeToRefs(appStore.spaceStore);
+const { setTeamInfo } = appStore.teamStore;
 const updateVisible = ref<boolean>(false);
 const viewTab = ref<string>("");
+const views = ref<string[]>([]);
 const memberVisible = ref<boolean>(false);
 const noteDialog = ref<boolean>(false);
+const dragTab = async () => {
+  console.log(views);
+  let teamRes = (await api.request.patch("project", {
+    projectKey: teamKey.value,
+    views: views.value,
+  })) as ResultProps;
+  if (teamRes.msg === "OK") {
+    let info = _.cloneDeep(teamInfo.value);
+    info = {
+      ...info,
+      views: views.value,
+    };
+    setTeamInfo(info);
+  }
+};
 watch(
   teamInfo,
   (newInfo) => {
@@ -27,9 +48,11 @@ watch(
       console.log(newInfo.views);
       if (newInfo.views.indexOf(newInfo.viewTab) !== -1) {
         viewTab.value = newInfo.viewTab;
+        views.value = newInfo.views;
         router.push(`/home/team/${newInfo.viewTab}`);
       } else {
         viewTab.value = newInfo.views[0];
+        views.value = newInfo.views;
         router.push(`/home/team/${newInfo.views[0]}`);
         api.request.post("user/clickTab", {
           teamKey: spaceKey.value,
@@ -68,7 +91,30 @@ watch(
         >
           <Icon name="a-suji22" :size="22" />
         </q-btn>
-        <q-btn flat round icon="o_settings"> </q-btn>
+        <q-btn flat round icon="o_settings">
+          <q-menu class="q-pa-sm">
+            <q-list dense>
+              <VueDraggableNext v-model="views" item-key="id" @end="dragTab">
+                <q-item
+                  clickable
+                  v-for="(item, index) in views"
+                  :key="`tabSet${index}`"
+                  v-close-popup
+                  @click="updateVisible = true"
+                  class="common-title dp--center"
+                >
+                  <Icon name="a-huibaoyaosu-yidong21" :size="14"  class="q-mr-sm"/>
+                  <div>
+                    {{
+                      viewArray[_.findIndex(viewArray, { value: item })].label
+                    }}
+                  </div>
+                </q-item>
+                <!-- </template> -->
+              </VueDraggableNext>
+            </q-list>
+          </q-menu>
+        </q-btn>
         <q-btn flat round icon="o_group" @click="memberVisible = true" />
         <q-btn flat round icon="o_more_horiz" size="12px" @click.stop="">
           <q-menu class="q-pa-sm">

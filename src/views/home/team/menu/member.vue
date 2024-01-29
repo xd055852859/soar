@@ -142,7 +142,9 @@ watch(
               :key="`role${index}`"
               @click="changeRole(item.value, memberIndex)"
             >
-              <q-item-section class="common-title">{{ item.label }}</q-item-section>
+              <q-item-section class="common-title">{{
+                item.label
+              }}</q-item-section>
             </q-item>
             <q-separator />
             <q-item
@@ -151,7 +153,9 @@ watch(
               @click="deleteMember(memberIndex)"
               class="q-mt-sm"
             >
-              <q-item-section class="text-weight-thin common-title">删除</q-item-section>
+              <q-item-section class="text-weight-thin common-title"
+                >删除</q-item-section
+              >
             </q-item>
           </q-list>
         </q-menu>
@@ -205,7 +209,8 @@ watch(
   }
   .member-item {
     width: 100%;
-    height: 40px;
+    /* prettier-ignore */
+    height: 40Px;
     margin-bottom: 10px;
     font-size: 14px;
     @include flex(space-between, center, null);
@@ -229,7 +234,7 @@ watch(
         height: 50px;
         color: #000000;
         line-height: 40px;
-        font-size:20px;
+        font-size: 20px;
       }
     }
     .member-item-button {

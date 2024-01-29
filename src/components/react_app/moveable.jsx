@@ -8,7 +8,14 @@ let clickY = 0;
 
 const Moveable = React.forwardRef(
   (
-    { style, rightClickToStart, scrollable, scrollStep = 23, children },
+    {
+      style,
+      rightClickToStart,
+      scrollable,
+      scrollStep = 23,
+      children,
+      onCloseMenu,
+    },
     ref
   ) => {
     // 暴露方法
