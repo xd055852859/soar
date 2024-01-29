@@ -134,13 +134,12 @@ const handleUpload = async (file: any) => {
   //   setMessage("error", "仅支持图片格式和docx,mp3,mp4");
   //   return;
   // }
-  let subType = getFileType(file.name).split("/")[1];
   uploadFile(file, ["*"], async (url) => {
     let title = file.name.split(".")[0] ? file.name.split(".")[0] : "新文件";
     let fileRes = (await api.request.post("card", {
       projectKey: teamKey.value,
       type: "file",
-      subType: subType,
+      subType: file.type,
       url: url,
       fileSize: file.size,
       title: title,
@@ -227,13 +226,19 @@ watchEffect(() => {
         "
       >
         <template v-for="(item, index) in fileList" :key="`file${index}`">
-          <fileCard :card="item" type="file" @chooseCard="chooseCard"  :chooseKey="fileKey"/>
+          <fileCard
+            :card="item"
+            type="file"
+            @chooseCard="chooseCard"
+            :chooseKey="fileKey"
+          />
         </template>
       </div>
       <div class="teamFile-box-right">
         <FilePreview
-          :file-url="fileInfo.url"
+          :fileUrl="fileInfo.url"
           :name="fileInfo.title"
+          :fileType="fileInfo.subType"
           v-if="fileInfo"
         />
       </div>

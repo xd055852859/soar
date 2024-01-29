@@ -115,11 +115,12 @@ watch(
       <FilePreview
         :file-url="cardInfo.url"
         :name="cardInfo.title"
+        :fileType="cardInfo.subType"
         v-if="cardInfo"
       />
     </div>
   </Teleport>
-  <Teleport to="body">
+  <!-- <Teleport to="body">
     <div class="card-fullDialog" v-if="noteVisible" style="z-index: 20">
       <q-btn
         round
@@ -128,9 +129,9 @@ watch(
         class="card-back"
         @click="setCardVisible(false, 'file')"
       />
-      <FilePreview :file-url="note.link!" :name="note.title" v-if="note" />
+      <FilePreview :file-url="note.link!" :name="note.title"     :fileType="cardInfo.subType" v-if="note" />
     </div>
-  </Teleport>
+  </Teleport> -->
 </template>
 <style scoped lang="scss">
 .home {
