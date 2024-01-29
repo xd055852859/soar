@@ -19,6 +19,7 @@ import api from "@/services/api";
 import { uploadImg } from "@/services/util/uploadImage";
 import { isUrl } from "@/services/util/util";
 import appStore from "@/store";
+import { stringify } from "querystring";
 const { createNote } = appStore.noteStore;
 const active = ref(false);
 
@@ -41,7 +42,8 @@ const uploadFile = (file: File) => {
         createNote({
           type: "file",
           title: file.name,
-          link: res as string,
+          url: res as string,
+          fileType: file.type,
         });
       }
     })
@@ -78,7 +80,7 @@ const handlePaste = async (event: ClipboardEvent) => {
       createNote({
         type: "link",
         title: res.data.title,
-        link: pastedText,
+        url: pastedText,
         icon: res.data.icon,
         summary: res.data.memo,
       });
@@ -99,6 +101,7 @@ const handlePaste = async (event: ClipboardEvent) => {
   background-color: #c1edd2;
 }
 .text {
+  font-size: 14px;
   flex: 1;
   color: #c6c6c6;
 }

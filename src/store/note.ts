@@ -19,7 +19,8 @@ export const noteStore = defineStore("noteStore", () => {
     content?: JSONContent;
     summary?: string;
     icon?: string;
-    link?: string;
+    url?: string;
+    fileType?: string;
   }) => {
     const res = (await api.note.create(props)) as ResultProps<Card>;
     if (res.status === 200) {
