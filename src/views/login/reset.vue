@@ -100,6 +100,7 @@ const changeState = async () => {
       v-model="mobile"
       label="手机号码"
       :rules="[(val) => !!val || '手机号码必填']"
+      class="q-mb-sm"
     />
 
     <q-input
@@ -110,6 +111,7 @@ const changeState = async () => {
       label="密码"
       v-if="loginState !== 'codeLogin'"
       :rules="[(val) => !!val || '密码必填']"
+      class="q-mb-sm"
     >
       <template v-slot:append>
         <q-icon
@@ -131,6 +133,7 @@ const changeState = async () => {
       <q-btn
         color="primary"
         dense
+        class="reset-button"
         @click="getCode()"
         :disabled="codeState"
         :style="{ marginLeft: '5px' }"
@@ -178,7 +181,7 @@ const changeState = async () => {
   .reset-button {
     width: 120px;
     height: 55px;
-    font-size: 14px;
+    font-size: 18px;
     outline: none;
     overflow: hidden;
     flex-shrink: 0;

@@ -8,17 +8,19 @@ import { storeToRefs } from "pinia";
 import appStore from "@/store";
 import { ResultProps } from "@/interface/Common";
 import { docArray, fileArray, viewArray } from "@/services/config/config";
+import Icon from "../common/Icon.vue";
 const $q = useQuasar();
 const dayjs: any = inject("dayjs");
 const { token, user } = storeToRefs(appStore.authStore);
 const { cardKey } = storeToRefs(appStore.cardStore);
 
+const { setTargetTeamKey } = appStore.teamStore;
 const { setCardKey, setCardVisible } = appStore.cardStore;
 const props = defineProps<{
   type: string;
   card: any;
   outType?: string;
-  chooseKey?:string
+  chooseKey?: string;
 }>();
 const emits = defineEmits<{
   (e: "chooseCard", key: string, type: string): void;
@@ -62,6 +64,7 @@ const chooseDoc = (type, detail, fullstate?: boolean) => {
       detailUrl = `https://sheets.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
       break;
   }
+  setTargetTeamKey(detail.projectKey);
   if (fullstate) {
     setCardKey(detail._key);
     setCardVisible(true, "doc", detailUrl);
@@ -70,6 +73,7 @@ const chooseDoc = (type, detail, fullstate?: boolean) => {
   }
 };
 const chooseFile = (detail, fullstate?: boolean) => {
+  setTargetTeamKey(detail.projectKey);
   if (fullstate) {
     setCardKey(detail._key);
     setCardVisible(true, "file");
@@ -78,6 +82,7 @@ const chooseFile = (detail, fullstate?: boolean) => {
   }
 };
 const chooseTaskTree = (detail, fullstate?: boolean) => {
+  setTargetTeamKey(detail.projectKey);
   if (fullstate) {
     setCardKey(detail._key);
     setCardVisible(true, "tasktree");
@@ -183,24 +188,19 @@ const handleDownload = (detail) => {
     >
       <!-- red amber green -->
       <q-card-section class="full-width teamTask-box-top">
-        <template v-if="outType && outType !== 'recent'"
-          ># {{ card.projectInfo?.name }} /
-        </template>
-        {{ card.title }}
-        <q-card-section class="justify-end q-pa-none">
-          <q-btn
-            flat
-            round
-            icon="o_account_tree"
-            :color="
-              card.iconState === 2
-                ? 'amber'
-                : card.iconState === 3
-                ? 'red'
-                : 'green'
-            "
-            size="12px"
-          >
+        <div>
+          <q-btn flat round size="12px">
+            <Icon
+              name="a-mokexiaoshumiao-weixinyuan2"
+              :size="18"
+              :color="
+                card.iconState === 2
+                  ? 'amber'
+                  : card.iconState === 3
+                  ? 'red'
+                  : 'green'
+              "
+            />
             <q-menu class="q-pa-sm">
               <q-list dense>
                 <!--  @click="editFile(item._key, index)" -->
@@ -210,7 +210,9 @@ const handleDownload = (detail) => {
                   @click="updatCard('iconState', 1, card)"
                   class="bg-green"
                 >
-                  <q-item-section class="text-white"> 正常</q-item-section>
+                  <q-item-section class="text-white common-title">
+                    正常</q-item-section
+                  >
                 </q-item>
                 <q-item
                   clickable
@@ -218,7 +220,9 @@ const handleDownload = (detail) => {
                   @click="updatCard('iconState', 2, card)"
                   class="bg-amber q-my-xs"
                 >
-                  <q-item-section class="text-white"> 警戒</q-item-section>
+                  <q-item-section class="text-white common-title">
+                    警戒</q-item-section
+                  >
                 </q-item>
                 <q-item
                   clickable
@@ -226,25 +230,38 @@ const handleDownload = (detail) => {
                   @click="updatCard('iconState', 3, card)"
                   class="bg-red"
                 >
-                  <q-item-section class="text-white">异常</q-item-section>
+                  <q-item-section class="text-white common-title"
+                    >异常</q-item-section
+                  >
                 </q-item>
               </q-list>
             </q-menu>
           </q-btn>
-          <q-icon
-            name="o_fullscreen"
-            size="25px"
+
+          <template v-if="outType && outType !== 'recent'"
+            >{{ card.projectInfo?.name }} /
+          </template>
+          {{ card.title }}
+        </div>
+
+        <q-card-section class="justify-end q-pa-none">
+          <q-btn
+            flat
+            round
+            size="12px"
             @click.stop="chooseTaskTree(card, true)"
-          />
+          >
+            <Icon name="quanping_o" :size="22" />
+          </q-btn>
           <q-btn flat round icon="o_more_horiz" size="12px" @click.stop="">
-            <q-menu anchor="top right" self="top left" class="q-pa-sm">
+            <q-menu class="q-pa-sm">
               <q-list dense>
                 <!--  @click="editFile(item._key, index)" -->
                 <q-item clickable v-close-popup @click="updateTitle(card)">
-                  <q-item-section>重命名</q-item-section>
+                  <q-item-section class="common-title">重命名</q-item-section>
                 </q-item>
                 <q-item clickable v-close-popup @click="deleteCard(card)">
-                  <q-item-section>删除</q-item-section>
+                  <q-item-section class="common-title">删除</q-item-section>
                 </q-item>
               </q-list>
             </q-menu>
@@ -305,20 +322,23 @@ const handleDownload = (detail) => {
               docArray[_.findIndex(docArray, { value: card.subType })]?.label
             }}
           </q-chip>
-          <q-icon
-            name="o_fullscreen"
-            size="25px"
-            @click.stop="chooseDoc(card.subType, card, true)"
-          />
+          <q-btn
+            flat
+            round
+            size="12px"
+            @click.stop="chooseTaskTree(card, true)"
+          >
+            <Icon name="quanping_o" :size="22" />
+          </q-btn>
           <q-btn flat round icon="o_more_horiz" size="12px" @click.stop="">
-            <q-menu anchor="top right" self="top left" class="q-pa-sm">
+            <q-menu class="q-pa-sm">
               <q-list dense>
                 <!--  @click="editFile(item._key, index)" -->
                 <q-item clickable v-close-popup @click="updateTitle(card)">
-                  <q-item-section>重命名</q-item-section>
+                  <q-item-section class="common-title">重命名</q-item-section>
                 </q-item>
                 <q-item clickable v-close-popup @click="deleteCard(card)">
-                  <q-item-section>删除</q-item-section>
+                  <q-item-section class="common-title">删除</q-item-section>
                 </q-item>
               </q-list>
             </q-menu>
@@ -367,17 +387,17 @@ const handleDownload = (detail) => {
             @click.stop="chooseFile(card, true)"
           />
           <q-btn flat round icon="more_horiz" size="12px" @click.stop="">
-            <q-menu anchor="top right" self="top left" class="q-pa-sm">
+            <q-menu class="q-pa-sm">
               <q-list dense>
                 <!--  @click="editFile(item._key, index)" -->
                 <q-item clickable v-close-popup @click="updateTitle(card)">
-                  <q-item-section>重命名</q-item-section>
+                  <q-item-section class="common-title">重命名</q-item-section>
                 </q-item>
                 <q-item clickable v-close-popup @click="handleDownload(card)">
-                  <q-item-section>下载</q-item-section>
+                  <q-item-section class="common-title">下载</q-item-section>
                 </q-item>
                 <q-item clickable v-close-popup @click="deleteCard(card)">
-                  <q-item-section>删除</q-item-section>
+                  <q-item-section class="common-title">删除</q-item-section>
                 </q-item>
               </q-list>
             </q-menu>
@@ -422,7 +442,7 @@ const handleDownload = (detail) => {
           </q-btn>
         </div>
       </q-card-section>
-      <q-card-section class="teamTask-box-center">
+      <q-card-section class="teamTask-box-center common-title">
         <q-icon
           :name="card.hasDone ? 'o_check_circle' : 'o_circle'"
           size="20px"
@@ -431,7 +451,7 @@ const handleDownload = (detail) => {
         />
         {{ card.name }}
       </q-card-section>
-      <q-card-section class="teamTask-box-bottom">
+      <q-card-section class="teamTask-box-bottom common-title">
         <div>
           <!-- <span v-for="(personItem,personIndex) in item."></span> -->
         </div>
@@ -452,7 +472,7 @@ const handleDownload = (detail) => {
               :src="
                 card.executorInfo?.userAvatar
                   ? card.executorInfo.userAvatar
-                  : '/common/defaultGroup.png'
+                  : '/common/defaultPerson.png'
               "
             />
           </q-avatar>
@@ -468,11 +488,13 @@ const handleDownload = (detail) => {
   .teamDoc-box-top {
     width: 100%;
     height: 50px;
+    font-size: 20px;
     @include flex(space-between, center, null);
   }
   .teamDoc-box-bottom {
     width: 100%;
     height: 50px;
+    font-size: 16px;
     @include flex(space-between, center, null);
   }
 }
@@ -480,11 +502,13 @@ const handleDownload = (detail) => {
   .teamFile-box-top {
     width: 100%;
     height: 50px;
+    font-size: 20px;
     @include flex(space-between, center, null);
   }
   .teamFile-box-bottom {
     width: 100%;
     height: 50px;
+    font-size: 16px;
     @include flex(space-between, center, null);
   }
 }
@@ -492,7 +516,8 @@ const handleDownload = (detail) => {
   padding: 5px 0px;
   .teamTask-box-top {
     width: 100%;
-    height: 30px;
+    height: 40px;
+    font-size: 20px;
     @include flex(space-between, center, null);
   }
   .teamTask-box-center {
@@ -501,7 +526,7 @@ const handleDownload = (detail) => {
   }
   .teamTaskTree-box-bottom {
     width: 100%;
-    height: 80px;
+    // height: 80px;
     @include scroll();
     @include flex(flex-start, center, null);
   }

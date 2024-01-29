@@ -6,10 +6,22 @@ import _ from "lodash";
 import api from "@/services/api";
 import { useQuasar } from "quasar";
 import { setMessage } from "@/services/util/common";
-const { teamMemberList, teamInfo, teamKey } = storeToRefs(appStore.teamStore);
+const {
+  targetTeamMemberList,
+  targetTeamInfo,
+  targetTeamKey,
+  teamMemberList,
+  teamInfo,
+  teamKey,
+} = storeToRefs(appStore.teamStore);
 const { spaceMemberList, spaceRole } = storeToRefs(appStore.spaceStore);
-const { setTeamMemberList } = appStore.teamStore;
 const $q = useQuasar();
+const props = defineProps<{
+  type: string;
+}>();
+const memberTeamKey = ref<string>("");
+const memberList = ref<any>([]);
+const memberTeamKeyInfo = ref<any>([]);
 const searchMemberList = ref<any>([]);
 const searchName = ref<string>("");
 const chooseKey = ref<string>("");
@@ -17,31 +29,27 @@ const chooseKey = ref<string>("");
 const addMember = async (index) => {
   let list = _.cloneDeep(searchMemberList.value);
   const memberRes = (await api.request.post("projectMember", {
-    projectKey: teamKey.value,
+    projectKey: memberTeamKey.value,
     memberKey: list[index].userKey,
-    role: teamInfo.value?.defaultRole,
+    role: memberTeamKeyInfo.value?.defaultRole,
   })) as ResultProps;
   if (memberRes.msg === "OK") {
     setMessage("success", "添加协作者成功");
     let list = _.cloneDeep(searchMemberList.value);
-    let memberlist = _.cloneDeep(teamMemberList.value);
-    list[index].role = teamInfo.value?.defaultRole;
-    memberlist.push(list[index]);
-    setTeamMemberList(memberlist);
-    list.splice(index, 1);
-    searchMemberList.value = [...list];
+    list[index].role = memberTeamKeyInfo.value?.defaultRole;
+    memberList.value.push(list[index]);
+    // list.splice(index, 1);
+    // searchMemberList.value = [...list];
   }
 };
 const changeRole = async (val, index) => {
-  let list = _.cloneDeep(teamMemberList.value);
   const roleRes = (await api.request.patch("projectMember/role", {
-    projectKey: teamKey.value,
-    memberKey: list[index].userKey,
+    projectKey: memberTeamKey.value,
+    memberKey: memberList.value[index].userKey,
     newRole: val,
   })) as ResultProps;
   if (roleRes.msg === "OK") {
-    list[index].role = val;
-    setTeamMemberList(list);
+    memberList.value[index].role = val;
   }
 };
 const deleteMember = async (index) => {
@@ -54,20 +62,19 @@ const deleteMember = async (index) => {
     },
   }).onOk(async () => {
     const teamRes = (await api.request.delete("projectMember", {
-      projectKey: teamKey.value,
-      memberKeyArr: [teamMemberList.value[index].userKey],
+      projectKey: memberTeamKey.value,
+      memberKeyArr: [memberList.value[index].userKey],
     })) as ResultProps;
     if (teamRes.msg === "OK") {
-      let list = _.cloneDeep(teamMemberList.value);
       setMessage("success", "删除协作者成功");
-      list.splice(index, 1);
-      setTeamMemberList(list);
+      memberList.value.splice(index, 1);
     }
   });
 };
 watch(
-  [searchName, teamMemberList],
+  [searchName, memberList],
   ([newName, newList]) => {
+    console.log(newList);
     let memberList: any = [];
     spaceMemberList.value.forEach((spaceItem) => {
       if (
@@ -84,15 +91,30 @@ watch(
     }
     searchMemberList.value = memberList;
   },
+  { immediate: true, deep: true }
+);
+watch(
+  () => props.type,
+  (newType) => {
+    if (newType === "target") {
+      memberTeamKey.value = targetTeamKey.value;
+      memberTeamKeyInfo.value = targetTeamInfo.value;
+      memberList.value = targetTeamMemberList.value;
+    } else {
+      memberTeamKey.value = teamKey.value;
+      memberTeamKeyInfo.value = teamInfo.value;
+      memberList.value = teamMemberList.value;
+    }
+  },
   { immediate: true }
 );
 </script>
 <template>
-  <div class="member" v-if="teamMemberList.length > 0">
+  <div class="member" v-if="memberList.length > 0">
     <div class="member-title">已添加的协作者</div>
     <div
       class="member-item"
-      v-for="(item, memberIndex) in teamMemberList"
+      v-for="(item, memberIndex) in memberList"
       :key="`board${item.userKey}`"
       @mouseenter="chooseKey = item._key"
     >
@@ -120,7 +142,7 @@ watch(
               :key="`role${index}`"
               @click="changeRole(item.value, memberIndex)"
             >
-              <q-item-section>{{ item.label }}</q-item-section>
+              <q-item-section class="common-title">{{ item.label }}</q-item-section>
             </q-item>
             <q-separator />
             <q-item
@@ -129,7 +151,7 @@ watch(
               @click="deleteMember(memberIndex)"
               class="q-mt-sm"
             >
-              <q-item-section class="text-weight-thin">删除</q-item-section>
+              <q-item-section class="text-weight-thin common-title">删除</q-item-section>
             </q-item>
           </q-list>
         </q-menu>
@@ -178,7 +200,7 @@ watch(
   @include scroll();
   .member-title {
     color: #606266;
-    font-size: 12px;
+    font-size: 20px;
     margin: 10px 0px 25px 0px;
   }
   .member-item {
@@ -204,9 +226,10 @@ watch(
       }
       .member-item-nickName {
         // width: 150px;
-        height: 40px;
+        height: 50px;
         color: #000000;
         line-height: 40px;
+        font-size:20px;
       }
     }
     .member-item-button {

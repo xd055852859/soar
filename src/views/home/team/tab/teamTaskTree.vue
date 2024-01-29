@@ -17,7 +17,7 @@ const { teamKey } = storeToRefs(appStore.teamStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { cardInfo } = storeToRefs(appStore.cardStore);
 const { setCardKey } = appStore.cardStore;
-
+const { setTeamKey } = appStore.teamStore;
 const taskList = ref<any>([]);
 const page = ref<number>(1);
 const total = ref<number>(0);
@@ -62,6 +62,7 @@ const getTaskList = async () => {
       taskList.value = [...taskRes.data];
       if (taskRes.data.length > 0) {
         nodeKey.value = taskRes.data[0]._key;
+        setTeamKey(taskRes.data[0].projectInfo._key);
         // setCardKey(taskRes.data[0]._key);
       }
       console.log(taskList.value);
@@ -98,6 +99,7 @@ const chooseCard = (detail, type) => {
   switch (type) {
     case "search":
       nodeKey.value = detail._key;
+      setTeamKey(detail.projectInfo._key);
       break;
     case "update":
       let updateIndex = _.findIndex(taskList.value, { _key: detail._key });
@@ -188,22 +190,27 @@ watchEffect(() => {
   @include p-number(10px, 25px);
   .teamTaskTree-header {
     width: 100%;
-    height: 50px;
+    height: 70px;
     @include flex(flex-start, center, null);
   }
   .teamTaskTree-box {
     width: 100%;
-    height: calc(100% - 50px);
+    height: calc(100% - 70px);
     @include flex(space-between, center, null);
     .teamTaskTree-box-left {
       width: 35%;
       height: 100%;
+      position: relative;
+      z-index: 1;
       @include p-number(10px, 10px);
       @include scroll();
     }
     .teamTaskTree-box-right {
       width: 65%;
       height: 100%;
+      position: relative;
+      z-index: 2;
+      overflow: hidden;
     }
   }
 }

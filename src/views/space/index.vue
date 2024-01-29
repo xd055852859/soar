@@ -87,17 +87,13 @@ const uploadImage = (file, type) => {
 // };
 </script>
 <template>
-  <div
-    class="space"
-    :style="{
-      backgroundImage: `url('/common/${
-        deviceType === 'pc' ? 'commonBg' : 'commonPhoneBg'
-      }.png')`,
-    }"
-  >
+  <div class="space">
     <div class="left">
-      <div class="left-title icon-point" @click="router.push('/home')">
-        <q-icon name="o_navigate_before" size="40px" />
+      <div
+        class="left-title icon-point common-title"
+        @click="router.push('/home')"
+      >
+        <q-icon name="navigate_before" size="32px" />
         返回空间
       </div>
       <!-- <q-tabs vertical inline-label>
@@ -108,35 +104,35 @@ const uploadImage = (file, type) => {
         <q-route-tab label="升级/续费" :to="`/space/vip`" />
       </q-tabs> -->
       <q-list>
-        <q-item to="/space/setting" exact>
-          <q-item-section avatar>
+        <q-item to="/space/setting" exact class="left-menu-item">
+          <q-item-section avatar class="left-menu-avatar">
             <q-icon name="o_settings" />
           </q-item-section>
-          <q-item-section>空间设置</q-item-section>
+          <q-item-section class="common-title">空间设置</q-item-section>
         </q-item>
-        <q-item to="/space/member" exact>
-          <q-item-section avatar>
+        <q-item to="/space/member" exact class="left-menu-item">
+          <q-item-section avatar class="left-menu-avatar">
             <q-icon name="o_person" />
           </q-item-section>
-          <q-item-section>成员管理</q-item-section>
+          <q-item-section class="common-title">成员管理</q-item-section>
         </q-item>
-        <q-item to="/space/group" exact>
-          <q-item-section avatar>
+        <q-item to="/space/group" exact class="left-menu-item">
+          <q-item-section avatar class="left-menu-avatar">
             <q-icon name="o_group" />
           </q-item-section>
-          <q-item-section>小组管理</q-item-section>
+          <q-item-section class="common-title">小组管理</q-item-section>
         </q-item>
-        <q-item to="/space/safety" exact>
-          <q-item-section avatar>
+        <q-item to="/space/safety" exact class="left-menu-item">
+          <q-item-section avatar class="left-menu-avatar">
             <q-icon name="o_lock" />
           </q-item-section>
-          <q-item-section>安全性</q-item-section>
+          <q-item-section class="common-title">安全性</q-item-section>
         </q-item>
-        <q-item to="/space/vip" exact>
-          <q-item-section avatar>
+        <q-item to="/space/vip" exact class="left-menu-item">
+          <q-item-section avatar class="left-menu-avatar">
             <q-icon name="o_paid" />
           </q-item-section>
-          <q-item-section>升级/续费</q-item-section>
+          <q-item-section class="common-title">升级/续费</q-item-section>
         </q-item>
       </q-list>
     </div>
@@ -151,7 +147,7 @@ const uploadImage = (file, type) => {
   height: 100vh;
   @include flex(space-between, center, null);
   .left {
-    width: 240px;
+    width: 350px;
     height: 100vh;
     padding: 20px 0px 10px 0px;
     box-sizing: border-box;
@@ -163,6 +159,7 @@ const uploadImage = (file, type) => {
       width: 100%;
       margin-bottom: 20px;
       box-sizing: border-box;
+      @include flex(flex-start, center, null);
     }
   }
   .right {
@@ -172,29 +169,23 @@ const uploadImage = (file, type) => {
     background-color: #fafafb;
     z-index: 1;
     width: 0;
+    @include p-number(15px, 35px);
   }
 }
 </style>
 
-<style>
-@keyframes moveLeft {
-  0% {
-    width: 240px;
-    opacity: 1;
+<style lang="scss">
+.left-menu-item {
+  .left-menu-avatar {
+    /* prettier-ignore */
+    min-width:30Px;
+    // padding-right: 0px;
   }
-  100% {
-    width: 0px;
-    opacity: 0;
-  }
-}
-@keyframes moveRight {
-  0% {
-    width: 0px;
-    opacity: 0;
-  }
-  50% {
-    width: 240px;
-    opacity: 1;
+  .left-common-title {
+    // height: 100%;
+    font-size: 22px;
+    // @include flex(flex-start, center, null);
+    // line-height: 40px;
   }
 }
 </style>

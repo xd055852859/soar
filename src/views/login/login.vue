@@ -59,6 +59,7 @@ const login = async () => {
       v-model="mobile"
       label="账号"
       :rules="[(val) => !!val || '账号必填']"
+      class="q-mb-sm"
     />
 
     <q-input
@@ -68,6 +69,7 @@ const login = async () => {
       :type="isPwd ? 'password' : 'text'"
       label="密码"
       :rules="[(val) => !!val || '密码必填']"
+      class="q-mb-sm"
     >
       <template v-slot:append>
         <q-icon
@@ -102,7 +104,7 @@ const login = async () => {
     text-align: right;
     line-height: 20px;
     margin: 6px 0px 20px 0px;
-    font-size: 16px;
+    font-size: 18px;
 
     @include flex(space-between, center, null);
     > div {

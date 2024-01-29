@@ -199,7 +199,7 @@ body,
   }
   .select-item-name {
     max-width: calc(100% - 60px);
-    font-size: 18px;
+    font-size: 20px;
     flex: 1;
     margin: 0px 10px;
     text-align: left;
@@ -209,11 +209,11 @@ body,
     height: 30px;
     @include flex(center, center, null);
   }
-  .select-icon-hover {
+  .select-item-icon-hover {
     display: none;
   }
   &:hover {
-    .select-icon-hover {
+    .select-item-icon-hover {
       @include flex(center, center, null);
     }
   }
@@ -291,8 +291,19 @@ body,
     display: none;
   }
 }
+.dialog-transparent {
+  top: 60px !important;
+  .q-dialog__backdrop {
+    top: 60px !important;
+    background-color: transparent;
+  }
+}
 .card-hover {
   &:hover {
     box-shadow: $shadow-3 !important;
   }
+}
+
+.common-title {
+  font-size: 20px;
 }

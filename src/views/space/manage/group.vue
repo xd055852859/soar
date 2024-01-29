@@ -2,7 +2,7 @@
 import cDialog from "@/components/common/cDialog.vue";
 import cHeader from "@/components/common/cHeader.vue";
 import { ROLE_OPTIONS, ResultProps } from "@/interface/Common";
-import member from "@/views/home/team/menu/member.vue";
+import Member from "@/views/home/team/menu/member.vue";
 import { SpaceMember } from "@/interface/Space";
 import _ from "lodash";
 import api from "@/services/api";
@@ -14,7 +14,7 @@ const { spaceKey, spaceRole, spaceMemberList } = storeToRefs(
   appStore.spaceStore
 );
 const { teamList } = storeToRefs(appStore.teamStore);
-const { setTeamList, setTeamKey } = appStore.teamStore;
+const { setTeamList, setTargetTeamKey } = appStore.teamStore;
 const dayjs: any = inject("dayjs");
 
 const $q = useQuasar();
@@ -148,7 +148,6 @@ watch(
           dense
           v-model="creator"
           :options="creatorArray"
-          class="q-field--with-bottom"
           emit-value
           map-options
         />
@@ -192,7 +191,7 @@ watch(
                 label="成员权限"
                 color="grey-5"
                 @click="
-                  setTeamKey(props.row._key);
+                  setTargetTeamKey(props.row._key);
                   memberVisible = true;
                 "
               />
@@ -214,7 +213,7 @@ watch(
       title="成员"
       :dialogStyle="{ width: '700px', maxWidth: '80vw' }"
     >
-      <template #content><member /></template>
+      <template #content><Member  type="target"/></template>
     </cDialog>
   </div>
 </template>
@@ -224,15 +223,15 @@ watch(
   height: 100%;
   .group-container {
     width: 100%;
-    height: calc(100% - 65px);
+    height: calc(100% - 75px);
     @include p-number(15px, 25px);
   }
   .group-table {
-    height: calc(100% - 65px);
+    height: calc(100% - 100px);
   }
 }
 .group-search {
-  width: 500px;
+  width: 700px;
   .group-search-title {
     width: 100%;
     height: 50px;

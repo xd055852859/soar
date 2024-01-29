@@ -87,7 +87,6 @@ const routes: Array<RouteRecordRaw> = [
         path: "team",
         name: "team",
         component: () => import("@/views/home/team/index.vue"),
-        redirect: "/home/team/recent",
         children: [
           {
             path: "recent",
@@ -124,6 +123,18 @@ const routes: Array<RouteRecordRaw> = [
             path: "taskTree",
             name: "teamtaskTree",
             component: () => import("@/views/home/team/tab/teamTaskTree.vue"),
+            children: [],
+          },
+          {
+            path: "table",
+            name: "teamtable",
+            component: () => import("@/views/home/team/tab/teamTable.vue"),
+            children: [],
+          },
+          {
+            path: "taskbox",
+            name: "teamtaskbox",
+            component: () => import("@/views/home/team/tab/teamTask.vue"),
             children: [],
           },
         ],

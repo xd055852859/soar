@@ -72,41 +72,69 @@ const createSpace = async () => {
 };
 </script>
 <template>
-  <div>创建新的团队空间</div>
-  <div class="q-field--with-bottom">
+  <div class="createSpace-title">创建新的团队空间</div>
+  <div class="createSpace-subtitle">
     管理任务、文档团队协同，成为您的在线工作室
   </div>
-  <q-input
-    filled
-    v-model="name"
-    label="您的企业/团队名称"
-    :rules="[(val) => !!val || '名称必填']"
-  />
-  <q-select
-    outlined
-    v-model="scale"
-    :options="scaleArray"
-    label="团队人员规模"
-    class="q-field--with-bottom"
-  />
+  <div class="createSpace-input-title">您的企业/团队名称*</div>
+  <q-input filled dense v-model="name" class="createSpace-input" />
+  <!--     :rules="[(val) => !!val || '名称必填']" -->
+  <div class="createSpace-input-title">团队人员规模*</div>
+  <q-select outlined dense v-model="scale" :options="scaleArray" />
+  <div class="createSpace-input-title">团队所在行业</div>
   <q-select
     outlined
     v-model="industry"
     :options="industryArray"
     :option-value="(opt) => opt.key"
     :option-label="(opt) => opt.value"
-    label="团队所在行业"
-    class="q-field--with-bottom"
+    dense
     emit-value
     map-options
   />
 
   <q-btn
-    class="login-button full-width"
+    class="createSpace-button full-width"
     color="primary"
     label="完成创建"
     @click="createSpace()"
   />
 </template>
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.createSpace-title {
+  width: 100%;
+  height: 42px;
+  font-size: 30px;
+  font-weight: bold;
+  text-align: left;
+  color: #161616;
+  line-height: 42px;
+  margin-bottom: 8px;
+}
+.createSpace-subtitle {
+  width: 100%;
+  height: 22px;
+  opacity: 0.8;
+  font-size: 16px;
+  font-family: PingFang SC, PingFang SC-Regular;
+  font-weight: Regular;
+  text-align: left;
+  color: #161616;
+  line-height: 22px;
+  margin-bottom: 20px;
+}
+.createSpace-input-title {
+  width: 100%;
+  height: 25px;
+  font-size: 18px;
+  text-align: left;
+  color: #161616;
+  line-height: 25px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.createSpace-button{
+  margin-top: 30px;
+}
+</style>
 <style></style>

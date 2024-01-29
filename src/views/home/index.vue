@@ -10,9 +10,16 @@ import FilePreview from "@/components/note/FilePreview.vue";
 const { closeNum } = storeToRefs(appStore.commonStore);
 
 const { spaceKey } = storeToRefs(appStore.spaceStore);
-const { cardKey, cardInfo, treeVisible, docVisible, docUrl, fileVisible } =
-  storeToRefs(appStore.cardStore);
-
+const {
+  cardKey,
+  cardInfo,
+  treeVisible,
+  docVisible,
+  docUrl,
+  fileVisible,
+  noteVisible,
+} = storeToRefs(appStore.cardStore);
+const { note } = storeToRefs(appStore.noteStore);
 const { getTeamList, getTeamFoldList } = appStore.teamStore;
 const { setSpaceKey } = appStore.spaceStore;
 const { setCardVisible, setCardKey, setCardInfo } = appStore.cardStore;
@@ -112,6 +119,18 @@ watch(
       />
     </div>
   </Teleport>
+  <Teleport to="body">
+    <div class="card-fullDialog" v-if="noteVisible" style="z-index: 20">
+      <q-btn
+        round
+        color="primary"
+        icon="navigate_before"
+        class="card-back"
+        @click="setCardVisible(false, 'file')"
+      />
+      <FilePreview :file-url="note.link!" :name="note.title" v-if="note" />
+    </div>
+  </Teleport>
 </template>
 <style scoped lang="scss">
 .home {
@@ -123,7 +142,7 @@ watch(
   @include flex(space-between, center, null);
 
   .left {
-    width: 250px;
+    width: 350px;
     height: 100vh;
     padding: 10px;
     box-sizing: border-box;
@@ -133,6 +152,7 @@ watch(
     z-index: 2;
     left: 0px;
     top: 0px;
+    @include p-number(25px, 10px);
     .left-arrow-button {
       position: absolute;
       z-index: 2;
@@ -147,6 +167,7 @@ watch(
     background-color: #fafafb;
     z-index: 1;
     width: 0px;
+    @include p-number(15px, 35px);
   }
 }
 
@@ -166,7 +187,7 @@ watch(
   }
 }
 .homeLeft {
-  padding-left: 250px;
+  padding-left: 350px;
   .left {
     left: 0px;
   }
@@ -174,7 +195,7 @@ watch(
 .homeRight {
   padding-left: 0px;
   .left {
-    left: -250px;
+    left: -350px;
   }
 }
 .moveLeft {
@@ -197,12 +218,12 @@ watch(
     left: 0px;
   }
   100% {
-    left: -250px;
+    left: -350px;
   }
 }
 @keyframes moveRight {
   0% {
-    left: -250px;
+    left: -350px;
   }
   100% {
     left: 0px;
@@ -210,7 +231,7 @@ watch(
 }
 @keyframes toLeft {
   0% {
-    padding-left: 250px;
+    padding-left: 350px;
   }
   100% {
     padding-left: 0px;
@@ -221,7 +242,7 @@ watch(
     padding-left: 0px;
   }
   100% {
-    padding-left: 250px;
+    padding-left: 350px;
   }
 }
 </style>

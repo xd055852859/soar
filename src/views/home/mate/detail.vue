@@ -54,6 +54,7 @@ const getMateChart = async () => {
   })) as ResultProps;
   if (detailRes.msg === "OK") {
     [chartData.value, chartName.value] = formatName(detailRes.data);
+    console.log(chartData.value)
     // mateTeamList.value = [...detailRes.data.cooperateList];
     // mateJoinList.value = [...detailRes.data.notJoinedList];
     // total.value = detailRes.total as number;
@@ -120,10 +121,10 @@ watchEffect(() => {
     backPath="/home/mate"
   />
   <div class="mateDetail">
-    <div class="mateDetail-left q-mr-lg">
-      <q-card flat bordered class="mateDetail-mateCard" v-if="mateInfo">
-        <q-card-section class="mateCard-avatar">
-          <q-avatar rounded size="80px">
+    <div class="mateDetail-left">
+      <div class="mateDetail-mateCard" v-if="mateInfo">
+        <div class="mateCard-avatar-box">
+          <div class="mateCard-avatar">
             <img
               :src="
                 mateInfo.userAvatar
@@ -131,9 +132,9 @@ watchEffect(() => {
                   : '/common/defaultGroup.png'
               "
             />
-          </q-avatar>
-        </q-card-section>
-        <q-card-section class="mateCard-info">
+          </div>
+        </div>
+        <div class="mateCard-info">
           <div class="mateCard-top">
             {{ mateInfo.userName }}
             <q-icon name="keyboard_arrow_down" size="28px" />
@@ -141,7 +142,7 @@ watchEffect(() => {
           <div class="mateCard-bottom">
             {{ mateInfo.post }}
           </div>
-        </q-card-section>
+        </div>
         <q-menu style="width: 240px; padding: 10px 0px">
           <q-list>
             <q-item
@@ -149,11 +150,11 @@ watchEffect(() => {
               :key="`mate${index}`"
               clickable
               v-close-popup
-              class=""
+              class="mateCard-menu"
               @click="setMateKey(item._key)"
             >
-              <div class="dp-center-center q-mr-md">
-                <q-avatar rounded size="40px">
+              <div class="mateCard-avatar-box">
+                <div class="mateCard-avatar">
                   <img
                     :src="
                       item.userAvatar
@@ -161,25 +162,25 @@ watchEffect(() => {
                         : '/common/defaultGroup.png'
                     "
                   />
-                </q-avatar>
+                </div>
               </div>
-              <q-item-section>
-                <div style="font-size: 18px; height: 30px">
+              <div class="mateCard-info">
+                <div class="mateCard-top">
                   {{ item.userName }}
                 </div>
                 <div class="mateCard-bottom">
                   {{ item.post }}
                 </div>
-              </q-item-section>
+              </div>
               <div class="dp-center-center" v-if="mateKey === item._key">
                 <q-icon name="check" size="28px" />
               </div>
             </q-item>
           </q-list>
         </q-menu>
-      </q-card>
-      <q-card flat bordered class="mateCard-teamMenu">
-        <q-card-section>
+      </div>
+      <div class="mateCard-teamMenu">
+        <div>
           <div class="teamMenu-title">
             <div>小组</div>
           </div>
@@ -189,6 +190,9 @@ watchEffect(() => {
               v-for="(item, index) in mateTeamList"
               :key="`team${index}`"
               @click="mateTeamKey = item._key"
+              :style="
+                mateTeamKey === item._key ? { background: '#e9f9ef' } : null
+              "
             >
               <div># {{ item.name }}</div>
               <div
@@ -198,12 +202,13 @@ watchEffect(() => {
                   $router.push(`/home/team`);
                 "
               >
-                <q-btn flat round icon="send" size="12px"> </q-btn>
+                <q-btn flat round icon="sym_o_share_windows" size="12px">
+                </q-btn>
               </div>
             </div>
           </div>
           <div class="teamMenu-title">
-            <div>折叠的小组</div>
+            <div>未加入小组</div>
           </div>
           <div class="teamMenu-list">
             <div
@@ -218,12 +223,12 @@ watchEffect(() => {
               </div>
             </div>
           </div>
-        </q-card-section>
-      </q-card>
+        </div>
+      </div>
     </div>
     <div class="mateDetail-right">
       <!-- <div class="mateDetail-right-title">{{ mateTeamInfo?.name }}</div> -->
-      <q-card flat bordered class="mateDetail-right-chart" v-if="mateInfo">
+      <q-card  class="mateDetail-right-chart" v-if="mateInfo">
         <div class="right-chart-left">
           <riverChart
             riverId="mateRiver"
@@ -243,23 +248,22 @@ watchEffect(() => {
         </div>
         <!-- <div class="right-chart-right"></div> -->
       </q-card>
-      <q-card flat bordered class="mateDetail-right-card">
-        <q-card-section>
-          <q-tabs
-            v-model="mateTab"
-            dense
-            align="left"
-            indicator-color="primary"
-            active-class="text-primary"
-          >
-            <q-tab name="task" label="任务" />
-            <q-tab name="doc" label="文档" />
-            <q-tab name="file" label="文件" />
-            <!-- <q-tab name="mails" label="知识库" /> -->
-            <!-- <q-tab name="mails" label="多维表" /> -->
-            <!-- <q-tab name="mails" label="洞察" /> -->
-          </q-tabs>
-        </q-card-section>
+      <q-tabs
+        v-model="mateTab"
+        dense
+        align="left"
+        indicator-color="primary"
+        active-class="text-primary"
+      >
+        <q-tab name="task" label="任务" />
+        <q-tab name="doc" label="文档" />
+        <q-tab name="file" label="文件" />
+        <!-- <q-tab name="mails" label="知识库" /> -->
+        <!-- <q-tab name="mails" label="多维表" /> -->
+        <!-- <q-tab name="mails" label="洞察" /> -->
+      </q-tabs>
+      <q-card flat  class="mateDetail-right-card">
+        <q-card-section> </q-card-section>
         <q-card-section class="q-pa-none">
           <div
             class="mateDetail-right-box"
@@ -295,90 +299,99 @@ watchEffect(() => {
   @include p-number(0px, 50px);
   @include flex(space-between, center, null);
   .mateDetail-left {
-    width: 240px;
+    width: 348px;
     height: 100%;
+    margin-right: 60px;
     @include p-number(20px, 0px);
     .mateDetail-mateCard {
       width: 100%;
-      height: 120px;
-      margin-bottom: 20px;
+      height: 176px;
+      margin-bottom: 22px;
+      background: #07be51;
+      border-radius: 14px;
+      box-shadow: -3px -4px 11px 0px #ffffff;
+      color: #fff;
       @include flex(space-between, center, null);
-      .mateCard-avatar {
-        width: 90px;
-        height: 100%;
-        @include flex(center, center, null);
-      }
+      @include p-number(35px, 20px);
     }
-    .mateCard-info {
-      width: calc(100% - 95px);
-      height: 100%;
-      align-content: center;
-      @include flex(flex-start, center, wrap);
-      .mateCard-top {
-        width: 100%;
-        height: 40px;
-        font-size: 22px;
-        @include flex(space-between, center, null);
-      }
-      .mateCard-bottom {
-        width: 100%;
-      }
+    .mateCard-menu {
+      width: 100%;
     }
     .mateCard-teamMenu {
       width: 100%;
-      height: calc(100% - 140px);
+      height: calc(100% - 200px);
+      background: #fafafb;
+      border-radius: 14px;
+      box-shadow: 4px 5px 9px 0px rgba(183, 187, 202, 0.61);
+      @include p-number(22px, 11px);
       @include scroll();
       .teamMenu-title {
         width: 100%;
-        height: 40px;
+        height: 30px;
         font-weight: bold;
-        font-size: 18px;
-
+        font-size: 22px;
+        font-weight: bolder;
+        color: #161616;
+        line-height: 30px;
+        margin-bottom: 22px;
+        @include p-number(10px, 15px);
         @include flex(space-between, center, null);
       }
       .teamMenu-list {
         .teamMenu-item {
           width: 100%;
-          height: 30px;
-          padding-left: 10px;
-          box-sizing: border-box;
-          margin-bottom: 10px;
+          height: 50px;
+          font-size: 20px;
+          color: #161616;
+          line-height: 28px;
+          margin-bottom: 5px;
+          @include p-number(10px, 15px);
           @include flex(space-between, center, null);
+          .teamMenu-item-icon {
+            display: none;
+          }
+          &:hover {
+            background: #e9f9ef;
+            .teamMenu-item-icon {
+              @include flex(center, center, null);
+            }
+          }
         }
       }
     }
   }
+
   .mateDetail-right {
     flex: 1;
     height: 100%;
     width: 0px;
     @include p-number(20px, 0px);
-    .mateDetail-right-title {
-      width: 100%;
-      height: 30px;
-      font-size: 20px;
-      line-height: 30px;
-    }
     .mateDetail-right-chart {
       width: 100%;
-      height: 250px;
-      margin-bottom: 10px;
+      height: 280px;
+      background: #ffffff;
+      border-radius: 14px;
+      box-shadow: 0px 4px 6px 0px rgba(203, 203, 203, 0.5);
+      margin-bottom:40px;
       .right-chart-left {
         width: 100%;
         height: 100%;
         position: relative;
         z-index: 1;
+        @include p-number(15px, 15px);
         .mate-chart-select {
           position: absolute;
           z-index: 2;
           top: 10px;
-          right: 10px;
+          right: 20px;
         }
       }
     }
-    .mateDetail-right-box {
+    .mateDetail-right-card {
       width: 100%;
-      height: calc(100vh - 430px);
+      height: calc(100vh - 540px);
+      background-color: transparent;
+      margin-top:40px;
       @include p-number(10px, 20px);
       @include scroll();
     }
@@ -391,4 +404,46 @@ watchEffect(() => {
   }
 }
 </style>
-<style></style>
+<style lang="scss">
+.mateCard-avatar-box {
+  width: 90px;
+  height: 100%;
+  flex-shrink: 0;
+  margin-right: 15px;
+  @include flex(center, center, null);
+  .mateCard-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 14px;
+    overflow: hidden;
+
+    @include flex(center, center, null);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+}
+.mateCard-info {
+  flex: 1;
+  height: 100%;
+  align-content: flex-start;
+  @include flex(flex-start, flex-start, wrap);
+  .mateCard-top {
+    width: 100%;
+    height: 40px;
+    font-size: 22px;
+    font-weight: bold;
+    line-height: 32px;
+    margin-bottom: 10px;
+    @include flex(space-between, center, null);
+  }
+  .mateCard-bottom {
+    width: 100%;
+    height: 22px;
+    font-size: 16px;
+    line-height: 22px;
+  }
+}
+</style>

@@ -45,9 +45,24 @@ const addMate = async (userKey) => {
     let list = _.cloneDeep(spaceMemberList.value);
     setMessage("success", "添加队友成功");
     let index = _.findIndex(spaceMemberList.value, { userKey: userKey });
-    console.log(index)
+    console.log(index);
     if (index !== -1) {
       list[index] = { ...list[index], beMate: true };
+    }
+    setSpaceMemberList(list);
+  }
+};
+const removeMate = async (userKey) => {
+  const setRes = (await api.request.delete("teamMate", {
+    teamKey: spaceKey.value,
+    mateKey: userKey,
+  })) as ResultProps;
+  if (setRes.msg === "OK") {
+    let list = _.cloneDeep(spaceMemberList.value);
+    setMessage("success", "删除队友成功");
+    let index = _.findIndex(spaceMemberList.value, { userKey: userKey });
+    if (index !== -1) {
+      list[index] = { ...list[index], beMate: false };
     }
     setSpaceMemberList(list);
   }
@@ -68,7 +83,7 @@ const addMate = async (userKey) => {
       >
         <template v-slot:body="props">
           <q-tr :props="props">
-            <q-td key="userAvatar" :props="props"  style="width: 100px">
+            <q-td key="userAvatar" :props="props" style="width: 100px">
               <q-avatar color="primary" text-color="white" size="lg">
                 <img
                   :src="
@@ -90,10 +105,17 @@ const addMate = async (userKey) => {
             <q-td key="operate" :props="props" style="width: 100px">
               <q-btn
                 flat
-                label="+ 队友"
-                color="grey-5"
+                label="添加"
+                color="primary"
                 @click="addMate(props.row.userKey)"
                 v-if="!props.row.beMate"
+              />
+              <q-btn
+                flat
+                label="移除"
+                color="grey-5"
+                @click="removeMate(props.row.userKey)"
+                v-else-if="props.row.beMate && props.row.userKey !== user?._key"
               />
             </q-td>
           </q-tr>

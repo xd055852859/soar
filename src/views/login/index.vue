@@ -6,11 +6,15 @@ import Login from "./login.vue";
 import Reset from "./reset.vue";
 const { loginState, token } = storeToRefs(appStore.authStore);
 const { deviceType } = storeToRefs(appStore.commonStore);
+const { spaceKey } = storeToRefs(appStore.spaceStore);
 const showLogin = ref<boolean>(false);
 onMounted(() => {
-  console.log(token.value);
   if (token.value) {
-    router.replace("/spaceList");
+    if (spaceKey.value) {
+      router.replace("/home");
+    } else {
+      router.replace("/spaceList");
+    }
   }
 });
 </script>
@@ -48,7 +52,19 @@ onMounted(() => {
       <div class="title-box-subtitle">
         Integration of knowledge and action,Cooperate like flying
       </div>
-
+      <div class="title-box-footer">
+        <span
+          className="title-box-ICPLicensing"
+          @click="
+            () => {
+              //@ts-ignore
+              window.open('http://beian.miit.gov.cn/');
+            }
+          "
+        >
+          Copyright © 2024 江苏脑际互联有限公司 Soar.苏ICP备2022036554号-3
+        </span>
+      </div>
       <q-btn
         rounded
         color="primary"
@@ -68,8 +84,8 @@ onMounted(() => {
   @include flex(center, center, null);
 
   .login-box {
-    width: 450px;
-    height: 580px;
+    width: 560px;
+    height: 680px;
     background: #ffffff;
     border-radius: 12px;
     box-shadow: 0px 2px 14px 0px rgba(0, 0, 0, 0.11);
@@ -85,13 +101,13 @@ onMounted(() => {
       @include flex(center, center, null);
 
       img {
-        width: 40%;
+        width: 50%;
       }
     }
 
     .login-container {
       width: 100%;
-      height: calc(100% - 127px);
+      height: calc(100% - 140px);
       padding: 0px 34px;
       box-sizing: border-box;
       position: relative;
@@ -124,11 +140,14 @@ onMounted(() => {
         .login-prompt {
           width: 100%;
           height: 20px;
-          font-size: 16px;
+          font-size: 18px;
           text-align: center;
           cursor: pointer;
           line-height: 20px;
           margin-top: 15px;
+          span {
+            color: $commonColor;
+          }
         }
       }
     }
@@ -155,8 +174,10 @@ onMounted(() => {
     @include flex(center, center, wrap);
 
     .title-box-logo {
-      width: 50%;
-      margin-bottom: 50px;
+      width: 853px;
+      height: 234px;
+      // margin-top: 319px;
+      margin-bottom: 57px;
 
       img {
         width: 100%;
@@ -166,32 +187,62 @@ onMounted(() => {
 
     .title-box-title {
       width: 100%;
-      height: 65px;
-      font-size: 60px;
+      height: 87px;
+      font-size: 62px;
       font-weight: 600;
-      color: #11151d;
-      line-height: 65px;
-      margin-bottom: 10px;
+      font-family: PingFang SC, PingFang SC-Semibold;
+      font-weight: Semibold;
+      color: #313131;
+      line-height: 87px;
+      margin-bottom: 4px;
       text-align: center;
     }
 
     .title-box-subtitle {
       width: 100%;
-      height: 30px;
+      height: 40px;
       font-size: 20px;
-      color: #b3b3b3;
-      line-height: 30px;
-      text-align: center;
       font-family: Arial, Arial-Regular;
+      font-weight: Regular;
+      color: #b3b3b3;
+      line-height: 23px;
+      letter-spacing: 0.61px;
+      text-align: center;
     }
-
+    .title-box-footer {
+      width: 100%;
+      height: 28px;
+      line-height: 28px;
+      position: fixed;
+      left: 0px;
+      bottom: 77px;
+      text-align: center;
+      .title-box-ICPLicensing {
+        height: 28px;
+        font-size: 20px;
+        font-family: PingFang SC, PingFang SC-Regular;
+        font-weight: Regular;
+        color: #969696;
+        line-height: 28px;
+        letter-spacing: 0.86px;
+        cursor: pointer;
+      }
+    }
     .title-box-button {
-      width: 180px;
-      height: 50px;
+      width: 255px;
+      height: 87px;
       position: fixed;
       z-index: 2;
-      top: 30px;
-      right: 30px;
+      top: 84px;
+      right: 90px;
+      border-radius: 44px;
+      font-size: 29px;
+      font-family: PingFang SC, PingFang SC-Medium;
+      font-weight: Medium;
+      text-align: center;
+      color: #ffffff;
+      line-height: 41px;
+      letter-spacing: 4.97px;
     }
   }
 }

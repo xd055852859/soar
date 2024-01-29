@@ -15,6 +15,7 @@ export const cardStore = defineStore(
     const docUrl = ref<string>("");
     const taskVisible = ref<boolean>(false);
     const fileVisible = ref<boolean>(false);
+    const noteVisible = ref<boolean>(false);
     const setCardKey = (newKey) => {
       cardKey.value = newKey;
     };
@@ -28,7 +29,7 @@ export const cardStore = defineStore(
       if (cardRes.msg === "OK") {
         cardInfo.value = cardRes.data;
         console.log(cardRes.data);
-        teamStore().teamKey = cardRes.data.projectKey;
+        // teamStore().teamKey = cardRes.data.projectKey;
       }
     };
     const setCardVisible = (
@@ -46,6 +47,9 @@ export const cardStore = defineStore(
           break;
         case "file":
           fileVisible.value = visible;
+          break;
+        case "note":
+          noteVisible.value = visible;
           break;
       }
     };
@@ -65,6 +69,7 @@ export const cardStore = defineStore(
       docVisible,
       docUrl,
       fileVisible,
+      noteVisible,
       setCardVisible,
     };
   }

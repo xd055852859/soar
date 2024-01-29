@@ -76,18 +76,21 @@ watchEffect(() => {
   overflow-y: hidden;
   @include flex(flex-start, center, null);
   .teamTask-box {
-    width: 350px;
+    width: 455px;
     height: 100%;
     flex-shrink: 0;
+    margin-right: 27px;
     .teamTask-top {
       width: 100%;
-      height: 90px;
+      /* prettier-ignore */
+      height: 90Px;
       font-size: 16px;
       @include flex(flex-start, center, null);
     }
     .teamTask-bottom {
       width: 100%;
-      height: calc(100% - 90px);
+       /* prettier-ignore */
+      height: calc(100% - 90Px);
       @include scroll();
       @include p-number(10px, 10px);
     }

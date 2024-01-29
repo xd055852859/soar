@@ -21,7 +21,7 @@ const emits = defineEmits<{
 }>();
 </script>
 <template>
-  <div className="header">
+  <div className="header" @click="leftVisible ? (leftVisible = false) : null">
     <div
       v-if="backPath || isBackOther"
       @click="
@@ -40,7 +40,7 @@ const emits = defineEmits<{
         flat
         round
         class="left-arrow-button"
-        @click="
+        @click.stop="
           setClose(1);
           leftVisible = false;
         "
@@ -68,46 +68,43 @@ const emits = defineEmits<{
     <q-space />
     <slot name="button"></slot>
   </div>
-  <OnClickOutside
+  <!-- <OnClickOutside
     @trigger="leftVisible = false"
     :options="{
       ignore: [buttonRef],
     }"
     v-if="buttonRef"
-  >
-    <q-dialog v-model="leftVisible" position="left" class="dialog-nomask">
-      <q-card
-        style="width: 250px; height: 90%"
-        @mouseleave="leftVisible = false"
-      >
-        <!-- <div class="left-dialog"> -->
-        <Left />
-        <!-- </div> -->
-      </q-card>
-    </q-dialog>
-  </OnClickOutside>
+  > -->
+  <!--         @mouseleave="leftVisible = false" -->
+  <q-dialog v-model="leftVisible" position="left" class="dialog-transparent">
+    <q-card class="left-dialog" >
+      <!-- <div class="left-dialog"> -->
+      <Left />
+      <!-- </div> -->
+    </q-card>
+  </q-dialog>
+  <!-- </OnClickOutside> -->
 </template>
 <style scoped lang="scss">
 .header {
   width: 100%;
-  height: 65px;
+  height: 75px;
   padding: 0px 10px;
   box-sizing: border-box;
-  font-size: 20px;
-  font-weight: 600;
-  line-height: 28px;
+  line-height: 75px;
   @include flex(space-between, center, null);
   .header-title {
     max-width: 50%;
-    font-size: 20px;
+    font-size: 26px;
     font-weight: 600;
     color: #000000;
     @include flex(flex-start, center, null);
   }
 }
 .left-dialog {
-  width: 250px;
-  height: 90vh;
+  width: 350px;
+  height: 90%;
+  @include p-number(25px, 10px);
 }
 </style>
 <style></style>

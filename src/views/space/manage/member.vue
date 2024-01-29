@@ -336,15 +336,16 @@ watch(memberInput, (newName) => {
   height: 100%;
   .member-container {
     width: 100%;
-    height: calc(100% - 65px);
+    height: calc(100% - 75px);
     @include p-number(15px, 25px);
   }
+  
   .member-table {
-    height: calc(100% - 65px);
+    height: calc(100% - 100px);
   }
 }
 .member-search {
-  width: 500px;
+  width: 700px;
   .member-search-title {
     width: 100%;
     height: 50px;

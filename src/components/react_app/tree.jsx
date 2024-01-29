@@ -169,8 +169,9 @@ const CustomTree = React.forwardRef((props, ref) => {
     viewType,
     onShowMenu,
     onChangePath,
-    onChooseAlt,
-    onChooseNote,
+    onOpenAlt,
+    onOpenNote,
+    onOpenFile,
   } = props;
   const treeRef = useRef(null);
   const moveRef = useRef(null);
@@ -233,8 +234,10 @@ const CustomTree = React.forwardRef((props, ref) => {
       node.endAdornment = getEndAdornment(
         node.endAdornmentContent,
         {
-          note: handleOpenNote,
+          note: onOpenNote,
           link: handleOpenLink,
+          file: onOpenAlt,
+          notefile: onOpenFile,
         },
         node
       );
@@ -245,7 +248,7 @@ const CustomTree = React.forwardRef((props, ref) => {
     if (node.bottomAdornmentContent) {
       node.bottomAdornment = getBottomAdornment(
         node.bottomAdornmentContent,
-        { file: handleOpenAlt },
+        {},
         node
       );
       node.bottomAdornmentWidth =
@@ -355,7 +358,38 @@ const CustomTree = React.forwardRef((props, ref) => {
     }
   };
   const deleteNode = async () => {
-    if (selectedId) {
+    if (selectedNodes.length > 0) {
+      let selectIds = selectedNodes.map((item) => {
+        return item._key;
+      });
+      Dialog.create({
+        title: "批量删除节点",
+        message: "是否批量删除该节点",
+        cancel: {
+          color: "grey-5",
+          flat: true,
+        },
+      }).onOk(async () => {
+        let delRes = await api.request.delete("node/batch", {
+          nodeKeyArr: selectIds,
+        });
+        if (delRes.msg === "OK") {
+          let newNodes = _.cloneDeep(nodes);
+          setMessage("success", "批量删除成功");
+          selectIds.forEach((delItem) => {
+            let fatherKey = newNodes[delItem].father;
+            let index = newNodes[fatherKey].sortList.findIndex(
+              (item) => item === delItem
+            );
+            if (index !== -1) {
+              newNodes[fatherKey].sortList.splice(index, 1);
+            }
+            delete newNodes[delItem];
+          });
+          setNodes(newNodes);
+        }
+      });
+    } else if (selectedId) {
       if (selectedId === rootKey) {
         setMessage("error", "根节点不允许删除");
         return;
@@ -390,35 +424,47 @@ const CustomTree = React.forwardRef((props, ref) => {
       });
     }
   };
-  const dragNode = async (dragInfo) => {
-    console.log(dragInfo);
+  const dragNode = async (dragInfo, dragSelectedNodes) => {
     let newNodes = _.cloneDeep(nodes);
-    let nodeKey = dragInfo.dragNodeId;
-    let oldFatherKey = newNodes[nodeKey].father;
     let fatherKey = newNodes[dragInfo.dropNodeId].father;
-
-    if (dragInfo.placement === "in") {
-      fatherKey = dragInfo.dropNodeId;
-      newNodes[dragInfo.dropNodeId].sortList.push(dragInfo.dragNodeId);
-    } else if (fatherKey) {
-      let nodeIndex = newNodes[fatherKey].sortList.indexOf(dragInfo.dropNodeId);
-      let childrenIndex =
-        dragInfo.placement === "up" ? nodeIndex : nodeIndex + 1;
-      console.log(childrenIndex);
-      newNodes[fatherKey].sortList.splice(
-        childrenIndex,
-        0,
-        dragInfo.dragNodeId
-      );
+    if (dragSelectedNodes.length === 0) {
+      dragSelectedNodes = [
+        {
+          nodeKey: dragInfo.dragNodeId,
+          oldFather: newNodes[dragInfo.dragNodeId].father,
+        },
+      ];
     }
-    let index = newNodes[oldFatherKey].sortList.indexOf(nodeKey);
-    if (index !== -1) {
-      newNodes[oldFatherKey].sortList.splice(index, 1);
-    }
-    newNodes[nodeKey].father = fatherKey;
     console.log(newNodes);
-    let dragRes = await api.request.patch("node/drag", {
-      nodeKey: nodeKey,
+    let nodeKeyArr = dragSelectedNodes.map((item) => {
+      return item.nodeKey;
+    });
+    dragSelectedNodes.forEach((item) => {
+      let nodeKey = item.nodeKey;
+      let oldFatherKey = item.oldFather;
+      if (dragInfo.placement === "in") {
+        fatherKey = dragInfo.dropNodeId;
+        newNodes[fatherKey].sortList.push(nodeKey);
+      } else if (fatherKey) {
+        let nodeIndex = newNodes[fatherKey].sortList.indexOf(
+          dragInfo.dropNodeId
+        );
+        let childrenIndex =
+          dragInfo.placement === "up" ? nodeIndex : nodeIndex + 1;
+        console.log(childrenIndex);
+        newNodes[fatherKey].sortList.splice(childrenIndex, 0, nodeKey);
+      }
+      let index = newNodes[oldFatherKey].sortList.indexOf(nodeKey);
+      if (index !== -1) {
+        newNodes[oldFatherKey].sortList.splice(index, 1);
+      }
+      newNodes[nodeKey].father = fatherKey;
+    });
+
+
+
+    let dragRes = await api.request.patch("node/drag/batch", {
+      nodeKeyArr: nodeKeyArr,
       targetNodeKey: dragInfo.dropNodeId,
       placement: dragInfo.placement,
     });
@@ -472,16 +518,21 @@ const CustomTree = React.forwardRef((props, ref) => {
   };
   //收缩节点
   const editContract = async (node) => {
-    console.log(node);
-    updateNode(
-      "contract",
-      !node.contract,
-      async (newNodes) => {
-        newNodes[node._key].contract = !node.contract;
+    let newNodes = _.cloneDeep(nodes);
+    let contractRes = await api.request.patch("node/contract", {
+      nodeKey: node._key,
+      contract: +!node.contract,
+    });
+    if (contractRes.msg === "OK") {
+      console.log(node.contract);
+      if (node.contract) {
+        getNodeList(node._key, "child");
+      } else {
+        newNodes[node._key].childNum = contractRes.data;
+        newNodes[node._key].contract = true;
         setNodes(newNodes);
-      },
-      node._key
-    );
+      }
+    }
   };
   //上下顺序
   const editSortList = async (nodeId, sortList) => {
@@ -498,9 +549,7 @@ const CustomTree = React.forwardRef((props, ref) => {
 
   // 插槽功能
   const handleClickNodeIcon = () => {};
-  const handleOpenNote = (node) => {
-    onChooseNote(node);
-  };
+
   const handleOpenLink = (node, nodeId) => {
     let url = node.endAdornmentContent.link.url;
     let linkUrl = "";
@@ -510,11 +559,6 @@ const CustomTree = React.forwardRef((props, ref) => {
       linkUrl = `https://${url}`;
     }
     window.open(linkUrl);
-    // console.log(nodes[nodeId].endAdornmentContent);
-  };
-  const handleOpenAlt = (node) => {
-    console.log(node);
-    onChooseAlt(node);
     // console.log(nodes[nodeId].endAdornmentContent);
   };
   //修改图片大小
@@ -593,7 +637,7 @@ const CustomTree = React.forwardRef((props, ref) => {
   };
   //获取内部数据
   const getNodeInfo = () => {
-    return [selectedNode, nodes];
+    return [selectedNode, nodes, selectedNodes];
   };
   const setAdornmentContent = (node, adornmentContent, obj) => {
     updateNodeObj(
@@ -665,6 +709,9 @@ const CustomTree = React.forwardRef((props, ref) => {
             handlePaste={pasteNode}
             handleResizeNodeImage={handleResizeNodeImage}
             dragEndFromOutside={dragEndFromOutside}
+            handleMutiSelect={(nodeArray) => {
+              setSelectedNodes(nodeArray);
+            }}
           />
         );
       } else {
@@ -702,6 +749,9 @@ const CustomTree = React.forwardRef((props, ref) => {
             handlePasteText={pasteText}
             handleResizeNodeImage={handleResizeNodeImage}
             dragEndFromOutside={dragEndFromOutside}
+            handleMutiSelect={(nodeArray) => {
+              setSelectedNodes(nodeArray);
+            }}
           />
         );
       }

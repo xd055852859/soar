@@ -14,7 +14,7 @@ const props = defineProps<{
         frameBorder="0"
         width="100%"
         height="100%"
-        allow="clipboard-read; clipboard-write"
+        allow="clipboard-read; clipboard-write;fullscreen"
       ></iframe>
     </div>
 </template>

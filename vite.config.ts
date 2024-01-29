@@ -4,7 +4,7 @@ import react from "@vitejs/plugin-react";
 import AutoImport from "unplugin-auto-import/vite";
 import veauryVitePlugins from "veaury/vite/index.js";
 import { quasar, transformAssetUrls } from "@quasar/vite-plugin";
-import { resolve } from "path";
+import path, { resolve } from "path";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd());
@@ -47,6 +47,7 @@ export default defineConfig(({ mode, command }) => {
         },
         preprocessorOptions: {},
       },
+      postcss: path.resolve(__dirname, "postcss.config.js"),
     },
     resolve: {
       alias: {

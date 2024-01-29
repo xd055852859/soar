@@ -19,6 +19,7 @@ import masonry from "vue-next-masonry";
 // import "amfe-flexible/index.js";
 // Import Quasar css
 import "quasar/src/css/index.sass";
+import "amfe-flexible/index.js";
 const app = createApp(App);
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);

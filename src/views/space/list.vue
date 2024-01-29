@@ -5,7 +5,9 @@ import { ROLE_OPTIONS, ResultProps } from "@/interface/Common";
 import createSpace from "@/components/createSpace.vue";
 import router from "@/router";
 const { spaceList, createState } = storeToRefs(appStore.spaceStore);
+const { deviceType } = storeToRefs(appStore.commonStore);
 const { getSpaceList, setSpaceKey } = appStore.spaceStore;
+const overKey = ref<string>("");
 onMounted(() => {
   getSpaceList();
 });
@@ -13,48 +15,60 @@ const toSpace = (spaceKey) => {
   router.push("/home");
   setSpaceKey(spaceKey);
 };
+watch(spaceList, (newList) => {
+  if (newList.length > 0) {
+    overKey.value = newList[0]._key;
+  }
+});
 </script>
 <template>
-  <div class="space">
+  <div
+    class="space"
+    :style="{
+      backgroundImage: `url('/common/${
+        deviceType === 'pc' ? 'commonBg' : 'commonPhoneBg'
+      }.png')`,
+    }"
+  >
+    <div class="space-logo">
+      <img src="/common/titleLogo.svg" alt="" />
+    </div>
     <div class="space-box">
-      <div class="space-logo">
-        <img src="/common/titleLogo.svg" alt="" />
-      </div>
       <div class="space-container" v-if="spaceList.length > 0">
-        <div class="q-mb-sm">你可以进入以下企业空间</div>
-        <div></div>
-        <q-card
-          flat
-          bordered
-          v-for="(item, index) in spaceList"
-          :key="`space${index}`"
-          class="space-item"
-          @click="toSpace(item._key)"
-        >
-          <q-card-section horizontal>
-            <q-img
-              class="col-2"
-              :src="item.logo ? item.logo : '/common/defaultGroup.png'"
-            />
-            <q-card-section class="col-10">
-              <div class="space-content">
-                <div class="space-title">
-                  <div class="top">{{ item.name }}</div>
-                  <div class="bottom">
-                    <div>
-                      {{
-                        item.role === 0
-                          ? "超管"
-                          : ROLE_OPTIONS[item.role - 1]?.label
-                      }}
-                    </div>
+        <div class="space-container-title">你可以进入以下企业空间</div>
+        <div class="space-container-subtitle">
+          管理任务、文档团队协同，成为您的在线工作室
+        </div>
+        <div class="space-list">
+          <div
+            v-for="(item, index) in spaceList"
+            :key="`space${index}`"
+            class="space-item"
+            @click="toSpace(item._key)"
+            @mouseenter="overKey = item._key"
+            :style="overKey === item._key ? { background: '#e9f9ef' } : null"
+          >
+            <div class="space-item-left">
+              <img :src="item.logo ? item.logo : '/common/defaultGroup.png'" />
+            </div>
+
+            <div class="space-item-right">
+              <div class="space-title">
+                <div class="top">{{ item.name }}</div>
+                <div class="bottom">
+                  <div>
+                    {{
+                      item.role === 0
+                        ? "超管"
+                        : ROLE_OPTIONS[item.role - 1]?.label
+                    }}
                   </div>
                 </div>
-                <q-icon name="keyboard_arrow_right" size="28px" />
               </div>
-            </q-card-section>
-          </q-card-section>
-        </q-card>
+              <q-icon name="keyboard_arrow_right" size="28px" color="grey-6" />
+            </div>
+          </div>
+        </div>
       </div>
       <div v-else>
         <div class="space-container"><createSpace /></div>
@@ -63,67 +77,104 @@ const toSpace = (spaceKey) => {
     </div>
   </div>
 </template>
-<style scoped lang="scss">
+<style lang="scss">
 .space {
   width: 100vw;
   height: 100vh;
-  background: #ffffff;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
   @include flex(center, center, null);
+  .space-logo {
+    width: 255px;
+    height: 70px;
+    position: fixed;
+    z-index: 10;
+    left: 55px;
+    top: 50px;
+    @include flex(center, center, null);
+    img {
+      width: 100%;
+    }
+  }
   .space-box {
-    width: 450px;
-    height: 580px;
+    width: 716px;
+    min-height: 517px;
     background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0px 2px 14px 0px rgba(0, 0, 0, 0.11);
-    padding-top: 44px;
+    border-radius: 25px;
+    box-shadow: 0px 2px 9px 0px rgba(178, 178, 178, 0.5);
     box-sizing: border-box;
     position: relative;
     z-index: 1;
-    .space-logo {
-      width: 100%;
-      height: 60px;
-      margin-bottom: 25px;
-      @include flex(center, center, null);
-      img {
-        width: 40%;
-      }
-    }
+
     .space-container {
       width: 100%;
-      padding: 0px 34px;
-      box-sizing: border-box;
+      @include p-number(61px, 54px);
       @include scroll();
-      .space-item {
-        margin-bottom: 15px;
-        .space-content {
+      .space-container-title {
+        width: 100%;
+        height: 30px;
+        font-size: 20px;
+        font-family: PingFang SC, PingFang SC-Semibold;
+        font-weight: bold;
+        text-align: left;
+        color: #161616;
+        line-height: 28px;
+        margin-bottom: 2px;
+      }
+      .space-container-subtitle {
+        width: 100%;
+        height: 30px;
+        opacity: 0.8;
+        font-size: 16px;
+        color: #161616;
+        line-height: 22px;
+        margin-bottom: 42px;
+      }
+      .space-list {
+        .space-item {
           width: 100%;
-          height: 100%;
-          @include flex(space-between, center, wrap);
-          .space-title {
-            width: calc(100% - 160px);
-            height: 100%;
-            .top {
+          height: 80px;
+          border-radius: 10px;
+          margin-bottom: 15px;
+          cursor: pointer;
+          @include p-number(14px, 26px);
+          @include flex(flex-start, center, null);
+          .space-item-left {
+            width: 52px;
+            height: 52px;
+            margin-right: 20px;
+            border-radius: 5px;
+            overflow: hidden;
+            img {
               width: 100%;
-              height: calc(100% - 30px);
-              font-size: 16px;
-              @include flex(null, flex-start, null);
+              height: 100%;
+              object-fit: cover;
             }
-            .bottom {
-              width: 100%;
-              height: 30px;
-              font-size: 14px;
-              color: #9e9e9e;
-              padding-right: 10px;
-              box-sizing: border-box;
-              @include flex(space-between, center, null);
-              .right {
-                min-width: 200px;
-                height: 100%;
-                @include flex(flex-end, center, null);
-                .view {
-                  height: 100%;
-                  @include flex(center, center, null);
-                }
+          }
+          .space-item-right {
+            width: calc(100% - 72px);
+            height: 100%;
+            @include flex(space-between, center, null);
+            .space-title {
+              width: calc(100% - 40px);
+              height: 100%;
+              .top {
+                width: 100%;
+                height: 28px;
+                font-size: 20px;
+                font-weight: bold;
+                text-align: left;
+                color: #161616;
+                line-height: 28px;
+              }
+              .bottom {
+                width: 100%;
+                height: 22px;
+                opacity: 0.8;
+                font-size: 16px;
+                text-align: left;
+                color: #161616;
+                line-height: 22px;
               }
             }
           }

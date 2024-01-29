@@ -177,15 +177,16 @@ watch(deleteVisible, (newVisible) => {
   height: 100%;
   .setting-container {
     width: 100%;
-    height: calc(100% - 65px);
+    height: calc(100% - 75px);
+    font-size:22px;
     @include p-number(15px, 25px);
     .form-logo {
       width: 100%;
-      height: 300px;
+      height: 450px;
       @include flex(flex-start, center, null);
       .logo-box {
-        width: 250px;
-        height: 250px;
+        width: 350px;
+        height: 350px;
         border-radius: 12px;
         overflow: hidden;
       }
@@ -193,7 +194,7 @@ watch(deleteVisible, (newVisible) => {
     .form-name {
       width: 100%;
       height: 50px;
-      margin: 10px 0px;
+      margin: 20px 0px;
     }
   }
 }

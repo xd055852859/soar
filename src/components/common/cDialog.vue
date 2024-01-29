@@ -22,9 +22,9 @@ watch(
     <q-card :style="{ ...dialogStyle }">
       <q-card-section
         v-if="title || showClose"
-        class="row items-center q-pb-none"
+        class="row items-center q-pb-none common-title"
       >
-        <div class="text-h6 dp-space-center" v-if="title">
+        <div class="dp-space-center dialog-title" v-if="title">
           {{ title }}
         </div>
         <q-space />
@@ -38,15 +38,20 @@ watch(
           v-if="!showClose"
         />
       </q-card-section>
-      <q-card-section class="flex items-center">
+      <q-card-section class="flex items-center common-title">
         <slot name="content"></slot>
       </q-card-section>
 
-      <q-card-actions align="right">
+      <q-card-actions align="right" class="common-title">
         <slot name="footer" />
       </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
 <style scoped lang="scss"></style>
-<style></style>
+<style lang="scss">
+.dialog-title {
+  font-size: 28px;
+  font-weight: bold;
+}
+</style>

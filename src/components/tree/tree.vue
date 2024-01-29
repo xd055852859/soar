@@ -20,7 +20,8 @@ import { setMessage } from "@/services/util/common";
 const CustomTree = applyReactInVue(Tree);
 const { token } = storeToRefs(appStore.authStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
-const { teamMemberList, teamKey } = storeToRefs(appStore.teamStore);
+const { targetTeamKey, targetTeamMemberList, teamMemberList, teamKey } =
+  storeToRefs(appStore.teamStore);
 const { setCardKey, setCardVisible } = appStore.cardStore;
 const { note } = storeToRefs(appStore.noteStore);
 const { clearNoteDetail, getNoteDetail } = appStore.noteStore;
@@ -41,6 +42,7 @@ const menuVisible = ref<boolean>(false);
 const nodeDetail = ref<any>(null);
 const nodeInfo = ref<any>(null);
 const nodes = ref<any>(null);
+const selectnodes = ref<any>(null);
 const nodeContent = ref<string>("");
 
 const commentVisible = ref<boolean>(false);
@@ -99,7 +101,6 @@ const getTreeInfo = async (key) => {
   if (cardRes.msg === "OK") {
     cardDetail.value = cardRes.data;
     rootKey.value = cardRes.data.rootKey;
-    console.log(rootKey.value);
   }
 };
 const showMenu = (node, el) => {
@@ -117,19 +118,41 @@ const updateContent = () => {
   );
 };
 const updateExecutor = async (userKey, avatarUri) => {
-  let updateRes = (await api.request.patch("node/executor", {
-    nodeKey: nodeInfo.value._key,
-    executor: userKey,
-  })) as ResultProps;
-  if (updateRes.msg === "OK") {
-    nodes.value[nodeInfo.value._key].avatarUri = userKey
-      ? avatarUri
+  if (selectnodes.value) {
+    let selectIds = selectnodes.value.map((item) => {
+      return item._key;
+    });
+    let updateRes = (await api.request.patch("node/executor/batch", {
+      nodeKeyArr: selectIds,
+      executor: userKey,
+    })) as ResultProps;
+    if (updateRes.msg === "OK") {
+      selectIds.forEach((item) => {
+        nodes.value[item].avatarUri = userKey
+          ? avatarUri
+            ? avatarUri
+            : "/common/defaultPerson.png"
+          : "";
+        nodes.value[item].executor = userKey;
+        nodes.value[item].showCheckbox = userKey ? true : false;
+      });
+      treeRef.value.__veauryReactRef__.setNodes({ ...nodes.value });
+    }
+  } else {
+    let updateRes = (await api.request.patch("node/executor", {
+      nodeKey: nodeInfo.value._key,
+      executor: userKey,
+    })) as ResultProps;
+    if (updateRes.msg === "OK") {
+      nodes.value[nodeInfo.value._key].avatarUri = userKey
         ? avatarUri
-        : "/common/defaultPerson.png"
-      : "";
-    nodes.value[nodeInfo.value._key].executor = userKey;
-    nodes.value[nodeInfo.value._key].showCheckbox = userKey ? true : false;
-    treeRef.value.__veauryReactRef__.setNodes({ ...nodes.value });
+          ? avatarUri
+          : "/common/defaultPerson.png"
+        : "";
+      nodes.value[nodeInfo.value._key].executor = userKey;
+      nodes.value[nodeInfo.value._key].showCheckbox = userKey ? true : false;
+      treeRef.value.__veauryReactRef__.setNodes({ ...nodes.value });
+    }
   }
 };
 const updateStyle = (key, value?: string) => {
@@ -260,7 +283,7 @@ const chooseMilestone = async (detail) => {
 const searchFile = async () => {
   let dataRes = (await api.request.get("card/search", {
     teamKey: spaceKey.value,
-    projectKey: teamKey.value,
+    projectKey: targetTeamKey.value,
     cardType: cardType.value,
     keyword: fileInput.value,
     // startTime: dayjs().subtract(90, "day").startOf("day").valueOf(),
@@ -375,6 +398,7 @@ const chooseHighlight = (type, value?: string) => {
 };
 const chooseExecutor = (executorDetail) => {
   nodeInfo.value = treeRef.value.__veauryReactRef__.getNodeInfo()[0];
+  selectnodes.value = treeRef.value.__veauryReactRef__.getNodeInfo()[2];
   if (!nodeInfo.value) {
     setMessage("error", "请选择节点");
     return;
@@ -386,10 +410,10 @@ const chooseExecutor = (executorDetail) => {
   updateExecutor(executorDetail.userKey, executorDetail.userAvatar);
 };
 
-const chooseAlt = (node) => {
-  let fileKey = node.bottomAdornmentContent.file.fileKey;
-  let fileType = node.bottomAdornmentContent.file.fileType;
-  let subType = node.bottomAdornmentContent.file.subType;
+const openAlt = (node) => {
+  let fileKey = node.endAdornmentContent.file.fileKey;
+  let fileType = node.endAdornmentContent.file.fileType;
+  let subType = node.endAdornmentContent.file.subType;
   switch (fileType) {
     case "doc":
       chooseDoc(subType, fileKey);
@@ -398,6 +422,11 @@ const chooseAlt = (node) => {
       chooseFile(fileKey);
       break;
   }
+};
+const openFile = (node) => {};
+const openNote = (node) => {
+  clearNoteDetail();
+  getNoteDetail(node.endAdornmentContent.note.key);
 };
 //文档
 const chooseDoc = (type, cardKey) => {
@@ -431,12 +460,9 @@ const chooseDoc = (type, cardKey) => {
 };
 const chooseFile = (cardKey) => {
   setCardKey(cardKey);
-  // setCardVisible(true, "doc", detailUrl);
+  // setCardVisible(true, "note");
 };
-const chooseNote = (node) => {
-  clearNoteDetail();
-  getNoteDetail(node.endAdornmentContent.note.key);
-};
+
 watch(
   () => props.cardKey,
   (newKey) => {
@@ -601,8 +627,9 @@ watch(detailDialog, (newVal, oldVal) => {
       :viewType="viewType"
       @showMenu="showMenu"
       @changePath="changePath"
-      @chooseAlt="chooseAlt"
-      @chooseNote="chooseNote"
+      @openAlt="openAlt"
+      @openNote="openNote"
+      @openFile="openFile"
     />
 
     <q-menu :target="targetEl" v-model="menuVisible">
@@ -619,7 +646,7 @@ watch(detailDialog, (newVal, oldVal) => {
             <q-list>
               <q-item
                 clickable
-                class="row items-center justify-between"
+                class="row items-center justify-between  common-title"
                 @click="updateExecutor('', '')"
               >
                 无
@@ -640,7 +667,7 @@ watch(detailDialog, (newVal, oldVal) => {
                     "
                   />
                 </q-avatar>
-                <div class="single-to-long" style="width: 120px">
+                <div class="single-to-long common-title" style="width: 120px" >
                   {{ item.userName }}
                 </div>
 
@@ -958,6 +985,7 @@ watch(detailDialog, (newVal, oldVal) => {
     padding-left: 60px;
     .teamTree-header-path {
       height: 100%;
+      font-size:22px;
       @include flex(center, center, null);
     }
     .teamTree-header-button {
@@ -997,7 +1025,8 @@ watch(detailDialog, (newVal, oldVal) => {
     }
   }
   .teamTree-right {
-    width: 50px;
+    /* prettier-ignore */
+    width: 50Px;
     height: calc(100% - 55px);
     position: absolute;
     z-index: 2;

@@ -12,6 +12,7 @@ const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { teamKey } = storeToRefs(appStore.teamStore);
 const { cardInfo, cardKey } = storeToRefs(appStore.cardStore);
 const { setCardKey, setCardInfo } = appStore.cardStore;
+const { setTeamKey } = appStore.teamStore;
 const props = defineProps<{
   type?: string;
 }>();
@@ -71,6 +72,7 @@ const getDocList = async () => {
       // // setCardKey(fileRes.data[0]._key);
       fileKey.value = fileRes.data[0]._key;
       fileInfo.value = fileRes.data[0];
+      setTeamKey(fileRes.data[0].projectInfo._key)
     }
     total.value = fileRes.total as number;
   }
@@ -122,6 +124,7 @@ const chooseCard = (detail, type) => {
     case "search":
       fileKey.value = detail._key;
       fileInfo.value = detail;
+      setTeamKey(detail.projectInfo._key)
       console.log(fileKey.value,fileInfo.value)
       break;
     case "update":
@@ -210,12 +213,12 @@ watchEffect(() => {
   @include p-number(10px, 25px);
   .teamDoc-header {
     width: 100%;
-    height: 50px;
+    height: 70px;
     @include flex(space-between, center, null);
   }
   .teamDoc-box {
     width: 100%;
-    height: calc(100% - 50px);
+    height: calc(100% - 70px);
     @include flex(space-between, center, null);
     .teamDoc-box-left {
       width: 35%;

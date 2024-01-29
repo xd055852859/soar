@@ -11,15 +11,22 @@ export const teamStore = defineStore(
   "teamStore",
   () => {
     const teamKey = ref<string>("");
+    const targetTeamKey = ref<any>("");
     const teamList = ref<any>([]);
     const teamFoldList = ref<any>([]);
+    const targetTeamMemberList = ref<any>([]);
     const teamMemberList = ref<any[]>([]);
+    const targetTeamInfo = ref<any | null>(null);
     const teamInfo = ref<any | null>(null);
+    const targetTeamRole = ref<number>(5);
     const teamRole = ref<number>(5);
     const createState = ref<boolean>(false);
     const setTeamKey = (newKey) => {
       teamKey.value = newKey;
       localStorage.setItem("teamKey", newKey);
+    };
+    const setTargetTeamKey = (newKey) => {
+      targetTeamKey.value = newKey;
     };
     const getTeamList = async (key) => {
       let teamRes = (await api.request.get("project", {
@@ -44,49 +51,74 @@ export const teamStore = defineStore(
     const setTeamFoldList = async (newList) => {
       teamFoldList.value = newList;
     };
-    const getTeamMemberList = async () => {
+    const getTeamMemberList = async (key,type?: string) => {
       let memberRes = (await api.request.get("projectMember", {
-        projectKey: teamKey.value,
+        projectKey: key,
       })) as ResultProps;
       if (memberRes.msg === "OK") {
-        teamMemberList.value = memberRes.data;
+        if (type) {
+          targetTeamMemberList.value = memberRes.data;
+        } else {
+          teamMemberList.value = memberRes.data;
+        }
       }
     };
     const setTeamMemberList = (newList) => {
       teamMemberList.value = newList;
     };
-    const getTeamInfo = async (key) => {
+    const getTeamInfo = async (key, type?: string) => {
       let teamRes = (await api.request.get("project/detail", {
         projectKey: key,
       })) as ResultProps;
       if (teamRes.msg === "OK") {
-        teamInfo.value = teamRes.data;
-        teamRole.value = teamRes.data.role;
+        if (type) {
+          targetTeamInfo.value = teamRes.data;
+          targetTeamRole.value = teamRes.data.role;
+        } else {
+          teamInfo.value = teamRes.data;
+          teamRole.value = teamRes.data.role;
+        }
       }
     };
-    const setTeamInfo = (newInfo) => {
-      teamInfo.value = newInfo;
+    const setTeamInfo = (newInfo, type?: string) => {
+      if (type) {
+        targetTeamInfo.value = newInfo;
+      } else {
+        teamInfo.value = newInfo;
+      }
     };
     watch(teamKey, (newKey) => {
       if (newKey) {
         getTeamInfo(newKey);
-        getTeamMemberList();
+        getTeamMemberList(newKey);
+      }
+    });
+    watch(targetTeamKey, (newKey) => {
+      if (newKey) {
+        getTeamInfo(newKey, "target");
+        getTeamMemberList(newKey,"target");
       }
     });
 
     return {
       teamKey,
       setTeamKey,
+      targetTeamKey,
+      setTargetTeamKey,
       teamRole,
       teamInfo,
+      targetTeamRole,
+      targetTeamInfo,
       setTeamInfo,
       getTeamInfo,
+
       teamList,
       setTeamList,
       getTeamList,
       teamFoldList,
       setTeamFoldList,
       getTeamFoldList,
+      targetTeamMemberList,
       teamMemberList,
       setTeamMemberList,
       createState,

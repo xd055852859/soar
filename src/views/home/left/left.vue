@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ResultProps } from "@/interface/Common";
 import api from "@/services/api";
-import team from "@/views/home/team/menu/menu.vue";
+import team from "@/views/home/team/menu/index.vue";
 import router from "@/router";
 import { setMessage } from "@/services/util/common";
 import { uploadFile } from "@/services/util/file";
@@ -87,9 +87,10 @@ watch(userVisible, (newVisible) => {
 });
 </script>
 <template>
+
   <div class="left-title icon-point">
-    <div class="select-third-item" style="width: 220px">
-      <q-avatar color="primary" text-color="white" size="lg">
+    <div class="select-third-item">
+      <q-avatar rounded color="primary" text-color="white" size="lg">
         <img
           :src="spaceInfo?.logo ? spaceInfo.logo : '/common/defaultGroup.png'"
         />
@@ -109,19 +110,19 @@ watch(userVisible, (newVisible) => {
             {{ userName }}
           </div>
         </div>
-        <q-list class="q-mb-md">
+        <q-list class="q-mb-md left-space-item">
           <q-item
             v-for="(item, index) in spaceList"
             :key="`space${index}`"
             clickable
             v-close-popup
-            class=""
+            class="left-space-title"
             @click="setSpaceKey(item._key)"
           >
-            <q-item-section>{{ item.name }}</q-item-section>
+            <div>{{ item.name }}</div>
             <q-icon
               name="o_settings"
-              size="28px"
+              size="22px"
               @click="chooseSpace(item._key)"
             />
           </q-item>
@@ -144,11 +145,12 @@ watch(userVisible, (newVisible) => {
       clickable
       :active="$route.name === 'explore'"
       @click="$router.push('/home/explore')"
+      class="left-menu-item"
     >
-      <q-item-section avatar>
-        <Icon name="a-tansuo21" :size="20"/>
+      <q-item-section avatar class="left-menu-avatar">
+        <Icon name="a-tansuo21" :size="20" />
       </q-item-section>
-      <q-item-section>探索</q-item-section>
+      <q-item-section class="left-common-title">探索</q-item-section>
       <q-item-section side @click.stop="$router.push('/home/note')">
         <Icon
           name="a-suji22"
@@ -167,12 +169,13 @@ watch(userVisible, (newVisible) => {
       clickable
       :active="$route.name === 'report'"
       @click="$router.push('/home/report')"
+      class="left-menu-item"
     >
-      <q-item-section avatar>
-        <Icon name="a-huibao21" :size="20"/>
+      <q-item-section avatar class="left-menu-avatar">
+        <Icon name="a-huibao21" :size="18" />
         <!-- <q-icon name="o_grid_view" /> -->
       </q-item-section>
-      <q-item-section>汇报</q-item-section>
+      <q-item-section class="left-common-title">汇报</q-item-section>
     </q-item>
     <!-- <q-item clickable to="/home/calendar" exact>
           <q-item-section avatar>
@@ -199,11 +202,12 @@ watch(userVisible, (newVisible) => {
       clickable
       :active="$route.name === 'task'"
       @click="$router.push('/home/task')"
+      class="left-menu-item"
     >
-      <q-item-section avatar>
+      <q-item-section avatar class="left-menu-avatar">
         <Icon name="a-mokexiaoshumiao-weixinyuan2" :size="22" />
       </q-item-section>
-      <q-item-section>事务</q-item-section>
+      <q-item-section class="left-common-title">事务</q-item-section>
       <q-item-section side @click.stop="$router.push('/home/taskBoard')">
         <Icon
           name="a-renwuchi2"
@@ -220,19 +224,20 @@ watch(userVisible, (newVisible) => {
         $route.name === 'mateSetting'
       "
       @click="$router.push('/home/mate/list')"
+      class="left-menu-item"
     >
-      <q-item-section avatar>
+      <q-item-section avatar class="left-menu-avatar">
         <Icon name="a-duiyou2" :size="20" />
       </q-item-section>
 
-      <q-item-section>队友</q-item-section>
+      <q-item-section class="left-common-title">队友</q-item-section>
     </q-item>
-    <q-item to="/home/resource" exact>
-      <q-item-section avatar>
+    <q-item to="/home/resource" class="left-menu-item" exact>
+      <q-item-section avatar  class="left-menu-avatar">
         <Icon name="ziyuan" :size="20" />
       </q-item-section>
 
-      <q-item-section>资源</q-item-section>
+      <q-item-section class="left-common-title">资源</q-item-section>
     </q-item>
   </q-list>
   <q-separator />
@@ -296,8 +301,9 @@ watch(userVisible, (newVisible) => {
 <style scoped lang="scss">
 .left-title {
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
+
 .form-container {
   width: 400px;
   height: 380px;
@@ -319,10 +325,39 @@ watch(userVisible, (newVisible) => {
   }
 }
 .spaceAdd-container {
-  width: 500px;
+  width: 716px;
   padding: 15px 34px;
   box-sizing: border-box;
   @include scroll();
 }
 </style>
-<style></style>
+<style lang="scss">
+.left-space-item {
+  width: 100%;
+  .left-space-title {
+    font-size: 20px;
+    @include flex(space-between, center, null);
+  }
+  .select-item-icon {
+    display: none;
+  }
+  &:hover {
+    .select-item-icon {
+      @include flex(center, center, null);
+    }
+  }
+}
+.left-menu-item {
+  .left-menu-avatar {
+    /* prettier-ignore */
+    min-width:30Px;
+    // padding-right: 0px;
+  }
+  .left-common-title {
+    // height: 100%;
+    font-size: 22px;
+    // @include flex(flex-start, center, null);
+    // line-height: 40px;
+  }
+}
+</style>
