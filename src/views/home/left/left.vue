@@ -118,7 +118,11 @@ watch(
         {{ spaceInfo?.name }}
         <q-icon name="o_keyboard_arrow_down" size="28px" />
       </div>
-
+      <Icon
+        name="a-xiaoxi2"
+        :size="16"
+        @click.stop="$router.push('/home/notice')"
+      />
       <q-menu style="width: 220px; padding: 10px">
         <div class="select-third-item icon-point" @click="userVisible = true">
           <q-avatar color="primary" text-color="white" size="lg">
@@ -136,7 +140,11 @@ watch(
               clickable
               v-close-popup
               class="left-space-title dp--center"
-              @click="setSpaceKey(item._key)"
+              @click="
+                setSpaceKey(item._key);
+                setTeamKey('');
+                router.push('/home');
+              "
             >
               <Icon name="a-huibaoyaosu-yidong21" :size="14" class="q-mr-sm" />
               <div style="width: calc(100% - 40px)">

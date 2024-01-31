@@ -1,3 +1,5 @@
+import api from "../api";
+
 export const getSearchParamValue = (search: string, paramName: string) => {
   const QUERY_PARAMS: string = new URLSearchParams(search).get(
     paramName
@@ -99,4 +101,33 @@ export const detectZoom = () => {
     ratio = Math.round(ratio * 100) / 100;
   }
   return ratio;
+};
+
+//获取对应url
+export const formatDocUrl = (docType, cardKey, token) => {
+  let url = "";
+  const getApi = api.API_URL + "card/detail";
+  const getParams = `{"cardKey": "${cardKey}" }`;
+  const patchApi = api.API_URL + "card";
+  const patchData = `["content", "title"]`;
+  const uptokenApi = api.API_URL + "account/qiniuToken";
+  const uptokenParams = `{"target": "cdn-soar"}`;
+  switch (docType) {
+    case "text":
+      url = `https://notecute.com/#/editor?token=${token}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
+      break;
+    case "draw":
+      url = `https://draw.workfly.cn/?token=${token}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":${patchData}}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
+      break;
+    case "mind":
+      url = `https://mind.qingtime.cn/?token=${token}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
+      break;
+    case "ppt":
+      url = `https://ppt.mindcute.com/?token=${token}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
+      break;
+    case "table":
+      url = `https://sheets.qingtime.cn/?token=${token}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
+      break;
+  }
+  return url
 };

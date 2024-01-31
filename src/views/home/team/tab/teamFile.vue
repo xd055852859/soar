@@ -22,7 +22,7 @@ const { teamKey } = storeToRefs(appStore.teamStore);
 const { cardInfo, cardKey } = storeToRefs(appStore.cardStore);
 const { setCardKey, setCardInfo } = appStore.cardStore;
 const { setTeamKey } = appStore.teamStore;
-const subType = ref<string>("");
+const subType = ref<string>("全部");
 const page = ref<number>(1);
 const fileList = ref<any>([]);
 const fileKey = ref<string>("");
@@ -36,7 +36,7 @@ const getFileList = async () => {
     teamKey: spaceKey.value,
     projectKey: props.type ? "" : teamKey.value,
     cardType: "file",
-    subType: subType.value,
+    subType: subType.value === "全部" ? "" : subType.value,
     page: page.value,
     limit: 30,
   })) as ResultProps;
@@ -85,61 +85,39 @@ const handleUpload = async (file: any) => {
   // const docTypeArr = ["pdf", "docx", "zip", "doc", "pptx"];
   const docTypeArr = ["docx", "doc"];
   const imgTypeArr = ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg"];
-  // let subType: string = "";
-  // if (
-  //   file.type ===
-  //     "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-  //   file.name.split(".")[1].indexOf("docx") !== -1 ||
-  //   file.name.split(".")[1].indexOf("doc") !== -1 ||
-  //   file.type === "application/msword"
-  // ) {
-  //   if (file.size === 0) {
-  //     setMessage("error", "请上传有内容的docx文件");
-  //     return;
-  //   }
-  //   subType = "doc";
-  //   // } else if (file.type === "application/pdf") {
-  //   //   subType = "pdf";
-  //   // } else if (file.type === "application/msword") {
-  //   //   subType = "doc";
-  //   // } else if (
-  //   //   file.type === "application/x-zip-compressed" ||
-  //   //   file.type === "application/zip"
-  //   // ) {
-  //   //   subType = "zip";
-  //   // } else if (
-  //   //   file.type === "application/x-rar" ||
-  //   //   file.name.indexOf("rar") !== -1
-  //   // ) {
-  //   //   subType = "rar";
-  // } else if (file.type === "audio/mpeg") {
-  //   subType = "mp3";
-  // } else if (file.type === "video/mp4") {
-  //   subType = "mp4";
-  //   // } else if (
-  //   //   file.type ===
-  //   //   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-  //   // ) {
-  //   //   subType = "xlsx";
-  //   // } else if (
-  //   //   file.type === "application/vnd.ms-powerpoint" ||
-  //   //   file.name.indexOf("pptx") !== -1 ||
-  //   //   file.name.split(".")[1].indexOf("ppt") !== -1
-  //   // ) {
-  //   //   subType = "pptx";
-  // } else if (file.type.indexOf("image") !== -1) {
-  //   subType = "image";
-  // } else {
-  //   // setMessage("error", "仅支持pdf,docx,xlsx,zip,rar,mp3,mp4,ppt和图片格式");
-  //   setMessage("error", "仅支持图片格式和docx,mp3,mp4");
-  //   return;
-  // }
+  let subType: string = "";
+  if (file.size === 0) {
+    setMessage("error", "请上传有内容的文件");
+    return;
+  }
+  if (
+    file.type === "application/vnd.ms-excel" ||
+    file.type === "application/vnd.ms-excel" ||
+    file.type === "application/msword" ||
+    file.type ===
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+    file.type ===
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+    file.type ===
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+  ) {
+    subType = "文档";
+  } else if (file.type.startsWith("audio/")) {
+    subType = "音频";
+  } else if (file.type.startsWith("video/")) {
+    subType = "视频";
+  } else if (file.type.startsWith("image/")) {
+    subType = "图片";
+  } else {
+    subType = "其他";
+  }
   uploadFile(file, ["*"], async (url) => {
     let title = file.name.split(".")[0] ? file.name.split(".")[0] : "新文件";
     let fileRes = (await api.request.post("card", {
       projectKey: teamKey.value,
       type: "file",
-      subType: file.type,
+      subType: subType,
+      fileType: file.type,
       url: url,
       fileSize: file.size,
       title: title,
@@ -205,8 +183,6 @@ watchEffect(() => {
         v-model="subType"
         :options="fileArray"
         dense
-        emit-value
-        map-options
       />
     </div>
     <div
@@ -238,7 +214,7 @@ watchEffect(() => {
         <FilePreview
           :fileUrl="fileInfo.url"
           :name="fileInfo.title"
-          :fileType="fileInfo.subType"
+          :fileType="fileInfo.fileType"
           v-if="fileInfo"
         />
       </div>

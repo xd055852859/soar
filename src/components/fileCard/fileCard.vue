@@ -9,6 +9,7 @@ import appStore from "@/store";
 import { ResultProps } from "@/interface/Common";
 import { docArray, fileArray, viewArray } from "@/services/config/config";
 import Icon from "../common/Icon.vue";
+import { formatDocUrl } from "@/services/util/url";
 const $q = useQuasar();
 const dayjs: any = inject("dayjs");
 const { token, user } = storeToRefs(appStore.authStore);
@@ -40,34 +41,11 @@ const fileDetail = ref<any>(null);
 //文档
 const chooseDoc = (type, detail, fullstate?: boolean) => {
   fileDetail.value = detail;
-  let detailUrl = "";
-  const getApi = api.API_URL + "card/detail";
-  const getParams = `{"cardKey": "${detail._key}" }`;
-  const patchApi = api.API_URL + "card";
-  const patchData = `["content", "title"]`;
-  const uptokenApi = api.API_URL + "account/qiniuToken";
-  const uptokenParams = `{"target": "cdn-soar"}`;
-  switch (type) {
-    case "text":
-      detailUrl = `https://notecute.com/#/editor?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
-      break;
-    case "draw":
-      detailUrl = `https://draw.workfly.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":${patchData}}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
-      break;
-    case "mind":
-      detailUrl = `https://mind.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
-      break;
-    case "ppt":
-      detailUrl = `https://ppt.mindcute.com/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
-      break;
-    case "table":
-      detailUrl = `https://sheets.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
-      break;
-  }
+  let docUrl = formatDocUrl(type, detail._key, token.value);
   setTargetTeamKey(detail.projectKey);
   if (fullstate) {
     setCardKey(detail._key);
-    setCardVisible(true, "doc", detailUrl);
+    setCardVisible(true, "doc", docUrl);
   } else {
     emits("chooseCard", detail, "search");
   }

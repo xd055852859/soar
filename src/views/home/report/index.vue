@@ -8,8 +8,9 @@ const { spaceKey } = storeToRefs(appStore.spaceStore);
 </script>
 <template>
   <div class="report">
-    <c-header title="汇报" />
+    <!-- <c-header title="汇报" /> -->
     <div class="report-box">
+      <div class="report-header"><c-header title="汇报" /></div>
       <c-iframe
         :url="`https://hb.qingtime.cn/?token=${token}&teamKey=${spaceKey}`"
         title="汇报"
@@ -21,12 +22,28 @@ const { spaceKey } = storeToRefs(appStore.spaceStore);
 .report {
   width: 100%;
   height: 100%;
+
   .report-box {
     width: 100%;
-    height: calc(100% - 70px);
+    // height: calc(100% - 70px);
+    height: 100%;
     box-sizing: border-box;
-    @include scroll();
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+    padding: 0px;
     // @include p-number(10px, 25px);
+    .report-header {
+      position: absolute;
+      z-index: 2;
+      top: 0px;
+      left: 0px;
+    }
+    .report-iframe {
+      width: 100%;
+      // height: calc(100% - 70px);
+      height: 100%;
+    }
   }
 }
 </style>

@@ -7,10 +7,17 @@ import { planArray } from "@/services/config/config";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import _ from "lodash";
-const { spaceKey } = storeToRefs(appStore.spaceStore);
+const { user } = storeToRefs(appStore.authStore);
+const { spaceMemberList, spaceKey } = storeToRefs(appStore.spaceStore);
+const props = defineProps<{
+  targetKey: string;
+  targetTag: string;
+}>();
 const boardList = ref<any>([]);
 const relationType = ref<number>(1);
+const memberList = ref<any>([]);
 const planTag = ref<string>("");
+const userKey = ref<string>("");
 const relationArray = [
   {
     value: 1,
@@ -25,9 +32,11 @@ const relationArray = [
     label: "指派的",
   },
 ];
+
 const getTaskBoardList = async () => {
   let taskBoardRes = (await api.request.get("task/board", {
     teamKey: spaceKey.value,
+    targetUserKey: userKey.value,
     relationType: relationType.value,
     planTag: planTag.value,
   })) as ResultProps;
@@ -78,6 +87,44 @@ const changeTaskBoard = async (item, index, type) => {
     });
   }
 };
+watch(
+  [() => props.targetKey, user],
+  ([newKey, newInfo]) => {
+    if (newKey) {
+      userKey.value = newKey;
+    } else if (newInfo) {
+      userKey.value = newInfo._key;
+    }
+  },
+  { immediate: true }
+);
+watch(
+  () => props.targetTag,
+  (newTag) => {
+    if (newTag) {
+      planTag.value = newTag;
+    }
+  },
+  { immediate: true }
+);
+watch(
+  spaceMemberList,
+  (newList) => {
+    if (newList.length > 0) {
+      memberList.value = [];
+      newList.forEach((item) => {
+        memberList.value.push({
+          ...item,
+          label: item.userName,
+          value: item.userKey,
+        });
+      });
+      console.log(spaceMemberList.value);
+      console.log(memberList.value);
+    }
+  },
+  { immediate: true }
+);
 watchEffect(() => {
   getTaskBoardList();
 });
@@ -86,6 +133,36 @@ watchEffect(() => {
   <div class="taskBoard">
     <cHeader title="任务池">
       <template #button>
+        <q-select
+          outlined
+          v-model="userKey"
+          :options="memberList"
+          emit-value
+          map-options
+          dense
+          style="width: 120px"
+          class="q-mr-sm"
+          v-if="memberList"
+        >
+          <template v-slot:option="scope">
+            <q-item v-bind="scope.itemProps">
+              <q-item-section>
+                <q-avatar size="24px">
+                  <img
+                    :src="
+                      scope.opt.userAvatar
+                        ? scope.opt.userAvatar
+                        : '/common/defaultPerson.png'
+                    "
+                  />
+                </q-avatar>
+              </q-item-section>
+              <q-item-section class="common-title">
+                {{ scope.opt.userName }}
+              </q-item-section>
+            </q-item>
+          </template>
+        </q-select>
         <q-select
           outlined
           v-model="relationType"
@@ -119,7 +196,7 @@ watchEffect(() => {
           :key="`taskTree${index}`"
         >
           <q-card-section class="row items-center q-pb-none common-title">
-            {{ item.title }}
+            # {{ item.projectInfo?.name }}
           </q-card-section>
           <q-card-section class="q-pt-none">
             <q-tree
@@ -133,37 +210,32 @@ watchEffect(() => {
                 <div
                   class="row items-center justify-between full-width taskBoard-item"
                 >
-                  <div class="row items-center">
-                    <template v-if="prop.node.executor">
-                      <q-icon
-                        :name="
-                          prop.node.hasDone ? 'o_check_circle' : 'o_circle'
+                  <template v-if="prop.node.executor">
+                    <q-icon
+                      :name="prop.node.hasDone ? 'o_check_circle' : 'o_circle'"
+                      color="primary"
+                      class="q-mr-xs"
+                      @click="editFinishPercent(prop.node, index)"
+                    />
+                    <q-avatar
+                      color="primary"
+                      text-color="white"
+                      size="lg"
+                      class="q-mr-sm"
+                    >
+                      <img
+                        :src="
+                          prop.node?.avatarUri
+                            ? prop.node.avatarUri
+                            : '/common/defaultPerson.png'
                         "
-                        color="primary"
-                        class="q-mr-xs"
-                        @click="editFinishPercent(prop.node, index)"
                       />
-                      <q-avatar
-                        color="primary"
-                        text-color="white"
-                        size="lg"
-                        class="q-mr-sm"
-                      >
-                        <img
-                          :src="
-                            prop.node?.avatarUri
-                              ? prop.node.avatarUri
-                              : '/common/defaultGroup.png'
-                          "
-                        />
-                      </q-avatar>
-                    </template>
-                    <div class="common-title">
-                      {{ prop.node.label }}
-                    </div>
+                    </q-avatar>
+                  </template>
+                  <div class="common-title taskBoard-item-title">
+                    {{ prop.node.label }}
                   </div>
-
-                  <div>
+                  <div class="common-title taskBoard-item-icon">
                     <q-btn
                       flat
                       size="12px"
@@ -187,6 +259,7 @@ watchEffect(() => {
                             :key="`planButton${planIndex}`"
                             :label="item.label"
                             :name="item.value"
+                            class="common-title"
                             clickable
                             v-close-popup
                             @click="
@@ -220,7 +293,16 @@ watchEffect(() => {
     @include scroll();
     .taskBoard-card {
       .taskBoard-item {
-        min-height: 35px;
+        min-height: 45px;
+        .taskBoard-item-title {
+          /* prettier-ignore */
+          width: calc(100% - 150Px);
+          flex-shrink: 0;
+        }
+        .taskBoard-item-icon {
+          /* prettier-ignore */
+          width:60Px;
+        }
         .taskBoard-button {
           display: none;
         }

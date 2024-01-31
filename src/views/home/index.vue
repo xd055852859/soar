@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import cIframe from "@/components/common/cIframe.vue";
 import TeamTree from "@/components/tree/tree.vue";
+import TaskBoard from "@/views/home/task/index.vue";
 import _ from "lodash";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import Left from "./left/left.vue";
 import Icon from "@/components/common/Icon.vue";
 import FilePreview from "@/components/note/FilePreview.vue";
-const { closeNum } = storeToRefs(appStore.commonStore);
+const { closeNum, iframeTaskInfo, iframeTaskVisible } = storeToRefs(
+  appStore.commonStore
+);
 
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const {
@@ -115,13 +118,13 @@ watch(
       <FilePreview
         :file-url="cardInfo.url"
         :name="cardInfo.title"
-        :fileType="cardInfo.subType"
+        :fileType="cardInfo.fileType"
         v-if="cardInfo"
       />
     </div>
   </Teleport>
-  <!-- <Teleport to="body">
-    <div class="card-fullDialog" v-if="noteVisible" style="z-index: 20">
+  <Teleport to="body">
+    <div class="card-fullDialog" v-if="iframeTaskVisible" style="z-index: 20">
       <q-btn
         round
         color="primary"
@@ -129,9 +132,12 @@ watch(
         class="card-back"
         @click="setCardVisible(false, 'file')"
       />
-      <FilePreview :file-url="note.link!" :name="note.title"     :fileType="cardInfo.subType" v-if="note" />
+      <TaskBoard
+        :targetKey="iframeTaskInfo.userKey"
+        :targetTag="iframeTaskInfo.planTag"
+      />
     </div>
-  </Teleport> -->
+  </Teleport>
 </template>
 <style scoped lang="scss">
 .home {
@@ -157,8 +163,8 @@ watch(
     .left-arrow-button {
       position: absolute;
       z-index: 2;
-      top: 14px;
-      right: 0px;
+      top: -2px;
+      right: -4px;
     }
   }
   .right {
@@ -168,7 +174,7 @@ watch(
     background-color: #fafafb;
     z-index: 1;
     width: 0px;
-    @include p-number(15px, 35px);
+    // @include p-number(15px, 35px);
   }
 }
 

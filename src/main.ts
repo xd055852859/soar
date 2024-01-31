@@ -5,6 +5,7 @@ import { Quasar, Notify, AppVisibility, Dialog, Loading } from "quasar";
 // Import icon libraries
 import "@quasar/extras/material-icons/material-icons.css";
 import { createPinia } from "pinia";
+import SocketIO from "@/plugins/io";
 import { registerStore } from "@/store";
 import router from "@/router";
 import "dayjs/locale/zh-cn";
@@ -40,7 +41,11 @@ app
   .use(masonry)
   .use(router)
   .use(pinia)
-
+  //@ts-ignore
+  .use(SocketIO, {
+    connection: "https://soardata.qingtime.cn",
+    options: {},
+  })
   .use(Quasar, {
     lang: langDe,
     plugins: {

@@ -5,8 +5,9 @@ import router from "@/router";
 import appStore from "@/store";
 import api from "@/services/api";
 import _ from "lodash";
-import { getSearchParamValue } from "./services/util/url";
+import { formatDocUrl, getSearchParamValue } from "./services/util/url";
 const dayjs: any = inject("dayjs");
+const socket: any = inject("socket");
 const { token } = storeToRefs(appStore.authStore);
 const {
   musicSrc,
@@ -16,25 +17,20 @@ const {
   deviceSize,
   deviceFontSize,
 } = storeToRefs(appStore.commonStore);
+const { setCardVisible, setCardKey } = appStore.cardStore;
 const { setToken, getUserInfo } = appStore.authStore;
 const { setSpaceKey } = appStore.spaceStore;
 const { setTeamKey } = appStore.teamStore;
-const { setDeviceInfo, setDeviceType, setClose } = appStore.commonStore;
+const { setDeviceInfo, setDeviceType, setClose, setIframeTaskVisible } =
+  appStore.commonStore;
 const musicRef = ref<any>(null);
 onMounted(() => {
   changeDevice();
   // 检测设备方向
   window.addEventListener("orientationchange", _.debounce(changeDevice, 100));
   // // 检测设备方向
-  window.addEventListener(
-    "resize",
-    //   document.documentElement.style.setProperty(
-    //     "--vh",
-    //     `${window.innerHeight * 0.01}px`
-    //   );
-    changeDevice
-    // _.debounce(changeDevice, 1000)
-  );
+  window.addEventListener("resize", changeDevice);
+  window.addEventListener("message", getMessage);
   setClose(
     localStorage.getItem("closeNum") ? +localStorage.getItem("closeNum")! : -1
   );
@@ -54,6 +50,10 @@ onMounted(() => {
     setTeamKey(
       localStorage.getItem("teamKey") ? localStorage.getItem("teamKey") : ""
     );
+    socket.on("connect", () => {
+      socket.emit("login", token);
+      console.log(socket.id);
+    });
   } else {
     router.replace("/");
   }
@@ -73,12 +73,46 @@ const changeDevice = () => {
   } else {
     if (deviceWidth.value < deviceHeight.value) {
       setDeviceType("phone");
-      html.style.fontSize = deviceFontSize.value;
     } else {
       setDeviceType("pc");
+      console.log(deviceWidth.value);
+      // if (deviceWidth.value >= 1920) {
+      // html.style.fontSize = deviceFontSize.value;
+      // }
+    }
+    html.style.fontSize = deviceFontSize.value;
+  }
+};
+const getMessage = (e) => {
+  if (typeof e.data === "string") {
+    const messageData = JSON.parse(e.data);
+    console.log(e.data);
+    switch (messageData.eventName) {
+      case "showFile":
+        setCardKey(messageData.data._key);
+        setCardVisible(true, "file");
+        break;
+      case "showDoc":
+        let docUrl = formatDocUrl(
+          messageData.data.docType,
+          messageData.data._key,
+          token.value
+        );
+        setCardKey(messageData.data._key);
+        setCardVisible(true, "doc", docUrl);
+        break;
+      case "showTree":
+        setCardKey(messageData.data._key);
+        setCardVisible(true, "tasktree");
+        break;
+      case "showTask":
+        setCardKey("");
+        setIframeTaskVisible(true, messageData.data);
+        break;
     }
   }
 };
+
 //初始化
 watch(
   token,

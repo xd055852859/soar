@@ -6,6 +6,7 @@ import _ from "lodash";
 import { commonscroll, setMessage } from "@/services/util/common";
 import appStore from "@/store";
 import fileCard from "@/components/fileCard/fileCard.vue";
+import { docArray } from "@/services/config/config";
 import { storeToRefs } from "pinia";
 const { token } = storeToRefs(appStore.authStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
@@ -23,36 +24,6 @@ const docUrl = ref<string>("");
 const fileKey = ref<string>("");
 const fileInfo = ref<any>(null);
 const total = ref<number>(0);
-const docArray = [
-  {
-    label: "全部类型",
-    value: "",
-  },
-  {
-    label: "文档",
-    value: "text",
-  },
-  {
-    label: "绘图",
-    value: "draw",
-  },
-  {
-    label: "脑图",
-    value: "mind",
-  },
-  {
-    label: "表格",
-    value: "table",
-  },
-  {
-    label: "演示",
-    value: "ppt",
-  },
-  {
-    label: "知识库",
-    value: "knowledgeBase",
-  },
-];
 const getDocList = async () => {
   let fileRes = (await api.request.get("card", {
     teamKey: spaceKey.value,

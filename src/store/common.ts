@@ -15,29 +15,31 @@ export const commonStore = defineStore("commonStore", () => {
   const deviceIconSize = ref<string>("20px");
   const musicSrc = ref<string>("");
   const musicNum = ref<number>(0);
+  const iframeTaskVisible = ref<boolean>(false);
+  const iframeTaskInfo = ref<any>(null);
 
   const closeNum = ref<number>(-1);
   const setDeviceType = (newDeviceType: string) => {
     deviceType.value = newDeviceType;
     if (deviceWidth.value < 400) {
       deviceSize.value = "xs";
-      deviceFontSize.value = "100px";
+      deviceFontSize.value = "90px";
       deviceIconSize.value = "20px";
     } else if (400 <= deviceWidth.value && deviceWidth.value <= 500) {
       deviceSize.value = "sm";
-      deviceFontSize.value = "120px";
+      deviceFontSize.value = "100px";
       deviceIconSize.value = "25px";
     } else if (500 < deviceWidth.value && deviceWidth.value <= 800) {
       deviceSize.value = "md";
-      deviceFontSize.value = "140px";
+      deviceFontSize.value = "120px";
       deviceIconSize.value = "28px";
     } else if (800 < deviceWidth.value && deviceWidth.value < 1024) {
       deviceSize.value = "lg";
-      deviceFontSize.value = "180px";
+      deviceFontSize.value = "140px";
       deviceIconSize.value = "30px";
     } else if (1024 <= deviceWidth.value) {
       deviceSize.value = "xl";
-      deviceFontSize.value = "200px";
+      deviceFontSize.value = "140px";
       deviceIconSize.value = "18px";
     }
   };
@@ -58,6 +60,10 @@ export const commonStore = defineStore("commonStore", () => {
     } else if (newNum === 1) {
       localStorage.setItem("closeNum", "-1");
     }
+  };
+  const setIframeTaskVisible = (visible, info) => {
+    iframeTaskVisible.value = visible;
+    iframeTaskInfo.value = info;
   };
   const clearStore = () => {
     authStore().$reset();
@@ -81,5 +87,8 @@ export const commonStore = defineStore("commonStore", () => {
     closeNum,
     setClose,
     clearStore,
+    iframeTaskVisible,
+    iframeTaskInfo,
+    setIframeTaskVisible,
   };
 });

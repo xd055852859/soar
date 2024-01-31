@@ -145,3 +145,4 @@ export const downloadFile = (url, fileName) => {
       URL.revokeObjectURL(href);
     });
 };
+

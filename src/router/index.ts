@@ -26,6 +26,12 @@ const routes: Array<RouteRecordRaw> = [
         children: [],
       },
       {
+        path: "notice",
+        name: "notice",
+        component: () => import("@/views/home/notice/index.vue"),
+        children: [],
+      },
+      {
         path: "calendar",
         name: "calendar",
         component: () => import("@/views/home/calendar/index.vue"),

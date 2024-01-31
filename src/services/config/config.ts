@@ -1,27 +1,5 @@
 import _ from "lodash";
-export const fileArray = [
-  {
-    label: "全部类型",
-    value: "",
-  },
-  {
-    label: "图片",
-    value: "image",
-  },
-  {
-    label: "文档",
-    value: "doc",
-  },
-
-  {
-    label: "视频",
-    value: "mp3",
-  },
-  {
-    label: "音频",
-    value: "mp3",
-  },
-];
+export const fileArray = ["全部", "图片", "文档", "视频", "音频", "其他"];
 export const nameArray = [
   {
     label: "文件",
@@ -149,14 +127,14 @@ export const planArray = [
     value: "tomorrow",
     label: "明日",
   },
-  {
-    value: "weekend",
-    label: "本周截止",
-  },
-  {
-    value: "monthend",
-    label: "本月截止",
-  },
+  // {
+  //   value: "weekend",
+  //   label: "本周截止",
+  // },
+  // {
+  //   value: "monthend",
+  //   label: "本月截止",
+  // },
 
   {
     value: "future",
