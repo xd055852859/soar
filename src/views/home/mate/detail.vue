@@ -167,14 +167,7 @@ watchEffect(() => {
               color="#fff"
               dense
               class="createSpace-button full-width"
-              :style="{
-                backgroundColor: '#fff',
-                color: `${
-                  signatureArray[
-                    _.findIndex(signatureArray, { label: signature })
-                  ]?.color
-                } !important`,
-              }"
+              flat
               :label="
                 signatureArray[
                   _.findIndex(signatureArray, { label: signature })
@@ -267,7 +260,7 @@ watchEffect(() => {
     </div>
     <div class="mateDetail-right">
       <!-- <div class="mateDetail-right-title">{{ mateTeamInfo?.name }}</div> -->
-      <q-card class="mateDetail-right-chart" v-if="mateInfo">
+      <q-card class="mateDetail-right-chart" v-if="mateInfo" flat>
         <div class="right-chart-left">
           <riverChart
             riverId="mateRiver"
@@ -302,7 +295,6 @@ watchEffect(() => {
         <!-- <q-tab name="mails" label="洞察" /> -->
       </q-tabs>
       <q-card flat class="mateDetail-right-card">
-        <q-card-section> </q-card-section>
         <q-card-section class="q-pa-none">
           <div
             class="mateDetail-right-box"
@@ -335,16 +327,16 @@ watchEffect(() => {
 .mateDetail {
   width: 100%;
   height: calc(100% - 60px);
-  @include p-number(0px, 50px);
+  @include p-number(10px, 25px);
   @include flex(space-between, center, null);
   .mateDetail-left {
     width: 348px;
     height: 100%;
-    margin-right: 60px;
-    @include p-number(20px, 0px);
+    margin-right: 20px;
+    // @include p-number(10px, 0px);
     .mateDetail-mateCard {
       width: 100%;
-      height: 176px;
+      height: 140px;
       margin-bottom: 22px;
       background: #07be51;
       border-radius: 14px;
@@ -353,7 +345,7 @@ watchEffect(() => {
       position: relative;
       z-index: 1;
       @include flex(space-between, center, null);
-      @include p-number(35px, 20px);
+      @include p-number(25px, 20px);
       .mateCard-signature {
         position: absolute;
         z-index: 2;
@@ -366,29 +358,29 @@ watchEffect(() => {
     }
     .mateCard-teamMenu {
       width: 100%;
-      height: calc(100% - 200px);
+      height: calc(100% - 170px);
       background: #fafafb;
       border-radius: 14px;
-      box-shadow: 4px 5px 9px 0px rgba(183, 187, 202, 0.61);
+      // box-shadow: 4px 5px 9px 0px rgba(183, 187, 202, 0.61);
       @include p-number(22px, 11px);
       @include scroll();
       .teamMenu-title {
         width: 100%;
         height: 30px;
         font-weight: bold;
-        font-size: 22px;
+        font-size: 16px;
         font-weight: bolder;
         color: #161616;
         line-height: 30px;
-        margin-bottom: 22px;
-        @include p-number(10px, 15px);
+        margin-bottom: 5px;
+        @include p-number(5px, 15px);
         @include flex(space-between, center, null);
       }
       .teamMenu-list {
         .teamMenu-item {
           width: 100%;
           height: 50px;
-          font-size: 20px;
+          font-size: 14px;
           color: #161616;
           line-height: 28px;
           margin-bottom: 5px;
@@ -412,14 +404,13 @@ watchEffect(() => {
     flex: 1;
     height: 100%;
     width: 0px;
-    @include p-number(20px, 0px);
     .mateDetail-right-chart {
       width: 100%;
       height: 280px;
       background: #ffffff;
       border-radius: 14px;
       box-shadow: 0px 4px 6px 0px rgba(203, 203, 203, 0.5);
-      margin-bottom: 40px;
+      margin-bottom: 10px;
       .right-chart-left {
         width: 100%;
         height: 100%;
@@ -436,9 +427,9 @@ watchEffect(() => {
     }
     .mateDetail-right-card {
       width: 100%;
-      height: calc(100vh - 540px);
+      height: calc(100vh - 430px);
       background-color: transparent;
-      margin-top: 40px;
+      margin-top: 10px;
       @include p-number(10px, 20px);
       @include scroll();
     }
@@ -463,7 +454,6 @@ watchEffect(() => {
     height: 90px;
     border-radius: 14px;
     overflow: hidden;
-
     @include flex(center, center, null);
     img {
       width: 100%;
@@ -480,7 +470,7 @@ watchEffect(() => {
   .mateCard-top {
     width: 100%;
     height: 40px;
-    font-size: 22px;
+    font-size: 18px;
     font-weight: bold;
     line-height: 32px;
     margin-bottom: 10px;
@@ -489,7 +479,7 @@ watchEffect(() => {
   .mateCard-bottom {
     width: 100%;
     height: 22px;
-    font-size: 16px;
+    font-size: 14px;
     line-height: 22px;
   }
 }

@@ -85,7 +85,7 @@ import { isOutline } from "@/services/util/util";
 const { createNote, editNote } = appStore.noteStore;
 
 const props = defineProps<{
-  initData?: Card | null;
+  initData?: any;
   autoSave?: boolean;
   readonly?: boolean;
   handleSave?: (title: string, json: JSONContent) => void;

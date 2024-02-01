@@ -178,15 +178,15 @@ watch(deleteVisible, (newVisible) => {
   .setting-container {
     width: 100%;
     height: calc(100% - 75px);
-    font-size:22px;
+    font-size:14px;
     @include p-number(15px, 25px);
     .form-logo {
       width: 100%;
-      height: 450px;
+      height: 350px;
       @include flex(flex-start, center, null);
       .logo-box {
-        width: 350px;
-        height: 350px;
+        width: 250px;
+        height: 250px;
         border-radius: 12px;
         overflow: hidden;
       }

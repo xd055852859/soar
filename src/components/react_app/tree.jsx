@@ -168,9 +168,9 @@ const CustomTree = React.forwardRef((props, ref) => {
     zoomRatio,
     viewType,
     onShowMenu,
+    onShowContent,
     onChangePath,
     onOpenAlt,
-    onOpenNote,
     onOpenFile,
     onCloseMenu
   } = props;
@@ -235,7 +235,7 @@ const CustomTree = React.forwardRef((props, ref) => {
       node.endAdornment = getEndAdornment(
         node.endAdornmentContent,
         {
-          note: onOpenNote,
+          note: onShowContent,
           link: handleOpenLink,
           file: onOpenAlt,
           notefile: onOpenFile,

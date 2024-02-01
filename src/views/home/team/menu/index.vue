@@ -132,10 +132,20 @@ const topTeam = async (item, index, state) => {
           <q-btn flat round icon="o_more_horiz" size="12px" @click.stop="">
             <q-menu anchor="top right" self="top left" class="q-pa-sm">
               <q-list dense>
-                <q-item clickable v-close-popup @click="toggleTeam(item, true)">
+                <q-item
+                  clickable
+                  v-close-popup
+                  @click="toggleTeam(item, true)"
+                  v-if="item.role < 3"
+                >
                   <q-item-section class="common-title">编辑</q-item-section>
                 </q-item>
-                <q-item clickable v-close-popup @click="memberVisible = true">
+                <q-item
+                  clickable
+                  v-close-popup
+                  @click="memberVisible = true"
+                  v-if="item.role < 3"
+                >
                   <q-item-section class="common-title">成员</q-item-section>
                 </q-item>
                 <q-item clickable v-close-popup @click="watchTeam(item)">
@@ -218,24 +228,24 @@ const topTeam = async (item, index, state) => {
 <style scoped lang="scss">
 .teamMenu {
   width: 100%;
-  height: calc(100% - 440px);
+  height: calc(100% - 350px);
   @include scroll();
   @include p-number(0px, 10px);
   .teamMenu-title {
     width: 100%;
-    height: 60px;
+    height: 40px;
     font-weight: bold;
-    font-size: 22px;
+    font-size: 16px;
     @include flex(space-between, center, null);
   }
   .teamMenu-list {
     .teamMenu-item {
       width: 100%;
-      height: 55px;
+      height: 35px;
       padding-left: 10px;
-      font-size: 20px;
+      font-size: 14px;
       box-sizing: border-box;
-      line-height: 55px;
+      line-height: 35px;
       margin-bottom: 5px;
       @include flex(space-between, center, null);
       &:hover {

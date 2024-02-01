@@ -88,14 +88,14 @@ const emits = defineEmits<{
 <style scoped lang="scss">
 .header {
   width: 100%;
-  height: 75px;
+  height: 65px;
   padding: 0px 10px;
   box-sizing: border-box;
   line-height: 75px;
   @include flex(space-between, center, null);
   .header-title {
     max-width: 50%;
-    font-size: 26px;
+    font-size: 18px;
     font-weight: 600;
     color: #000000;
     @include flex(flex-start, center, null);

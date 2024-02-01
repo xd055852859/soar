@@ -17,7 +17,7 @@ export const commonStore = defineStore("commonStore", () => {
   const musicNum = ref<number>(0);
   const iframeTaskVisible = ref<boolean>(false);
   const iframeTaskInfo = ref<any>(null);
-
+  const overKey = ref<string>("");
   const closeNum = ref<number>(-1);
   const setDeviceType = (newDeviceType: string) => {
     deviceType.value = newDeviceType;
@@ -61,6 +61,9 @@ export const commonStore = defineStore("commonStore", () => {
       localStorage.setItem("closeNum", "-1");
     }
   };
+  const setOverKey = (newKey) => {
+    overKey.value = newKey;
+  };
   const setIframeTaskVisible = (visible, info) => {
     iframeTaskVisible.value = visible;
     iframeTaskInfo.value = info;
@@ -90,5 +93,7 @@ export const commonStore = defineStore("commonStore", () => {
     iframeTaskVisible,
     iframeTaskInfo,
     setIframeTaskVisible,
+    overKey,
+    setOverKey
   };
 });

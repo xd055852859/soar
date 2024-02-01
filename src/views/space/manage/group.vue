@@ -227,7 +227,7 @@ watch(
     @include p-number(15px, 25px);
   }
   .group-table {
-    height: calc(100% - 100px);
+    height: calc(100% - 65px);
   }
 }
 .group-search {

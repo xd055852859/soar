@@ -18,7 +18,7 @@ const { teamKey } = storeToRefs(appStore.teamStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { treeVisible } = storeToRefs(appStore.cardStore);
 const { setCardKey } = appStore.cardStore;
-const { setTeamKey } = appStore.teamStore;
+const { setTargetTeamKey } = appStore.teamStore;
 const taskList = ref<any>([]);
 const page = ref<number>(1);
 const total = ref<number>(0);
@@ -63,7 +63,7 @@ const getTaskList = async () => {
       taskList.value = [...taskRes.data];
       if (taskRes.data.length > 0) {
         nodeKey.value = taskRes.data[0]._key;
-        setTeamKey(taskRes.data[0].projectInfo._key);
+        setTargetTeamKey(taskRes.data[0].projectInfo._key);
         // setCardKey(taskRes.data[0]._key);
       }
       console.log(taskList.value);
@@ -100,7 +100,7 @@ const chooseCard = (detail, type) => {
   switch (type) {
     case "search":
       nodeKey.value = detail._key;
-      setTeamKey(detail.projectInfo._key);
+      setTargetTeamKey(detail.projectInfo._key);
       break;
     case "update":
       let updateIndex = _.findIndex(taskList.value, { _key: detail._key });
@@ -140,13 +140,13 @@ watchEffect(() => {
         style="width: 120px"
         @click="addTask"
       />
-      <q-btn
+      <!-- <q-btn
         flat
         icon="o_task_alt"
         color="primary"
         class="q-ml-sm"
         @click="$router.push('/home/team/task')"
-      />
+      /> -->
     </div>
     <div class="teamTaskTree-box" :style="type ? { height: '100%' } : null">
       <div
@@ -167,7 +167,10 @@ watchEffect(() => {
           />
         </template>
       </div>
-      <div class="teamTaskTree-box-right">
+      <div
+        class="teamTaskTree-box-right"
+        :style="!type ? { height: 'calc(100% - 25px)' } : null"
+      >
         <TeamTree
           :cardKey="nodeKey"
           ref="treeRef"
@@ -188,30 +191,39 @@ watchEffect(() => {
 .teamTaskTree {
   width: 100%;
   height: 100%;
-  @include p-number(10px, 25px);
+  position: relative;
+  z-index: 1;
+  // @include p-number(10px, 25px);
   .teamTaskTree-header {
-    width: 100%;
+    width: 150px;
     height: 70px;
-    @include flex(flex-start, center, null);
+    position: absolute;
+    z-index: 5;
+    top: -50px;
+    right: 0px;
+    @include flex(flex-end, center, null);
   }
   .teamTaskTree-box {
     width: 100%;
-    height: calc(100% - 70px);
+    height: calc(100% - 10px);
     @include flex(space-between, center, null);
     .teamTaskTree-box-left {
-      width: 35%;
+      width: 350px;
       height: 100%;
       position: relative;
       z-index: 1;
-      @include p-number(10px, 10px);
+      @include p-number(15px, 30px);
       @include scroll();
     }
     .teamTaskTree-box-right {
-      width: 65%;
+      width: calc(100% - 350px);
       height: 100%;
       position: relative;
       z-index: 2;
       overflow: hidden;
+      background-color: #fff;
+      margin-top: 25px;
+      @include p-number(10px, 0px);
     }
   }
 }

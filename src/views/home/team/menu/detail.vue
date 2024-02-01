@@ -20,7 +20,7 @@ const emits = defineEmits<{
 }>();
 const menuTeamInfo = ref<any>(null);
 const menuTeamKey = ref<any>("");
-const name = ref<string>("");
+const name = ref<string>("新小组");
 const isPublic = ref<boolean>(true);
 const defaultRole = ref<number>(3);
 const memo = ref<string>("");
@@ -111,20 +111,28 @@ watchEffect(() => {
   }
 });
 watchEffect(() => {
-  if (props.type === "target") {
-    menuTeamInfo.value = _.cloneDeep(targetTeamInfo.value);
+  if (props.state) {
+    if (props.type === "target") {
+      menuTeamInfo.value = _.cloneDeep(targetTeamInfo.value);
+    } else {
+      menuTeamInfo.value = _.cloneDeep(teamInfo.value);
+    }
+    if (menuTeamInfo.value) {
+      menuTeamKey.value = menuTeamInfo.value._key;
+      name.value = menuTeamInfo.value.name;
+      isPublic.value = menuTeamInfo.value.isPublic;
+      defaultRole.value = menuTeamInfo.value.defaultRole;
+      memo.value = menuTeamInfo.value.memo;
+      views.value = menuTeamInfo.value.views;
+    }
   } else {
-    menuTeamInfo.value = _.cloneDeep(teamInfo.value);
+    menuTeamKey.value = "";
+    name.value = "新小组";
+    isPublic.value = true;
+    defaultRole.value = 3;
+    memo.value = "";
+    views.value = ["taskTree", "knowledgeBase", "doc", "file"];
   }
-  if (menuTeamInfo.value) {
-    menuTeamKey.value = menuTeamInfo.value._key;
-    name.value = menuTeamInfo.value.name;
-    isPublic.value = menuTeamInfo.value.isPublic;
-    defaultRole.value = menuTeamInfo.value.defaultRole;
-    memo.value = menuTeamInfo.value.memo;
-    views.value = menuTeamInfo.value.views;
-  }
-  console.log(menuTeamInfo.value);
 });
 </script>
 <template>
@@ -146,7 +154,7 @@ watchEffect(() => {
           clearable
         />
         <div class="q-mb-sm teamAdd-title">小组属性</div>
-        <q-checkbox v-model="isPublic" label="全平台可见" />
+        <q-checkbox v-model="isPublic" label="空间内小组名公开" />
         <div class="q-mb-sm teamAdd-title">小组简介</div>
         <q-input
           outlined
@@ -161,7 +169,9 @@ watchEffect(() => {
           outlined
           dense
           v-model="defaultRole"
-          :options="ROLE_OPTIONS"
+          :options="
+            ROLE_OPTIONS.slice(menuTeamInfo.role + 1, ROLE_OPTIONS.length)
+          "
           class="full-width q-mb-md"
           emit-value
           map-options
@@ -190,7 +200,7 @@ watchEffect(() => {
   @include scroll();
   .teamAdd-title {
     font-weight: bolder;
-    font-size: 24px;
+    font-size: 16px;
   }
 }
 </style>

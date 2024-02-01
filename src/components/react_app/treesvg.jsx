@@ -57,7 +57,7 @@ export function getEndAdornment(endAdornment, handleClick, node) {
             height="18"
             x={x + (18 + 2) * index}
             y={y}
-            onClick={(event) => handleClick[key](node)}
+            onClick={(event) => handleClick[key](node, event.currentTarget)}
             fill={fill}
           >
             <rect x={0} y={0} width="1024" height="1024" fillOpacity={0} />

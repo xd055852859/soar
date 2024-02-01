@@ -119,7 +119,7 @@ watch(
       @mouseenter="chooseKey = item._key"
     >
       <div class="member-item-left">
-        <q-avatar color="primary" size="lg" class="q-mr-sm">
+        <q-avatar color="primary" size="lg" class="q-mr-md">
           <img
             :src="
               item?.userAvatar ? item.userAvatar : '/common/defaultPerson.png'
@@ -142,7 +142,7 @@ watch(
               :key="`role${index}`"
               @click="changeRole(item.value, memberIndex)"
             >
-              <q-item-section class="common-title">{{
+              <q-item-section>{{
                 item.label
               }}</q-item-section>
             </q-item>
@@ -153,7 +153,7 @@ watch(
               @click="deleteMember(memberIndex)"
               class="q-mt-sm"
             >
-              <q-item-section class="text-weight-thin common-title"
+              <q-item-section class="text-weight-thin"
                 >删除</q-item-section
               >
             </q-item>
@@ -180,7 +180,7 @@ watch(
         :key="`search${item.userKey}`"
       >
         <div class="member-item-left" style="width: calc(100% - 120px)">
-          <q-avatar color="primary" size="lg" class="q-mr-sm">
+          <q-avatar color="primary" size="lg" class="q-mr-md">
             <img
               :src="
                 item?.userAvatar ? item.userAvatar : '/common/defaultPerson.png'
@@ -204,7 +204,7 @@ watch(
   @include scroll();
   .member-title {
     color: #606266;
-    font-size: 20px;
+    font-size: 16px;
     margin: 10px 0px 25px 0px;
   }
   .member-item {
@@ -231,10 +231,10 @@ watch(
       }
       .member-item-nickName {
         // width: 150px;
-        height: 50px;
+        height: 40px;
         color: #000000;
         line-height: 40px;
-        font-size: 20px;
+        font-size: 16px;
       }
     }
     .member-item-button {

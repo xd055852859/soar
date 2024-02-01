@@ -73,9 +73,15 @@ watch(
     }"
   >
     <div class="left">
-      <q-btn flat round class="left-arrow-button" @click="setClose(0)">
-        <Icon name="a-shousuo2" :size="36" />
+      <q-btn flat round class="left-arrow-button" @click="setClose(0)" size="10px">
+        <Icon name="a-shousuo2" :size="30" />
       </q-btn>
+      <Icon
+        name="a-xiaoxi2"
+        class="left-notice-button"
+        :size="16"
+        @click.stop="$router.push('/home/notice')"
+      />
       <Left />
     </div>
     <div class="right">
@@ -149,29 +155,36 @@ watch(
   @include flex(space-between, center, null);
 
   .left {
-    width: 350px;
+    width: 300px;
     height: 100vh;
     padding: 10px;
     box-sizing: border-box;
-    background-color: #f2f3f6;
+    background: #fafafb;
     box-shadow: 1px 0px 0px 0px #e1e1e1;
     position: absolute;
     z-index: 2;
     left: 0px;
     top: 0px;
-    @include p-number(25px, 10px);
-    .left-arrow-button {
+    @include p-number(5px, 25px);
+    .left-arrow-button{
       position: absolute;
       z-index: 2;
-      top: -2px;
-      right: -4px;
+      top: 20px;
+      right: 0px;
+    }
+    .left-notice-button {
+      position: absolute;
+      z-index: 2;
+      top: 23px;
+      right: 35px;
+      cursor: pointer;
     }
   }
   .right {
     flex: 1;
     height: 100vh;
     position: relative;
-    background-color: #fafafb;
+    background: #f2f3f6;
     z-index: 1;
     width: 0px;
     // @include p-number(15px, 35px);
@@ -194,7 +207,7 @@ watch(
   }
 }
 .homeLeft {
-  padding-left: 350px;
+  padding-left: 300px;
   .left {
     left: 0px;
   }
@@ -202,7 +215,7 @@ watch(
 .homeRight {
   padding-left: 0px;
   .left {
-    left: -350px;
+    left: -300px;
   }
 }
 .moveLeft {
@@ -225,12 +238,12 @@ watch(
     left: 0px;
   }
   100% {
-    left: -350px;
+    left: -300px;
   }
 }
 @keyframes moveRight {
   0% {
-    left: -350px;
+    left: -300px;
   }
   100% {
     left: 0px;
@@ -238,7 +251,7 @@ watch(
 }
 @keyframes toLeft {
   0% {
-    padding-left: 350px;
+    padding-left: 300px;
   }
   100% {
     padding-left: 0px;
@@ -249,7 +262,7 @@ watch(
     padding-left: 0px;
   }
   100% {
-    padding-left: 350px;
+    padding-left: 300px;
   }
 }
 </style>

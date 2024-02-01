@@ -80,7 +80,7 @@ const changeDevice = () => {
       // html.style.fontSize = deviceFontSize.value;
       // }
     }
-    html.style.fontSize = deviceFontSize.value;
+    // html.style.fontSize = deviceFontSize.value;
   }
 };
 const getMessage = (e) => {
@@ -163,6 +163,6 @@ watch([musicSrc, musicNum], ([newSrc, newNum]) => {
 ::-webkit-scrollbar-thumb {
   /*滚动条里面小方块*/
   border-radius: 2px;
-  background-color: var(--q-primary);
+  background-color: rgb(7, 190, 81, 0.5);
 }
 </style>

@@ -37,7 +37,7 @@ export const docArray = [
   },
   {
     label: "表格",
-    value: "table",
+    value: "sheet",
   },
   {
     label: "演示",
@@ -53,14 +53,14 @@ export const viewArray = [
     value: "taskTree",
     label: "事务",
   },
-  {
-    value: "doc",
-    label: "文档",
-  },
-  {
-    value: "file",
-    label: "文件",
-  },
+  // {
+  //   value: "doc",
+  //   label: "文档",
+  // },
+  // {
+  //   value: "file",
+  //   label: "文件",
+  // },
   {
     value: "knowledgeBase",
     label: "知识库",

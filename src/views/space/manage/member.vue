@@ -341,7 +341,7 @@ watch(memberInput, (newName) => {
   }
   
   .member-table {
-    height: calc(100% - 100px);
+    height: calc(100% - 65px);
   }
 }
 .member-search {

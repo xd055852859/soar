@@ -18,6 +18,7 @@ const { clearStore } = appStore.commonStore;
 const { setUserInfo, setToken } = appStore.authStore;
 const { setSpaceKey, setSpaceList } = appStore.spaceStore;
 const { setTeamKey } = appStore.teamStore;
+const { setCardKey } = appStore.cardStore;
 const userVisible = ref<boolean>(false);
 const userName = ref<string>("");
 const userAvatar = ref<string>("");
@@ -114,16 +115,15 @@ watch(
         />
       </q-avatar>
 
-      <div class="select-item-name single-to-long">
+      <div
+        class="select-item-name single-to-long"
+        style="max-width: calc(100% - 80px); font-weight: bolder"
+      >
         {{ spaceInfo?.name }}
         <q-icon name="o_keyboard_arrow_down" size="28px" />
       </div>
-      <Icon
-        name="a-xiaoxi2"
-        :size="16"
-        @click.stop="$router.push('/home/notice')"
-      />
-      <q-menu style="width: 220px; padding: 10px">
+
+      <q-menu style="width: 300px; padding: 10px">
         <div class="select-third-item icon-point" @click="userVisible = true">
           <q-avatar color="primary" text-color="white" size="lg">
             <img :src="userAvatar ? userAvatar : '/common/defaultPerson.png'" />
@@ -139,10 +139,11 @@ watch(
               :key="`space${index}`"
               clickable
               v-close-popup
-              class="left-space-title dp--center"
+              class="left-space-title dp--center q-px-xs q-py-xs"
               @click="
                 setSpaceKey(item._key);
                 setTeamKey('');
+                setCardKey('');
                 router.push('/home');
               "
             >
@@ -163,8 +164,11 @@ watch(
               <q-icon
                 name="o_settings"
                 size="22px"
+                color="grey-5"
+                class=""
                 @click="chooseSpace(item._key)"
               />
+              <q-space />
             </q-item>
           </VueDraggableNext>
         </q-list>
@@ -376,7 +380,7 @@ watch(
 .left-space-item {
   width: 100%;
   .left-space-title {
-    font-size: 20px;
+    // font-size: 14px;
     @include flex(space-between, center, null);
   }
   .select-item-icon {
@@ -390,15 +394,7 @@ watch(
 }
 .left-menu-item {
   .left-menu-avatar {
-    /* prettier-ignore */
-    min-width:30Px;
-    // padding-right: 0px;
-  }
-  .left-common-title {
-    // height: 100%;
-    font-size: 22px;
-    // @include flex(flex-start, center, null);
-    // line-height: 40px;
+    min-width: 30px;
   }
 }
 </style>

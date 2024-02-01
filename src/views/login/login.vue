@@ -104,7 +104,7 @@ const login = async () => {
     text-align: right;
     line-height: 20px;
     margin: 6px 0px 20px 0px;
-    font-size: 18px;
+    font-size: 14px;
 
     @include flex(space-between, center, null);
     > div {

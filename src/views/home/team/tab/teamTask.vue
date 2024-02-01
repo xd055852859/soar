@@ -4,6 +4,10 @@ import { ResultProps } from "@/interface/Common";
 import api from "@/services/api";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
+const props = defineProps<{
+  type?: string;
+}>();
+const { user } = storeToRefs(appStore.authStore);
 const { teamKey } = storeToRefs(appStore.teamStore);
 const taskList = ref<any>([]);
 const getTaskList = async () => {
@@ -30,7 +34,7 @@ watchEffect(() => {
           <q-circular-progress
             show-value
             font-size="10px"
-            class="q-mr-sm"
+            class="q-mr-md"
             :value="
               item.totalTask === 0
                 ? 0
@@ -41,7 +45,7 @@ watchEffect(() => {
             color="primary"
             track-color="grey-3"
           >
-            <q-avatar size="65px">
+            <q-avatar size="73px">
               <img
                 :src="
                   item.userAvatar
@@ -53,7 +57,7 @@ watchEffect(() => {
           </q-circular-progress>
         </div>
         <div class="teamTask-top-right">
-          <div>{{ item.userName }}</div>
+          <div>{{ item.userName }}{{ item.userKey===user?._key?"(我)":"" }}</div>
           <div>{{ item.finishTask }} / {{ item.totalTask }}</div>
         </div>
       </div>
@@ -62,7 +66,7 @@ watchEffect(() => {
           v-for="(taskItem, taskIndex) in item.taskList"
           :key="`taskItem${taskIndex}`"
         >
-          <fileCard :card="taskItem" type="task" />
+          <fileCard :card="taskItem" type="task" :outType="type"/>
         </template>
       </div>
     </div>
@@ -85,7 +89,7 @@ watchEffect(() => {
       /* prettier-ignore */
       height: 90Px;
       font-size: 16px;
-      @include flex(flex-start, center, null);
+      @include flex(center, center, null);
     }
     .teamTask-bottom {
       width: 100%;

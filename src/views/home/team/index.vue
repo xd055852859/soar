@@ -103,7 +103,11 @@ watch(
                   @click="updateVisible = true"
                   class="common-title dp--center"
                 >
-                  <Icon name="a-huibaoyaosu-yidong21" :size="14"  class="q-mr-sm"/>
+                  <Icon
+                    name="a-huibaoyaosu-yidong21"
+                    :size="14"
+                    class="q-mr-sm"
+                  />
                   <div>
                     {{
                       viewArray[_.findIndex(viewArray, { value: item })].label
@@ -139,12 +143,16 @@ watch(
       v-model="viewTab"
     >
       <!-- <q-route-tab label="最近" :to="`/home/team/recent`" exact /> -->
-      <q-tab
+      <template
         v-for="(item, index) in teamInfo.views"
         :key="`viewTab${index}`"
-        :label="viewArray[_.findIndex(viewArray, { value: item })].label"
-        :name="viewArray[_.findIndex(viewArray, { value: item })].value"
-      />
+      >
+        <q-tab
+          v-if="_.findIndex(viewArray, { value: item }) !== -1"
+          :label="viewArray[_.findIndex(viewArray, { value: item })].label"
+          :name="viewArray[_.findIndex(viewArray, { value: item })].value"
+        />
+      </template>
       <div class="full-width row justify-end"></div>
     </q-tabs>
     <div class="team-box"><router-view></router-view></div>
