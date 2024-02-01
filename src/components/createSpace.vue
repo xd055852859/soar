@@ -103,19 +103,19 @@ const createSpace = async () => {
 <style scoped lang="scss">
 .createSpace-title {
   width: 100%;
-  height: 42px;
-  font-size: 30px;
+  height: 25px;
+  font-size: 22px;
   font-weight: bold;
   text-align: left;
   color: #161616;
-  line-height: 42px;
+  line-height: 25px;
   margin-bottom: 8px;
 }
 .createSpace-subtitle {
   width: 100%;
   height: 22px;
   opacity: 0.8;
-  font-size: 16px;
+  font-size: 14px;
   font-family: PingFang SC, PingFang SC-Regular;
   font-weight: Regular;
   text-align: left;
@@ -126,7 +126,7 @@ const createSpace = async () => {
 .createSpace-input-title {
   width: 100%;
   height: 25px;
-  font-size: 18px;
+  font-size: 14px;
   text-align: left;
   color: #161616;
   line-height: 25px;

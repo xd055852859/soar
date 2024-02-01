@@ -85,20 +85,20 @@ watch(spaceList, (newList) => {
   background-repeat: no-repeat;
   @include flex(center, center, null);
   .space-logo {
-    width: 255px;
-    height: 70px;
+    width: 18%;
+    height: 9%;
     position: fixed;
     z-index: 10;
-    left: 55px;
-    top: 50px;
+    left: 4%;
+    top: 5%;
     @include flex(center, center, null);
     img {
       width: 100%;
     }
   }
   .space-box {
-    width: 716px;
-    min-height: 517px;
+    width: 520px;
+    min-height: 300px;
     background: #ffffff;
     border-radius: 25px;
     box-shadow: 0px 2px 9px 0px rgba(178, 178, 178, 0.5);
@@ -108,12 +108,12 @@ watch(spaceList, (newList) => {
 
     .space-container {
       width: 100%;
-      @include p-number(61px, 54px);
+      @include p-number(45px, 45px);
       @include scroll();
       .space-container-title {
         width: 100%;
         height: 30px;
-        font-size: 20px;
+        font-size: 16px;
         font-family: PingFang SC, PingFang SC-Semibold;
         font-weight: bold;
         text-align: left;
@@ -125,7 +125,7 @@ watch(spaceList, (newList) => {
         width: 100%;
         height: 30px;
         opacity: 0.8;
-        font-size: 16px;
+        font-size: 14px;
         color: #161616;
         line-height: 22px;
         margin-bottom: 42px;
@@ -137,7 +137,7 @@ watch(spaceList, (newList) => {
           border-radius: 10px;
           margin-bottom: 15px;
           cursor: pointer;
-          @include p-number(14px, 26px);
+          @include p-number(14px, 14px);
           @include flex(flex-start, center, null);
           .space-item-left {
             width: 52px;
@@ -161,7 +161,7 @@ watch(spaceList, (newList) => {
               .top {
                 width: 100%;
                 height: 28px;
-                font-size: 20px;
+                font-size: 16px;
                 font-weight: bold;
                 text-align: left;
                 color: #161616;
@@ -171,7 +171,7 @@ watch(spaceList, (newList) => {
                 width: 100%;
                 height: 22px;
                 opacity: 0.8;
-                font-size: 16px;
+                font-size: 14px;
                 text-align: left;
                 color: #161616;
                 line-height: 22px;

@@ -8,7 +8,6 @@ import _ from "lodash";
 const { user } = storeToRefs(appStore.authStore);
 const { mateList } = storeToRefs(appStore.mateStore);
 const signVisible = ref<boolean>(false);
-
 </script>
 <template>
   <cHeader title="队友">
@@ -106,22 +105,22 @@ const signVisible = ref<boolean>(false);
   @include p-number(10px, 25px);
   @include flex(flex-start, flex-start, null);
   .mate-box-item {
-    width: 302px;
+    width: 21%;
     // height: 328px;
     background: #ffffff;
     border-radius: 14px;
-    margin-right: 60px;
+    margin-right: 6%;
     position: relative;
     z-index: 1;
-    @include p-number(30px, 0px);
+    @include p-number(20px, 0px);
     @include scroll();
     .mate-box-avatar {
       width: 100%;
-      height: 198px;
+      height: 120px;
       @include flex(center, center, null);
       .mate-item-avatar {
-        width: 198px;
-        height: 198px;
+        width: 120px;
+        height: 120px;
         border-radius: 50%;
         overflow: hidden;
         img {
@@ -131,11 +130,13 @@ const signVisible = ref<boolean>(false);
         }
       }
     }
-
+    &:nth-child(4n) {
+      margin-right: 0px;
+    }
     .mate-item-name {
       width: 100%;
       height: 28px;
-      font-size: 20px;
+      font-size: 16px;
       text-align: center;
       color: #161616;
       line-height: 28px;

@@ -16,6 +16,11 @@ watch(
   },
   { immediate: true }
 );
+watch(dialogVisible, (newVisible) => {
+  if (!newVisible) {
+    emits('close')
+  }
+});
 </script>
 <template>
   <q-dialog v-model="dialogVisible">
@@ -51,7 +56,7 @@ watch(
 <style scoped lang="scss"></style>
 <style lang="scss">
 .dialog-title {
-  font-size: 28px;
+  font-size: 18px;
   font-weight: bold;
 }
 </style>

@@ -17,7 +17,6 @@ import TeamTaskTree from "../team/tab/teamTaskTree.vue";
   .task-box {
     width: 100%;
     height: calc(100% - 65px);
-    @include p-number(10px, 25px);
   }
 }
 </style>

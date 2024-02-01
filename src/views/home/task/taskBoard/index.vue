@@ -7,6 +7,7 @@ import { planArray } from "@/services/config/config";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import _ from "lodash";
+import Icon from "@/components/common/Icon.vue";
 const { user } = storeToRefs(appStore.authStore);
 const { spaceMemberList, spaceKey } = storeToRefs(appStore.spaceStore);
 const props = defineProps<{
@@ -211,9 +212,14 @@ watchEffect(() => {
                   class="row items-center justify-between full-width taskBoard-item"
                 >
                   <template v-if="prop.node.executor">
-                    <q-icon
-                      :name="prop.node.hasDone ? 'o_check_circle' : 'o_circle'"
-                      color="primary"
+                    <Icon
+                      :name="
+                        prop.node.hasDone
+                          ? 'a-quangouxuan21'
+                          : 'a-quanxuan-weixuanzhong21'
+                      "
+                      :size="20"
+                      color="#333"
                       class="q-mr-xs"
                       @click="editFinishPercent(prop.node, index)"
                     />

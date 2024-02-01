@@ -38,13 +38,18 @@ const deleteTeam = (key) => {
 };
 </script>
 <template>
-  <q-item clickable v-close-popup @click="">
-    <q-item-section  class="common-title">合并到</q-item-section>
+  <q-item clickable v-close-popup @click="" v-if="info.role === 0">
+    <q-item-section class="common-title">合并到</q-item-section>
   </q-item>
   <q-item clickable v-close-popup @click="">
     <q-item-section class="common-title">克隆</q-item-section>
   </q-item>
-  <q-item clickable v-close-popup @click="deleteTeam(info._key)">
+  <q-item
+    clickable
+    v-close-popup
+    @click="deleteTeam(info._key)"
+    v-if="info.role === 0"
+  >
     <q-item-section class="common-title">删除</q-item-section>
   </q-item>
 </template>

@@ -1437,11 +1437,6 @@ acorn@^8.10.0, acorn@^8.11.2:
   resolved "https://registry.npmmirror.com/acorn/-/acorn-8.11.2.tgz#ca0d78b51895be5390a5903c5b3bdcdaf78ae40b"
   integrity sha512-nc0Axzp/0FILLEVsm4fNwLCwMttvhEI263QtVPQcbpfZZ3ts0hLsZGOpE6czNlid7CJ9MlyH8reXkpsf3YUY4w==
 
-amfe-flexible@^2.2.1:
-  version "2.2.1"
-  resolved "https://registry.npmmirror.com/amfe-flexible/-/amfe-flexible-2.2.1.tgz#353f00289e4d38ca88a21eb3854420308af0b559"
-  integrity sha512-L2VfvDzoETBjhRptg5u/IUuzHSuxm22JpSRb404p/TBGeRfwWmmNEbB+TFPIP/sS/+pbM18bCFH9QnMojLuPNw==
-
 ansi-styles@^3.2.1:
   version "3.2.1"
   resolved "https://registry.npmmirror.com/ansi-styles/-/ansi-styles-3.2.1.tgz#41fbb20243e50b12be0f04b8dedbf07520ce841d"
@@ -2480,11 +2475,6 @@ postcss-pseudo-class-any-link@^9.0.0:
   integrity sha512-cKYGGZ9yzUZi+dZd7XT2M8iSDfo+T2Ctbpiizf89uBTBfIpZpjvTavzIJXpCReMVXSKROqzpxClNu6fz4DHM0Q==
   dependencies:
     postcss-selector-parser "^6.0.13"
-
-postcss-pxtorem@^6.1.0:
-  version "6.1.0"
-  resolved "https://registry.npmmirror.com/postcss-pxtorem/-/postcss-pxtorem-6.1.0.tgz#7e6410e30426adef53bad6c4c5f00cd5f586937c"
-  integrity sha512-ROODSNci9ADal3zUcPHOF/K83TiCgNSPXQFSbwyPHNV8ioHIE4SaC+FPOufd8jsr5jV2uIz29v1Uqy1c4ov42g==
 
 postcss-replace-overflow-wrap@^4.0.0:
   version "4.0.0"

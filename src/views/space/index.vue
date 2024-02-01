@@ -147,7 +147,7 @@ const uploadImage = (file, type) => {
   height: 100vh;
   @include flex(space-between, center, null);
   .left {
-    width: 350px;
+    width: 250px;
     height: 100vh;
     padding: 20px 0px 10px 0px;
     box-sizing: border-box;
@@ -169,7 +169,7 @@ const uploadImage = (file, type) => {
     background-color: #fafafb;
     z-index: 1;
     width: 0;
-    @include p-number(15px, 35px);
+    // @include p-number(15px, 35px);
   }
 }
 </style>
@@ -178,12 +178,12 @@ const uploadImage = (file, type) => {
 .left-menu-item {
   .left-menu-avatar {
     /* prettier-ignore */
-    min-width:30Px;
+    min-width:30px;
     // padding-right: 0px;
   }
   .left-common-title {
     // height: 100%;
-    font-size: 22px;
+    font-size: 14px;
     // @include flex(flex-start, center, null);
     // line-height: 40px;
   }

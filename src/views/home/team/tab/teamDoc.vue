@@ -13,7 +13,7 @@ const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { teamKey } = storeToRefs(appStore.teamStore);
 const { cardInfo, cardKey } = storeToRefs(appStore.cardStore);
 const { setCardKey, setCardInfo } = appStore.cardStore;
-const { setTeamKey } = appStore.teamStore;
+const { setTargetTeamKey } = appStore.teamStore;
 const props = defineProps<{
   type?: string;
 }>();
@@ -25,7 +25,7 @@ const fileKey = ref<string>("");
 const fileInfo = ref<any>(null);
 const total = ref<number>(0);
 const getDocList = async () => {
-  let fileRes = (await api.request.get("card", {
+  let fileRes = (await api.request.get("knowledgeBase/card", {
     teamKey: spaceKey.value,
     projectKey: props.type ? "" : teamKey.value,
     cardType: "doc",
@@ -43,7 +43,7 @@ const getDocList = async () => {
       // // setCardKey(fileRes.data[0]._key);
       fileKey.value = fileRes.data[0]._key;
       fileInfo.value = fileRes.data[0];
-      setTeamKey(fileRes.data[0].projectInfo._key);
+      setTargetTeamKey(fileRes.data[0].projectInfo._key);
     }
     total.value = fileRes.total as number;
   }
@@ -55,7 +55,7 @@ const formatUrl = (detail) => {
   const patchData = `["content", "title"]`;
   const uptokenApi = api.API_URL + "account/qiniuToken";
   const uptokenParams = `{"target": "cdn-soar"}`;
-  switch (detail.subType) {
+  switch (detail.type) {
     case "text":
       docUrl.value = `https://notecute.com/#/editor?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
       break;
@@ -68,7 +68,7 @@ const formatUrl = (detail) => {
     case "ppt":
       docUrl.value = `https://ppt.mindcute.com/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
       break;
-    case "table":
+    case "sheet":
       docUrl.value = `https://sheets.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
       break;
   }
@@ -95,7 +95,7 @@ const chooseCard = (detail, type) => {
     case "search":
       fileKey.value = detail._key;
       fileInfo.value = detail;
-      setTeamKey(detail.projectInfo._key);
+      setTargetTeamKey(detail.projectInfo._key);
       console.log(fileKey.value, fileInfo.value);
       break;
     case "update":
@@ -147,11 +147,11 @@ watchEffect(() => {
       </q-btn>
       <q-space v-else />
       <q-select
-        style="width: 150px"
-        outlined
+        style="width: 100px"
         v-model="subType"
         :options="docArray"
         dense
+        class="q-mr-sm"
         emit-value
         map-options
       />
@@ -171,6 +171,7 @@ watchEffect(() => {
             type="doc"
             @chooseCard="chooseCard"
             :chooseKey="fileKey"
+            :outType="type"
           />
         </template>
       </div>
@@ -184,24 +185,29 @@ watchEffect(() => {
 .teamDoc {
   width: 100%;
   height: 100%;
-  @include p-number(10px, 25px);
+  position: relative;
+  z-index: 1;
   .teamDoc-header {
-    width: 100%;
-    height: 70px;
-    @include flex(space-between, center, null);
+    width: 150px;
+    // height: 70px;
+    position: absolute;
+    z-index: 5;
+    top: -40px;
+    right: 0px;
+    @include flex(flex-end, center, null);
   }
   .teamDoc-box {
     width: 100%;
     height: calc(100% - 70px);
     @include flex(space-between, center, null);
     .teamDoc-box-left {
-      width: 35%;
+      width: 350px;
       height: 100%;
       @include p-number(10px, 10px);
       @include scroll();
     }
     .teamDoc-box-right {
-      width: 65%;
+      width: calc(100% - 350px);
       height: 100%;
     }
   }

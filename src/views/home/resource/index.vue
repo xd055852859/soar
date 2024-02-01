@@ -36,8 +36,7 @@ const resourceTab = ref<string>("doc");
   height: 100%;
   .resource-box {
     width: 100%;
-    height: calc(100% - 105px);
-    @include p-number(10px, 25px);
+    height: calc(100% - 45px);
   }
 }
 </style>

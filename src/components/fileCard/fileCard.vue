@@ -13,8 +13,8 @@ import { formatDocUrl } from "@/services/util/url";
 const $q = useQuasar();
 const dayjs: any = inject("dayjs");
 const { token, user } = storeToRefs(appStore.authStore);
-const { cardKey } = storeToRefs(appStore.cardStore);
-
+const { overKey } = storeToRefs(appStore.commonStore);
+const { setOverKey } = appStore.commonStore;
 const { setTargetTeamKey } = appStore.teamStore;
 const { setCardKey, setCardVisible } = appStore.cardStore;
 const props = defineProps<{
@@ -28,7 +28,6 @@ const emits = defineEmits<{
 }>();
 
 const fileDetail = ref<any>(null);
-
 //任务
 // const chooseTaskTree = (detail) => {
 //   setCardKey(detail._key);
@@ -157,17 +156,25 @@ const handleDownload = (detail) => {
   <template v-if="type === 'taskTree'">
     <q-card
       flat
-      bordered
-      class="teamTask-box-container q-mb-md icon-point card-hover"
+      class="teamTaskTree-box-container q-mb-md icon-point card-hover q-py-none"
       @click="chooseTaskTree(card)"
-      :style="
-        chooseKey === card._key ? { borderLeft: '6px solid #07be51' } : null
-      "
+      :style="chooseKey === card._key ? { border: '2px solid #4a4a4a' } : null"
+      @mouseenter="setOverKey(card._key)"
     >
       <!-- red amber green -->
-      <q-card-section class="full-width teamTask-box-top">
+      <q-card-section class="full-width teamTaskTree-box-top q-py-none">
         <div>
-          <q-btn flat round size="12px">
+          <template v-if="outType && outType !== 'recent'"
+            >{{ card.projectInfo?.name }} /
+          </template>
+          {{ card.title }}
+        </div>
+
+        <q-card-section
+          class="justify-end q-pa-none teamTask-box-icon"
+          v-if="overKey === card._key"
+        >
+          <q-btn flat round size="9px">
             <Icon
               name="a-mokexiaoshumiao-weixinyuan2"
               :size="18"
@@ -215,23 +222,10 @@ const handleDownload = (detail) => {
               </q-list>
             </q-menu>
           </q-btn>
-
-          <template v-if="outType && outType !== 'recent'"
-            >{{ card.projectInfo?.name }} /
-          </template>
-          {{ card.title }}
-        </div>
-
-        <q-card-section class="justify-end q-pa-none">
-          <q-btn
-            flat
-            round
-            size="12px"
-            @click.stop="chooseTaskTree(card, true)"
-          >
+          <q-btn flat round size="9px" @click.stop="chooseTaskTree(card, true)">
             <Icon name="quanping_o" :size="22" />
           </q-btn>
-          <q-btn flat round icon="o_more_horiz" size="12px" @click.stop="">
+          <q-btn flat round icon="o_more_horiz" size="9px" @click.stop="">
             <q-menu class="q-pa-sm">
               <q-list dense>
                 <!--  @click="editFile(item._key, index)" -->
@@ -245,25 +239,26 @@ const handleDownload = (detail) => {
             </q-menu>
           </q-btn>
         </q-card-section>
+        <q-space v-else></q-space>
       </q-card-section>
-      <q-card-section class="teamTaskTree-box-bottom">
+      <div class="teamTaskTree-box-bottom q-px-sm">
         <q-circular-progress
           v-for="(taskItem, taskIndex) in card.treeMember"
           :key="`taskProgress${taskIndex}`"
           show-value
           font-size="10px"
-          class="q-mr-sm"
+          class="q-mr-xs q-mb-sm"
           :value="
             taskItem.totalTask === 0
               ? 0
               : (taskItem.finishTask / taskItem.totalTask) * 100
           "
-          size="45px"
+          size="36px"
           :thickness="0.25"
           :color="taskItem._key !== user?._key ? 'primary' : 'red'"
           track-color="grey-3"
         >
-          <q-avatar size="36px" class="shadow-3">
+          <q-avatar size="30px" class="shadow-3">
             <img
               :src="
                 taskItem.userAvatar
@@ -276,95 +271,87 @@ const handleDownload = (detail) => {
             </q-tooltip>
           </q-avatar>
         </q-circular-progress>
-      </q-card-section>
+      </div>
     </q-card>
   </template>
   <template v-else-if="type === 'doc'">
     <q-card
-      class="teamDoc-box-container q-mb-md icon-point card-hover"
-      @click="chooseDoc(card.subType, card, false)"
-      :style="
-        chooseKey === card._key ? { borderLeft: '6px solid #07be51' } : null
-      "
+      flat
+      class="teamFile-box-container q-mb-md icon-point card-hover q-py-none"
+      @click="chooseDoc(card.type, card, false)"
+      :style="chooseKey === card._key ? { border: '2px solid #4a4a4a' } : null"
+      @mouseenter="setOverKey(card._key)"
     >
-      <q-card-section class="teamDoc-box-top">
-        <div>
-          <template v-if="outType && outType !== 'recent'"
-            ># {{ card.projectInfo?.name }} /
-          </template>
+      <q-card-section class="teamFile-box-top q-py-none">
+        <div class="teamFile-box-top-title">
+          <template v-if="outType"># {{ card.projectInfo?.name }} / </template>
           {{ card.title }}
         </div>
-        <div>
-          <q-chip color="teal" text-color="white" icon="description">
+        <div class="teamFile-box-top-icon" v-if="overKey === card._key">
+          <!-- <q-chip color="teal" text-color="white" icon="description">
             {{
               docArray[_.findIndex(docArray, { value: card.subType })]?.label
             }}
-          </q-chip>
+          </q-chip> -->
           <q-btn
             flat
             round
-            size="12px"
-            @click.stop="chooseTaskTree(card, true)"
+            size="8px"
+            @click.stop="chooseDoc(card.type, card, true)"
           >
             <Icon name="quanping_o" :size="22" />
           </q-btn>
-          <q-btn flat round icon="o_more_horiz" size="12px" @click.stop="">
+          <q-btn flat round icon="o_more_horiz" size="8px" @click.stop="">
             <q-menu class="q-pa-sm">
               <q-list dense>
                 <!--  @click="editFile(item._key, index)" -->
                 <q-item clickable v-close-popup @click="updateTitle(card)">
                   <q-item-section class="common-title">重命名</q-item-section>
                 </q-item>
-                <q-item clickable v-close-popup @click="deleteCard(card)">
+                <!-- <q-item clickable v-close-popup @click="deleteCard(card)">
                   <q-item-section class="common-title">删除</q-item-section>
-                </q-item>
+                </q-item> -->
               </q-list>
             </q-menu>
           </q-btn>
         </div>
       </q-card-section>
-      <q-card-section class="teamDoc-box-bottom">
+      <!-- <q-card-section class="teamDoc-box-bottom">
         <div>
           <q-btn dense flat color="grey-6" round icon="o_link">
-            <!-- <q-badge color="red" floating>0</q-badge> -->
           </q-btn>
           <q-btn dense flat color="grey-6" round icon="o_visibility">
-            <!-- <q-badge color="red" floating>4</q-badge> -->
           </q-btn>
-          <!-- <span v-for="(personItem,personIndex) in item."></span> -->
         </div>
         <div>{{ dayjs(card.updateTime).format("YYYY-MM-DD HH:mm") }}</div>
-      </q-card-section>
+      </q-card-section> -->
     </q-card>
   </template>
   <template v-else-if="type === 'file'">
     <q-card
+      flat
       class="teamFile-box-container q-mb-md icon-point card-hover"
       @click="chooseFile(card)"
-      :style="
-        chooseKey === card._key ? { borderLeft: '6px solid #07be51' } : null
-      "
+      :style="chooseKey === card._key ? { border: '2px solid #4a4a4a' } : null"
+      @mouseenter="setOverKey(card._key)"
     >
-      <q-card-section class="teamFile-box-top">
-        <div>
+      <q-card-section class="teamFile-box-top q-py-none">
+        <div class="teamFile-box-top-title">
           <template v-if="outType && outType !== 'recent'"
             ># {{ card.projectInfo?.name }} /
           </template>
-          {{ card.title }}
-        </div>
-        <div>
-          <q-chip color="cyan" text-color="white" icon="cloud_upload"
-            >{{ card.subType }}
-            <!-- {{
-              fileArray[_.findIndex(fileArray, { value: card.subType })]?.label
-            }} -->
-          </q-chip>
-          <q-icon
-            name="o_fullscreen"
+          <!-- <q-icon
+            name="cloud_upload"
             size="25px"
             @click.stop="chooseFile(card, true)"
-          />
-          <q-btn flat round icon="more_horiz" size="12px" @click.stop="">
+          /> -->
+          {{ card.title }}
+        </div>
+        <div class="teamFile-box-top-icon" v-if="overKey === card._key">
+          <q-btn flat round size="8px" @click.stop="chooseFile(card, true)">
+            <Icon name="quanping_o" :size="22" />
+          </q-btn>
+          <q-btn flat round icon="more_horiz" size="9px" @click.stop="">
             <q-menu class="q-pa-sm">
               <q-list dense>
                 <!--  @click="editFile(item._key, index)" -->
@@ -374,20 +361,17 @@ const handleDownload = (detail) => {
                 <q-item clickable v-close-popup @click="handleDownload(card)">
                   <q-item-section class="common-title">下载</q-item-section>
                 </q-item>
-                <q-item clickable v-close-popup @click="deleteCard(card)">
+                <!-- <q-item clickable v-close-popup @click="deleteCard(card)">
                   <q-item-section class="common-title">删除</q-item-section>
-                </q-item>
+                </q-item> -->
               </q-list>
             </q-menu>
           </q-btn>
         </div>
       </q-card-section>
-      <q-card-section class="teamFile-box-bottom">
-        <div>
-          <!-- <span v-for="(personItem,personIndex) in item."></span> -->
-        </div>
+      <!-- <q-card-section class="teamFile-box-bottom">
         <div>{{ dayjs(card.updateTime).format("YYYY-MM-DD HH:mm") }}</div>
-      </q-card-section>
+      </q-card-section> -->
     </q-card>
   </template>
   <template v-else-if="type === 'task'">
@@ -395,18 +379,31 @@ const handleDownload = (detail) => {
     <q-card
       class="teamTask-box-container q-mb-md icon-point card-hover"
       :dense="!outType"
-      :style="
-        chooseKey === card._key ? { borderLeft: '6px solid #07be51' } : null
-      "
+      :style="chooseKey === card._key ? { border: '2px solid #4a4a4a' } : null"
+      @mouseenter="setOverKey(card._key)"
     >
-      <q-card-section class="teamTask-box-top">
-        <div>
+      <q-card-section class="teamTask-box-top q-py-none">
+        <!-- <div>
           <template v-if="outType"># {{ card.projectInfo.name }}</template>
-        </div>
-        <div>
-          {{ dayjs(card.updateTime).fromNow() }}
-          <q-btn flat round icon="more_horiz" size="12px" @click.stop="">
-            <q-menu anchor="top right" self="top left" class="q-pa-sm">
+        </div> -->
+
+        <!-- <q-icon
+          :name="card.hasDone ? 'o_check_circle' : 'o_circle'"
+          size="20px"
+          class="q-mr-sm"
+          @click="finishTask(card)"
+        /> -->
+        <Icon
+          :name="card.hasDone ? 'a-quangouxuan21' : 'a-quanxuan-weixuanzhong21'"
+          :size="20"
+          color="#333"
+          class="q-mr-sm"
+          @click="finishTask(card)"
+        />
+        <div class="teamTask-box-top-title">{{ card.name }}</div>
+        <div class="teamTask-box-top-icon" v-if="overKey === card._key">
+          <q-btn flat round icon="more_horiz" size="9px" @click.stop="">
+            <q-menu class="q-pa-sm">
               <q-list dense>
                 <!--  @click="editFile(item._key, index)" -->
                 <!-- <q-item clickable v-close-popup>
@@ -420,19 +417,7 @@ const handleDownload = (detail) => {
           </q-btn>
         </div>
       </q-card-section>
-      <q-card-section class="teamTask-box-center common-title">
-        <q-icon
-          :name="card.hasDone ? 'o_check_circle' : 'o_circle'"
-          size="20px"
-          class="q-mr-sm"
-          @click="finishTask(card)"
-        />
-        {{ card.name }}
-      </q-card-section>
-      <q-card-section class="teamTask-box-bottom common-title">
-        <div>
-          <!-- <span v-for="(personItem,personIndex) in item."></span> -->
-        </div>
+      <q-card-section class="teamTask-box-bottom q-py-none">
         <div class="dp-center-center">
           <q-avatar size="30px" class="q-mr-sm">
             <img
@@ -456,32 +441,57 @@ const handleDownload = (detail) => {
           </q-avatar>
           {{ card.executorInfo?.userName }}
         </div>
+        {{ dayjs(card.updateTime).fromNow() }}
       </q-card-section>
     </q-card></template
   >
   <template v-else-if="type === 'knowledgeBase'"></template>
 </template>
 <style scoped lang="scss">
-.teamDoc-box-container {
-  .teamDoc-box-top {
-    width: 100%;
-    height: 50px;
-    font-size: 20px;
-    @include flex(space-between, center, null);
-  }
-  .teamDoc-box-bottom {
-    width: 100%;
-    height: 50px;
-    font-size: 16px;
-    @include flex(space-between, center, null);
-  }
-}
+// .teamDoc-box-container {
+//   width: 100%;
+//   height: 40px;
+//   border-radius: 0px;
+//   padding: 0px 10px;
+//   box-sizing: border-box;
+//   .teamDoc-box-top {
+//     width: 100%;
+//     height: 100%;
+//     font-size: 14px;
+//     padding: 5px 0px;
+//     box-sizing: border-box;
+//     @include flex(space-between, center, null);
+//   }
+//   .teamDoc-box-bottom {
+//     width: 100%;
+//     height: 50px;
+//     font-size: 12px;
+//     @include flex(space-between, center, null);
+//   }
+// }
 .teamFile-box-container {
+  width: 100%;
+  min-height: 40px;
+  border-radius: 0px;
+  padding: 0px 10px;
+  box-sizing: border-box;
   .teamFile-box-top {
     width: 100%;
-    height: 50px;
-    font-size: 20px;
+    min-height: 40px;
+    font-size: 14px;
+    padding: 5px 0px;
+    box-sizing: border-box;
     @include flex(space-between, center, null);
+    .teamFile-box-top-title {
+      flex: 1;
+      line-height: 18px;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+    .teamFile-box-top-icon {
+      width: 52px;
+      flex-shrink: 0;
+    }
   }
   .teamFile-box-bottom {
     width: 100%;
@@ -490,28 +500,64 @@ const handleDownload = (detail) => {
     @include flex(space-between, center, null);
   }
 }
-.teamTask-box-container {
+.teamTaskTree-box-container {
+  width: 100%;
+  min-height: 100px;
+  border-radius: 0px;
   padding: 5px 0px;
-  .teamTask-box-top {
+  box-sizing: border-box;
+  .teamTaskTree-box-top {
     width: 100%;
-    height: 40px;
-    font-size: 20px;
+    min-height: 35px;
+    font-size: 14px;
     @include flex(space-between, center, null);
-  }
-  .teamTask-box-center {
-    width: 100%;
-    min-height: 50px;
+    .teamTaskTree-box-top-title {
+      flex: 1;
+      // line-height: 18px;
+      // word-wrap: break-word;
+      // white-space: pre-wrap;
+      // text-align: left;
+    }
+    .teamTaskTree-box-top-icon {
+      width: 25px;
+      flex-shrink: 0;
+    }
   }
   .teamTaskTree-box-bottom {
     width: 100%;
-    // height: 80px;
+    min-height: 50px;
     @include scroll();
-    @include flex(flex-start, center, null);
+    @include flex(flex-start, center, wrap);
+  }
+}
+.teamTask-box-container {
+  width: 100%;
+  min-height: 80px;
+  border-radius: 0px;
+  padding: 5px 0px;
+  box-sizing: border-box;
+  .teamTask-box-top {
+    width: 100%;
+    min-height: 55px;
+    font-size: 14px;
+    @include flex(space-between, center, null);
+    .teamTask-box-top-title {
+      flex: 1;
+      // line-height: 18px;
+      // word-wrap: break-word;
+      // white-space: pre-wrap;
+      // text-align: left;
+    }
+    .teamTask-box-top-icon {
+      width: 25px;
+      flex-shrink: 0;
+    }
   }
   .teamTask-box-bottom {
     width: 100%;
-    height: 50px;
-    @include flex(flex-end, center, null);
+    // height: 80px;
+    @include scroll();
+    @include flex(space-between, center, null);
   }
 }
 </style>

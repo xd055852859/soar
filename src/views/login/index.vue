@@ -84,8 +84,8 @@ onMounted(() => {
   @include flex(center, center, null);
 
   .login-box {
-    width: 560px;
-    height: 680px;
+    width: 420px;
+    height: 580px;
     background: #ffffff;
     border-radius: 12px;
     box-shadow: 0px 2px 14px 0px rgba(0, 0, 0, 0.11);
@@ -140,7 +140,7 @@ onMounted(() => {
         .login-prompt {
           width: 100%;
           height: 20px;
-          font-size: 18px;
+          font-size: 14px;
           text-align: center;
           cursor: pointer;
           line-height: 20px;
@@ -174,11 +174,10 @@ onMounted(() => {
     @include flex(center, center, wrap);
 
     .title-box-logo {
-      width: 853px;
-      height: 234px;
+      width: 44%;
+      height: 22%;
       // margin-top: 319px;
-      margin-bottom: 57px;
-
+      margin-bottom: 5%;
       img {
         width: 100%;
         height: 100%;
@@ -187,27 +186,26 @@ onMounted(() => {
 
     .title-box-title {
       width: 100%;
-      height: 87px;
-      font-size: 62px;
+      height: 40px;
+      font-size: 46px;
       font-weight: 600;
-      font-family: PingFang SC, PingFang SC-Semibold;
-      font-weight: Semibold;
       color: #313131;
-      line-height: 87px;
-      margin-bottom: 4px;
+      line-height: 40px;
+      margin-bottom: 14px;
       text-align: center;
     }
 
     .title-box-subtitle {
       width: 100%;
-      height: 40px;
-      font-size: 20px;
+      height: 15px;
+      font-size: 14px;
       font-family: Arial, Arial-Regular;
       font-weight: Regular;
       color: #b3b3b3;
-      line-height: 23px;
+      line-height: 15px;
       letter-spacing: 0.61px;
       text-align: center;
+      margin-bottom: 3%;
     }
     .title-box-footer {
       width: 100%;
@@ -215,11 +213,11 @@ onMounted(() => {
       line-height: 28px;
       position: fixed;
       left: 0px;
-      bottom: 77px;
+      bottom: 7%;
       text-align: center;
       .title-box-ICPLicensing {
         height: 28px;
-        font-size: 20px;
+        font-size: 12px;
         font-family: PingFang SC, PingFang SC-Regular;
         font-weight: Regular;
         color: #969696;
@@ -229,19 +227,19 @@ onMounted(() => {
       }
     }
     .title-box-button {
-      width: 255px;
-      height: 87px;
+      width: 13%;
+      height: 8%;
       position: fixed;
       z-index: 2;
-      top: 84px;
-      right: 90px;
+      top: 8%;
+      right: 5%;
       border-radius: 44px;
-      font-size: 29px;
+      font-size: 20px;
       font-family: PingFang SC, PingFang SC-Medium;
       font-weight: Medium;
       text-align: center;
       color: #ffffff;
-      line-height: 41px;
+      line-height: 40px;
       letter-spacing: 4.97px;
     }
   }

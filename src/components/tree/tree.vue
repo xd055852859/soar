@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { applyReactInVue, applyPureReactInVue } from "veaury";
 import Tree from "@/components/react_app/tree.jsx";
+import Editor from "@/components/note/Editor.vue";
 import { ResultProps } from "@/interface/Common";
 import cDialog from "@/components/common/cDialog.vue";
 import cCalendar from "@/components/common/cCalendar.vue";
@@ -17,6 +18,7 @@ import fileCard from "../fileCard/fileCard.vue";
 import NoteEditor from "@/views/home/note/NoteEditor.vue";
 import { tagArray } from "@/services/config/config";
 import { setMessage } from "@/services/util/common";
+import { formatDocUrl } from "@/services/util/url";
 const CustomTree = applyReactInVue(Tree);
 const { token, user } = storeToRefs(appStore.authStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
@@ -37,13 +39,17 @@ const treeHeight = ref<number>(0);
 const rootKey = ref<string>("");
 const treeRef = ref<any>(null);
 const targetEl = ref<any>(null);
+const contentTargetEl = ref<any>(null);
 const menuVisible = ref<boolean>(false);
+const contentVisible = ref<boolean>(false);
+const changed = ref(false);
 
 const nodeDetail = ref<any>(null);
 const nodeInfo = ref<any>(null);
 const nodes = ref<any>(null);
 const selectnodes = ref<any>(null);
-const nodeContent = ref<string>("");
+const nodeContent = ref<any>("");
+const editorRef = ref();
 
 const commentVisible = ref<boolean>(false);
 const commentList = ref<string>("");
@@ -69,7 +75,7 @@ const cardType = ref<string>("doc");
 // const imageWidth = ref<number>(0);
 const noteDialog = ref(false);
 const detailDialog = ref(false);
-
+let timeout: any;
 const colorArray = [
   "rgb(89, 89, 89)",
   "rgb(251, 191, 188)",
@@ -104,20 +110,49 @@ const getTreeInfo = async (key) => {
   }
 };
 const showMenu = (node, el) => {
+  console.log(el);
   menuVisible.value = true;
   targetEl.value = el;
-  nodeInfo.value = { ...node };
   nodes.value = treeRef.value.__veauryReactRef__.getNodeInfo()[1];
+  nodeInfo.value = { ...nodes.value[node._key] };
   nodeContent.value = node.content;
 };
-const updateContent = () => {
+const showContent = (node, el) => {
+  contentVisible.value = true;
+  contentTargetEl.value = el;
+
+  nodes.value = treeRef.value.__veauryReactRef__.getNodeInfo()[1];
+  nodeInfo.value = { ...nodes.value[node._key] };
+  nodeContent.value = node.content;
+};
+const updateContent = (title, json) => {
+  let newNode = { ...nodeInfo.value };
   treeRef.value.__veauryReactRef__.updateNodeObj(
-    { content: nodeContent.value },
-    async (newNodes) => {},
-    nodeDetail.value._key
+    { content: json },
+    async (newNodes) => {
+      newNodes[newNode._key].content = json;
+      // nodeContent.value = json;
+      treeRef.value.__veauryReactRef__.setNodes(newNodes);
+      nodes.value = newNodes;
+    },
+    nodeInfo.value._key
   );
 };
+const saveContent = () => {
+  if (editorRef.value) {
+    editorRef.value.handlePost();
+  }
+};
+const handleChange = () => {
+  clearTimeout(timeout);
+  changed.value = true;
+  timeout = setTimeout(() => {
+    saveContent();
+    changed.value = false;
+  }, 2000);
+};
 const updateExecutor = async (userKey, avatarUri) => {
+  nodes.value = treeRef.value.__veauryReactRef__.getNodeInfo()[1];
   if (selectnodes.value.length > 0) {
     let selectIds = selectnodes.value.map((item) => {
       return item._key;
@@ -405,6 +440,7 @@ const chooseHighlight = (type, value?: string) => {
 const chooseExecutor = (executorDetail) => {
   nodeInfo.value = treeRef.value.__veauryReactRef__.getNodeInfo()[0];
   selectnodes.value = treeRef.value.__veauryReactRef__.getNodeInfo()[2];
+  console.log();
   if (!nodeInfo.value) {
     setMessage("error", "请选择节点");
     return;
@@ -430,39 +466,15 @@ const openAlt = (node) => {
   }
 };
 const openFile = (node) => {};
-const openNote = (node) => {
-  clearNoteDetail();
-  getNoteDetail(node.endAdornmentContent.note.key);
-};
+// const openNote = (node) => {
+//   clearNoteDetail();
+//   getNoteDetail(node.endAdornmentContent.note.key);
+// };
 //文档
 const chooseDoc = (type, cardKey) => {
   setCardKey(cardKey);
-  let detailUrl = "";
-  const getApi = api.API_URL + "card/detail";
-  const getParams = `{"cardKey": "${cardKey}" }`;
-  const patchApi = api.API_URL + "card";
-  const patchData = `["content", "title"]`;
-  const uptokenApi = api.API_URL + "account/qiniuToken";
-  const uptokenParams = `{"target": "cdn-soar"}`;
-  switch (type) {
-    case "text":
-      detailUrl = `https://notecute.com/#/editor?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
-      break;
-    case "draw":
-      detailUrl = `https://draw.workfly.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":${patchData}}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
-      break;
-    case "mind":
-      detailUrl = `https://mind.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
-      break;
-    case "ppt":
-      detailUrl = `https://ppt.mindcute.com/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
-      break;
-    case "table":
-      detailUrl = `https://sheets.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
-      break;
-  }
-  console.log(detailUrl);
-  setCardVisible(true, "doc", detailUrl);
+  let docUrl = formatDocUrl(type, cardKey, token.value);
+  setCardVisible(true, "doc", docUrl);
 };
 const chooseFile = (cardKey) => {
   setCardKey(cardKey);
@@ -497,6 +509,11 @@ watch(note, (newVal, oldVal) => {
 watch(detailDialog, (newVal, oldVal) => {
   if (!newVal) {
     clearNoteDetail();
+  }
+});
+watch(contentVisible, (newVisible) => {
+  if (!newVisible) {
+    changed.value = false;
   }
 });
 </script>
@@ -623,7 +640,7 @@ watch(detailDialog, (newVal, oldVal) => {
           color="primary"
           track-color="grey-3"
         > -->
-        <q-avatar size="40px" class="q-mb-sm">
+        <q-avatar size="35px" class="q-mb-sm">
           <img
             :src="
               item.userAvatar ? item.userAvatar : '/common/defaultPerson.png'
@@ -641,10 +658,10 @@ watch(detailDialog, (newVal, oldVal) => {
       :rootKey="rootKey"
       :viewType="viewType"
       @showMenu="showMenu"
+      @showContent="showContent"
       @closeMenu="menuVisible = false"
       @changePath="changePath"
       @openAlt="openAlt"
-      @openNote="openNote"
       @openFile="openFile"
     />
 
@@ -836,13 +853,36 @@ watch(detailDialog, (newVal, oldVal) => {
         />
       </q-btn>
     </q-menu>
+    <q-menu
+      :target="contentTargetEl"
+      v-model="contentVisible"
+      anchor="bottom middle"
+      self="top middle"
+    >
+      <q-card>
+        <q-card-section class="q-pt-none">备注</q-card-section>
+        <div class="node-editor">
+          <span v-if="nodeInfo" class="node-save">{{
+            changed ? "有变更" : "已保存"
+          }}</span>
+          <Editor
+            v-if="nodeInfo"
+            ref="editorRef"
+            :initData="nodeInfo"
+            :autoSave="true"
+            @onChange="handleChange"
+            :handleSave="updateContent"
+          />
+        </div>
+      </q-card>
+    </q-menu>
     <cDrawer
       :visible="commentVisible"
       @close="commentVisible = false"
       :drawerStyle="{ width: '350px' }"
     >
       <template #content>
-        <q-card-section class="q-pt-none">备注</q-card-section>
+        <q-card-section style="font-size: 18px;font-weight: bold;">备注</q-card-section>
         <q-card-section class="full-width">
           <q-input
             outlined
@@ -851,8 +891,8 @@ watch(detailDialog, (newVal, oldVal) => {
             dense
             class="full-width q-mb-md"
             type="textarea"
-            @blur="updateContent"
           />
+          <!--             @blur="updateContent" -->
         </q-card-section>
         <q-card-section class="q-pt-none">评论</q-card-section>
         <q-card-section class="q-pt-none">
@@ -915,7 +955,7 @@ watch(detailDialog, (newVal, oldVal) => {
       <template #content>
         <div class="file-search">
           <div class="file-search-title">
-            <q-select
+            <!-- <q-select
               style="width: 150px; margin-right: 10px"
               outlined
               v-model="cardType"
@@ -923,11 +963,11 @@ watch(detailDialog, (newVal, oldVal) => {
               dense
               emit-value
               map-options
-            />
+            /> -->
             <q-input
               outlined
               v-model="fileInput"
-              placeholder="搜索用户名或手机号"
+              placeholder="搜索文件"
               dense
               class="full-width"
               @keyup.enter="searchFile"
@@ -1001,7 +1041,7 @@ watch(detailDialog, (newVal, oldVal) => {
     padding-left: 60px;
     .teamTree-header-path {
       height: 100%;
-      font-size: 22px;
+      font-size: 16px;
       @include flex(center, center, null);
     }
     .teamTree-header-button {
@@ -1042,7 +1082,7 @@ watch(detailDialog, (newVal, oldVal) => {
   }
   .teamTree-right {
     /* prettier-ignore */
-    width: 50Px;
+    width: 50px;
     height: calc(100% - 55px);
     position: absolute;
     z-index: 2;
@@ -1079,6 +1119,20 @@ watch(detailDialog, (newVal, oldVal) => {
         }
       }
     }
+  }
+}
+.node-editor {
+  min-width: 350px;
+  max-height: 400px;
+  position: relative;
+  z-index: 1;
+  @include scroll();
+  .node-save {
+    position: absolute;
+    z-index: 2;
+    top: 10px;
+    right: 10px;
+    color: $grey-5;
   }
 }
 </style>
