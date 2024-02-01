@@ -1,5 +1,9 @@
 <template>
-  <div :draggable="draggable" @dragstart="handleDragStart">
+  <div
+    :draggable="draggable"
+    @dragstart="handleDragStart"
+    @dragend="handleDragEnd"
+  >
     <q-card
       v-ripple
       flat
@@ -56,7 +60,19 @@ const handleDelete = () => {
 };
 
 const handleDragStart = (event: DragEvent) => {
+  const iframe: any = document.getElementsByClassName("web-view")[0];
+  if (iframe && iframe.contentWindow) {
+    iframe.contentWindow.postMessage({ eventName: "drag-start" }, "*");
+  }
+
   event.dataTransfer?.setData("text/plain", props.card._key);
+};
+
+const handleDragEnd = (event: DragEvent) => {
+  const iframe: any = document.getElementsByClassName("web-view")[0];
+  if (iframe && iframe.contentWindow) {
+    iframe.contentWindow.postMessage({ eventName: "drag-end" }, "*");
+  }
 };
 </script>
 <style scoped>

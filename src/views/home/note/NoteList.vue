@@ -27,6 +27,11 @@
         @click="selectedNoteKey = card._key"
       />
     </div>
+    <q-dialog v-if="draggable" v-model="detailDialog">
+      <q-card style="width: 80%; height: 80%; max-width: 1200px">
+        <NoteEditor />
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 <script setup lang="ts">
@@ -34,6 +39,7 @@ import NoteInput from "@/components/note/NoteInput.vue";
 import { storeToRefs } from "pinia";
 import appStore from "@/store";
 import Card from "@/components/note/Card.vue";
+import NoteEditor from "@/views/home/note/NoteEditor.vue";
 import FileUploader from "./FileUploader.vue";
 
 const props = defineProps<{
@@ -48,7 +54,9 @@ const emit = defineEmits<{
 const { user } = storeToRefs(appStore.authStore);
 const { notes } = storeToRefs(appStore.noteStore);
 const { getNotes, getNoteDetail, clearNoteDetail } = appStore.noteStore;
+const { note } = storeToRefs(appStore.noteStore);
 const selectedNoteKey = ref("");
+const detailDialog = ref(false);
 
 watch(notes, (newVal, oldVal) => {
   if (newVal.length - oldVal.length === 1) {
@@ -75,6 +83,18 @@ watch(selectedNoteKey, (newVal) => {
 
 onUnmounted(() => {
   clearNoteDetail();
+});
+
+watch(note, (newVal, oldVal) => {
+  if (newVal && !oldVal) {
+    detailDialog.value = true;
+  }
+});
+
+watch(detailDialog, (newVal, oldVal) => {
+  if (!newVal) {
+    clearNoteDetail();
+  }
 });
 </script>
 <style scoped>
