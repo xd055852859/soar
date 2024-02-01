@@ -1,5 +1,11 @@
 <template>
-  <div :draggable="draggable" @dragstart="handleDragStart">
+  <div
+    :draggable="draggable"
+    @mouseenter="handleMouseEnter"
+    @mouseleave="handleMouseLeave"
+    @dragstart="handleDragStart"
+    @dragend="handleDragEnd"
+  >
     <q-card
       v-ripple
       flat
@@ -55,9 +61,25 @@ const handleDelete = () => {
   deleteNote(props.card._key);
 };
 
+const handleMouseEnter = () => {
+  const iframe: any = document.getElementsByClassName("web-view")[0];
+  if (iframe && iframe.contentWindow) {
+    iframe.contentWindow.postMessage({ eventName: "drag-start" }, "*");
+  }
+};
+
+const handleMouseLeave = () => {
+  const iframe: any = document.getElementsByClassName("web-view")[0];
+  if (iframe && iframe.contentWindow) {
+    iframe.contentWindow.postMessage({ eventName: "drag-end" }, "*");
+  }
+};
+
 const handleDragStart = (event: DragEvent) => {
   event.dataTransfer?.setData("text/plain", props.card._key);
 };
+
+const handleDragEnd = (event: DragEvent) => {};
 </script>
 <style scoped>
 .note-card {

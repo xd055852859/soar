@@ -15,7 +15,6 @@ import Icon from "../common/Icon.vue";
 import cDrawer from "../common/cDrawer.vue";
 import dayjs from "dayjs";
 import fileCard from "../fileCard/fileCard.vue";
-import NoteEditor from "@/views/home/note/NoteEditor.vue";
 import { tagArray } from "@/services/config/config";
 import { setMessage } from "@/services/util/common";
 import { formatDocUrl } from "@/services/util/url";
@@ -74,7 +73,7 @@ const cardType = ref<string>("doc");
 // const imageHeight = ref<number>(0);
 // const imageWidth = ref<number>(0);
 const noteDialog = ref(false);
-const detailDialog = ref(false);
+
 let timeout: any;
 const colorArray = [
   "rgb(89, 89, 89)",
@@ -506,17 +505,17 @@ watch(fileInput, (newName) => {
     searchList.value = [];
   }
 });
-watch(note, (newVal, oldVal) => {
-  if (newVal && !oldVal) {
-    detailDialog.value = true;
-  }
-});
+// watch(note, (newVal, oldVal) => {
+//   if (newVal && !oldVal) {
+//     detailDialog.value = true;
+//   }
+// });
 
-watch(detailDialog, (newVal, oldVal) => {
-  if (!newVal) {
-    clearNoteDetail();
-  }
-});
+// watch(detailDialog, (newVal, oldVal) => {
+//   if (!newVal) {
+//     clearNoteDetail();
+//   }
+// });
 watch(contentVisible, (newVisible) => {
   if (!newVisible) {
     changed.value = false;
@@ -1021,11 +1020,6 @@ watch(contentVisible, (newVisible) => {
     <q-dialog v-model="noteDialog" position="right" class="note-list-dialog">
       <q-card style="width: 350px; height: 100%">
         <NoteList draggable closable @close="noteDialog = false" />
-      </q-card>
-    </q-dialog>
-    <q-dialog v-model="detailDialog">
-      <q-card style="width: 80%; height: 100%; max-width: 420px">
-        <NoteEditor />
       </q-card>
     </q-dialog>
   </div>

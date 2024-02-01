@@ -14,7 +14,16 @@ export const noteStore = defineStore("noteStore", () => {
   };
 
   const createNote = async (props: {
-    type: "text" | "outline" | "clip" | "link" | "file";
+    type:
+      | "text"
+      | "outline"
+      | "clip"
+      | "link"
+      | "file"
+      | "ppt"
+      | "draw"
+      | "mind"
+      | "sheet";
     title: string;
     content?: JSONContent;
     summary?: string;
@@ -83,6 +92,13 @@ export const noteStore = defineStore("noteStore", () => {
     }
   };
 
+  const removeNote = async (noteKey: string) => {
+    const index = notes.value.findIndex((note) => note._key === noteKey);
+    if (index !== -1) {
+      notes.value.splice(index, 1);
+    }
+  };
+
   return {
     note,
     notes,
@@ -92,5 +108,6 @@ export const noteStore = defineStore("noteStore", () => {
     editNote,
     getNoteDetail,
     clearNoteDetail,
+    removeNote,
   };
 });
