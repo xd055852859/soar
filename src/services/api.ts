@@ -146,7 +146,16 @@ const qiniu = {
 
 const note = {
   create(props: {
-    type: "text" | "outline" | "clip" | "link" | "file";
+    type:
+      | "text"
+      | "outline"
+      | "clip"
+      | "link"
+      | "file"
+      | "ppt"
+      | "draw"
+      | "mind"
+      | "sheet";
     title: string;
     content?: JSONContent;
     summary?: string;

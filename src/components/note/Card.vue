@@ -1,6 +1,8 @@
 <template>
   <div
     :draggable="draggable"
+    @mouseenter="handleMouseEnter"
+    @mouseleave="handleMouseLeave"
     @dragstart="handleDragStart"
     @dragend="handleDragEnd"
   >
@@ -59,21 +61,25 @@ const handleDelete = () => {
   deleteNote(props.card._key);
 };
 
-const handleDragStart = (event: DragEvent) => {
+const handleMouseEnter = () => {
   const iframe: any = document.getElementsByClassName("web-view")[0];
   if (iframe && iframe.contentWindow) {
     iframe.contentWindow.postMessage({ eventName: "drag-start" }, "*");
   }
-
-  event.dataTransfer?.setData("text/plain", props.card._key);
 };
 
-const handleDragEnd = (event: DragEvent) => {
+const handleMouseLeave = () => {
   const iframe: any = document.getElementsByClassName("web-view")[0];
   if (iframe && iframe.contentWindow) {
     iframe.contentWindow.postMessage({ eventName: "drag-end" }, "*");
   }
 };
+
+const handleDragStart = (event: DragEvent) => {
+  event.dataTransfer?.setData("text/plain", props.card._key);
+};
+
+const handleDragEnd = (event: DragEvent) => {};
 </script>
 <style scoped>
 .note-card {

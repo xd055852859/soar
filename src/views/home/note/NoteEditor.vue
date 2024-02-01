@@ -18,6 +18,15 @@
       :file-type="note.fileType"
       :name="note.title"
     />
+    <QdocViewer
+      v-else-if="
+        note &&
+        (note.type === 'mind' ||
+          note.type === 'draw' ||
+          note.type === 'ppt' ||
+          note.type === 'sheet')
+      "
+    />
     <div class="link-preview" v-if="note && note.type === 'link' && note.url">
       <Webview :src="note.url" width="100%" height="100%" />
     </div>
@@ -30,6 +39,7 @@ import FilePreview from "@/components/note/FilePreview.vue";
 import { setSingleSizeLimit } from "@/services/util/uploadImage";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
+import QdocViewer from "@/components/note/QdocViewer.vue";
 
 let timeout: any;
 const { note } = storeToRefs(appStore.noteStore);

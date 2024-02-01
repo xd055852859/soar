@@ -95,7 +95,7 @@ const handlePaste = async (event: ClipboardEvent) => {
   padding: 15px;
   display: flex;
   align-items: center;
-  height: 100px;
+  height: 80px;
 }
 .file-uploader.active {
   background-color: #c1edd2;
