@@ -40,11 +40,6 @@ app
   .use(masonry)
   .use(router)
   .use(pinia)
-  //@ts-ignore
-  .use(SocketIO, {
-    connection: "https://soardata.qingtime.cn",
-    options: {},
-  })
   .use(Quasar, {
     lang: langDe,
     plugins: {
@@ -67,4 +62,9 @@ app
     },
   });
 registerStore();
-app.mount("#app");
+app //@ts-ignore
+  .use(SocketIO, {
+    connection: "https://soardata.qingtime.cn",
+    options: {},
+  })
+  .mount("#app");

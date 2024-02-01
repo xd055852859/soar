@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ResultProps } from "@/interface/Common";
-import cIframe from "@/components/common/cIframe.vue";
 import api from "@/services/api";
 import _ from "lodash";
 import { commonscroll, setMessage } from "@/services/util/common";
@@ -8,22 +7,23 @@ import appStore from "@/store";
 import fileCard from "@/components/fileCard/fileCard.vue";
 import { docArray } from "@/services/config/config";
 import { storeToRefs } from "pinia";
-const { token } = storeToRefs(appStore.authStore);
+import DocPreview from "./docPreview.vue";
+
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { teamKey } = storeToRefs(appStore.teamStore);
-const { cardInfo, cardKey } = storeToRefs(appStore.cardStore);
-const { setCardKey, setCardInfo } = appStore.cardStore;
-const { setTargetTeamKey } = appStore.teamStore;
+const { setTeamKey } = appStore.teamStore;
+
 const props = defineProps<{
   type?: string;
 }>();
 const subType = ref<string>("");
 const page = ref<number>(1);
 const fileList = ref<any>([]);
-const docUrl = ref<string>("");
+
 const fileKey = ref<string>("");
-const fileInfo = ref<any>(null);
+
 const total = ref<number>(0);
+
 const getDocList = async () => {
   let fileRes = (await api.request.get("knowledgeBase/card", {
     teamKey: spaceKey.value,
@@ -42,37 +42,12 @@ const getDocList = async () => {
       // setCardKey(fileRes.data[0]._key);
       // // setCardKey(fileRes.data[0]._key);
       fileKey.value = fileRes.data[0]._key;
-      fileInfo.value = fileRes.data[0];
-      setTargetTeamKey(fileRes.data[0].projectInfo._key);
+      setTeamKey(fileRes.data[0].projectInfo._key);
     }
     total.value = fileRes.total as number;
   }
 };
-const formatUrl = (detail) => {
-  const getApi = api.API_URL + "card/detail";
-  const getParams = `{"cardKey": "${detail._key}" }`;
-  const patchApi = api.API_URL + "card";
-  const patchData = `["content", "title"]`;
-  const uptokenApi = api.API_URL + "account/qiniuToken";
-  const uptokenParams = `{"target": "cdn-soar"}`;
-  switch (detail.type) {
-    case "text":
-      docUrl.value = `https://notecute.com/#/editor?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
-      break;
-    case "draw":
-      docUrl.value = `https://draw.workfly.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams}}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":${patchData}}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2`;
-      break;
-    case "mind":
-      docUrl.value = `https://mind.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
-      break;
-    case "ppt":
-      docUrl.value = `https://ppt.mindcute.com/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
-      break;
-    case "sheet":
-      docUrl.value = `https://sheets.qingtime.cn/?token=${token.value}&getDataApi={"url":"${getApi}","params":${getParams},"docDataName":"content"}&patchDataApi={"url":"${patchApi}","params":${getParams},"docDataName":"content"}&getUptokenApi={"url":"${uptokenApi}","params":${uptokenParams}}&isEdit=2&hideHead=1`;
-      break;
-  }
-};
+
 const addDoc = async (type, typeName) => {
   let fileRes = (await api.request.post("card", {
     projectKey: teamKey.value,
@@ -85,18 +60,12 @@ const addDoc = async (type, typeName) => {
     fileList.value.unshift(fileRes.data);
   }
 };
-watch(fileInfo, (newInfo) => {
-  if (newInfo) {
-    formatUrl(newInfo);
-  }
-});
+
 const chooseCard = (detail, type) => {
   switch (type) {
     case "search":
       fileKey.value = detail._key;
-      fileInfo.value = detail;
-      setTargetTeamKey(detail.projectInfo._key);
-      console.log(fileKey.value, fileInfo.value);
+      setTeamKey(detail.projectInfo._key);
       break;
     case "update":
       let updateIndex = _.findIndex(fileList.value, { _key: detail._key });
@@ -115,6 +84,7 @@ const chooseCard = (detail, type) => {
       break;
   }
 };
+
 watchEffect(() => {
   getDocList();
 });
@@ -176,7 +146,9 @@ watchEffect(() => {
         </template>
       </div>
       <div class="teamDoc-box-right">
-        <c-iframe :url="docUrl" :title="fileInfo.title" v-if="fileInfo" />
+        <DocPreview :fileKey="fileKey" @chooseCard="chooseCard" />
+
+        <!-- </template> -->
       </div>
     </div>
   </div>
@@ -209,6 +181,9 @@ watchEffect(() => {
     .teamDoc-box-right {
       width: calc(100% - 350px);
       height: 100%;
+      position: relative;
+      z-index: 1;
+
     }
   }
 }

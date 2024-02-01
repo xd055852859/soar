@@ -2,6 +2,7 @@
 import cDialog from "@/components/common/cDialog.vue";
 import { ROLE_OPTIONS, ResultProps } from "@/interface/Common";
 import api from "@/services/api";
+import { viewArray } from "@/services/config/config";
 import { setMessage } from "@/services/util/common";
 import appStore from "@/store";
 import _ from "lodash";
@@ -25,33 +26,7 @@ const isPublic = ref<boolean>(true);
 const defaultRole = ref<number>(3);
 const memo = ref<string>("");
 // const overKey = ref<string>("");
-const views = ref<string[]>(["taskTree", "doc", "file"]);
-const viewArray = [
-  {
-    value: "taskTree",
-    label: "任务",
-  },
-  {
-    value: "doc",
-    label: "文档",
-  },
-  {
-    value: "file",
-    label: "文件",
-  },
-  {
-    value: "knowledgeBase",
-    label: "知识库",
-  },
-  {
-    value: "table",
-    label: "多维表",
-  },
-  {
-    value: "taskBox",
-    label: "任务盒子",
-  },
-];
+const views = ref<string[]>(["taskTree", "knowledgeBase"]);
 
 const updateTeam = async () => {
   if (!name.value) {

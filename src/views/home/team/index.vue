@@ -48,11 +48,15 @@ watch(
       console.log(newInfo.views);
       if (newInfo.views.indexOf(newInfo.viewTab) !== -1) {
         viewTab.value = newInfo.viewTab;
-        views.value = newInfo.views;
+        views.value = newInfo.views.filter(
+          (item) => item !== "file" && item !== "doc"
+        );
         router.push(`/home/team/${newInfo.viewTab}`);
       } else {
         viewTab.value = newInfo.views[0];
-        views.value = newInfo.views;
+        views.value = newInfo.views.filter(
+          (item) => item !== "file" && item !== "doc"
+        );
         router.push(`/home/team/${newInfo.views[0]}`);
         api.request.post("user/clickTab", {
           teamKey: spaceKey.value,
@@ -91,34 +95,7 @@ watch(
         >
           <Icon name="a-suji22" :size="22" />
         </q-btn>
-        <q-btn flat round icon="o_settings">
-          <q-menu class="q-pa-sm">
-            <q-list dense>
-              <VueDraggableNext v-model="views" item-key="id" @end="dragTab">
-                <q-item
-                  clickable
-                  v-for="(item, index) in views"
-                  :key="`tabSet${index}`"
-                  v-close-popup
-                  @click="updateVisible = true"
-                  class="common-title dp--center"
-                >
-                  <Icon
-                    name="a-huibaoyaosu-yidong21"
-                    :size="14"
-                    class="q-mr-sm"
-                  />
-                  <div>
-                    {{
-                      viewArray[_.findIndex(viewArray, { value: item })].label
-                    }}
-                  </div>
-                </q-item>
-                <!-- </template> -->
-              </VueDraggableNext>
-            </q-list>
-          </q-menu>
-        </q-btn>
+
         <q-btn flat round icon="o_group" @click="memberVisible = true" />
         <q-btn flat round icon="o_more_horiz" size="12px" @click.stop="">
           <q-menu class="q-pa-sm">
@@ -153,7 +130,36 @@ watch(
           :name="viewArray[_.findIndex(viewArray, { value: item })].value"
         />
       </template>
-      <div class="full-width row justify-end"></div>
+      <q-btn flat round icon="o_settings" class="q-ml-md">
+        <q-menu class="q-pa-sm">
+          <q-list dense>
+            <VueDraggableNext v-model="views" item-key="id" @end="dragTab">
+              <template v-for="(item, index) in views" :key="`tabSet${index}`">
+                <q-item
+                  clickable
+                  v-if="_.findIndex(viewArray, { value: item }) !== -1"
+                  v-close-popup
+                  @click="updateVisible = true"
+                  class="common-title dp--center"
+                >
+                  <Icon
+                    name="a-huibaoyaosu-yidong21"
+                    :size="14"
+                    class="q-mr-sm"
+                  />
+                  <div>
+                    {{
+                      viewArray[_.findIndex(viewArray, { value: item })].label
+                    }}
+                  </div>
+                </q-item>
+              </template>
+              <!-- </template> -->
+            </VueDraggableNext>
+          </q-list>
+        </q-menu>
+      </q-btn>
+      <!-- <div class="full-width row justify-end"></div> -->
     </q-tabs>
     <div class="team-box"><router-view></router-view></div>
     <Detail

@@ -386,32 +386,38 @@ const chooseHighlight = (type, value?: string) => {
   switch (type) {
     case "executor":
       for (let key in nodes.value) {
-        let node = nodes.value[key];
-        let element = document.getElementById(`tree-node-${node._key}`);
-        console.log(value);
-        if (value === "all") {
-          element!.style.opacity = !node.executor ? "0.2" : "1";
-        } else {
-          element!.style.opacity = node.executor !== value ? "0.2" : "1";
-          console.log(element!.style.opacity);
-        }
+        if (key !== rootKey.value) {
+          let node = nodes.value[key];
+          let element = document.getElementById(`tree-node-${node._key}`);
+          console.log(value);
+          if (value === "all") {
+            element!.style.opacity = !node.executor ? "0.6" : "1";
+          } else {
+            element!.style.opacity = node.executor !== value ? "0.6" : "1";
+            console.log(element!.style.opacity);
+          }
 
-        // node.color = node.executor === value ? "#fff" : "#fafafa";
-        // node.backgroundColor = node.executor === value ? "#07be51" : "#f5f5f5";
+          // node.color = node.executor === value ? "#fff" : "#fafafa";
+          // node.backgroundColor = node.executor === value ? "#07be51" : "#f5f5f5";
+        }
       }
       break;
     case "task":
       for (let key in nodes.value) {
-        let node = nodes.value[key];
-        let element = document.getElementById(`tree-node-${node._key}`);
-        element!.style.opacity = node.executor !== value ? "0.2" : "1";
+        if (key !== rootKey.value) {
+          let node = nodes.value[key];
+          let element = document.getElementById(`tree-node-${node._key}`);
+          element!.style.opacity = node.executor !== value ? "0.6" : "1";
+        }
       }
       break;
     case "finish":
       for (let key in nodes.value) {
-        let node = nodes.value[key];
-        let element = document.getElementById(`tree-node-${node._key}`);
-        element!.style.opacity = node.hasDone && node.executor ? "0.2" : "1";
+        if (key !== rootKey.value) {
+          let node = nodes.value[key];
+          let element = document.getElementById(`tree-node-${node._key}`);
+          element!.style.opacity = node.hasDone && node.executor ? "0.6" : "1";
+        }
         // node.color = node.hasDone && node.executor ? "#fafafa" : "";
         // node.backgroundColor =
         //   node.hasDone && node.executor
@@ -514,11 +520,13 @@ watch(detailDialog, (newVal, oldVal) => {
 watch(contentVisible, (newVisible) => {
   if (!newVisible) {
     changed.value = false;
+    clearTimeout(timeout);
+    timeout = null;
   }
 });
 </script>
 <template>
-  <div class="teamTree" id="teamTree" @click="chooseHighlight('clear')">
+  <div class="teamTree" id="teamTree">
     <!--     @contextmenu.prevent="menuVisible = false" -->
     <!-- <button :draggable="true">测试</button> -->
     <div class="teamTree-header">
@@ -859,22 +867,20 @@ watch(contentVisible, (newVisible) => {
       anchor="bottom middle"
       self="top middle"
     >
-      <q-card>
-        <q-card-section class="q-pt-none">备注</q-card-section>
-        <div class="node-editor">
-          <span v-if="nodeInfo" class="node-save">{{
-            changed ? "有变更" : "已保存"
-          }}</span>
-          <Editor
-            v-if="nodeInfo"
-            ref="editorRef"
-            :initData="nodeInfo"
-            :autoSave="true"
-            @onChange="handleChange"
-            :handleSave="updateContent"
-          />
-        </div>
-      </q-card>
+      <!-- <q-card-section style="font-size: 18px;font-weight: bold;">备注</q-card-section> -->
+      <div class="node-editor">
+        <span v-if="nodeInfo" class="node-save">{{
+          changed ? "有变更" : "已保存"
+        }}</span>
+        <Editor
+          v-if="nodeInfo"
+          ref="editorRef"
+          :initData="nodeInfo"
+          :autoSave="true"
+          @onChange="handleChange"
+          :handleSave="updateContent"
+        />
+      </div>
     </q-menu>
     <cDrawer
       :visible="commentVisible"
@@ -882,7 +888,9 @@ watch(contentVisible, (newVisible) => {
       :drawerStyle="{ width: '350px' }"
     >
       <template #content>
-        <q-card-section style="font-size: 18px;font-weight: bold;">备注</q-card-section>
+        <q-card-section style="font-size: 18px; font-weight: bold"
+          >备注</q-card-section
+        >
         <q-card-section class="full-width">
           <q-input
             outlined
@@ -1123,7 +1131,7 @@ watch(contentVisible, (newVisible) => {
 }
 .node-editor {
   min-width: 350px;
-  max-height: 400px;
+  max-height: 250px;
   position: relative;
   z-index: 1;
   @include scroll();

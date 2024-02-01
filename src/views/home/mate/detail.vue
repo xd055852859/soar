@@ -287,7 +287,7 @@ watchEffect(() => {
         indicator-color="primary"
         active-class="text-primary"
       >
-        <q-tab name="task" label="任务" />
+        <q-tab name="taskBox" label="任务" />
         <q-tab name="doc" label="文档" />
         <q-tab name="file" label="文件" />
         <!-- <q-tab name="mails" label="知识库" /> -->

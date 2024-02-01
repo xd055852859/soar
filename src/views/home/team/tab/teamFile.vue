@@ -21,7 +21,7 @@ const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { teamKey } = storeToRefs(appStore.teamStore);
 const { cardInfo, cardKey } = storeToRefs(appStore.cardStore);
 const { setCardKey, setCardInfo } = appStore.cardStore;
-const { setTargetTeamKey } = appStore.teamStore;
+const { setTeamKey } = appStore.teamStore;
 const subType = ref<string>("全部");
 const page = ref<number>(1);
 const fileList = ref<any>([]);
@@ -50,7 +50,7 @@ const getFileList = async () => {
       // // setCardKey(fileRes.data[0]._key);
       fileKey.value = fileRes.data[0]._key;
       fileInfo.value = fileRes.data[0];
-      setTargetTeamKey(fileRes.data[0].projectInfo._key);
+      setTeamKey(fileRes.data[0].projectInfo._key);
     }
     total.value = fileRes.total as number;
   }
@@ -133,7 +133,7 @@ const chooseCard = (detail, type) => {
     case "search":
       fileKey.value = detail._key;
       fileInfo.value = detail;
-      setTargetTeamKey(detail.projectInfo._key);
+      setTeamKey(detail.projectInfo._key);
       break;
     case "update":
       let updateIndex = _.findIndex(fileList.value, { _key: detail._key });

@@ -66,7 +66,7 @@ watchEffect(() => {
           v-for="(taskItem, taskIndex) in item.taskList"
           :key="`taskItem${taskIndex}`"
         >
-          <fileCard :card="taskItem" type="task" :outType="type"/>
+          <fileCard :card="taskItem" type="taskBox" :outType="type"/>
         </template>
       </div>
     </div>
@@ -88,7 +88,7 @@ watchEffect(() => {
       width: 100%;
       /* prettier-ignore */
       height: 90Px;
-      font-size: 16px;
+      font-size: 14px;
       @include flex(center, center, null);
     }
     .teamTask-bottom {

@@ -683,17 +683,11 @@ const CustomTree = React.forwardRef((props, ref) => {
             showChildNum={true}
             uncontrolled={false}
             defaultSelectedId={selectedId || undefined}
+     
+            singleColumn={viewType.includes("-single")}
+            
             handleChangeNodeText={editNodeText}
             handleClickDot={clickDot}
-            singleColumn={viewType.includes("-single")}
-            // singleColumn={viewType.startsWith("single-")}
-            // itemHeight={48}
-            // pathWidth={2}
-            // pathColor={darkMode ? "#FFF" : "#535953"}
-            // nodeColor={"#e3e3e3"}
-            // hoverBorderColor={darkMode ? "#FFE4E1" : undefined}
-            // paddingLeft={1000}
-            // paddingTop={1000}
             handleCheck={editFinishPercent}
             handleClickExpand={editContract}
             handleShiftUpDown={editSortList}
@@ -730,7 +724,6 @@ const CustomTree = React.forwardRef((props, ref) => {
             showChildNum={true}
             uncontrolled={false}
             handleChangeNodeText={editNodeText}
-            // defaultSelectedId={nextSelectKey || selectedKey || undefined}
             defaultSelectedId={selectedId || undefined}
             handleCheck={editFinishPercent}
             handleClickDot={clickDot}
@@ -771,6 +764,7 @@ const CustomTree = React.forwardRef((props, ref) => {
     setStartId,
     getNodeInfo,
     formatNode,
+
     // handleAddNext,
     // handleDelete,
     // resetMove,

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import api from "@/services/api";
 import _ from "lodash";
-import { useQuasar } from "quasar";
+import { Dialog, useQuasar } from "quasar";
 
 import { setMessage } from "@/services/util/common";
 import { storeToRefs } from "pinia";
@@ -15,7 +15,7 @@ const dayjs: any = inject("dayjs");
 const { token, user } = storeToRefs(appStore.authStore);
 const { overKey } = storeToRefs(appStore.commonStore);
 const { setOverKey } = appStore.commonStore;
-const { setTargetTeamKey } = appStore.teamStore;
+const { setTeamKey } = appStore.teamStore;
 const { setCardKey, setCardVisible } = appStore.cardStore;
 const props = defineProps<{
   type: string;
@@ -41,7 +41,7 @@ const fileDetail = ref<any>(null);
 const chooseDoc = (type, detail, fullstate?: boolean) => {
   fileDetail.value = detail;
   let docUrl = formatDocUrl(type, detail._key, token.value);
-  setTargetTeamKey(detail.projectKey);
+  setTeamKey(detail.projectKey);
   if (fullstate) {
     setCardKey(detail._key);
     setCardVisible(true, "doc", docUrl);
@@ -50,7 +50,7 @@ const chooseDoc = (type, detail, fullstate?: boolean) => {
   }
 };
 const chooseFile = (detail, fullstate?: boolean) => {
-  setTargetTeamKey(detail.projectKey);
+  setTeamKey(detail.projectKey);
   if (fullstate) {
     setCardKey(detail._key);
     setCardVisible(true, "file");
@@ -59,7 +59,7 @@ const chooseFile = (detail, fullstate?: boolean) => {
   }
 };
 const chooseTaskTree = (detail, fullstate?: boolean) => {
-  setTargetTeamKey(detail.projectKey);
+  setTeamKey(detail.projectKey);
   if (fullstate) {
     setCardKey(detail._key);
     setCardVisible(true, "tasktree");
@@ -99,6 +99,7 @@ const deleteCard = async (detail) => {
     })
     .onCancel(() => {});
 };
+
 const updatCard = async (key, value, detail) => {
   let detailRes = (await api.request.patch("card", {
     cardKey: detail._key,
@@ -165,7 +166,7 @@ const handleDownload = (detail) => {
       <q-card-section class="full-width teamTaskTree-box-top q-py-none">
         <div>
           <template v-if="outType && outType !== 'recent'"
-            >{{ card.projectInfo?.name }} /
+            ><span style="font-weight: bold;">{{ card.projectInfo?.name }}</span> /
           </template>
           {{ card.title }}
         </div>
@@ -374,7 +375,7 @@ const handleDownload = (detail) => {
       </q-card-section> -->
     </q-card>
   </template>
-  <template v-else-if="type === 'task'">
+  <template v-else-if="type === 'taskBox'">
     <!--      @click="chooseTask(card)" -->
     <q-card
       class="teamTask-box-container q-mb-md icon-point card-hover"
@@ -401,21 +402,17 @@ const handleDownload = (detail) => {
           @click="finishTask(card)"
         />
         <div class="teamTask-box-top-title">{{ card.name }}</div>
-        <div class="teamTask-box-top-icon" v-if="overKey === card._key">
+        <!-- <div class="teamTask-box-top-icon" v-if="overKey === card._key">
           <q-btn flat round icon="more_horiz" size="9px" @click.stop="">
             <q-menu class="q-pa-sm">
               <q-list dense>
-                <!--  @click="editFile(item._key, index)" -->
-                <!-- <q-item clickable v-close-popup>
-                  <q-item-section>编辑</q-item-section>
-                </q-item> -->
-                <q-item clickable v-close-popup @click="deleteCard(card)">
+                <q-item clickable v-close-popup @click="deleteNode(card)">
                   <q-item-section>删除</q-item-section>
                 </q-item>
               </q-list>
             </q-menu>
           </q-btn>
-        </div>
+        </div> -->
       </q-card-section>
       <q-card-section class="teamTask-box-bottom q-py-none">
         <div class="dp-center-center">

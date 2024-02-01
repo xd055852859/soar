@@ -8,6 +8,8 @@ import { storeToRefs } from "pinia";
 import Left from "./left/left.vue";
 import Icon from "@/components/common/Icon.vue";
 import FilePreview from "@/components/note/FilePreview.vue";
+import Editor from "@/components/note/Editor.vue";
+import DocPreview from "./team/tab/docPreview.vue";
 const { closeNum, iframeTaskInfo, iframeTaskVisible } = storeToRefs(
   appStore.commonStore
 );
@@ -73,7 +75,13 @@ watch(
     }"
   >
     <div class="left">
-      <q-btn flat round class="left-arrow-button" @click="setClose(0)" size="10px">
+      <q-btn
+        flat
+        round
+        class="left-arrow-button"
+        @click="setClose(0)"
+        size="10px"
+      >
         <Icon name="a-shousuo2" :size="30" />
       </q-btn>
       <Icon
@@ -91,9 +99,10 @@ watch(
   <Teleport to="body">
     <div class="card-fullDialog" v-if="treeVisible" style="z-index: 10">
       <q-btn
-        color="primary"
         round
+        flat
         icon="navigate_before"
+        size="lg"
         class="card-back"
         @click="setCardVisible(false, 'tasktree')"
       />
@@ -101,22 +110,24 @@ watch(
     </div>
   </Teleport>
   <Teleport to="body">
-    <div class="card-fullDialog" v-if="docVisible" style="z-index: 20">
+    <div class="card-fullDialog q-pa-lg" v-if="docVisible" style="z-index: 20">
       <q-btn
         round
-        color="primary"
+        flat
+        size="lg"
         icon="navigate_before"
         class="card-back"
         @click="setCardVisible(false, 'doc')"
       />
-      <c-iframe :url="docUrl" :title="cardInfo.title" v-if="cardInfo" />
+      <DocPreview :fileKey="cardInfo._key" v-if="cardInfo"/>
     </div>
   </Teleport>
   <Teleport to="body">
     <div class="card-fullDialog" v-if="fileVisible" style="z-index: 20">
       <q-btn
         round
-        color="primary"
+        flat
+        size="lg"
         icon="navigate_before"
         class="card-back"
         @click="setCardVisible(false, 'file')"
@@ -133,7 +144,8 @@ watch(
     <div class="card-fullDialog" v-if="iframeTaskVisible" style="z-index: 20">
       <q-btn
         round
-        color="primary"
+        flat
+        size="lg"
         icon="navigate_before"
         class="card-back"
         @click="setCardVisible(false, 'file')"
@@ -166,7 +178,7 @@ watch(
     left: 0px;
     top: 0px;
     @include p-number(5px, 25px);
-    .left-arrow-button{
+    .left-arrow-button {
       position: absolute;
       z-index: 2;
       top: 20px;
@@ -199,6 +211,7 @@ watch(
   top: 0px;
   left: 0px;
   background-color: #fff;
+  @include scroll();
   .card-back {
     position: absolute;
     z-index: 20;

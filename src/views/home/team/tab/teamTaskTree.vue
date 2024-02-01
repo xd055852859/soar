@@ -18,7 +18,7 @@ const { teamKey } = storeToRefs(appStore.teamStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { treeVisible } = storeToRefs(appStore.cardStore);
 const { setCardKey } = appStore.cardStore;
-const { setTargetTeamKey } = appStore.teamStore;
+const { setTeamKey } = appStore.teamStore;
 const taskList = ref<any>([]);
 const page = ref<number>(1);
 const total = ref<number>(0);
@@ -63,7 +63,7 @@ const getTaskList = async () => {
       taskList.value = [...taskRes.data];
       if (taskRes.data.length > 0) {
         nodeKey.value = taskRes.data[0]._key;
-        setTargetTeamKey(taskRes.data[0].projectInfo._key);
+        setTeamKey(taskRes.data[0].projectInfo._key);
         // setCardKey(taskRes.data[0]._key);
       }
       console.log(taskList.value);
@@ -100,7 +100,7 @@ const chooseCard = (detail, type) => {
   switch (type) {
     case "search":
       nodeKey.value = detail._key;
-      setTargetTeamKey(detail.projectInfo._key);
+      setTeamKey(detail.projectInfo._key);
       break;
     case "update":
       let updateIndex = _.findIndex(taskList.value, { _key: detail._key });
