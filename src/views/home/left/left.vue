@@ -116,11 +116,11 @@ watch(
       </q-avatar>
 
       <div
-        class="select-item-name single-to-long"
+        class="select-item-name single-to-long dp--center"
         style="max-width: calc(100% - 80px); font-weight: bolder"
       >
         {{ spaceInfo?.name }}
-        <q-icon name="o_keyboard_arrow_down" size="28px" />
+        <Icon name="a-xiala2" :size="8" class="q-ml-sm"/>
       </div>
 
       <q-menu style="width: 300px; padding: 10px">

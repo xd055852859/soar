@@ -104,6 +104,7 @@ watch(
         icon="navigate_before"
         size="lg"
         class="card-back"
+        style="top:0px"
         @click="setCardVisible(false, 'tasktree')"
       />
       <TeamTree :cardKey="cardKey" ref="treeRef" viewType="tree" />

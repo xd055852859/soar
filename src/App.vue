@@ -45,10 +45,16 @@ onMounted(() => {
     request.setToken(token);
     setToken(token);
     setSpaceKey(
-      localStorage.getItem("spaceKey") ? localStorage.getItem("spaceKey") : ""
+      localStorage.getItem("spaceKey") &&
+        localStorage.getItem("spaceKey") != "undefined"
+        ? localStorage.getItem("spaceKey")
+        : ""
     );
     setTeamKey(
-      localStorage.getItem("teamKey") ? localStorage.getItem("teamKey") : ""
+      localStorage.getItem("teamKey") &&
+        localStorage.getItem("teamKey") != "undefined"
+        ? localStorage.getItem("teamKey")
+        : ""
     );
     socket.on("connect", () => {
       socket.emit("login", token);
@@ -93,13 +99,8 @@ const getMessage = (e) => {
         setCardVisible(true, "file");
         break;
       case "showDoc":
-        let docUrl = formatDocUrl(
-          messageData.data.docType,
-          messageData.data._key,
-          token.value
-        );
         setCardKey(messageData.data._key);
-        setCardVisible(true, "doc", docUrl);
+        setCardVisible(true, "doc");
         break;
       case "showTree":
         setCardKey(messageData.data._key);

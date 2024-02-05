@@ -66,6 +66,9 @@ const createSpace = async () => {
   if (spaceRes.msg === "OK") {
     setMessage("success", "创建空间成功");
     setSpaceKey(spaceRes.data._key);
+    if (!spaceList.value) {
+      spaceList.value = [];
+    }
     setSpaceList([...spaceList.value, spaceRes.data]);
     emits("close");
   }
@@ -133,7 +136,7 @@ const createSpace = async () => {
   margin-top: 10px;
   margin-bottom: 10px;
 }
-.createSpace-button{
+.createSpace-button {
   margin-top: 30px;
 }
 </style>

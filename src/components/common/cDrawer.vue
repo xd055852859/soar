@@ -5,6 +5,7 @@ const props = withDefaults(
     drawerStyle?: any;
     title?: string;
     noMask?: boolean;
+    opacityMask?: boolean;
     showClose?: boolean;
     position?: "right" | "standard" | "top" | "bottom" | "left" | undefined;
   }>(),
@@ -21,12 +22,17 @@ watch(
   },
   { immediate: true }
 );
+watch(drawerVisible, (newVisible) => {
+  if (!newVisible) {
+    emits("close");
+  }
+});
 </script>
 <template>
   <q-dialog
     v-model="drawerVisible"
     :position="position"
-    :class="{ 'drawer-noMask': noMask }"
+    :class="{ 'drawer-noMask': noMask,'drawer-opacity':opacityMask }"
     class="drawer"
   >
     <q-card :style="{ ...drawerStyle }" class="drawer-box">
@@ -48,8 +54,13 @@ watch(
           v-if="!showClose"
         />
       </q-card-section>
-      <q-card-section class="flex q-pa-sm drawer-bottom">
-        <div class="drawer-container q-px-sm  q-pt-sm"><slot name="content"></slot></div>
+      <q-card-section
+        class="flex q-pa-sm drawer-bottom"
+        :style="!title ? { height: '100%' } : null"
+      >
+        <div class="drawer-container q-px-sm q-pt-sm">
+          <slot name="content"></slot>
+        </div>
       </q-card-section>
     </q-card>
   </q-dialog>

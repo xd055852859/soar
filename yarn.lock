@@ -2944,10 +2944,10 @@ to-regex-range@^5.0.1:
   dependencies:
     is-number "^7.0.0"
 
-tree-graph-react@^2.4.1:
-  version "2.4.1"
-  resolved "https://registry.npmmirror.com/tree-graph-react/-/tree-graph-react-2.4.1.tgz#415a50acb009a71a49f51131d12f0ab8ab2e25d3"
-  integrity sha512-Ty36esNdfFffm9c87AiZAVaol6uPdpWG65fMwHFa1tJyxQSYHt6IGXzXCLVC70+mZwqSj/VN/vjhjb8EfZEDfw==
+tree-graph-react@^2.4.2:
+  version "2.4.2"
+  resolved "https://registry.npmmirror.com/tree-graph-react/-/tree-graph-react-2.4.2.tgz#0b0ce4b4459f1204d12c15b9faa325b6c41d7ef8"
+  integrity sha512-yT9AntF5wg2WHe/FpZv1CvINH+S2O/XJL8Hyx824lOoMeNd2QJBt5Vvy7VOk0SwapJoKhBY4IVEAYa+tuTkiUA==
   dependencies:
     jspdf "^2.5.1"
     lodash "^4.17.21"

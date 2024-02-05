@@ -41,10 +41,10 @@ const fileDetail = ref<any>(null);
 const chooseDoc = (type, detail, fullstate?: boolean) => {
   fileDetail.value = detail;
   let docUrl = formatDocUrl(type, detail._key, token.value);
-  setTeamKey(detail.projectKey);
+  setTeamKey(detail.projectInfo._key);
   if (fullstate) {
     setCardKey(detail._key);
-    setCardVisible(true, "doc", docUrl);
+    setCardVisible(true, "doc");
   } else {
     emits("chooseCard", detail, "search");
   }
@@ -59,7 +59,8 @@ const chooseFile = (detail, fullstate?: boolean) => {
   }
 };
 const chooseTaskTree = (detail, fullstate?: boolean) => {
-  setTeamKey(detail.projectKey);
+  console.log(detail)
+  setTeamKey(detail.projectInfo._key);
   if (fullstate) {
     setCardKey(detail._key);
     setCardVisible(true, "tasktree");
@@ -166,7 +167,8 @@ const handleDownload = (detail) => {
       <q-card-section class="full-width teamTaskTree-box-top q-py-none">
         <div>
           <template v-if="outType && outType !== 'recent'"
-            ><span style="font-weight: bold;">{{ card.projectInfo?.name }}</span> /
+            ><span style="font-weight: bold">{{ card.projectInfo?.name }}</span>
+            /
           </template>
           {{ card.title }}
         </div>
@@ -394,13 +396,18 @@ const handleDownload = (detail) => {
           class="q-mr-sm"
           @click="finishTask(card)"
         /> -->
-        <Icon
-          :name="card.hasDone ? 'a-quangouxuan21' : 'a-quanxuan-weixuanzhong21'"
-          :size="20"
-          color="#333"
-          class="q-mr-sm"
-          @click="finishTask(card)"
-        />
+        <div class="teamTask-box-top-done">
+          <Icon
+            :name="
+              card.hasDone ? 'a-quangouxuan21' : 'a-quanxuan-weixuanzhong21'
+            "
+            :size="20"
+            color="#333"
+            class="q-mr-sm"
+            @click="finishTask(card)"
+          />
+        </div>
+
         <div class="teamTask-box-top-title">{{ card.name }}</div>
         <!-- <div class="teamTask-box-top-icon" v-if="overKey === card._key">
           <q-btn flat round icon="more_horiz" size="9px" @click.stop="">
@@ -537,10 +544,24 @@ const handleDownload = (detail) => {
     width: 100%;
     min-height: 55px;
     font-size: 14px;
-    @include flex(space-between, center, null);
+    position: relative;
+    z-index: 1;
+    @include flex(space-between, flex-start, null);
+    .teamTask-box-top-done {
+      width: 25px;
+      height: 25px;
+      position: absolute;
+      top:0px;
+      left: 18px;
+      z-index: 2;
+      @include flex(center, flex-start, null);
+    }
     .teamTask-box-top-title {
+      padding-left: 25px;
+      padding-top:5px;
+      box-sizing: border-box;
       flex: 1;
-      // line-height: 18px;
+      line-height: 20px;
       // word-wrap: break-word;
       // white-space: pre-wrap;
       // text-align: left;

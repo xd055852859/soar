@@ -19,7 +19,9 @@ const getTaskList = async () => {
   }
 };
 watchEffect(() => {
-  getTaskList();
+  if (teamKey.value) {
+    getTaskList();
+  }
 });
 </script>
 <template>
@@ -57,7 +59,9 @@ watchEffect(() => {
           </q-circular-progress>
         </div>
         <div class="teamTask-top-right">
-          <div>{{ item.userName }}{{ item.userKey===user?._key?"(我)":"" }}</div>
+          <div>
+            {{ item.userName }}{{ item.userKey === user?._key ? "(我)" : "" }}
+          </div>
           <div>{{ item.finishTask }} / {{ item.totalTask }}</div>
         </div>
       </div>
@@ -66,7 +70,7 @@ watchEffect(() => {
           v-for="(taskItem, taskIndex) in item.taskList"
           :key="`taskItem${taskIndex}`"
         >
-          <fileCard :card="taskItem" type="taskBox" :outType="type"/>
+          <fileCard :card="taskItem" type="taskBox" :outType="type" />
         </template>
       </div>
     </div>
@@ -93,7 +97,7 @@ watchEffect(() => {
     }
     .teamTask-bottom {
       width: 100%;
-       /* prettier-ignore */
+      /* prettier-ignore */
       height: calc(100% - 90Px);
       @include scroll();
       @include p-number(10px, 10px);

@@ -37,13 +37,13 @@ export const cardStore = defineStore(
       type: string,
       visibleValue?: string
     ) => {
+      console.log(visible, type, visibleValue);
       switch (type) {
         case "tasktree":
           treeVisible.value = visible;
           break;
         case "doc":
           docVisible.value = visible;
-          docUrl.value = visibleValue!;
           break;
         case "file":
           fileVisible.value = visible;

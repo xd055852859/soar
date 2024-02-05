@@ -1,0 +1,10 @@
+g[id^="tree-node-"] {
+  .tree-detail-icon {
+    display: none;
+  }
+  &:hover {
+    .tree-detail-icon {
+      display: flex;
+    }
+  }
+}

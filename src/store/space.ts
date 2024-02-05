@@ -11,7 +11,7 @@ export const spaceStore = defineStore(
   "spaceStore",
   () => {
     const spaceKey = ref<string>("");
-    const spaceList = ref<Space[]>([]);
+    const spaceList = ref<Space[] | null>(null);
     const spaceMemberList = ref<SpaceMember[]>([]);
     const spaceInfo = ref<SpaceInfo | null>(null);
     const spaceRole = ref<number>(5);
@@ -23,7 +23,7 @@ export const spaceStore = defineStore(
     const getSpaceList = async () => {
       let spaceRes = (await api.request.get("team")) as ResultProps;
       if (spaceRes.msg === "OK") {
-        spaceList.value = spaceRes.data;
+        spaceList.value = spaceRes.data ? spaceRes.data : [];
       }
     };
     const setSpaceList = async (newList) => {
@@ -65,7 +65,7 @@ export const spaceStore = defineStore(
     });
     watch([spaceList, spaceKey], ([newList, newKey]) => {
       if (newKey) {
-        if (newList.length > 0) {
+        if (newList && newList.length > 0) {
           let index = _.findIndex(newList, { _key: newKey });
           if (index === -1) {
             spaceKey.value = "";

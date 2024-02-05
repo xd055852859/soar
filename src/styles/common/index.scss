@@ -291,6 +291,11 @@ body,
     display: none;
   }
 }
+.drawer-opacity {
+  .q-dialog__backdrop {
+    opacity: 0;
+  }
+}
 .dialog-transparent {
   top: 60px !important;
   .q-dialog__backdrop {
@@ -328,4 +333,9 @@ body,
 .q-avatar__content,
 .q-avatar img:not(.q-icon):not(.q-img__image) {
   object-fit: cover;
+}
+.no-input-border {
+  .q-field--standard .q-field__control:before {
+    border-bottom: 0px;
+  }
 }

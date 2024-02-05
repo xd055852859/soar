@@ -1,83 +1,24 @@
-export function getStartAdornment(startAdornment, handleClickIcon) {
+export function getStartAdornment(startAdornment, handleClick, node) {
   const keys = Object.keys(startAdornment);
-  const order = ["priority", "progress", "flag", "study", "office", "symbol"];
+  const order = [
+    "priority",
+    "progress",
+    "flag",
+    "study",
+    "office",
+    "symbol",
+    "tag",
+    "milestone",
+  ];
   const orderedKeys = keys.sort((a, b) => {
     return order.indexOf(a) - order.indexOf(b);
   });
-  return ({ x, y, nodeKey }) => (
-    <g>
-      {orderedKeys.map((key, index) => (
-        <svg
-          key={index}
-          viewBox="0 0 1024 1024"
-          version="1.1"
-          width="18"
-          height="18"
-          x={x + (18 + 2) * index}
-          y={y}
-          onClick={(event) =>
-            handleClickIcon(nodeKey, key, startAdornment[key], event)
-          }
-        >
-          <rect x={0} y={0} width="1024" height="1024" fillOpacity={0} />
-          {startAdornments[key][startAdornment[key]]}
-        </svg>
-      ))}
-    </g>
-  );
-}
 
-export function getEndAdornment(endAdornment, handleClick, node) {
-  const keys = Object.keys(endAdornment);
-  const order = ["note", "link"];
-  const orderedKeys = keys.sort((a, b) => {
-    return order.indexOf(a) - order.indexOf(b);
-  });
   return ({ x, y, nodeKey }) => (
     <g>
       {orderedKeys.map((key, index) => {
         let viewBox = "";
-        let fill = "#333";
-        switch (key) {
-          case "notefile":
-            viewBox = "0 -960 960 960";
-            break;
-          case "file":
-            viewBox = "0 -960 960 960";
-            break;
-          default:
-            viewBox = "0 0 1024 1024";
-        }
-        return (
-          <svg
-            key={index}
-            viewBox={viewBox}
-            version="1.1"
-            width="18"
-            height="18"
-            x={x + (18 + 2) * index}
-            y={y}
-            onClick={(event) => handleClick[key](node, event.currentTarget)}
-            fill={fill}
-          >
-            <rect x={0} y={0} width="1024" height="1024" fillOpacity={0} />
-            {endAdornments[key]}
-          </svg>
-        );
-      })}
-    </g>
-  );
-}
-export function getBottomAdornment(bottomAdornment, handleClick, node) {
-  const keys = Object.keys(bottomAdornment);
-  const order = ["milestone", "file", "tag"];
-  const orderedKeys = keys.sort((a, b) => {
-    return order.indexOf(a) - order.indexOf(b);
-  });
-  return ({ x, y, nodeKey }) => (
-    <g>
-      {orderedKeys.map((key, index) => {
-        let viewBox = "";
+        let svgIndex = 0;
         let fill = "#333";
         switch (key) {
           case "milestone":
@@ -87,14 +28,17 @@ export function getBottomAdornment(bottomAdornment, handleClick, node) {
             break;
           case "tag":
             viewBox = "0 -960 960 960";
-            fill = bottomAdornment.tag.color;
+            fill = startAdornment.tag?.color
+              ? startAdornment.tag?.color
+              : "#$333";
             break;
           default:
+            svgIndex = startAdornment[key].index;
             viewBox = "0 0 1024 1024";
         }
         return (
           <svg
-            key={index}
+            key={node._key + "start" + index}
             viewBox={viewBox}
             version="1.1"
             width="18"
@@ -105,11 +49,141 @@ export function getBottomAdornment(bottomAdornment, handleClick, node) {
             fill={fill}
           >
             <rect x={0} y={0} width="1024" height="1024" fillOpacity={0} />
+            {startAdornments[key][svgIndex]}
+          </svg>
+        );
+      })}
+    </g>
+  );
+}
+
+export function getEndAdornment(endAdornment, handleClick, node) {
+  const keys = Object.keys(endAdornment);
+  // const order = ["file", "link", "note"];
+  const order = ["file", "link"];
+  const orderedKeys = keys.sort((a, b) => {
+    return order.indexOf(a) - order.indexOf(b);
+  });
+  return ({ x, y, nodeKey }) => (
+    <g>
+      {orderedKeys.map((key, index) => {
+        let viewBox = "";
+        let fill = "#333";
+        switch (key) {
+          case "notefile":
+            viewBox = [0, -960, 960, 960];
+            break;
+          case "file":
+            viewBox = [0, -960, 960, 960];
+            break;
+          default:
+            viewBox = [0, 0, 1024, 1024];
+        }
+        return (
+          <svg
+            key={node._key + "end" + index}
+            viewBox={viewBox.join(",")}
+            version="1.1"
+            width="18"
+            height="18"
+            x={x + (18 + 2) * index}
+            y={y}
+            onClick={(event) => handleClick[key](node, event.currentTarget)}
+            fill={fill}
+          >
+            <rect
+              x={viewBox[0]}
+              y={viewBox[1]}
+              width={viewBox[2]}
+              height={viewBox[3]}
+              fillOpacity={0}
+            />
+            {endAdornments[key]}
+          </svg>
+        );
+      })}
+    </g>
+  );
+}
+export function getBottomAdornment(bottomAdornment, handleClick, node) {
+  const keys = Object.keys(bottomAdornment);
+  const order = ["file"];
+  const orderedKeys = keys.sort((a, b) => {
+    return order.indexOf(a) - order.indexOf(b);
+  });
+  return ({ x, y, nodeKey }) => (
+    <g>
+      {orderedKeys.map((key, index) => {
+        let viewBox = "";
+        let fill = "#333";
+        switch (key) {
+          default:
+            viewBox = [0, 0, 1024, 1024];
+        }
+        return (
+          <svg
+            key={node._key + "bottom" + index}
+            viewBox={viewBox.join(",")}
+            version="1.1"
+            width="18"
+            height="18"
+            x={x + (18 + 2) * index}
+            y={y}
+            onClick={(event) => handleClick[key](node)}
+            fill={fill}
+          >
+            <rect
+              x={viewBox[0]}
+              y={viewBox[1]}
+              width={viewBox[2]}
+              height={viewBox[3]}
+              fillOpacity={0}
+            />
             {bottomAdornments[key]}
           </svg>
         );
       })}
     </g>
+  );
+}
+export function getCustmAdornment(x, y, height, nodeKey, handleClick) {
+  return (
+    <svg
+      key={nodeKey + "custom"}
+      width="20px"
+      height="12px"
+      viewBox="0 0 35 19"
+      x={x}
+      y={y + height + 1}
+      version="1.1"
+      onClick={(event) => handleClick(nodeKey)}
+      className="tree-detail-icon"
+    >
+      <g id="事务放大" transform="translate(-1035.000000, -427.000000)">
+        <g id="三个点" transform="translate(1035.000000, 427.000000)">
+          <rect
+            id="矩形"
+            fill="#F3F3F3"
+            x="0"
+            y="0"
+            width="35"
+            height="19"
+            rx="5"
+          ></rect>
+          <g
+            id="三个点-2"
+            transform="translate(6.000000, 8.000000)"
+            fill="#111111"
+            fillRule="nonzero"
+          >
+            <path
+              d="M2.02197803,0 C0.884615394,0 0,0.875000005 0,2 C0,3.12499999 0.884615394,4 2.02197803,4 C3.15934067,4 4.04395606,3.12499999 4.04395606,2 C4.04395606,0.875000005 3.15934067,0 2.02197803,0 Z M11.5,0 C10.3626374,0 9.47802197,0.875000005 9.47802197,2 C9.47802197,3.12499999 10.3626374,4 11.5,4 C12.6373626,4 13.521978,3.12499999 13.521978,2 C13.521978,0.875000005 12.6373626,0 11.5,0 Z M20.978022,0 C19.8406593,0 18.9560439,0.875000005 18.9560439,2 C18.9560439,3.12499999 19.8406593,4 20.978022,4 C22.1153846,4 23,3.12499999 23,2 C23,0.875000005 21.989011,0 20.978022,0 Z"
+              id="形状"
+            ></path>
+          </g>
+        </g>
+      </g>
+    </svg>
   );
 }
 export const priority = [
@@ -1240,18 +1314,25 @@ export const link = (
     ></path>
   </g>
 );
-export const milestone = (
-  <path d="M200-80q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-40q0-17 11.5-28.5T280-880q17 0 28.5 11.5T320-840v40h320v-40q0-17 11.5-28.5T680-880q17 0 28.5 11.5T720-840v40h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H200Zm0-80h560v-400H200v400Zm0-480h560v-80H200v80Zm0 0v-80 80Zm280 240q-17 0-28.5-11.5T440-440q0-17 11.5-28.5T480-480q17 0 28.5 11.5T520-440q0 17-11.5 28.5T480-400Zm-160 0q-17 0-28.5-11.5T280-440q0-17 11.5-28.5T320-480q17 0 28.5 11.5T360-440q0 17-11.5 28.5T320-400Zm320 0q-17 0-28.5-11.5T600-440q0-17 11.5-28.5T640-480q17 0 28.5 11.5T680-440q0 17-11.5 28.5T640-400ZM480-240q-17 0-28.5-11.5T440-280q0-17 11.5-28.5T480-320q17 0 28.5 11.5T520-280q0 17-11.5 28.5T480-240Zm-160 0q-17 0-28.5-11.5T280-280q0-17 11.5-28.5T320-320q17 0 28.5 11.5T360-280q0 17-11.5 28.5T320-240Zm320 0q-17 0-28.5-11.5T600-280q0-17 11.5-28.5T640-320q17 0 28.5 11.5T680-280q0 17-11.5 28.5T640-240Z" />
-);
+export const milestone = [
+  <g>
+    <path d="M200-80q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-40q0-17 11.5-28.5T280-880q17 0 28.5 11.5T320-840v40h320v-40q0-17 11.5-28.5T680-880q17 0 28.5 11.5T720-840v40h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H200Zm0-80h560v-400H200v400Zm0-480h560v-80H200v80Zm0 0v-80 80Zm280 240q-17 0-28.5-11.5T440-440q0-17 11.5-28.5T480-480q17 0 28.5 11.5T520-440q0 17-11.5 28.5T480-400Zm-160 0q-17 0-28.5-11.5T280-440q0-17 11.5-28.5T320-480q17 0 28.5 11.5T360-440q0 17-11.5 28.5T320-400Zm320 0q-17 0-28.5-11.5T600-440q0-17 11.5-28.5T640-480q17 0 28.5 11.5T680-440q0 17-11.5 28.5T640-400ZM480-240q-17 0-28.5-11.5T440-280q0-17 11.5-28.5T480-320q17 0 28.5 11.5T520-280q0 17-11.5 28.5T480-240Zm-160 0q-17 0-28.5-11.5T280-280q0-17 11.5-28.5T320-320q17 0 28.5 11.5T360-280q0 17-11.5 28.5T320-240Zm320 0q-17 0-28.5-11.5T600-280q0-17 11.5-28.5T640-320q17 0 28.5 11.5T680-280q0 17-11.5 28.5T640-240Z" />
+  </g>,
+];
+export const tag = [
+  <g>
+    <path d="M570-104q-23 23-57 23t-57-23L104-456q-11-11-17.5-26T80-514v-286q0-33 23.5-56.5T160-880h286q17 0 32 6.5t26 17.5l352 353q23 23 23 56.5T856-390L570-104Zm-57-56 286-286-353-354H160v286l353 354ZM260-640q25 0 42.5-17.5T320-700q0-25-17.5-42.5T260-760q-25 0-42.5 17.5T200-700q0 25 17.5 42.5T260-640ZM160-800Z" />
+  </g>,
+];
 export const file = (
-  <path d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480v58q0 59-40.5 100.5T740-280q-35 0-66-15t-52-43q-29 29-65.5 43.5T480-280q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480v58q0 26 17 44t43 18q26 0 43-18t17-44v-58q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93h160q17 0 28.5 11.5T680-120q0 17-11.5 28.5T640-80H480Zm0-280q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35Z" />
+  <g>
+    <path d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480v58q0 59-40.5 100.5T740-280q-35 0-66-15t-52-43q-29 29-65.5 43.5T480-280q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480v58q0 26 17 44t43 18q26 0 43-18t17-44v-58q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93h160q17 0 28.5 11.5T680-120q0 17-11.5 28.5T640-80H480Zm0-280q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35Z" />
+  </g>
 );
 export const notefile = (
   <path d="M480-480Zm280 360H440q-17 0-28.5-11.5T400-160q0-17 11.5-28.5T440-200h320v-560H200v120q0 17-11.5 28.5T160-600q-17 0-28.5-11.5T120-640v-120q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120ZM265-80q-79 0-134.5-55.5T75-270q0-57 29.5-102t77.5-68h-62q-17 0-28.5-11.5T80-480q0-17 11.5-28.5T120-520h160q17 0 28.5 11.5T320-480v160q0 17-11.5 28.5T280-280q-17 0-28.5-11.5T240-320v-57q-37 8-61 38t-24 69q0 46 32.5 78t77.5 32q17 0 28.5 11.5T305-120q0 17-11.5 28.5T265-80Zm175-200h80q17 0 28.5-11.5T560-320q0-17-11.5-28.5T520-360h-80q-17 0-28.5 11.5T400-320q0 17 11.5 28.5T440-280Zm0-160h200q17 0 28.5-11.5T680-480q0-17-11.5-28.5T640-520H440q-17 0-28.5 11.5T400-480q0 17 11.5 28.5T440-440ZM320-600h320q17 0 28.5-11.5T680-640q0-17-11.5-28.5T640-680H320q-17 0-28.5 11.5T280-640q0 17 11.5 28.5T320-600Z" />
 );
-export const tag = (
-  <path d="M570-104q-23 23-57 23t-57-23L104-456q-11-11-17.5-26T80-514v-286q0-33 23.5-56.5T160-880h286q17 0 32 6.5t26 17.5l352 353q23 23 23 56.5T856-390L570-104Zm-57-56 286-286-353-354H160v286l353 354ZM260-640q25 0 42.5-17.5T320-700q0-25-17.5-42.5T260-760q-25 0-42.5 17.5T200-700q0 25 17.5 42.5T260-640ZM160-800Z" />
-);
+
 export const startAdornments = {
   priority,
   progress,
@@ -1259,16 +1340,16 @@ export const startAdornments = {
   study,
   office,
   symbol,
+  tag,
+  milestone,
 };
 
 export const endAdornments = {
-  note,
+  // note,
   link,
   file,
-  notefile,
+  // notefile,
 };
 export const bottomAdornments = {
-  milestone,
-
   tag,
 };

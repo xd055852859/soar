@@ -103,13 +103,14 @@ const signVisible = ref<boolean>(false);
   align-content: flex-start;
   @include scroll();
   @include p-number(10px, 25px);
-  @include flex(flex-start, flex-start, null);
+  @include flex(flex-start, flex-start, wrap);
   .mate-box-item {
     width: 21%;
     // height: 328px;
     background: #ffffff;
     border-radius: 14px;
-    margin-right: 6%;
+    margin-right: 5%;
+    margin-bottom:20px;
     position: relative;
     z-index: 1;
     @include p-number(20px, 0px);

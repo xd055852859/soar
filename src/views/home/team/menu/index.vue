@@ -124,7 +124,7 @@ const topTeam = async (item, index, state) => {
         "
         :style="{
           borderLeft: item.top ? '5px solid #f44336' : '',
-          background: teamKey === item._key ? '#e0e0e0' : '',
+          background: teamKey === item._key&&$route.path!.indexOf('home/team')!==-1 ? '#e0e0e0' : '',
         }"
       >
         <div># {{ item.name }}</div>
@@ -189,7 +189,7 @@ const topTeam = async (item, index, state) => {
           setTeamKey(item._key);
           $router.push(`/home/team`);
         "
-        :style="teamKey === item._key ? { background: '#e0e0e0' } : null"
+        :style="teamKey === item._key&&$route.path!.indexOf('home/team')!==-1 ? { background: '#e0e0e0' } : null"
       >
         <div># {{ item.name }}</div>
         <div class="teamMenu-item-icon" v-if="targetTeamKey === item._key">

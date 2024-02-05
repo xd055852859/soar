@@ -51,7 +51,7 @@ export const teamStore = defineStore(
     const setTeamFoldList = async (newList) => {
       teamFoldList.value = newList;
     };
-    const getTeamMemberList = async (key,type?: string) => {
+    const getTeamMemberList = async (key, type?: string) => {
       let memberRes = (await api.request.get("projectMember", {
         projectKey: key,
       })) as ResultProps;
@@ -67,18 +67,18 @@ export const teamStore = defineStore(
       teamMemberList.value = newList;
     };
     const getTeamInfo = async (key, type?: string) => {
-      let teamRes = (await api.request.get("project/detail", {
-        projectKey: key,
-      })) as ResultProps;
-      if (teamRes.msg === "OK") {
-        if (type) {
-          targetTeamInfo.value = teamRes.data;
-          targetTeamRole.value = teamRes.data.role;
-        } else {
-          teamInfo.value = teamRes.data;
-          teamRole.value = teamRes.data.role;
+        let teamRes = (await api.request.get("project/detail", {
+          projectKey: key,
+        })) as ResultProps;
+        if (teamRes.msg === "OK") {
+          if (type) {
+            targetTeamInfo.value = teamRes.data;
+            targetTeamRole.value = teamRes.data.role;
+          } else {
+            teamInfo.value = teamRes.data;
+            teamRole.value = teamRes.data.role;
+          }
         }
-      }
     };
     const setTeamInfo = (newInfo, type?: string) => {
       if (type) {
@@ -96,7 +96,7 @@ export const teamStore = defineStore(
     watch(targetTeamKey, (newKey) => {
       if (newKey) {
         getTeamInfo(newKey, "target");
-        getTeamMemberList(newKey,"target");
+        getTeamMemberList(newKey, "target");
       }
     });
 

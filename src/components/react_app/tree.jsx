@@ -16,8 +16,9 @@ import {
   getStartAdornment,
   getEndAdornment,
   getBottomAdornment,
+  getCustmAdornment,
 } from "./treesvg";
-
+import "./tree.scss";
 //   "001": {
 //     _key: "001",
 //     name: "项目管理",
@@ -167,12 +168,12 @@ const CustomTree = React.forwardRef((props, ref) => {
     rootKey,
     zoomRatio,
     viewType,
-    onShowMenu,
+    onShowDrawer,
     onShowContent,
     onChangePath,
     onOpenAlt,
     onOpenFile,
-    onCloseMenu
+    onCloseMenu,
   } = props;
   const treeRef = useRef(null);
   const moveRef = useRef(null);
@@ -188,6 +189,7 @@ const CustomTree = React.forwardRef((props, ref) => {
       getNodeList(rootKey);
     }
   }, [rootKey]);
+
   useEffect(() => {
     if (startId) {
       onChangePath(startId, rootKey, true);
@@ -201,11 +203,11 @@ const CustomTree = React.forwardRef((props, ref) => {
     if (dataRes.msg === "OK") {
       for (let key in dataRes.data) {
         let value = dataRes.data[key];
-        if (value.executor) {
+        if (value.isTask) {
           value.showCheckbox = true;
-          if (!value.avatarUri) {
-            value.avatarUri = "/common/defaultPerson.png";
-          }
+        }
+        if (value.executor && !value.avatarUri) {
+          value.avatarUri = "/common/defaultPerson.png";
         }
         value.checked = value.hasDone;
         if (value._key === rootKey) {
@@ -224,8 +226,9 @@ const CustomTree = React.forwardRef((props, ref) => {
   const formatNode = (node) => {
     if (node.startAdornmentContent) {
       node.startAdornment = getStartAdornment(
-        item.startAdornmentContent,
-        handleClickNodeIcon
+        node.startAdornmentContent,
+        {},
+        node
       );
       node.startAdornmentWidth =
         Object.keys(node.startAdornmentContent).length * (18 + 2);
@@ -235,10 +238,10 @@ const CustomTree = React.forwardRef((props, ref) => {
       node.endAdornment = getEndAdornment(
         node.endAdornmentContent,
         {
-          note: onShowContent,
+          // note: onShowContent,
           link: handleOpenLink,
           file: onOpenAlt,
-          notefile: onOpenFile,
+          // notefile: onOpenFile,
         },
         node
       );
@@ -285,6 +288,7 @@ const CustomTree = React.forwardRef((props, ref) => {
     if (node) {
       setSelectedNode(node);
       setSelectedId(node._key);
+
       // if (type === 1) {
       //   treeRef.current.rename();
       // }
@@ -356,6 +360,17 @@ const CustomTree = React.forwardRef((props, ref) => {
         ...selectedNode,
         ...obj,
       });
+    }
+  };
+  const updateNodeBatch = async (obj, callback, nodeKeyArr, needCover) => {
+    let newNodes = _.cloneDeep(nodes);
+    let updateRes = await api.request.patch("node/more/batch", {
+      nodeKeyArr: nodeKeyArr,
+      obj: { ...obj },
+      needCover: needCover,
+    });
+    if (updateRes.msg === "OK") {
+      callback(newNodes);
     }
   };
   const deleteNode = async () => {
@@ -590,7 +605,7 @@ const CustomTree = React.forwardRef((props, ref) => {
               };
               setNodes(newNodes);
               setAdornmentContent(node, "endAdornmentContent", {
-                note: { content: note.content, type: "text", key: text },
+                note: { content: note.content },
               });
             },
             node._key
@@ -683,9 +698,7 @@ const CustomTree = React.forwardRef((props, ref) => {
             showChildNum={true}
             uncontrolled={false}
             defaultSelectedId={selectedId || undefined}
-     
             singleColumn={viewType.includes("-single")}
-            
             handleChangeNodeText={editNodeText}
             handleClickDot={clickDot}
             handleCheck={editFinishPercent}
@@ -701,7 +714,6 @@ const CustomTree = React.forwardRef((props, ref) => {
             }}
             handleContextMenu={(selectedNode, e) => {
               setSelectedId(selectedNode);
-              onShowMenu(nodes[selectedNode], e.target);
             }}
             handleDeleteNode={deleteNode}
             handlePaste={pasteNode}
@@ -710,6 +722,9 @@ const CustomTree = React.forwardRef((props, ref) => {
             handleMutiSelect={(nodeArray) => {
               setSelectedNodes(nodeArray);
             }}
+            customAdornment={({ x, y, height, nodeKey }) =>
+              getCustmAdornment(x, y, height, nodeKey, onShowDrawer)
+            }
           />
         );
       } else {
@@ -737,10 +752,10 @@ const CustomTree = React.forwardRef((props, ref) => {
             handleAddNext={(selectedNode) => {
               addNode(selectedNode, "next");
             }}
-            handleContextMenu={(selectedNode, e) => {
-              setSelectedId(selectedNode);
-              props.onShowMenu(nodes[selectedNode], e.target);
-            }}
+            // handleContextMenu={(selectedNode, e) => {
+            //   setSelectedId(selectedNode);
+            //   onShowDrawer(nodes[selectedNode], e.target);
+            // }}
             handleDeleteNode={deleteNode}
             handlePaste={pasteNode}
             handlePasteText={pasteText}
@@ -749,17 +764,22 @@ const CustomTree = React.forwardRef((props, ref) => {
             handleMutiSelect={(nodeArray) => {
               setSelectedNodes(nodeArray);
             }}
+            customAdornment={({ x, y, height, nodeKey }) =>
+              getCustmAdornment(x, y, height, nodeKey, onShowDrawer)
+            }
           />
         );
       }
     } else {
       return <div></div>;
     }
-  }, [startId, selectedId, nodes]);
+  }, [startId, selectedId, nodes, viewType]);
   useImperativeHandle(ref, () => ({
     addNode,
     updateNode,
     updateNodeObj,
+    updateNodeBatch,
+    setSelectedNode,
     setNodes,
     setStartId,
     getNodeInfo,

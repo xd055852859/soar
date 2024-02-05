@@ -16,7 +16,7 @@ const toSpace = (spaceKey) => {
   setSpaceKey(spaceKey);
 };
 watch(spaceList, (newList) => {
-  if (newList.length > 0) {
+  if (newList && newList.length > 0) {
     overKey.value = newList[0]._key;
   }
 });
@@ -33,7 +33,7 @@ watch(spaceList, (newList) => {
     <div class="space-logo">
       <img src="/common/titleLogo.svg" alt="" />
     </div>
-    <div class="space-box">
+    <div class="space-box" v-if="spaceList">
       <div class="space-container" v-if="spaceList.length > 0">
         <div class="space-container-title">你可以进入以下企业空间</div>
         <div class="space-container-subtitle">

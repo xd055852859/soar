@@ -139,7 +139,6 @@ watch(
                   clickable
                   v-if="_.findIndex(viewArray, { value: item }) !== -1"
                   v-close-popup
-                  @click="updateVisible = true"
                   class="common-title dp--center"
                 >
                   <Icon
