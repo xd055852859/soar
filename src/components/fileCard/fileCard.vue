@@ -27,7 +27,6 @@ const emits = defineEmits<{
   (e: "chooseCard", key: string, type: string): void;
 }>();
 
-const fileDetail = ref<any>(null);
 //任务
 // const chooseTaskTree = (detail) => {
 //   setCardKey(detail._key);
@@ -38,28 +37,21 @@ const fileDetail = ref<any>(null);
 //   setCardVisible(true, "tasktree");
 // };
 //文档
-const chooseDoc = (type, detail, fullstate?: boolean) => {
-  fileDetail.value = detail;
-  let docUrl = formatDocUrl(type, detail._key, token.value);
-  setTeamKey(detail.projectInfo._key);
-  if (fullstate) {
-    setCardKey(detail._key);
-    setCardVisible(true, "doc");
+const chooseResource = (type, detail, fullstate?: boolean) => {
+  if (type === "doc") {
+    setTeamKey(detail.projectInfo._key);
   } else {
-    emits("chooseCard", detail, "search");
+    setTeamKey(detail.projectKey);
   }
-};
-const chooseFile = (detail, fullstate?: boolean) => {
-  setTeamKey(detail.projectKey);
   if (fullstate) {
     setCardKey(detail._key);
-    setCardVisible(true, "file");
+    setCardVisible(true, type);
   } else {
     emits("chooseCard", detail, "search");
   }
 };
 const chooseTaskTree = (detail, fullstate?: boolean) => {
-  console.log(detail)
+  console.log(detail);
   setTeamKey(detail.projectInfo._key);
   if (fullstate) {
     setCardKey(detail._key);
@@ -182,9 +174,9 @@ const handleDownload = (detail) => {
               name="a-mokexiaoshumiao-weixinyuan2"
               :size="18"
               :color="
-                card.iconState === 2
-                  ? 'amber'
-                  : card.iconState === 3
+                card.iconStatus === 2
+                  ? '#ffc107'
+                  : card.iconStatus === 3
                   ? 'red'
                   : 'green'
               "
@@ -195,7 +187,7 @@ const handleDownload = (detail) => {
                 <q-item
                   clickable
                   v-close-popup
-                  @click="updatCard('iconState', 1, card)"
+                  @click="updatCard('iconStatus', 1, card)"
                   class="bg-green"
                 >
                   <q-item-section class="text-white common-title">
@@ -205,7 +197,7 @@ const handleDownload = (detail) => {
                 <q-item
                   clickable
                   v-close-popup
-                  @click="updatCard('iconState', 2, card)"
+                  @click="updatCard('iconStatus', 2, card)"
                   class="bg-amber q-my-xs"
                 >
                   <q-item-section class="text-white common-title">
@@ -215,7 +207,7 @@ const handleDownload = (detail) => {
                 <q-item
                   clickable
                   v-close-popup
-                  @click="updatCard('iconState', 3, card)"
+                  @click="updatCard('iconStatus', 3, card)"
                   class="bg-red"
                 >
                   <q-item-section class="text-white common-title"
@@ -228,7 +220,8 @@ const handleDownload = (detail) => {
           <q-btn flat round size="9px" @click.stop="chooseTaskTree(card, true)">
             <Icon name="quanping_o" :size="22" />
           </q-btn>
-          <q-btn flat round icon="o_more_horiz" size="9px" @click.stop="">
+          <q-btn flat round size="9px" @click.stop="">
+            <Icon name="gengduo" :size="18" />
             <q-menu class="q-pa-sm">
               <q-list dense>
                 <!--  @click="editFile(item._key, index)" -->
@@ -244,7 +237,7 @@ const handleDownload = (detail) => {
         </q-card-section>
         <q-space v-else></q-space>
       </q-card-section>
-      <div class="teamTaskTree-box-bottom q-px-sm">
+      <!-- <div class="teamTaskTree-box-bottom q-px-sm">
         <q-circular-progress
           v-for="(taskItem, taskIndex) in card.treeMember"
           :key="`taskProgress${taskIndex}`"
@@ -261,7 +254,7 @@ const handleDownload = (detail) => {
           :color="taskItem._key !== user?._key ? 'primary' : 'red'"
           track-color="grey-3"
         >
-          <q-avatar size="30px" class="shadow-3">
+          <q-avatar color="#fff" size="30px" class="shadow-3">
             <img
               :src="
                 taskItem.userAvatar
@@ -274,14 +267,14 @@ const handleDownload = (detail) => {
             </q-tooltip>
           </q-avatar>
         </q-circular-progress>
-      </div>
+      </div> -->
     </q-card>
   </template>
   <template v-else-if="type === 'doc'">
     <q-card
       flat
       class="teamFile-box-container q-mb-md icon-point card-hover q-py-none"
-      @click="chooseDoc(card.type, card, false)"
+      @click="chooseResource(type, card, false)"
       :style="chooseKey === card._key ? { border: '2px solid #4a4a4a' } : null"
       @mouseenter="setOverKey(card._key)"
     >
@@ -300,11 +293,12 @@ const handleDownload = (detail) => {
             flat
             round
             size="8px"
-            @click.stop="chooseDoc(card.type, card, true)"
+            @click.stop="chooseResource(type, card, true)"
           >
             <Icon name="quanping_o" :size="22" />
           </q-btn>
-          <q-btn flat round icon="o_more_horiz" size="8px" @click.stop="">
+          <q-btn flat round size="9px" @click.stop="">
+            <Icon name="gengduo" :size="18" />
             <q-menu class="q-pa-sm">
               <q-list dense>
                 <!--  @click="editFile(item._key, index)" -->
@@ -319,22 +313,13 @@ const handleDownload = (detail) => {
           </q-btn>
         </div>
       </q-card-section>
-      <!-- <q-card-section class="teamDoc-box-bottom">
-        <div>
-          <q-btn dense flat color="grey-6" round icon="o_link">
-          </q-btn>
-          <q-btn dense flat color="grey-6" round icon="o_visibility">
-          </q-btn>
-        </div>
-        <div>{{ dayjs(card.updateTime).format("YYYY-MM-DD HH:mm") }}</div>
-      </q-card-section> -->
     </q-card>
   </template>
   <template v-else-if="type === 'file'">
     <q-card
       flat
       class="teamFile-box-container q-mb-md icon-point card-hover"
-      @click="chooseFile(card)"
+      @click="chooseResource(type, card, false)"
       :style="chooseKey === card._key ? { border: '2px solid #4a4a4a' } : null"
       @mouseenter="setOverKey(card._key)"
     >
@@ -351,10 +336,16 @@ const handleDownload = (detail) => {
           {{ card.title }}
         </div>
         <div class="teamFile-box-top-icon" v-if="overKey === card._key">
-          <q-btn flat round size="8px" @click.stop="chooseFile(card, true)">
+          <q-btn
+            flat
+            round
+            size="8px"
+            @click.stop="chooseResource(type, card, true)"
+          >
             <Icon name="quanping_o" :size="22" />
           </q-btn>
-          <q-btn flat round icon="more_horiz" size="9px" @click.stop="">
+          <q-btn flat round size="9px" @click.stop="">
+            <Icon name="gengduo" :size="18" />
             <q-menu class="q-pa-sm">
               <q-list dense>
                 <!--  @click="editFile(item._key, index)" -->
@@ -389,13 +380,6 @@ const handleDownload = (detail) => {
         <!-- <div>
           <template v-if="outType"># {{ card.projectInfo.name }}</template>
         </div> -->
-
-        <!-- <q-icon
-          :name="card.hasDone ? 'o_check_circle' : 'o_circle'"
-          size="20px"
-          class="q-mr-sm"
-          @click="finishTask(card)"
-        /> -->
         <div class="teamTask-box-top-done">
           <Icon
             :name="
@@ -423,7 +407,7 @@ const handleDownload = (detail) => {
       </q-card-section>
       <q-card-section class="teamTask-box-bottom q-py-none">
         <div class="dp-center-center">
-          <q-avatar size="30px" class="q-mr-sm">
+          <q-avatar color="#fff" size="30px" class="q-mr-sm">
             <img
               :src="
                 card.assignorInfo?.userAvatar
@@ -434,7 +418,7 @@ const handleDownload = (detail) => {
           </q-avatar>
           {{ card.assignorInfo?.userName }}
           <q-icon name="arrow_right_alt" size="20px" class="q-ma-sm" />
-          <q-avatar size="30px" class="q-mr-sm">
+          <q-avatar color="#fff" size="30px" class="q-mr-sm">
             <img
               :src="
                 card.executorInfo?.userAvatar
@@ -445,7 +429,7 @@ const handleDownload = (detail) => {
           </q-avatar>
           {{ card.executorInfo?.userName }}
         </div>
-        {{ dayjs(card.updateTime).fromNow() }}
+        {{ dayjs(card.createTime).fromNow() }}
       </q-card-section>
     </q-card></template
   >
@@ -506,7 +490,7 @@ const handleDownload = (detail) => {
 }
 .teamTaskTree-box-container {
   width: 100%;
-  min-height: 100px;
+  min-height: 50px;
   border-radius: 0px;
   padding: 5px 0px;
   box-sizing: border-box;
@@ -551,14 +535,14 @@ const handleDownload = (detail) => {
       width: 25px;
       height: 25px;
       position: absolute;
-      top:0px;
+      top: 0px;
       left: 18px;
       z-index: 2;
       @include flex(center, flex-start, null);
     }
     .teamTask-box-top-title {
       padding-left: 25px;
-      padding-top:5px;
+      padding-top: 5px;
       box-sizing: border-box;
       flex: 1;
       line-height: 20px;

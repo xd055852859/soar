@@ -95,6 +95,7 @@ export const uploadImg = ({
 
   return new Promise(async function (resolve, reject) {
     try {
+      console.log("????");
       let observer = {
         next(res: any) {
           if (updatePercent) {
@@ -128,20 +129,18 @@ export const uploadImg = ({
           if (!getUptokenApi) {
             // api.auth.qiniuStatistic(cardKey, url, file.size);
           }
-
+          console.log(url);
           resolve(url);
         },
       };
-
-      if (file.size > singleSizeLimit) {
-        return reject({
-          msg: `limit: ${singleSizeLimit / 1024 / 1024}`,
-        });
-      }
-
-      const tagKey = window.location.hash.includes("/tags")
-        ? localStorage.getItem("LAST_TAG") || undefined
-        : undefined;
+      // if (file.size > singleSizeLimit) {
+      //   return reject({
+      //     msg: `limit: ${singleSizeLimit / 1024 / 1024}`,
+      //   });
+      // }
+      // const tagKey = window.location.hash.includes("/tags")
+      //   ? localStorage.getItem("LAST_TAG") || undefined
+      //   : undefined;
 
       // todo
       // const res: any = getUptokenApi
@@ -150,6 +149,7 @@ export const uploadImg = ({
       const res: any = { status: 200 };
 
       if (res.status === 200) {
+        console.log("????");
         let uptoken;
         if (qiniuToken) {
           uptoken = qiniuToken;
@@ -168,6 +168,7 @@ export const uploadImg = ({
         if (!uptoken) {
           return reject({ msg: "qiniu-failed" });
         }
+        console.log(uptoken);
         // 上传
         let observable = qiniu.upload(
           file,
@@ -176,6 +177,7 @@ export const uploadImg = ({
           putExtra,
           qiniuConfig
         );
+        console.log(observable)
         // 上传开始
         setLoading(true);
         observable.subscribe(observer);

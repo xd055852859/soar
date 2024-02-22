@@ -96,8 +96,11 @@ watch(
           <Icon name="a-suji22" :size="22" />
         </q-btn>
 
-        <q-btn flat round icon="o_group" @click="memberVisible = true" />
-        <q-btn flat round icon="o_more_horiz" size="12px" @click.stop="">
+        <q-btn flat round size="12px" @click="memberVisible = true">
+          <Icon name="a-duiyou2" :size="18" />
+        </q-btn>
+        <q-btn flat round size="12px" @click.stop="">
+          <Icon name="gengduo" :size="18" />
           <q-menu class="q-pa-sm">
             <q-list dense>
               <q-item clickable v-close-popup @click="updateVisible = true">
@@ -130,7 +133,8 @@ watch(
           :name="viewArray[_.findIndex(viewArray, { value: item })].value"
         />
       </template>
-      <q-btn flat round icon="o_settings" class="q-ml-md">
+      <q-btn flat round class="q-ml-md">
+        <Icon name="a-shezhi2" :size="18" />
         <q-menu class="q-pa-sm">
           <q-list dense>
             <VueDraggableNext v-model="views" item-key="id" @end="dragTab">

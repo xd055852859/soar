@@ -6,13 +6,18 @@ const dayjs: any = inject("dayjs");
 const { deviceType } = storeToRefs(appStore.commonStore);
 const props = defineProps<{
   calendarTimeList?: any;
+  endTime?: number;
 }>();
 const emits = defineEmits<{
   (e: "getCalendarNum", startTime: number, endTime: number): void;
   (e: "clickDate", startTime: number): void;
+  (e: "clearDate"): void;
 }>();
 const calendarDate = ref<any>(null);
+const chooseDate = ref<any>(null);
 const calendarYear = ref<any>([]);
+const inputState = ref<boolean>(false);
+const inputData = ref<string>("");
 const calendarMonth = ref<any>([]);
 const month = ref<number>(0);
 const calendarList = ref<any>([]);
@@ -23,12 +28,15 @@ onMounted(() => {
     deviceType.value === "phone"
       ? dayjs().startOf("week").startOf("day")
       : dayjs().startOf("month").startOf("day");
+  console.log(props.endTime);
+  chooseDate.value = dayjs(props.endTime).startOf("day").valueOf();
 });
 const getCalendar = (targetDate: any) => {
   // 获得当前月的天数  和 第一天的星期数
   // let newTaskList: any = [];
   calendarYear.value = dayjs(targetDate).year();
   calendarMonth.value = dayjs(targetDate).month() + 1;
+  inputData.value = dayjs(targetDate).format("YYYY年MM月");
   let calendarDayNum = 0;
   if (deviceType.value === "phone") {
     calendarDayNum = 7;
@@ -41,6 +49,13 @@ const getCalendar = (targetDate: any) => {
     calendarDayNum = 35;
   }
   getTargetDate(targetDate, calendarDayNum);
+};
+const changeDate = () => {
+  console.log(inputData.value);
+  calendarDate.value = dayjs(
+    inputData.value.replace("年", "/").replace("月", "")
+  );
+  inputState.value = false;
 };
 const chooseMonth = (type: string) => {
   if (type === "left") {
@@ -212,7 +227,20 @@ watchEffect(() => {
         src="/common/leftCalendar.svg"
         alt=""
       />
-      <div>{{ calendarYear }}年 {{ calendarMonth }}月</div>
+      <div class="calendar-header-input" v-if="inputState">
+        <q-input
+          style="width: 100px"
+          dense
+          fill-mask
+          v-model="inputData"
+          mask="####年##月"
+          @blur="changeDate()"
+        />
+      </div>
+      <div @click="inputState = true" v-else>
+        {{ calendarYear }}年 {{ calendarMonth }}月
+      </div>
+
       <img
         @click="chooseMonth('right')"
         v-if="deviceType === 'pc'"
@@ -240,9 +268,14 @@ watchEffect(() => {
         <div
           class="calendar-day-item icon-point"
           :class="{
-            'calendar-day-choose': calendarItem.targetDay,
+            'calendar-day-choose': chooseDate
+              ? chooseDate === calendarItem.startTime
+              : calendarItem.targetDay,
           }"
-          @click="emits('clickDate', calendarItem.startTime)"
+          @click="
+            chooseDate = calendarItem.startTime;
+            emits('clickDate', calendarItem.startTime);
+          "
         >
           <div
             class="calendar-day-title"
@@ -250,19 +283,28 @@ watchEffect(() => {
           >
             {{ calendarItem.targetDay ? "今" : calendarItem.day }}
           </div>
-          <div class="calendar-day-point"></div>
+          <!-- <div class="calendar-day-point"></div> -->
         </div>
       </div>
+    </div>
+    <div class="calendar-footer">
+      <q-btn
+        class="full-width"
+        color="primary"
+        @click="emits('clearDate')"
+        label="清除"
+      />
     </div>
   </div>
 </template>
 <style scoped lang="scss">
 .calendar {
   width: 100%;
+  padding: 0px 10px;
   .calendar-header {
     width: 100%;
-    height: 34px;
-    font-size: 12px;
+    height: 45px;
+    font-size: 16px;
     color: #333333;
     line-height: 17px;
     letter-spacing: 0.27px;
@@ -270,9 +312,12 @@ watchEffect(() => {
     margin-bottom: 10px;
     @include flex(space-between, center, null);
     img {
-      width: 34px;
-      height: 34px;
+      width: 40px;
+      height: 40px;
       cursor: pointer;
+    }
+    .calendar-header-input {
+      @include flex(center, center, null);
     }
   }
   .calendar-week {
@@ -306,7 +351,7 @@ watchEffect(() => {
         @include flex(center, center, wrap);
         .calendar-day-title {
           width: 100%;
-          font-size: 12px;
+          font-size: 14px;
           text-align: center;
           color: #333333;
           line-height: 16px;
@@ -318,11 +363,16 @@ watchEffect(() => {
         }
       }
       .calendar-day-choose {
-        border: 1.2px solid $commonColor;
+        border: 1.5px solid $commonColor;
         border-radius: 7px;
         color: $commonColor;
       }
     }
+  }
+  .calendar-footer {
+    width: 100%;
+    height: 50px;
+    margin-top: 10px;
   }
 }
 .calendar-phone {

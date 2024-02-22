@@ -5,6 +5,7 @@ import { teamStore } from "@/store/team";
 import { noteStore } from "@/store/note";
 import { mateStore } from "@/store/mate";
 import { cardStore } from "@/store/card";
+import { exploreStore } from "@/store/explore";
 import { createPinia } from "pinia";
 
 export interface IAppStore {
@@ -15,6 +16,7 @@ export interface IAppStore {
   noteStore: ReturnType<typeof noteStore>;
   mateStore: ReturnType<typeof mateStore>;
   cardStore: ReturnType<typeof cardStore>;
+  exploreStore: ReturnType<typeof exploreStore>;
 }
 
 const appStore: IAppStore = {} as IAppStore;
@@ -30,6 +32,7 @@ export const registerStore = () => {
   appStore.noteStore = noteStore();
   appStore.mateStore = mateStore();
   appStore.cardStore = cardStore();
+  appStore.exploreStore = exploreStore();
 };
 
 export default appStore;

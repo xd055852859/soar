@@ -253,7 +253,7 @@ watch(fileInput, (newName) => {
             _.findIndex(teamMemberList, { userKey: executor }) !== -1
           "
         >
-          <q-avatar size="30px" class="shadow-3 q-mr-sm">
+          <q-avatar color="#fff" size="30px" class="shadow-3 q-mr-sm">
             <img
               :src="
                 teamMemberList[
@@ -301,7 +301,7 @@ watch(fileInput, (newName) => {
                 })
               "
             >
-              <q-avatar size="24px" class="q-mr-sm">
+              <q-avatar color="#fff" size="24px" class="q-mr-sm">
                 <img
                   :src="
                     item?.userAvatar
@@ -428,7 +428,7 @@ watch(fileInput, (newName) => {
                   })
                 "
               >
-                <q-avatar size="24px" class="q-mr-sm">
+                <q-avatar color="#fff" size="24px" class="q-mr-sm">
                   <img
                     :src="
                       item?.userAvatar

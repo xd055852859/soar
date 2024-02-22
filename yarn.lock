@@ -2944,10 +2944,10 @@ to-regex-range@^5.0.1:
   dependencies:
     is-number "^7.0.0"
 
-tree-graph-react@^2.4.2:
-  version "2.4.2"
-  resolved "https://registry.npmmirror.com/tree-graph-react/-/tree-graph-react-2.4.2.tgz#0b0ce4b4459f1204d12c15b9faa325b6c41d7ef8"
-  integrity sha512-yT9AntF5wg2WHe/FpZv1CvINH+S2O/XJL8Hyx824lOoMeNd2QJBt5Vvy7VOk0SwapJoKhBY4IVEAYa+tuTkiUA==
+tree-graph-react@^2.4.3:
+  version "2.4.3"
+  resolved "https://registry.npmmirror.com/tree-graph-react/-/tree-graph-react-2.4.3.tgz#1585a43efb3830036c19bf87df4e9f914f4beeeb"
+  integrity sha512-2s0NlvGvzuzDZnmJe6GLWbjmgsVwRD7WkAXnBZe9DyDsCUoGSY8RPAJ7l6ukRLtyyMjHC+2QV3goFDo7Be+EuQ==
   dependencies:
     jspdf "^2.5.1"
     lodash "^4.17.21"
@@ -3067,6 +3067,11 @@ vite@^5.0.8:
     rollup "^4.2.0"
   optionalDependencies:
     fsevents "~2.3.3"
+
+vue-cropper@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.npmmirror.com/vue-cropper/-/vue-cropper-1.1.1.tgz#e1d2729f7139182a893e8badcb8f33257aa2a40f"
+  integrity sha512-WsqKMpaBf9Osi1LQlE/5AKdD0nHWOy1asLXocaG8NomOWO07jiZi968+/PbMmnD0QbPJOumDQaGuGa13qys85A==
 
 vue-demi@>=0.14.5, vue-demi@>=0.14.6:
   version "0.14.6"

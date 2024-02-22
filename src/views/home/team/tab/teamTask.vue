@@ -1,21 +1,56 @@
 <script setup lang="ts">
 import fileCard from "@/components/fileCard/fileCard.vue";
+import _ from "lodash";
 import { ResultProps } from "@/interface/Common";
 import api from "@/services/api";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 const props = defineProps<{
   type?: string;
+  nodeKey?: string;
 }>();
 const { user } = storeToRefs(appStore.authStore);
 const { teamKey } = storeToRefs(appStore.teamStore);
 const taskList = ref<any>([]);
 const getTaskList = async () => {
+  let obj: any = {
+    projectKey: props.type ? "" : teamKey.value,
+  };
+  if (props.nodeKey) {
+    obj.cardKey = props.nodeKey;
+  }
   let taskRes = (await api.request.get("node/task/project", {
-    projectKey: teamKey.value,
+    ...obj,
   })) as ResultProps;
   if (taskRes.msg === "OK") {
+    console.log(taskRes.data);
     taskList.value = [...taskRes.data];
+  }
+};
+const chooseCard = (detail, type) => {
+  switch (type) {
+    case "update":
+      let userIndex = _.findIndex(taskList.value, {
+        _key: detail.executorInfo._key,
+      });
+      if (userIndex !== -1) {
+        let updateIndex = _.findIndex(taskList.value[userIndex].taskList, {
+          _key: detail._key,
+        });
+        if (updateIndex !== -1) {
+          console.log(taskList.value[userIndex]);
+          if (detail.hasDone) {
+            taskList.value[userIndex].finishTask++;
+          } else {
+            taskList.value[userIndex].finishTask--;
+          }
+          taskList.value[userIndex].taskList[updateIndex] = {
+            ...taskList.value[userIndex].taskList[updateIndex] ,
+            ...detail,
+          };
+        }
+        break;
+      }
   }
 };
 watchEffect(() => {
@@ -47,7 +82,7 @@ watchEffect(() => {
             color="primary"
             track-color="grey-3"
           >
-            <q-avatar size="73px">
+            <q-avatar color="#fff" size="73px">
               <img
                 :src="
                   item.userAvatar
@@ -70,7 +105,12 @@ watchEffect(() => {
           v-for="(taskItem, taskIndex) in item.taskList"
           :key="`taskItem${taskIndex}`"
         >
-          <fileCard :card="taskItem" type="taskBox" :outType="type" />
+          <fileCard
+            :card="taskItem"
+            type="taskBox"
+            :outType="type"
+            @chooseCard="chooseCard"
+          />
         </template>
       </div>
     </div>
@@ -82,6 +122,7 @@ watchEffect(() => {
   height: 100%;
   overflow-x: auto;
   overflow-y: hidden;
+  background: #f2f3f6;
   @include flex(flex-start, center, null);
   .teamTask-box {
     width: 455px;

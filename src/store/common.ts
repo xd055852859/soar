@@ -67,6 +67,7 @@ export const commonStore = defineStore("commonStore", () => {
   const setIframeTaskVisible = (visible, info) => {
     iframeTaskVisible.value = visible;
     iframeTaskInfo.value = info;
+    console.log(info)
   };
   const clearStore = () => {
     authStore().$reset();

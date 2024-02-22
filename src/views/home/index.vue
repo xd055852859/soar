@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import cIframe from "@/components/common/cIframe.vue";
 import TeamTree from "@/components/tree/tree.vue";
-import TaskBoard from "@/views/home/task/index.vue";
+import TaskBoard from "@/views/home/task/taskBoard/index.vue";
 import _ from "lodash";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
@@ -14,7 +14,7 @@ const { closeNum, iframeTaskInfo, iframeTaskVisible } = storeToRefs(
   appStore.commonStore
 );
 
-const { spaceKey } = storeToRefs(appStore.spaceStore);
+const { spaceKey, spaceMessageNum } = storeToRefs(appStore.spaceStore);
 const {
   cardKey,
   cardInfo,
@@ -27,8 +27,9 @@ const {
 const { note } = storeToRefs(appStore.noteStore);
 const { getTeamList, getTeamFoldList } = appStore.teamStore;
 const { setSpaceKey } = appStore.spaceStore;
-const { setCardVisible, setCardKey, setCardInfo } = appStore.cardStore;
-const { setClose } = appStore.commonStore;
+const { setCardVisible } = appStore.cardStore;
+const { setClose, setIframeTaskVisible } = appStore.commonStore;
+const showButton = ref<boolean>(false);
 const route = useRoute();
 // const outSpace = (index) => {
 //   ElMessageBox.confirm("是否退出该空间", "退出空间", {
@@ -74,22 +75,28 @@ watch(
       moveRight: closeNum === 1,
     }"
   >
-    <div class="left">
+    <div
+      class="left"
+      @mouseenter="showButton = true"
+      @mouseleave="showButton = false"
+    >
+      <div class="left-arrow-button">
+        <q-btn round @click="setClose(0)" size="12px" v-if="showButton">
+          <Icon name="a-shousuo2" :size="36" :style="{ marginTop: '5px' }" />
+        </q-btn>
+      </div>
       <q-btn
         flat
         round
-        class="left-arrow-button"
-        @click="setClose(0)"
-        size="10px"
-      >
-        <Icon name="a-shousuo2" :size="30" />
-      </q-btn>
-      <Icon
-        name="a-xiaoxi2"
-        class="left-notice-button"
-        :size="16"
         @click.stop="$router.push('/home/notice')"
-      />
+        size="11px"
+        class="left-notice-button"
+      >
+        <q-badge floating rounded color="red" v-if="spaceMessageNum">{{
+          spaceMessageNum
+        }}</q-badge>
+        <Icon name="xiaoxi1" :size="20" />
+      </q-btn>
       <Left />
     </div>
     <div class="right">
@@ -101,13 +108,13 @@ watch(
       <q-btn
         round
         flat
-        icon="navigate_before"
-        size="lg"
+        size="16px"
         class="card-back"
-        style="top:0px"
         @click="setCardVisible(false, 'tasktree')"
-      />
-      <TeamTree :cardKey="cardKey" ref="treeRef" viewType="tree" />
+      >
+        <Icon name="a-fanhuikongjian21" :size="20" />
+      </q-btn>
+      <TeamTree :cardKey="cardKey" ref="treeRef" />
     </div>
   </Teleport>
   <Teleport to="body">
@@ -115,12 +122,13 @@ watch(
       <q-btn
         round
         flat
-        size="lg"
-        icon="navigate_before"
+        size="16px"
         class="card-back"
         @click="setCardVisible(false, 'doc')"
-      />
-      <DocPreview :fileKey="cardInfo._key" v-if="cardInfo"/>
+      >
+        <Icon name="a-fanhuikongjian21" :size="20" />
+      </q-btn>
+      <DocPreview :fileKey="cardInfo._key" v-if="cardInfo" />
     </div>
   </Teleport>
   <Teleport to="body">
@@ -128,16 +136,17 @@ watch(
       <q-btn
         round
         flat
-        size="lg"
-        icon="navigate_before"
+        size="16px"
         class="card-back"
         @click="setCardVisible(false, 'file')"
-      />
+      >
+        <Icon name="a-fanhuikongjian21" :size="20" />
+      </q-btn>
       <FilePreview
         :file-url="cardInfo.url"
         :name="cardInfo.title"
         :fileType="cardInfo.fileType"
-        v-if="cardInfo"
+        v-if="cardInfo && cardInfo.url"
       />
     </div>
   </Teleport>
@@ -146,11 +155,12 @@ watch(
       <q-btn
         round
         flat
-        size="lg"
-        icon="navigate_before"
+        size="16px"
         class="card-back"
-        @click="setCardVisible(false, 'file')"
-      />
+        @click="setIframeTaskVisible(false, null)"
+      >
+        <Icon name="a-fanhuikongjian21" :size="20" />
+      </q-btn>
       <TaskBoard
         :targetKey="iframeTaskInfo.userKey"
         :targetTag="iframeTaskInfo.planTag"
@@ -178,18 +188,19 @@ watch(
     z-index: 2;
     left: 0px;
     top: 0px;
-    @include p-number(5px, 25px);
+    @include p-number(15px, 10px);
     .left-arrow-button {
+      width: 100px;
       position: absolute;
       z-index: 2;
-      top: 20px;
-      right: 0px;
+      top: 14px;
+      right: -80px;
     }
     .left-notice-button {
       position: absolute;
       z-index: 2;
-      top: 23px;
-      right: 35px;
+      top: 20px;
+      right: 18px;
       cursor: pointer;
     }
   }
@@ -216,7 +227,7 @@ watch(
   .card-back {
     position: absolute;
     z-index: 20;
-    top: 10px;
+    top: 5px;
     left: 10px;
   }
 }

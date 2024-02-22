@@ -2,14 +2,28 @@ import router from "@/router";
 import appStore from "@/store";
 import axios from "axios";
 import { commonStore } from "@/store/common";
-import { setMessage } from "./util/common";
+import { setLoading, setMessage } from "./util/common";
 import { JSONContent } from "@tiptap/vue-3";
 const AUTH_URL = import.meta.env.VITE_AUTH_URL;
 const API_URL = import.meta.env.VITE_API_URL;
 let token = localStorage.getItem("auth_token") || "";
-
+let loadNum = 0;
+axios.interceptors.request.use(
+  function (config) {
+    loadNum = loadNum + 1;
+    // setLoading(true);
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 axios.interceptors.response.use(
   (response) => {
+    loadNum = loadNum - 1;
+    if (loadNum === 0) {
+      // setLoading(false);
+    }
     if (response.data.status === 701) {
       setMessage("error", "请登录");
       localStorage.clear();
@@ -18,6 +32,7 @@ axios.interceptors.response.use(
       commonStore().clearStore();
     } else if (response.data.status !== 200) {
       setMessage("error", response.data.msg);
+    } else {
     }
     return response;
   },

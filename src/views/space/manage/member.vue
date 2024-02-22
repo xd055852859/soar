@@ -9,6 +9,7 @@ import { setMessage } from "@/services/util/common";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
+import { uploadFile } from "@/services/util/file";
 const { spaceKey, spaceRole, spaceMemberList, spaceList } = storeToRefs(
   appStore.spaceStore
 );
@@ -91,6 +92,15 @@ const updateMember = async (value, key, member) => {
     ...obj,
   })) as ResultProps;
   if (memberRes.msg === "OK") {
+    let memberIndex = _.findIndex(memberList.value, {
+      userKey: member.userKey,
+    });
+    if (memberIndex !== -1) {
+      memberList.value[memberIndex] = {
+        ...memberList.value[memberIndex],
+        ...obj,
+      };
+    }
   }
 };
 const addMember = async (memberKey) => {
@@ -134,6 +144,14 @@ const deleteMember = (memberKey) => {
       }
     })
     .onCancel(() => {});
+};
+const uploadImage = (file, type, item) => {
+  let mimeType = ["image/*"];
+  if (file) {
+    uploadFile(file, mimeType, async (url, name) => {
+      updateMember(url, "userAvatar", item);
+    });
+  }
 };
 watchEffect(() => {
   if (spaceKey.value) {
@@ -186,7 +204,7 @@ watch(memberInput, (newName) => {
         <template v-slot:body="props">
           <q-tr :props="props">
             <q-td key="userAvatar" :props="props">
-              <q-avatar color="primary" text-color="white" size="lg">
+              <q-avatar color="#fff" size="lg">
                 <img
                   :src="
                     props.row.userAvatar
@@ -195,9 +213,56 @@ watch(memberInput, (newName) => {
                   "
                 />
               </q-avatar>
+              <q-popup-edit
+                v-model="props.row.userAvatar"
+                v-slot="scope"
+                v-if="spaceRole < props.row.role"
+              >
+                <div className="form-logo">
+                  <div className="upload-button upload-img-button logo-box">
+                    <img
+                      :src="props.row.userAvatar"
+                      alt=""
+                      style="width: 100%, height:100%"
+                      class="upload-cover"
+                      v-if="props.row.userAvatar"
+                    />
+                    <q-icon
+                      name="add"
+                      style="color: #ebebeb"
+                      size="80px"
+                      v-else
+                    />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      @change="
+                        //@ts-ignore
+                        uploadImage($event.target.files[0], 'avatar', props.row)
+                      "
+                      class="upload-img"
+                    />
+                  </div>
+                </div>
+              </q-popup-edit>
             </q-td>
             <q-td key="userName" :props="props" style="width: 200px">
               {{ props.row.userName }}
+              <q-popup-edit
+                v-model="props.row.userName"
+                v-slot="scope"
+                @save="(value) => updateMember(value, 'userName', props.row)"
+                v-if="spaceRole < props.row.role"
+              >
+                <q-input
+                  outlined
+                  v-model="scope.value"
+                  label="姓名"
+                  dense
+                  autofocus
+                  @keyup.enter="scope.set"
+                />
+              </q-popup-edit>
             </q-td>
             <q-td key="nickName" :props="props">
               {{ props.row.nickName }}
@@ -251,7 +316,9 @@ watch(memberInput, (newName) => {
                   outlined
                   dense
                   v-model="scope.value"
-                  :options="ROLE_OPTIONS"
+                  :options="
+                    ROLE_OPTIONS.slice(spaceRole + 1, ROLE_OPTIONS.length)
+                  "
                   class="full-width q-mb-md"
                   emit-value
                   map-options
@@ -294,10 +361,14 @@ watch(memberInput, (newName) => {
                 :key="`search${index}`"
               >
                 <div class="member-search-left">
-                  <q-avatar color="primary" text-color="white" size="lg">
+                  <q-avatar
+                    color="#fff"
+                    size="lg"
+                    class="q-mr-sm"
+                  >
                     <img
                       :src="
-                        item.userAvatar
+                        item.row?.userAvatar
                           ? item.row.userAvatar
                           : '/common/defaultPerson.png'
                       "
@@ -328,6 +399,7 @@ watch(memberInput, (newName) => {
         </div>
       </template>
     </cDialog>
+    
   </div>
 </template>
 <style scoped lang="scss">
@@ -339,7 +411,7 @@ watch(memberInput, (newName) => {
     height: calc(100% - 75px);
     @include p-number(15px, 25px);
   }
-  
+
   .member-table {
     height: calc(100% - 65px);
   }
@@ -370,4 +442,16 @@ watch(memberInput, (newName) => {
   }
 }
 </style>
-<style lang="scss"></style>
+<style lang="scss">
+.form-logo {
+  width: 100%;
+  height: 150px;
+  @include flex(center, center, null);
+  .logo-box {
+    width: 150px;
+    height: 150px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+}
+</style>

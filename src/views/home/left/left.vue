@@ -2,10 +2,12 @@
 import { ResultProps } from "@/interface/Common";
 import api from "@/services/api";
 import team from "@/views/home/team/menu/index.vue";
+import "vue-cropper/dist/index.css";
+import { VueCropper } from "vue-cropper";
 import router from "@/router";
 import { VueDraggableNext } from "vue-draggable-next";
 import { setMessage } from "@/services/util/common";
-import { uploadFile } from "@/services/util/file";
+import { base64ToFile, fileToBase64, uploadFile } from "@/services/util/file";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import Icon from "@/components/common/Icon.vue";
@@ -20,12 +22,18 @@ const { setSpaceKey, setSpaceList } = appStore.spaceStore;
 const { setTeamKey } = appStore.teamStore;
 const { setCardKey } = appStore.cardStore;
 const userVisible = ref<boolean>(false);
+const cropperVisible = ref<boolean>(false);
 const userName = ref<string>("");
 const userAvatar = ref<string>("");
 const spaceVisible = ref<boolean>(false);
+const spaceMenuVisible = ref<boolean>(false);
 const sortList = ref<any>([]);
+const urlBase64 = ref<any>(null);
+const cropperRef = ref<any>(null);
 const chooseSpace = (key) => {
   setSpaceKey(key);
+  setTeamKey("");
+  setCardKey("");
   router.push("/space");
 };
 const dragSpace = async () => {
@@ -58,13 +66,34 @@ const updateUser = async () => {
     setUserInfo(newUser);
   }
 };
-const uploadImage = (file, type) => {
-  let mimeType = ["image/*"];
+// const uploadImage = (file, type) => {
+//   let mimeType = ["image/*"];
+//   if (file) {
+//     uploadFile(file, mimeType, async (url, name) => {
+//       userAvatar.value = url;
+//     });
+//   }
+// };
+const uploadImage = async (file, type) => {
   if (file) {
-    uploadFile(file, mimeType, async (url, name) => {
-      userAvatar.value = url;
-    });
+    console.log(fileToBase64);
+    urlBase64.value = await fileToBase64(file);
+    console.log(urlBase64.value);
+    cropperVisible.value = true;
   }
+};
+const saveImg = () => {
+  let mimeType = ["image/*"];
+  console.log(cropperRef.value);
+  cropperRef.value.getCropData((data) => {
+    // do something
+    console.log(data);
+    let file = base64ToFile(data);
+    uploadFile(file, mimeType, async (url) => {
+      userAvatar.value = url;
+      cropperVisible.value = false;
+    });
+  });
 };
 const logout = () => {
   router.push("/");
@@ -108,8 +137,8 @@ watch(
 </script>
 <template>
   <div class="left-title icon-point">
-    <div class="select-third-item">
-      <q-avatar rounded color="primary" text-color="white" size="lg">
+    <div class="select-third-item" @mouseenter="spaceMenuVisible = true" style="height:45px">
+      <q-avatar color="#fff" rounded size="lg">
         <img
           :src="spaceInfo?.logo ? spaceInfo.logo : '/common/defaultGroup.png'"
         />
@@ -120,12 +149,16 @@ watch(
         style="max-width: calc(100% - 80px); font-weight: bolder"
       >
         {{ spaceInfo?.name }}
-        <Icon name="a-xiala2" :size="8" class="q-ml-sm"/>
+        <Icon name="a-xiala2" :size="8" class="q-ml-sm" />
       </div>
 
-      <q-menu style="width: 300px; padding: 10px">
+      <q-menu
+        style="width: 280px; padding: 10px"
+        v-model="spaceMenuVisible"
+        @mouseleave="spaceMenuVisible = false"
+      >
         <div class="select-third-item icon-point" @click="userVisible = true">
-          <q-avatar color="primary" text-color="white" size="lg">
+          <q-avatar color="#fff" size="lg">
             <img :src="userAvatar ? userAvatar : '/common/defaultPerson.png'" />
           </q-avatar>
           <div class="select-item-name single-to-long">
@@ -149,24 +182,18 @@ watch(
             >
               <Icon name="a-huibaoyaosu-yidong21" :size="14" class="q-mr-sm" />
               <div style="width: calc(100% - 40px)">
-                <q-avatar
-                  rounded
-                  color="primary"
-                  text-color="white"
-                  size="sm"
-                  class="q-mr-sm"
-                >
+                <q-avatar rounded color="#fff" size="sm" class="q-mr-sm">
                   <img
                     :src="item.logo ? item.logo : '/common/defaultGroup.png'"
                   /> </q-avatar
                 >{{ item.name }}
               </div>
-              <q-icon
-                name="o_settings"
-                size="22px"
-                color="grey-5"
-                class=""
-                @click="chooseSpace(item._key)"
+              <Icon
+                name="a-shezhi2"
+                :size="18"
+                class="q-mr-sm"
+                color="#bdbdbd"
+                @click.stop="chooseSpace(item._key)"
               />
               <q-space />
             </q-item>
@@ -202,12 +229,6 @@ watch(
           :size="20"
           :color="$route.name === 'note' ? '#07be51' : '#333'"
         />
-        <!-- <q-icon
-              name="sym_o_package_2"
-              :color="$route.name === 'note' ? 'primary' : 'grey'"
-            >
-              <q-tooltip :offset="[10, 5]"> 速记 </q-tooltip>
-            </q-icon> -->
       </q-item-section>
     </q-item>
     <q-item
@@ -222,26 +243,6 @@ watch(
       </q-item-section>
       <q-item-section class="left-common-title">汇报</q-item-section>
     </q-item>
-    <!-- <q-item clickable to="/home/calendar" exact>
-          <q-item-section avatar>
-            <Icon name="a-richeng2" :size="20" color="#333" />
-          </q-item-section>
-          <q-item-section>日程</q-item-section>
-        </q-item> -->
-    <!-- <q-item to="/home/mate" exact>
-          <q-item-section avatar>
-            <q-icon name="o_group" />
-          </q-item-section>
-
-          <q-item-section>队友</q-item-section>
-        </q-item>
-        <q-item to="/home/resource" exact>
-          <q-item-section avatar>
-            <q-icon name="o_folder_open" />
-          </q-item-section>
-
-          <q-item-section>资源</q-item-section>
-        </q-item> -->
     <q-separator />
     <q-item
       clickable
@@ -287,6 +288,31 @@ watch(
   </q-list>
   <q-separator />
   <team />
+  <cDialog
+    :visible="cropperVisible"
+    @close="cropperVisible = false"
+    title="裁剪图片"
+  >
+    <template #content>
+      <div style="width: 500px; height: 400px">
+        <VueCropper
+          ref="cropperRef"
+          :img="urlBase64"
+          :autoCrop="true"
+          :centerBox="true"
+        />
+      </div>
+    </template>
+    <template #footer>
+      <q-btn
+        flat
+        label="取消"
+        color="grey-5"
+        @click="cropperVisible = false"
+        :dense="true" />
+      <q-btn label="确认" color="primary" @click="saveImg"
+    /></template>
+  </cDialog>
   <cDialog :visible="userVisible" @close="userVisible = false" title="用户设置">
     <template #content>
       <div className="form-container">
@@ -393,6 +419,7 @@ watch(
   }
 }
 .left-menu-item {
+  border-radius: 4px;
   .left-menu-avatar {
     min-width: 30px;
   }

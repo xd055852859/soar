@@ -17,24 +17,30 @@ export function getStartAdornment(startAdornment, handleClick, node) {
   return ({ x, y, nodeKey }) => (
     <g>
       {orderedKeys.map((key, index) => {
-        let viewBox = "";
+        let viewBox = [];
         let svgIndex = 0;
         let fill = "#333";
+        let clickKey = "";
         switch (key) {
           case "milestone":
+            clickKey = "milestone";
             let time = new Date().setHours(23, 59, 59, 999);
-            viewBox = "0 -960 960 960";
+            viewBox = [0, -960, 960, 960];
             fill = node.endTime < time ? "#f44336" : "#07be51";
             break;
           case "tag":
-            viewBox = "0 -960 960 960";
+            clickKey = "tag";
+            viewBox = [0, -960, 960, 960];
             fill = startAdornment.tag?.color
               ? startAdornment.tag?.color
-              : "#$333";
+              : "#333";
             break;
           default:
-            svgIndex = startAdornment[key].index;
-            viewBox = "0 0 1024 1024";
+            clickKey = "icon";
+            svgIndex = startAdornment[key]?.index
+              ? startAdornment[key].index
+              : 0;
+            viewBox = [0, 0, 1024, 1024];
         }
         return (
           <svg
@@ -45,10 +51,18 @@ export function getStartAdornment(startAdornment, handleClick, node) {
             height="18"
             x={x + (18 + 2) * index}
             y={y}
-            onClick={(event) => handleClick[key](node)}
+            onClick={(event) =>
+              handleClick[clickKey](node, event.currentTarget, clickKey, key)
+            }
             fill={fill}
           >
-            <rect x={0} y={0} width="1024" height="1024" fillOpacity={0} />
+            <rect
+              x={viewBox[0]}
+              y={viewBox[1]}
+              width={viewBox[2]}
+              height={viewBox[3]}
+              fillOpacity={0}
+            />
             {startAdornments[key][svgIndex]}
           </svg>
         );
@@ -146,8 +160,8 @@ export function getBottomAdornment(bottomAdornment, handleClick, node) {
     </g>
   );
 }
-export function getCustmAdornment(x, y, height, nodeKey, handleClick) {
-  return (
+export function getCustmAdornment(x, y, height, nodeKey, rootKey, handleClick) {
+  return nodeKey !== rootKey ? (
     <svg
       key={nodeKey + "custom"}
       width="20px"
@@ -184,7 +198,7 @@ export function getCustmAdornment(x, y, height, nodeKey, handleClick) {
         </g>
       </g>
     </svg>
-  );
+  ) : null;
 }
 export const priority = [
   // <g>

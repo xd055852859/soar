@@ -3,7 +3,7 @@ import cDialog from "@/components/common/cDialog.vue";
 import { ROLE_OPTIONS, ResultProps } from "@/interface/Common";
 import api from "@/services/api";
 import { viewArray } from "@/services/config/config";
-import { setMessage } from "@/services/util/common";
+import { setLoading, setMessage } from "@/services/util/common";
 import appStore from "@/store";
 import _ from "lodash";
 import { storeToRefs } from "pinia";
@@ -72,7 +72,9 @@ const updateTeam = async () => {
       teamKey: spaceKey.value,
       ...obj,
     })) as ResultProps;
+    setLoading(true);
     if (teamRes.msg === "OK") {
+      setLoading(false);
       setMessage("success", "创建小组成功");
       setTeamKey(teamRes.data._key);
       setTeamList([...teamList.value, teamRes.data]);
@@ -86,27 +88,29 @@ watchEffect(() => {
   }
 });
 watchEffect(() => {
-  if (props.state) {
-    if (props.type === "target") {
-      menuTeamInfo.value = _.cloneDeep(targetTeamInfo.value);
+  if (props.visible) {
+    if (props.state) {
+      if (props.type === "target") {
+        menuTeamInfo.value = _.cloneDeep(targetTeamInfo.value);
+      } else {
+        menuTeamInfo.value = _.cloneDeep(teamInfo.value);
+      }
+      if (menuTeamInfo.value) {
+        menuTeamKey.value = menuTeamInfo.value._key;
+        name.value = menuTeamInfo.value.name;
+        isPublic.value = menuTeamInfo.value.isPublic;
+        defaultRole.value = menuTeamInfo.value.defaultRole;
+        memo.value = menuTeamInfo.value.memo;
+        views.value = menuTeamInfo.value.views;
+      }
     } else {
-      menuTeamInfo.value = _.cloneDeep(teamInfo.value);
+      menuTeamKey.value = "";
+      name.value = "新小组";
+      isPublic.value = true;
+      defaultRole.value = 3;
+      memo.value = "";
+      views.value = ["taskTree", "knowledgeBase", "doc", "file"];
     }
-    if (menuTeamInfo.value) {
-      menuTeamKey.value = menuTeamInfo.value._key;
-      name.value = menuTeamInfo.value.name;
-      isPublic.value = menuTeamInfo.value.isPublic;
-      defaultRole.value = menuTeamInfo.value.defaultRole;
-      memo.value = menuTeamInfo.value.memo;
-      views.value = menuTeamInfo.value.views;
-    }
-  } else {
-    menuTeamKey.value = "";
-    name.value = "新小组";
-    isPublic.value = true;
-    defaultRole.value = 3;
-    memo.value = "";
-    views.value = ["taskTree", "knowledgeBase", "doc", "file"];
   }
 });
 </script>
@@ -144,9 +148,7 @@ watchEffect(() => {
           outlined
           dense
           v-model="defaultRole"
-          :options="
-            ROLE_OPTIONS.slice(menuTeamInfo.role + 1, ROLE_OPTIONS.length)
-          "
+          :options="ROLE_OPTIONS.slice(1, ROLE_OPTIONS.length)"
           class="full-width q-mb-md"
           emit-value
           map-options

@@ -10,6 +10,7 @@ import { formatName, nameArray } from "@/services/config/config";
 import { useQuasar } from "quasar";
 import _ from "lodash";
 import riverChart from "@/components/chart/riverChart.vue";
+import Icon from "@/components/common/Icon.vue";
 const props = defineProps<{
   type?: string;
 }>();
@@ -22,10 +23,10 @@ const { setTeamKey } = appStore.teamStore;
 const taskList = ref<any>([]);
 const page = ref<number>(1);
 const total = ref<number>(0);
-const treeRef = ref<any>(null);
 const nodeKey = ref<string>("");
 const chartData = ref<any>(null);
 const chartName = ref<string[]>([]);
+
 const $q = useQuasar();
 const addTask = async () => {
   $q.dialog({
@@ -55,35 +56,25 @@ const addTask = async () => {
 };
 const getTaskList = async () => {
   let taskRes: any = null;
-  if (props.type) {
-    taskRes = (await api.request.get("card/work", {
-      teamKey: spaceKey.value,
-    })) as ResultProps;
-    if (taskRes.msg === "OK") {
-      taskList.value = [...taskRes.data];
+  taskRes = (await api.request.get("card", {
+    teamKey: spaceKey.value,
+    projectKey: teamKey.value,
+    cardType: "taskTree",
+    page: page.value,
+    limit: 30,
+  })) as ResultProps;
+  if (taskRes.msg === "OK") {
+    if (page.value === 1) {
+      taskList.value = [];
       if (taskRes.data.length > 0) {
         nodeKey.value = taskRes.data[0]._key;
         setTeamKey(taskRes.data[0].projectInfo._key);
         // setCardKey(taskRes.data[0]._key);
       }
-      console.log(taskList.value);
-      total.value = taskList.value.length;
     }
-  } else {
-    taskRes = (await api.request.get("card", {
-      teamKey: spaceKey.value,
-      projectKey: teamKey.value,
-      cardType: "taskTree",
-      page: page.value,
-      limit: 30,
-    })) as ResultProps;
-    if (taskRes.msg === "OK") {
-      if ((page.value = 1)) {
-        taskList.value = [];
-      }
-      taskList.value = [...taskList.value, ...taskRes.data];
-      total.value = taskRes.total as number;
-    }
+    taskList.value = [...taskList.value, ...taskRes.data];
+
+    total.value = taskRes.total as number;
   }
 };
 const getChartData = async () => {
@@ -132,7 +123,7 @@ watchEffect(() => {
 </script>
 <template>
   <div class="teamTaskTree">
-    <div class="teamTaskTree-header" v-if="!type">
+    <div class="teamTaskTree-header">
       <q-btn
         color="primary"
         label="创建事务树"
@@ -140,23 +131,16 @@ watchEffect(() => {
         style="width: 120px"
         @click="addTask"
       />
-      <!-- <q-btn
-        flat
-        icon="o_task_alt"
-        color="primary"
-        class="q-ml-sm"
-        @click="$router.push('/home/team/task')"
-      /> -->
+
     </div>
+    
     <div class="teamTaskTree-box" :style="type ? { height: '100%' } : null">
-      <div
-        class="teamTaskTree-box-left"
-        @scroll="
+      <!-- @scroll="
           commonscroll($event, taskList, total, () => {
             page++;
           })
-        "
-      >
+        " -->
+      <div class="teamTaskTree-box-left" v-if="!type">
         <template v-for="(item, index) in taskList" :key="`task${index}`">
           <fileCard
             :card="item"
@@ -167,14 +151,9 @@ watchEffect(() => {
           />
         </template>
       </div>
-      <div
-        class="teamTaskTree-box-right"
-        :style="!type ? { height: 'calc(100% - 25px)' } : null"
-      >
+      <div class="teamTaskTree-box-right">
         <TeamTree
           :cardKey="nodeKey"
-          ref="treeRef"
-          viewType="mind-single"
           v-if="nodeKey && !treeVisible"
         />
         <riverChart
@@ -203,6 +182,15 @@ watchEffect(() => {
     right: 0px;
     @include flex(flex-end, center, null);
   }
+  .teamTaskTree-out-header {
+    height: 65px;
+    position: absolute;
+    z-index: 3;
+    top: -100px;
+    left: 110px;
+    font-size: 16px;
+    @include flex(flex-start, center, null);
+  }
   .teamTaskTree-box {
     width: 100%;
     height: calc(100% - 10px);
@@ -216,7 +204,7 @@ watchEffect(() => {
       @include scroll();
     }
     .teamTaskTree-box-right {
-      width: calc(100% - 350px);
+      flex: 1;
       height: 100%;
       position: relative;
       z-index: 2;

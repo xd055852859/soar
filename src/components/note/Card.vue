@@ -23,14 +23,8 @@
         </div>
         <div class="summary">{{ card.summary }}</div>
       </div>
-      <q-btn
-        flat
-        round
-        icon="more_horiz"
-        size="sm"
-        class="options"
-        @click="handleClickOptions"
-      >
+      <q-btn flat round size="9px" class="options" @click="handleClickOptions">
+        <Icon name="gengduo" :size="18" />
         <q-menu>
           <q-list style="min-width: 100px">
             <q-item clickable v-close-popup @click="handleDelete">

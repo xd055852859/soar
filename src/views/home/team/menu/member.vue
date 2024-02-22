@@ -119,7 +119,7 @@ watch(
       @mouseenter="chooseKey = item._key"
     >
       <div class="member-item-left">
-        <q-avatar color="primary" size="lg" class="q-mr-md">
+        <q-avatar color="#fff" size="lg" class="q-mr-md">
           <img
             :src="
               item?.userAvatar ? item.userAvatar : '/common/defaultPerson.png'
@@ -180,7 +180,7 @@ watch(
         :key="`search${item.userKey}`"
       >
         <div class="member-item-left" style="width: calc(100% - 120px)">
-          <q-avatar color="primary" size="lg" class="q-mr-md">
+          <q-avatar color="#fff" size="lg" class="q-mr-md">
             <img
               :src="
                 item?.userAvatar ? item.userAvatar : '/common/defaultPerson.png'

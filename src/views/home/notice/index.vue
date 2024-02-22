@@ -8,12 +8,16 @@ import { commonscroll, setMessage } from "@/services/util/common";
 const socket: any = inject("socket");
 const dayjs: any = inject("dayjs");
 const { spaceKey } = storeToRefs(appStore.spaceStore);
+const { setSpaceMessageNum } = appStore.spaceStore;
+
 const noticeList = ref<any>([]);
 const page = ref<number>(1);
 const total = ref<number>(0);
+const noticeTab = ref<string>("unRead");
 const getNoticeList = async () => {
   let noticeRes = (await api.request.get("message", {
     teamKey: spaceKey.value,
+    hasRead: noticeTab.value === "read" ? 1 : 0,
     page: page.value,
     limit: 30,
   })) as ResultProps;
@@ -35,13 +39,45 @@ const operateNotice = async (key, operate) => {
     getNoticeList();
   }
 };
+const readAll = async () => {
+  let noticeRes = (await api.request.patch("/message/hasRead", {
+    teamKey: spaceKey.value,
+  })) as ResultProps;
+  if (noticeRes.msg === "OK") {
+    setSpaceMessageNum(noticeRes.data);
+    if (page.value !== 1) {
+      page.value === 1;
+    } else {
+      getNoticeList();
+    }
+  }
+};
 watchEffect(() => {
   getNoticeList();
 });
 </script>
 <template>
   <div class="notice">
-    <c-header title="消息" />
+    <c-header title="消息">
+      <template #button>
+        <q-btn
+          color="primary"
+          label="一键已读"
+          v-if="noticeTab === 'unRead'"
+          @click="readAll()"
+        />
+      </template>
+    </c-header>
+    <q-tabs
+      v-model="noticeTab"
+      dense
+      align="left"
+      indicator-color="primary"
+      active-class="text-primary"
+    >
+      <q-tab name="unRead" label="未读" />
+      <q-tab name="read" label="已读" />
+    </q-tabs>
     <div
       class="notice-box"
       @scroll="
@@ -53,8 +89,8 @@ watchEffect(() => {
       <template v-for="(item, index) in noticeList" :key="`notice${index}`">
         <q-card class="notice-item q-mb-sm">
           <q-card-section class="notice-item-box">
-            <div>
-              <q-avatar size="30px" class="q-mr-xs">
+            <div style="width: 20%">
+              <q-avatar color="#fff" size="30px" class="q-mr-xs">
                 <img
                   :src="
                     item.fromUserInfo?.userAvatar
@@ -65,9 +101,11 @@ watchEffect(() => {
               </q-avatar>
               {{ item.fromUserInfo?.userName }}
             </div>
-            <div>在 #{{ item.projectInfo?.name }}</div>
-            <div>{{ item.log }}</div>
-            <div v-if="item.type === 'applyJoin'">
+            <div style="width: 20%" v-if="item.projectInfo?.name">
+              在 #{{ item.projectInfo?.name }}
+            </div>
+            <div style="width: 40%">{{ item.log }}</div>
+            <div style="width: 15%" v-if="item.type === 'applyJoin'">
               <template v-if="item.needReply === 1">
                 <q-btn
                   color="red"
@@ -92,7 +130,9 @@ watchEffect(() => {
             <div v-if="item.type === 'watchLog'">
               {{ item?.cardInfo?.name }}
             </div>
-            <div>{{ dayjs(item.createTime).fromNow() }}</div>
+            <div style="width: 10%; text-align: right">
+              {{ dayjs(item.createTime).fromNow() }}
+            </div>
           </q-card-section>
         </q-card>
       </template>
@@ -105,16 +145,13 @@ watchEffect(() => {
   height: 100%;
   .notice-box {
     width: 100%;
-    height: calc(100% - 70px);
+    height: calc(100% - 110px);
     @include scroll();
     @include p-number(10px, 25px);
     .notice-item {
-      font-size: 18px;
+      font-size: 16px;
       .notice-item-box {
-        @include flex(flex-start, center, null);
-        > div {
-          width: 20%;
-        }
+        @include flex(space-between, center, null);
       }
     }
   }

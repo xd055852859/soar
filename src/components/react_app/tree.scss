@@ -1,10 +1,16 @@
-g[id^="tree-node-"] {
-  .tree-detail-icon {
-    display: none;
-  }
-  &:hover {
+.tree-component {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  @include scroll();
+  g[id^="tree-node-"] {
     .tree-detail-icon {
-      display: flex;
+      display: none;
+    }
+    &:hover {
+      .tree-detail-icon {
+        display: flex;
+      }
     }
   }
 }

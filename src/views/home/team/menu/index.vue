@@ -129,7 +129,8 @@ const topTeam = async (item, index, state) => {
       >
         <div># {{ item.name }}</div>
         <div class="teamMenu-item-icon" v-if="targetTeamKey === item._key">
-          <q-btn flat round icon="o_more_horiz" size="12px" @click.stop="">
+          <q-btn flat round size="9px" @click.stop="">
+            <Icon name="gengduo" :size="18" />
             <q-menu anchor="top right" self="top left" class="q-pa-sm">
               <q-list dense>
                 <q-item
@@ -193,7 +194,8 @@ const topTeam = async (item, index, state) => {
       >
         <div># {{ item.name }}</div>
         <div class="teamMenu-item-icon" v-if="targetTeamKey === item._key">
-          <q-btn flat round icon="more_horiz" size="12px" @click.stop="">
+          <q-btn flat round size="9px" @click.stop="">
+            <Icon name="gengduo" :size="18" />
             <q-menu anchor="top right" self="top left" class="q-pa-sm">
               <q-list dense>
                 <q-item
@@ -228,7 +230,7 @@ const topTeam = async (item, index, state) => {
 <style scoped lang="scss">
 .teamMenu {
   width: 100%;
-  height: calc(100% - 350px);
+  height: calc(100% - 320px);
   @include scroll();
   @include p-number(0px, 10px);
   .teamMenu-title {
@@ -239,19 +241,26 @@ const topTeam = async (item, index, state) => {
     @include flex(space-between, center, null);
   }
   .teamMenu-list {
+    max-height: calc(100vh - 450px);
+    @include scroll();
     .teamMenu-item {
       width: 100%;
       height: 35px;
       padding-left: 10px;
       font-size: 14px;
+      border-radius: 4px;
       box-sizing: border-box;
       line-height: 35px;
       margin-bottom: 5px;
       @include flex(space-between, center, null);
       &:hover {
-        background: #e0e0e0;
+        background: #f5f5f5;
       }
     }
+  }
+  &::-webkit-scrollbar {
+    /*滚动条整体样式*/
+    width: 0px;
   }
 }
 </style>

@@ -5,6 +5,7 @@ import { storeToRefs } from "pinia";
 import { signatureArray } from "@/services/config/config";
 import appStore from "@/store";
 import _ from "lodash";
+import Icon from "@/components/common/Icon.vue";
 const { user } = storeToRefs(appStore.authStore);
 const { mateList } = storeToRefs(appStore.mateStore);
 const signVisible = ref<boolean>(false);
@@ -35,6 +36,9 @@ const signVisible = ref<boolean>(false);
             "
           />
         </div>
+      </div>
+      <div class="mate-item-online" v-if="item.online">
+        <Icon name="a-diannaozaixian2" :size="14" color="#fff" />
       </div>
       <div class="mate-item-name">
         {{ item.userName }}
@@ -110,7 +114,7 @@ const signVisible = ref<boolean>(false);
     background: #ffffff;
     border-radius: 14px;
     margin-right: 5%;
-    margin-bottom:20px;
+    margin-bottom: 20px;
     position: relative;
     z-index: 1;
     @include p-number(20px, 0px);
@@ -142,6 +146,17 @@ const signVisible = ref<boolean>(false);
       color: #161616;
       line-height: 28px;
       margin: 28px 0px;
+    }
+    .mate-item-online {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background-color: $commonColor;
+      @include flex(center, center, null);
+      position: absolute;
+      z-index: 2;
+      top: 110px;
+      right: 60px;
     }
     .mate-item-chart {
       width: 100%;

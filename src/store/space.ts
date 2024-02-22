@@ -15,6 +15,7 @@ export const spaceStore = defineStore(
     const spaceMemberList = ref<SpaceMember[]>([]);
     const spaceInfo = ref<SpaceInfo | null>(null);
     const spaceRole = ref<number>(5);
+    const spaceMessageNum = ref<number>(0);
     const createState = ref<boolean>(false);
     const setSpaceKey = (newKey) => {
       spaceKey.value = newKey;
@@ -29,7 +30,18 @@ export const spaceStore = defineStore(
     const setSpaceList = async (newList) => {
       spaceList.value = newList;
     };
+    const getSpaceMessageNum = async () => {
+      let spaceRes = (await api.request.get("message/unReadNum", {
+        teamKey: spaceKey.value,
+      })) as ResultProps;
+      if (spaceRes.msg === "OK") {
+        spaceMessageNum.value = spaceRes.data;
+      }
+    };
 
+    const setSpaceMessageNum = async (newNum) => {
+      spaceMessageNum.value = newNum;
+    };
     const getSpaceMemberList = async () => {
       let memberRes = (await api.request.get("teamMember", {
         teamKey: spaceKey.value,
@@ -61,6 +73,7 @@ export const spaceStore = defineStore(
       if (newKey) {
         getSpaceInfo(newKey);
         getSpaceMemberList();
+        getSpaceMessageNum();
       }
     });
     watch([spaceList, spaceKey], ([newList, newKey]) => {
@@ -80,6 +93,8 @@ export const spaceStore = defineStore(
     return {
       spaceKey,
       setSpaceKey,
+      spaceMessageNum,
+      setSpaceMessageNum,
       spaceRole,
       spaceInfo,
       setSpaceInfo,

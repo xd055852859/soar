@@ -57,11 +57,7 @@ watch(spaceList, (newList) => {
                 <div class="top">{{ item.name }}</div>
                 <div class="bottom">
                   <div>
-                    {{
-                      item.role === 0
-                        ? "超管"
-                        : ROLE_OPTIONS[item.role - 1]?.label
-                    }}
+                    {{ ROLE_OPTIONS[item.role]?.label }}
                   </div>
                 </div>
               </div>

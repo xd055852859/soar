@@ -84,7 +84,7 @@ const removeMate = async (userKey) => {
         <template v-slot:body="props">
           <q-tr :props="props">
             <q-td key="userAvatar" :props="props" style="width: 100px">
-              <q-avatar color="primary" text-color="white" size="lg">
+              <q-avatar color="#fff" size="lg">
                 <img
                   :src="
                     props.row.userAvatar

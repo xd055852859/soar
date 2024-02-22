@@ -103,6 +103,7 @@ watch(
   () => props.targetTag,
   (newTag) => {
     if (newTag) {
+      console.log(newTag)
       planTag.value = newTag;
     }
   },
@@ -132,7 +133,8 @@ watchEffect(() => {
 </script>
 <template>
   <div class="taskBoard">
-    <cHeader title="任务池">
+    <div class="iframe-title" v-if="targetKey"></div>
+    <cHeader title="任务池" v-else>
       <template #button>
         <q-select
           outlined
@@ -148,7 +150,7 @@ watchEffect(() => {
           <template v-slot:option="scope">
             <q-item v-bind="scope.itemProps">
               <q-item-section>
-                <q-avatar size="24px">
+                <q-avatar color="#fff" size="24px">
                   <img
                     :src="
                       scope.opt.userAvatar
@@ -223,12 +225,7 @@ watchEffect(() => {
                       class="q-mr-xs"
                       @click="editFinishPercent(prop.node, index)"
                     />
-                    <q-avatar
-                      color="primary"
-                      text-color="white"
-                      size="lg"
-                      class="q-mr-sm"
-                    >
+                    <q-avatar color="#fff" size="lg" class="q-mr-sm">
                       <img
                         :src="
                           prop.node?.avatarUri
@@ -254,7 +251,12 @@ watchEffect(() => {
                           _.findIndex(planArray, { value: prop.node.planTag })
                         ]?.label
                       }}</template>
-                      <q-icon name="o_settings" v-else color="grey" />
+                      <Icon
+                        name="a-shezhi2"
+                        :size="18"
+                        color="#bdbdbd"
+                        v-else
+                      />
                       <q-menu class="q-pa-sm">
                         <q-list dense>
                           <q-item
@@ -320,6 +322,10 @@ watchEffect(() => {
       }
     }
   }
+}
+.iframe-title {
+  width: 100%;
+  height: 65px;
 }
 </style>
 <style lang="scss"></style>

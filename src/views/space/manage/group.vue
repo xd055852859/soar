@@ -13,7 +13,7 @@ import { useQuasar } from "quasar";
 const { spaceKey, spaceRole, spaceMemberList } = storeToRefs(
   appStore.spaceStore
 );
-const { teamList } = storeToRefs(appStore.teamStore);
+const { teamList, targetTeamMemberList } = storeToRefs(appStore.teamStore);
 const { setTeamList, setTargetTeamKey } = appStore.teamStore;
 const dayjs: any = inject("dayjs");
 
@@ -213,7 +213,9 @@ watch(
       title="成员"
       :dialogStyle="{ width: '700px', maxWidth: '80vw' }"
     >
-      <template #content><Member  type="target"/></template>
+      <template #content
+        ><Member v-if="targetTeamMemberList.length > 0" type="target"
+      /></template>
     </cDialog>
   </div>
 </template>

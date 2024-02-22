@@ -92,7 +92,6 @@ const changeDevice = () => {
 const getMessage = (e) => {
   if (typeof e.data === "string") {
     const messageData = JSON.parse(e.data);
-    console.log(e.data);
     switch (messageData.eventName) {
       case "showFile":
         setCardKey(messageData.data._key);
