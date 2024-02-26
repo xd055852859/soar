@@ -4,40 +4,20 @@ import { ResultProps } from "@/interface/Common";
 import _ from "lodash";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
-import cDialog from "@/components/common/cDialog.vue";
 import api from "@/services/api";
 
 import router from "@/router";
 import { setMessage } from "@/services/util/common";
 import { uploadFile } from "@/services/util/file";
-const { deviceType } = storeToRefs(appStore.commonStore);
-const { closeNum } = storeToRefs(appStore.commonStore);
 const { user } = storeToRefs(appStore.authStore);
-const { spaceKey, spaceInfo, spaceList } = storeToRefs(appStore.spaceStore);
+const { spaceInfo } = storeToRefs(appStore.spaceStore);
 
 const { setUserInfo } = appStore.authStore;
 
-const { setSpaceKey, setSpaceList } = appStore.spaceStore;
-
-const noticeVisible = ref<boolean>(false);
-const spaceVisible = ref<boolean>(false);
-const memberVisible = ref<boolean>(false);
-const noVerify = ref<boolean>(false);
-const isPublic = ref<boolean>(false);
+const { getDepartmentTree } = appStore.departmentStore;
 const userVisible = ref<boolean>(false);
-const clearNum = ref<number>(0);
-const defaultRole = ref<number>(4);
-const bookIndex = ref<number>(-1);
-const spaceName = ref<string>("");
-const spaceLogo = ref<string>("");
-const bookName = ref<string>("");
-const infoState = ref<string>("create");
 const userName = ref<string>("");
 const userAvatar = ref<string>("");
-const showFast = ref<boolean>(true);
-const showBook = ref<boolean>(true);
-const showFold = ref<boolean>(true);
-const searchVisible = ref<boolean>(false);
 
 const updateUser = async () => {
   if (!userName.value) {
@@ -85,6 +65,15 @@ const uploadImage = (file, type) => {
 //     }
 //   });
 // };
+watch(
+  spaceInfo,
+  (newInfo) => {
+    if (newInfo) {
+      getDepartmentTree();
+    }
+  },
+  { immediate: true }
+);
 </script>
 <template>
   <div class="space">
@@ -99,40 +88,31 @@ const uploadImage = (file, type) => {
       <!-- <q-tabs vertical inline-label>
         <q-route-tab label="空间设置" :to="`/space/setting`" />
         <q-route-tab label="成员管理" :to="`/space/member`" />
-        <q-route-tab label="小组管理" :to="`/space/group`" />
+        <q-route-tab label="群组管理" :to="`/space/group`" />
         <q-route-tab label="安全性" :to="`/space/safety`" />
         <q-route-tab label="升级/续费" :to="`/space/vip`" />
       </q-tabs> -->
       <q-list>
         <q-item to="/space/setting" exact class="left-menu-item">
-          <q-item-section avatar class="left-menu-avatar">
+          <!-- <q-item-section avatar class="left-menu-avatar">
             <q-icon name="o_settings" />
-          </q-item-section>
+          </q-item-section> -->
           <q-item-section class="common-title">空间设置</q-item-section>
         </q-item>
         <q-item to="/space/member" exact class="left-menu-item">
-          <q-item-section avatar class="left-menu-avatar">
-            <q-icon name="o_person" />
-          </q-item-section>
           <q-item-section class="common-title">成员管理</q-item-section>
         </q-item>
+        <q-item to="/space/department" exact class="left-menu-item">
+          <q-item-section class="common-title">组织结构</q-item-section>
+        </q-item>
         <q-item to="/space/group" exact class="left-menu-item">
-          <q-item-section avatar class="left-menu-avatar">
-            <q-icon name="o_group" />
-          </q-item-section>
-          <q-item-section class="common-title">小组管理</q-item-section>
+          <q-item-section class="common-title">群组管理</q-item-section>
+        </q-item>
+        <q-item to="/space/application" exact class="left-menu-item">
+          <q-item-section class="common-title">应用配置</q-item-section>
         </q-item>
         <q-item to="/space/safety" exact class="left-menu-item">
-          <q-item-section avatar class="left-menu-avatar">
-            <q-icon name="o_lock" />
-          </q-item-section>
           <q-item-section class="common-title">安全性</q-item-section>
-        </q-item>
-        <q-item to="/space/vip" exact class="left-menu-item">
-          <q-item-section avatar class="left-menu-avatar">
-            <q-icon name="o_paid" />
-          </q-item-section>
-          <q-item-section class="common-title">升级/续费</q-item-section>
         </q-item>
       </q-list>
     </div>

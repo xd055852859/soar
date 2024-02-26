@@ -228,7 +228,6 @@ const CustomTree = React.forwardRef((props, ref) => {
   const formatNode = (node) => {
 
     if (node.startAdornmentContent) {
-      console.log(node.startAdornmentContent)
       node.startAdornment = getStartAdornment(
         node.startAdornmentContent,
         { tag: onShowMenu, icon: onShowMenu, milestone: onShowMenu },
@@ -306,7 +305,7 @@ const CustomTree = React.forwardRef((props, ref) => {
     setSelectedId(nodeId);
     let newNodes = _.cloneDeep(nodes);
     if (type === "next" && rootKey === nodeId) {
-      setMessage("error", "根结点不能新建同级节点");
+      setMessage("error", "根结点不能创建同级节点");
       return;
     }
     let fatherKey = "";

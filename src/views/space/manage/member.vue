@@ -5,14 +5,16 @@ import { ROLE_OPTIONS, ResultProps } from "@/interface/Common";
 import { SpaceMember } from "@/interface/Space";
 import _ from "lodash";
 import api from "@/services/api";
-import { setMessage } from "@/services/util/common";
+import { setLoading, setMessage } from "@/services/util/common";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
 import { uploadFile } from "@/services/util/file";
+import axios from "axios";
 const { spaceKey, spaceRole, spaceMemberList, spaceList } = storeToRefs(
   appStore.spaceStore
 );
+const { token } = storeToRefs(appStore.authStore);
 const { setSpaceMemberList } = appStore.spaceStore;
 const $q = useQuasar();
 const memberList = ref<SpaceMember[]>([]);
@@ -145,6 +147,49 @@ const deleteMember = (memberKey) => {
     })
     .onCancel(() => {});
 };
+const downloadMemberFile = () => {
+  let a = document.createElement("a"); //创建一个<a></a>标签
+  a.href = "https://nodeserver.qingtime.cn/通讯录批量导入模板.xlsx"; // 给a标签的href属性值加上地址，注意，这里是绝对路径，不用加 点.
+  a.download = "通讯录模板.xlsx"; //设置下载文件文件名，这里加上.xlsx指定文件类型，pdf文件就指定.fpd即可
+  a.style.display = "none"; // 障眼法藏起来a标签
+  document.body.appendChild(a); // 将a标签追加到文档对象中
+  a.click(); // 模拟点击了a标签，会触发a标签的href的读取，浏览器就会自动下载了
+  a.remove(); // 一次性的，用完就删除a标签
+};
+
+const chooseMemberFile = async (e, file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const createRes = (await axios.post(
+    "https://nodeserver.qingtime.cn/upload",
+    formData,
+    {
+      // 因为我们上传了图片,因此需要单独执行请求头的Content-Type
+      headers: {
+        // 表示上传的是文件,而不是普通的表单数据
+        "Content-Type": "multipart/form-data",
+        token: token.value,
+      },
+    }
+  )) as ResultProps;
+  if (createRes.data.msg === "OK") {
+    setMessage("success", "上传文件成功,导入中...");
+    e.target.value = "";
+    importMember(createRes.data.filePath);
+  }
+};
+const importMember = async (filePath) => {
+  setLoading(true);
+  const importRes = (await api.request.post("teamMember/import", {
+    teamKey: spaceKey.value,
+    filePath: filePath,
+  })) as ResultProps;
+  if (importRes.msg === "OK") {
+    setLoading(false);
+    setMessage("success", "导入成功");
+    getSpaceMemberList();
+  }
+};
 const uploadImage = (file, type, item) => {
   let mimeType = ["image/*"];
   if (file) {
@@ -184,13 +229,42 @@ watch(memberInput, (newName) => {
           </template>
         </q-input>
         <q-space />
-        <q-btn
-          rounded
-          color="primary"
-          label="添加成员"
-          @click="addVisible = true"
-          style="width: 120px"
-        />
+        <div class="row">
+          <q-btn
+            flat
+            style="color: #1976d2"
+            label="下载模板"
+            @click="downloadMemberFile()"
+          />
+          <div
+            className="upload-button upload-img-button q-mr-sm"
+            style="border: 0px"
+          >
+            <q-btn
+              rounded
+              color="primary"
+              label="导入通讯录"
+              @click=""
+              style="width: 120px"
+            />
+            <input
+              type="file"
+              @change="
+                //@ts-ignore
+                chooseMemberFile($event, $event.target.files[0])
+              "
+              class="upload-img"
+            />
+          </div>
+
+          <q-btn
+            rounded
+            color="primary"
+            label="添加成员"
+            @click="addVisible = true"
+            style="width: 120px"
+          />
+        </div>
       </div>
       <q-table
         :rows="memberList"
@@ -361,11 +435,7 @@ watch(memberInput, (newName) => {
                 :key="`search${index}`"
               >
                 <div class="member-search-left">
-                  <q-avatar
-                    color="#fff"
-                    size="lg"
-                    class="q-mr-sm"
-                  >
+                  <q-avatar color="#fff" size="lg" class="q-mr-sm">
                     <img
                       :src="
                         item.row?.userAvatar
@@ -399,7 +469,6 @@ watch(memberInput, (newName) => {
         </div>
       </template>
     </cDialog>
-    
   </div>
 </template>
 <style scoped lang="scss">

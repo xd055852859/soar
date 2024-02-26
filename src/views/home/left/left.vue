@@ -14,7 +14,7 @@ import Icon from "@/components/common/Icon.vue";
 import cDialog from "@/components/common/cDialog.vue";
 
 import createSpace from "@/components/createSpace.vue";
-const { spaceInfo, spaceList } = storeToRefs(appStore.spaceStore);
+const { spaceKey, spaceInfo, spaceList } = storeToRefs(appStore.spaceStore);
 const { user } = storeToRefs(appStore.authStore);
 const { clearStore } = appStore.commonStore;
 const { setUserInfo, setToken } = appStore.authStore;
@@ -137,7 +137,11 @@ watch(
 </script>
 <template>
   <div class="left-title icon-point">
-    <div class="select-third-item" @mouseenter="spaceMenuVisible = true" style="height:45px">
+    <div
+      class="select-third-item"
+      @mouseenter="spaceMenuVisible = true"
+      style="width: 100%; height: 45px"
+    >
       <q-avatar color="#fff" rounded size="lg">
         <img
           :src="spaceInfo?.logo ? spaceInfo.logo : '/common/defaultGroup.png'"
@@ -153,18 +157,10 @@ watch(
       </div>
 
       <q-menu
-        style="width: 280px; padding: 10px"
+        style="width: 280px; padding: 10px; max-height: 70vh"
         v-model="spaceMenuVisible"
         @mouseleave="spaceMenuVisible = false"
       >
-        <div class="select-third-item icon-point" @click="userVisible = true">
-          <q-avatar color="#fff" size="lg">
-            <img :src="userAvatar ? userAvatar : '/common/defaultPerson.png'" />
-          </q-avatar>
-          <div class="select-item-name single-to-long">
-            {{ userName }}
-          </div>
-        </div>
         <q-list class="q-mb-md left-space-item">
           <VueDraggableNext v-model="sortList" item-key="id" @end="dragSpace">
             <q-item
@@ -205,87 +201,47 @@ watch(
           color="primary"
           @click="spaceVisible = true"
         />
-        <div class="row justify-end items-center q-mt-sm">
+        <!-- <div class="row justify-end items-center q-mt-sm">
           <q-btn flat label="退出登录" color="grey-5" @click="logout" />
-        </div>
+        </div> -->
       </q-menu>
     </div>
   </div>
-  <!-- <div @click="router.push('/home/note')">速记</div> -->
-  <q-list @click="setTeamKey('')">
-    <q-item
-      clickable
-      :active="$route.name === 'explore'"
-      @click="$router.push('/home/explore')"
-      class="left-menu-item"
-    >
-      <q-item-section avatar class="left-menu-avatar">
-        <Icon name="a-tansuo21" :size="20" />
-      </q-item-section>
-      <q-item-section class="left-common-title">探索</q-item-section>
-      <q-item-section side @click.stop="$router.push('/home/note')">
-        <Icon
-          name="a-suji22"
-          :size="20"
-          :color="$route.name === 'note' ? '#07be51' : '#333'"
-        />
-      </q-item-section>
-    </q-item>
-    <q-item
-      clickable
-      :active="$route.name === 'report'"
-      @click="$router.push('/home/report')"
-      class="left-menu-item"
-    >
-      <q-item-section avatar class="left-menu-avatar">
-        <Icon name="a-huibao21" :size="18" />
-        <!-- <q-icon name="o_grid_view" /> -->
-      </q-item-section>
-      <q-item-section class="left-common-title">汇报</q-item-section>
-    </q-item>
-    <q-separator />
-    <q-item
-      clickable
-      :active="$route.name === 'task'"
-      @click="$router.push('/home/task')"
-      class="left-menu-item"
-    >
-      <q-item-section avatar class="left-menu-avatar">
-        <Icon name="a-mokexiaoshumiao-weixinyuan2" :size="22" />
-      </q-item-section>
-      <q-item-section class="left-common-title">事务</q-item-section>
-      <q-item-section side @click.stop="$router.push('/home/taskBoard')">
-        <Icon
-          name="a-renwuchi2"
-          :size="20"
-          :color="$route.name === 'taskBoard' ? '#07be51' : '#333'"
-        />
-      </q-item-section>
-    </q-item>
-    <q-item
-      clickable
-      :active="
-        $route.name === 'mateList' ||
-        $route.name === 'mateDetail' ||
-        $route.name === 'mateSetting'
-      "
-      @click="$router.push('/home/mate/list')"
-      class="left-menu-item"
-    >
-      <q-item-section avatar class="left-menu-avatar">
-        <Icon name="a-duiyou2" :size="20" />
-      </q-item-section>
-
-      <q-item-section class="left-common-title">队友</q-item-section>
-    </q-item>
-    <q-item to="/home/resource" class="left-menu-item" exact>
-      <q-item-section avatar class="left-menu-avatar">
-        <Icon name="ziyuan" :size="20" />
-      </q-item-section>
-
-      <q-item-section class="left-common-title">资源</q-item-section>
-    </q-item>
-  </q-list>
+  <div class="left-button">
+    <q-btn flat round @click="$router.push('/home/task')">
+      <Icon name="a-search" :size="20" />
+    </q-btn>
+    <q-btn flat round @click="$router.push('/home/task')">
+      <Icon name="a-renwuchi2" :size="20" />
+    </q-btn>
+    <q-btn flat round @click="$router.push('/home/explore')">
+      <Icon name="a-tansuo21" :size="20" />
+    </q-btn>
+    <q-btn flat round @click="$router.push('/home/resource')">
+      <Icon name="ziyuan" :size="20" />
+    </q-btn>
+    <q-btn flat round>
+      <Icon name="gengduo" :size="20" />
+      <q-menu class="q-pa-sm" auto-close anchor="top right" self="top left">
+        <q-list dense>
+          <!--  @click="editFile(item._key, index)" -->
+          <q-item clickable v-close-popup @click="userVisible = true">
+            <q-item-section>个人设置</q-item-section>
+          </q-item>
+          <q-item clickable v-close-popup @click="chooseSpace(spaceKey)">
+            <q-item-section>空间设置</q-item-section>
+          </q-item>
+          <q-item clickable v-close-popup>
+            <q-item-section>空间升级</q-item-section>
+          </q-item>
+          <q-item clickable v-close-popup @click="logout()">
+            <q-item-section>退出登录</q-item-section>
+          </q-item>
+        </q-list>
+      </q-menu>
+    </q-btn>
+  </div>
+  <div class="left-button-icon"></div>
   <q-separator />
   <team />
   <cDialog
@@ -372,9 +328,12 @@ watch(
 <style scoped lang="scss">
 .left-title {
   width: 100%;
-  margin-bottom: 10px;
+  height: 70px;
+  @include flex(center, center, null);
 }
-
+.left-button {
+  @include flex(space-between, center, null);
+}
 .form-container {
   width: 400px;
   height: 380px;

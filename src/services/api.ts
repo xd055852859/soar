@@ -30,7 +30,10 @@ axios.interceptors.response.use(
       router.replace("/");
       token = "";
       commonStore().clearStore();
-    } else if (response.data.status !== 200) {
+    } else if (
+      response.data.status !== 200 &&
+      response.data.statusCode !== "200"
+    ) {
       setMessage("error", response.data.msg);
     } else {
     }

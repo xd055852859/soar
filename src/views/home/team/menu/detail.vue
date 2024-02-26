@@ -21,7 +21,7 @@ const emits = defineEmits<{
 }>();
 const menuTeamInfo = ref<any>(null);
 const menuTeamKey = ref<any>("");
-const name = ref<string>("新小组");
+const name = ref<string>("新群组");
 const isPublic = ref<boolean>(true);
 const defaultRole = ref<number>(3);
 const memo = ref<string>("");
@@ -47,7 +47,7 @@ const updateTeam = async () => {
     })) as ResultProps;
     if (teamRes.msg === "OK") {
       let list = _.cloneDeep(teamList.value);
-      setMessage("success", "编辑小组成功");
+      setMessage("success", "编辑群组成功");
       let index = _.findIndex(list, { _key: menuTeamKey.value });
       if (index !== -1) {
         list[index] = {
@@ -75,7 +75,7 @@ const updateTeam = async () => {
     setLoading(true);
     if (teamRes.msg === "OK") {
       setLoading(false);
-      setMessage("success", "创建小组成功");
+      setMessage("success", "创建群组成功");
       setTeamKey(teamRes.data._key);
       setTeamList([...teamList.value, teamRes.data]);
       emits("close");
@@ -105,7 +105,7 @@ watchEffect(() => {
       }
     } else {
       menuTeamKey.value = "";
-      name.value = "新小组";
+      name.value = "新群组";
       isPublic.value = true;
       defaultRole.value = 3;
       memo.value = "";
@@ -118,27 +118,25 @@ watchEffect(() => {
   <c-dialog
     :visible="visible"
     @close="emits('close')"
-    :title="`${state ? '编辑' : '创建'}小组`"
+    :title="`${state ? '编辑' : '创建'}群组`"
     :dialogStyle="{ width: '700px', maxWidth: '80vw' }"
   >
     <template #content>
       <div class="teamAdd-container">
-        <div class="q-mb-sm teamAdd-title">小组名称</div>
+        <div class="q-mb-sm teamAdd-title">群组名称</div>
         <q-input
           outlined
           v-model="name"
-          placeholder="请输入小组名称"
+          placeholder="请输入群组名称"
           dense
           class="full-width q-mb-md"
           clearable
         />
-        <div class="q-mb-sm teamAdd-title">小组属性</div>
-        <q-checkbox v-model="isPublic" label="空间内小组名公开" />
-        <div class="q-mb-sm teamAdd-title">小组简介</div>
+        <div class="q-mb-sm teamAdd-title">群组简介</div>
         <q-input
           outlined
           v-model="memo"
-          placeholder="请输入小组简介"
+          placeholder="请输入群组简介"
           dense
           class="full-width q-mb-md"
           type="textarea"
@@ -153,8 +151,6 @@ watchEffect(() => {
           emit-value
           map-options
         />
-        <div class="q-mb-sm teamAdd-title">选择功能块</div>
-        <q-option-group v-model="views" :options="viewArray" type="checkbox" />
       </div>
     </template>
     <template #footer>
@@ -171,7 +167,8 @@ watchEffect(() => {
 <style scoped lang="scss">
 .teamAdd-container {
   width: 100%;
-  height: 70vh;
+  height: 400px;
+  max-height: 80vh;
   padding: 15px 34px;
   box-sizing: border-box;
   @include scroll();

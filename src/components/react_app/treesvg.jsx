@@ -44,7 +44,7 @@ export function getStartAdornment(startAdornment, handleClick, node) {
         }
         return (
           <svg
-            key={node._key + "start" + index}
+            key={node._key + "start" + key}
             viewBox={viewBox}
             version="1.1"
             width="18"

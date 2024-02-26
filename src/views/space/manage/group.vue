@@ -28,7 +28,7 @@ const memberVisible = ref<boolean>(false);
 const columns: any = [
   {
     name: "name",
-    label: "小组名称",
+    label: "群组名称",
     align: "center",
     field: "name",
   },
@@ -76,8 +76,8 @@ const getTeamList = async () => {
 
 const deleteTeam = (groupKey) => {
   $q.dialog({
-    title: "删除小组",
-    message: "是否确认删除该小组",
+    title: "删除群组",
+    message: "是否确认删除该群组",
     cancel: {
       color: "grey-5",
       flat: true,
@@ -89,7 +89,7 @@ const deleteTeam = (groupKey) => {
       })) as ResultProps;
       if (groupRes.msg === "OK") {
         let list = _.cloneDeep(teamList.value);
-        setMessage("success", "删除小组成功");
+        setMessage("success", "删除群组成功");
         let groupIndex = _.findIndex(groupList.value, { userKey: groupKey });
         groupIndex !== -1 && groupList.value.splice(groupIndex, 1);
         let index = _.findIndex(list, { userKey: groupKey });
@@ -125,14 +125,14 @@ watch(
 </script>
 <template>
   <div class="group">
-    <cHeader title="小组管理" />
+    <cHeader title="群组管理" />
     <div class="group-container">
       <div class="row justify-between items-center q-mb-md">
         <q-input
           rounded
           outlined
           v-model="searchName"
-          placeholder="请输入小组名称"
+          placeholder="请输入群组名称"
           dense
           style="width: 250px"
           clearable
@@ -154,7 +154,7 @@ watch(
         <!-- <q-btn
           rounded
           color="primary"
-          label="添加小组"
+          label="添加群组"
           @click="addVisible = true"
           style="width: 120px"
         /> -->

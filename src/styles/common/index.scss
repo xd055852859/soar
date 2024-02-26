@@ -344,3 +344,8 @@ body,
     border-bottom: 0px;
   }
 }
+.small-input {
+  .q-field--dense .q-field__control {
+    height: 30px;
+  }
+}

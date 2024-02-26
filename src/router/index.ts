@@ -165,12 +165,26 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("@/views/space/manage/member.vue"),
         children: [],
       },
+      
+      {
+        path: "department",
+        name: "department",
+        component: () => import("@/views/space/manage/department.vue"),
+        children: [],
+      },
       {
         path: "group",
         name: "group",
         component: () => import("@/views/space/manage/group.vue"),
         children: [],
       },
+      {
+        path: "application",
+        name: "application",
+        component: () => import("@/views/space/manage/application.vue"),
+        children: [],
+      },
+      
       {
         path: "safety",
         name: "safety",

@@ -14,7 +14,7 @@ const props = defineProps<{
 const $q = useQuasar();
 const deleteTeam = (key) => {
   $q.dialog({
-    title: "删除小组",
+    title: "删除群组",
     message: "请将资源(任务、文档、文件)全部删除后再删除",
     cancel: {
       color: "grey-5",
@@ -27,7 +27,7 @@ const deleteTeam = (key) => {
       })) as ResultProps;
       if (teamRes.msg === "OK") {
         let list = _.cloneDeep(teamList.value);
-        setMessage("success", "删除小组成功");
+        setMessage("success", "删除群组成功");
         let index = _.findIndex(list, { _key: key });
         index !== -1 && list.splice(index, 1);
         setTeamList(list);

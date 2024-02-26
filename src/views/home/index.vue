@@ -188,7 +188,9 @@ watch(
     z-index: 2;
     left: 0px;
     top: 0px;
-    @include p-number(15px, 10px);
+    display: flex;
+    flex-direction: column;
+    @include p-number(0px, 10px);
     .left-arrow-button {
       width: 100px;
       position: absolute;

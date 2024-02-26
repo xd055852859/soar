@@ -36,7 +36,7 @@ const watchTeam = async (item) => {
     watch: !item.watch,
   })) as ResultProps;
   if (teamRes.msg === "OK") {
-    setMessage("success", `${item.watch ? "取消关注" : "关注"}小组成功`);
+    setMessage("success", `${item.watch ? "取消关注" : "关注"}群组成功`);
     let list = _.cloneDeep(teamList.value);
     let index = _.findIndex(list, { _key: item._key });
     list[index] = { ...list[index], watch: !item.watch };
@@ -53,14 +53,14 @@ const foldTeam = async (key, state) => {
     let list = _.cloneDeep(teamList.value);
     let foldList = _.cloneDeep(teamFoldList.value);
     if (state) {
-      setMessage("success", "折叠小组成功");
+      setMessage("success", "折叠群组成功");
       let index = _.findIndex(list, { _key: key });
       if (index !== -1) {
         let item = list.splice(index, 1)[0];
         foldList.push(item);
       }
     } else {
-      setMessage("success", "取消折叠小组成功");
+      setMessage("success", "取消折叠群组成功");
       let index = _.findIndex(foldList, { _key: key });
       if (index !== -1) {
         let item = foldList.splice(index, 1)[0];
@@ -77,7 +77,7 @@ const topTeam = async (item, index, state) => {
     top: state,
   })) as ResultProps;
   if (teamRes.msg === "OK") {
-    setMessage("success", state ? "置顶小组成功" : "取消置顶小组成功");
+    setMessage("success", state ? "置顶群组成功" : "取消置顶群组成功");
     let list = _.cloneDeep(teamList.value);
     list.splice(index, 1);
     item.top = !item.top;
@@ -106,7 +106,7 @@ const topTeam = async (item, index, state) => {
 <template>
   <div class="teamMenu">
     <div class="teamMenu-title">
-      <div>小组</div>
+      <div>群组</div>
       <q-btn flat round @click="toggleTeam(null, true)">
         <Icon name="a-chuangjian2" :size="20" />
       </q-btn>
@@ -123,11 +123,11 @@ const topTeam = async (item, index, state) => {
           $router.push(`/home/team`);
         "
         :style="{
-          borderLeft: item.top ? '5px solid #f44336' : '',
+          borderLeft: `5px solid ${item.top?'#f44336':'transparent'}`,
           background: teamKey === item._key&&$route.path!.indexOf('home/team')!==-1 ? '#e0e0e0' : '',
         }"
       >
-        <div># {{ item.name }}</div>
+        <div>{{ item.name }}</div>
         <div class="teamMenu-item-icon" v-if="targetTeamKey === item._key">
           <q-btn flat round size="9px" @click.stop="">
             <Icon name="gengduo" :size="18" />
@@ -177,39 +177,42 @@ const topTeam = async (item, index, state) => {
         </div>
       </div>
     </div>
-    <div class="teamMenu-title">
-      <div>折叠的小组</div>
-    </div>
-    <div class="teamMenu-list">
-      <div
-        class="teamMenu-item icon-point"
-        v-for="(item, index) in teamFoldList"
-        @mouseenter="setTargetTeamKey(item._key)"
-        :key="`foldTeam${index}`"
-        @click="
-          setTeamKey(item._key);
-          $router.push(`/home/team`);
-        "
-        :style="teamKey === item._key&&$route.path!.indexOf('home/team')!==-1 ? { background: '#e0e0e0' } : null"
-      >
-        <div># {{ item.name }}</div>
-        <div class="teamMenu-item-icon" v-if="targetTeamKey === item._key">
-          <q-btn flat round size="9px" @click.stop="">
-            <Icon name="gengduo" :size="18" />
-            <q-menu anchor="top right" self="top left" class="q-pa-sm">
-              <q-list dense>
-                <q-item
-                  clickable
-                  v-close-popup
-                  @click="foldTeam(item._key, false)"
-                >
-                  <q-item-section class="common-title">取消折叠</q-item-section>
-                </q-item>
-              </q-list>
-            </q-menu>
-          </q-btn>
+    <div class="teamMenu-subtitle">
+      <div>折叠的群组</div>
+      <Icon name="a-youcezhedie21" :size="8" />
+      <q-menu style="width: 280px; max-height: 70vh">
+        <div
+          class="teamMenu-item icon-point"
+          v-for="(item, index) in teamFoldList"
+          @mouseenter="setTargetTeamKey(item._key)"
+          :key="`foldTeam${index}`"
+          @click="
+            setTeamKey(item._key);
+            $router.push(`/home/team`);
+          "
+          :style="teamKey === item._key&&$route.path!.indexOf('home/team')!==-1 ? { background: '#e0e0e0' } : null"
+        >
+          <div># {{ item.name }}</div>
+          <div class="teamMenu-item-icon" v-if="targetTeamKey === item._key">
+            <q-btn flat round size="9px" @click.stop="">
+              <Icon name="gengduo" :size="18" />
+              <q-menu anchor="top right" self="top left" class="q-pa-sm">
+                <q-list dense>
+                  <q-item
+                    clickable
+                    v-close-popup
+                    @click="foldTeam(item._key, false)"
+                  >
+                    <q-item-section class="common-title"
+                      >取消折叠</q-item-section
+                    >
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-btn>
+          </div>
         </div>
-      </div>
+      </q-menu>
     </div>
   </div>
   <Detail
@@ -230,9 +233,10 @@ const topTeam = async (item, index, state) => {
 <style scoped lang="scss">
 .teamMenu {
   width: 100%;
-  height: calc(100% - 320px);
-  @include scroll();
-  @include p-number(0px, 10px);
+  // height: calc(100% - 320px);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   .teamMenu-title {
     width: 100%;
     height: 40px;
@@ -240,27 +244,35 @@ const topTeam = async (item, index, state) => {
     font-size: 16px;
     @include flex(space-between, center, null);
   }
-  .teamMenu-list {
-    max-height: calc(100vh - 450px);
-    @include scroll();
-    .teamMenu-item {
-      width: 100%;
-      height: 35px;
-      padding-left: 10px;
-      font-size: 14px;
-      border-radius: 4px;
-      box-sizing: border-box;
-      line-height: 35px;
-      margin-bottom: 5px;
-      @include flex(space-between, center, null);
-      &:hover {
-        background: #f5f5f5;
-      }
-    }
+  .teamMenu-subtitle {
+    width: 100%;
+    height: 40px;
+    font-size: 14px;
+    color: $grey-8;
+    @include flex(space-between, center, null);
   }
+  .teamMenu-list {
+    // height: calc(100% - 45px);
+    flex: 1;
+    @include scroll();
+  }
+
   &::-webkit-scrollbar {
     /*滚动条整体样式*/
     width: 0px;
+  }
+}
+.teamMenu-item {
+  width: 100%;
+  height: 40px;
+  padding-left: 10px;
+  font-size: 14px;
+  border-radius: 4px;
+  box-sizing: border-box;
+  line-height: 40px;
+  @include flex(space-between, center, null);
+  &:hover {
+    background: #f5f5f5;
   }
 }
 </style>

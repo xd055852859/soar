@@ -29,6 +29,33 @@ export interface Notice {
   applyKey?: string;
   newRole?: number;
 }
+
+export interface Config {
+  backType: number;
+  mask: number;
+  radius: number;
+  clockType: number;
+  fontSize: number;
+  iconSize: number;
+  showDate: boolean;
+  right: number;
+  bottom: number;
+  fontWeight: number;
+  fontPoint: boolean;
+  fontOpacity: number;
+  componentVisible: string;
+  backImg: string;
+  backColor: string;
+  searchArray: Search[];
+  randomType: number;
+}
+export interface Search {
+  _key: string;
+  name: string;
+  icon: string;
+  checked: boolean;
+  url: string;
+}
 export enum ROLELIST {
   "SpaceSuperAdmin" = -2,
   "SpaceAdmin" = -1,

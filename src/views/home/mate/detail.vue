@@ -136,7 +136,7 @@ watchEffect(() => {
 <template>
   <cHeader
     :title="`${mateInfo?.userName ? mateInfo?.userName : '队友详情'} - ${
-      mateTeamInfo?.name ? mateTeamInfo.name : '小组'
+      mateTeamInfo?.name ? mateTeamInfo.name : '群组'
     }`"
     backPath="/home/mate"
   />
@@ -215,7 +215,7 @@ watchEffect(() => {
       <div class="mateCard-teamMenu">
         <div>
           <div class="teamMenu-title">
-            <div>小组</div>
+            <div>群组</div>
           </div>
           <div class="teamMenu-list">
             <div
@@ -241,7 +241,7 @@ watchEffect(() => {
             </div>
           </div>
           <div class="teamMenu-title">
-            <div>未加入小组</div>
+            <div>未加入群组</div>
           </div>
           <div class="teamMenu-list">
             <div
