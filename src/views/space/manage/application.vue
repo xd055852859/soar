@@ -1,5 +1,13 @@
 <script setup lang="ts">
+import Icon from "@/components/common/Icon.vue";
 import cHeader from "@/components/common/cHeader.vue";
+import { ResultProps } from "@/interface/Common";
+import api from "@/services/api";
+import appStore from "@/store";
+import _ from "lodash";
+import { storeToRefs } from "pinia";
+const { spaceKey } = storeToRefs(appStore.spaceStore);
+const { getLockList } = appStore.spaceStore;
 const applicationList = ref<any>([]);
 const columns: any = [
   {
@@ -10,14 +18,14 @@ const columns: any = [
   },
   {
     name: "name",
-    required: true,
+    align: "center",
     label: "名称",
-    align: "name",
+    field: "name",
   },
   {
     name: "type",
     align: "center",
-    label: "人数",
+    label: "类型",
     field: "type",
   },
   {
@@ -33,10 +41,98 @@ const columns: any = [
     field: "isDefault",
   },
 ];
+const getApplicationList = async () => {
+  let applicationRes = (await api.request.get("app/team", {
+    teamKey: spaceKey.value,
+  })) as ResultProps;
+  if (applicationRes.msg === "OK") {
+    applicationList.value = [...applicationRes.data];
+    console.log(applicationList.value);
+  }
+};
+const addApplication = async () => {
+  let departmentRes = (await api.request.post("app", {
+    icon: "",
+    name: "打卡",
+    enName: "clockIn",
+    appType: "",
+  })) as ResultProps;
+  if (departmentRes.msg === "OK") {
+  }
+};
+
+const updateApplication = async (value, key, application) => {
+  let obj: any = { [key]: value };
+  let appRes = (await api.request.patch("app/team", {
+    teamKey: spaceKey.value,
+    appKey: application._key,
+    ...obj,
+  })) as ResultProps;
+  if (appRes.msg === "OK") {
+    let applicationIndex = _.findIndex(applicationList.value, {
+      _key: application._key,
+    });
+    if (applicationIndex !== -1) {
+      applicationList.value[applicationIndex] = {
+        ...applicationList.value[applicationIndex],
+        ...obj,
+      };
+    }
+    getLockList(spaceKey.value);
+  }
+};
+const updateApplicationAll = async (value, key, application) => {
+  let obj: any = { [key]: value };
+  let appRes = (await api.request.patch("app", {
+    appKey: application._key,
+    ...obj,
+  })) as ResultProps;
+  if (appRes.msg === "OK") {
+    let applicationIndex = _.findIndex(applicationList.value, {
+      _key: application._key,
+    });
+    if (applicationIndex !== -1) {
+      applicationList.value[applicationIndex] = {
+        ...applicationList.value[applicationIndex],
+        ...obj,
+      };
+    }
+  }
+};
+const test = () => {
+  console.log("???");
+};
+watchEffect(() => {
+  if (spaceKey.value) {
+    getApplicationList();
+  }
+});
+watch(
+  applicationList,
+  (newList) => {
+    console.log(newList);
+  },
+  { deep: true }
+);
 </script>
 <template>
   <div class="application">
-    <cHeader title="应用配置" />
+    <cHeader title="应用配置">
+      <!-- <template #button>
+        <q-btn
+          style="color: #1976d2"
+          label="修改应用"
+          @click="updateApplicationAll('huibao','icon',{
+            _key:'1530700178'
+          })"
+        />
+        <q-btn
+          style="color: #1976d2"
+          label="新增应用"
+          @click="addApplication()"
+        />
+      </template> -->
+    </cHeader>
     <div class="application-container">
       <q-table
         :rows="applicationList"
@@ -48,20 +144,34 @@ const columns: any = [
         }"
       >
         <template v-slot:body="props">
-          <q-td key="icon" :props="props">
-            <q-avatar color="#fff" size="lg">
-              <img :src="props.row.icon" />
-            </q-avatar>
-          </q-td>
-          <q-td key="name" :props="props">
-            {{ props.row.name }}
-          </q-td>
-          <q-td key="isOpen" :props="props">
-            <q-checkbox v-model="props.row.isOpen" />
-          </q-td>
-          <q-td key="isDefault" :props="props">
-            <q-checkbox v-model="props.row.isDefault" />
-          </q-td>
+          <q-tr :props="props">
+            <q-td key="icon" :props="props">
+              <Icon :name="props.row.icon" :size="25" />
+            </q-td>
+            <q-td key="name" :props="props">
+              {{ props.row.name }}
+            </q-td>
+            <q-td key="type" :props="props">
+              {{ props.row.type }}
+            </q-td>
+            <q-td key="isOpen" :props="props">
+              <q-checkbox
+                v-model="props.row.isOpen"
+                @click.native="
+                  updateApplication(props.row.isOpen, 'isOpen', props.row)
+                "
+              />
+            </q-td>
+            <q-td key="isDefault" :props="props">
+              <q-checkbox
+                v-model="props.row.isDefault"
+                :disable="!props.row.isOpen"
+                @click.native="
+                  updateApplication(props.row.isDefault, 'isDefault', props.row)
+                "
+              />
+            </q-td>
+          </q-tr>
         </template>
       </q-table>
     </div>

@@ -87,6 +87,7 @@ const noteDialog = ref(false);
 let timeout: any;
 
 onMounted(() => {
+  console.log(props.cardKey);
   treeType.value = localStorage.getItem("treeType")
     ? (localStorage.getItem("treeType") as string)
     : "tree";
@@ -957,9 +958,9 @@ watch(contentVisible, (newVisible) => {
           </q-menu>
         </q-btn>
 
-        <q-btn flat round size="12px" @click="noteDialog = true">
+        <!-- <q-btn flat round size="12px" @click="noteDialog = true">
           <Icon name="a-suji22" :size="20" />
-        </q-btn>
+        </q-btn> -->
         <!-- <q-btn flat round icon="o_update" @click="updateVisible = true" /> -->
         <q-btn flat round size="12px" @click.stop="">
           <Icon name="gengduo" :size="18" />

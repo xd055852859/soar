@@ -10,6 +10,7 @@ import { formatData } from "@/services/util/data";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import { setMessage } from "@/services/util/common";
+const $q = useQuasar();
 const { spaceKey, spaceInfo } = storeToRefs(appStore.spaceStore);
 const { departmentList, departmentTree, departmentInfo } = storeToRefs(
   appStore.departmentStore
@@ -33,7 +34,7 @@ const chooseDepartmentKeyList = ref<string[]>([]);
 const dragId = ref<string>("");
 const dropId = ref<string>("");
 
-const $q = useQuasar();
+
 const columns: any = [
   {
     name: "name",
@@ -69,7 +70,7 @@ const columns: any = [
   },
 ];
 
-const addDepartmentList = async () => {
+const addDepartment = async () => {
   if (!departmentKey.value) {
     setMessage("error", "请选择部门节点");
     return;
@@ -99,7 +100,8 @@ const addDepartmentList = async () => {
     }
   });
 };
-const updateDepartmentList = async (item) => {
+const updateDepartment = async (item) => {
+  // departmentKey.value = item._key;
   $q.dialog({
     title: "编辑部门",
     prompt: {
@@ -112,13 +114,13 @@ const updateDepartmentList = async (item) => {
     },
   }).onOk(async (data) => {
     let departmentRes = (await api.request.patch("department", {
-      departmentKey: departmentKey.value,
+      departmentKey: item._key,
       name: data,
     })) as ResultProps;
     if (departmentRes.msg === "OK") {
       setMessage("success", "编辑部门成功");
       let newTree = { ...departmentTree.value };
-      newTree[departmentKey.value].name = data;
+      newTree[item._key].name = data;
       setDepartmentTree(newTree, true);
     }
   });
@@ -172,6 +174,9 @@ const chooseDepartmentMember = (item, index) => {
   departmentVisible.value = true;
 };
 const changeDepartment = async () => {
+  if (chooseDepartmentKeyList.value.length === 0) {
+    chooseDepartmentKeyList.value = [spaceInfo.value!.rootDepartment!];
+  }
   let departmentRes = (await api.request.patch("department/member", {
     teamKey: spaceKey.value,
     memberKey: departmentMemberKey.value,
@@ -255,7 +260,7 @@ watch(
             style="width: calc(100% - 40px)"
             color="primary"
           />
-          <q-btn flat round @click="addDepartmentList()">
+          <q-btn flat round @click="addDepartment()">
             <Icon name="a-chuangjian2" :size="20" />
           </q-btn>
         </div>
@@ -267,7 +272,7 @@ watch(
             default-expand-all
             no-transition
             :filter="departmentName"
-            v-if="departmentList"
+            v-if="departmentList && spaceInfo"
           >
             <template v-slot:default-header="prop">
               <div
@@ -289,7 +294,26 @@ watch(
                 @drop="handleDrop"
               >
                 <div class="department-item-title">
-                  {{ prop.node.label }}
+                  <q-avatar
+                    rounded
+                    color="#fff"
+                    size="sm"
+                    class="q-mr-sm"
+                    v-if="prop.node._key === spaceInfo?.rootDepartment"
+                  >
+                    <img
+                      :src="
+                        spaceInfo?.logo
+                          ? spaceInfo.logo
+                          : '/common/defaultGroup.png'
+                      "
+                    />
+                  </q-avatar>
+                  {{
+                    prop.node._key === spaceInfo?.rootDepartment
+                      ? spaceInfo.name
+                      : prop.node.label
+                  }}
                 </div>
                 <div
                   class="department-item-icon"
@@ -305,7 +329,7 @@ watch(
                         <q-item
                           clickable
                           v-close-popup
-                          @click="updateDepartmentList(prop.node)"
+                          @click="updateDepartment(prop.node)"
                         >
                           <q-item-section>编辑</q-item-section></q-item
                         >

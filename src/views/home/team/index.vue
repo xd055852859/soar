@@ -4,167 +4,59 @@ import cDialog from "@/components/common/cDialog.vue";
 import Menu from "@/views/home/team/menu/menu.vue";
 import Detail from "@/views/home/team/menu/detail.vue";
 import NoteList from "@/views/home/note/NoteList.vue";
-import { VueDraggableNext } from "vue-draggable-next";
-import router from "@/router";
 import appStore from "@/store";
 import _ from "lodash";
 import { storeToRefs } from "pinia";
-import { viewArray } from "@/services/config/config";
-import api from "@/services/api";
 import Member from "./menu/member.vue";
 import Icon from "@/components/common/Icon.vue";
-import { setMessage } from "@/services/util/common";
-import { ResultProps } from "@/interface/Common";
+import TeamKnowledgeBase from "./tab/teamKnowledgeBase.vue";
 
-const route = useRoute();
-const { teamInfo, teamKey } = storeToRefs(appStore.teamStore);
-const { spaceKey } = storeToRefs(appStore.spaceStore);
-const { setTeamInfo } = appStore.teamStore;
+const { teamInfo } = storeToRefs(appStore.teamStore);
+const { setClose } = appStore.commonStore;
 const updateVisible = ref<boolean>(false);
-const viewTab = ref<string>("");
-const views = ref<string[]>([]);
 const memberVisible = ref<boolean>(false);
 const noteDialog = ref<boolean>(false);
-const dragTab = async () => {
-  console.log(views);
-  let teamRes = (await api.request.patch("project", {
-    projectKey: teamKey.value,
-    views: views.value,
-  })) as ResultProps;
-  if (teamRes.msg === "OK") {
-    let info = _.cloneDeep(teamInfo.value);
-    info = {
-      ...info,
-      views: views.value,
-    };
-    setTeamInfo(info);
-  }
-};
-watch(
-  teamInfo,
-  (newInfo) => {
-    if (newInfo) {
-      console.log(newInfo.viewTab);
-      console.log(newInfo.views);
-      if (newInfo.views.indexOf(newInfo.viewTab) !== -1) {
-        viewTab.value = newInfo.viewTab;
-        views.value = newInfo.views.filter(
-          (item) => item !== "file" && item !== "doc"
-        );
-        router.push(`/home/team/${newInfo.viewTab}`);
-      } else {
-        viewTab.value = newInfo.views[0];
-        views.value = newInfo.views.filter(
-          (item) => item !== "file" && item !== "doc"
-        );
-        router.push(`/home/team/${newInfo.views[0]}`);
-        api.request.post("user/clickTab", {
-          teamKey: spaceKey.value,
-          projectKey: teamKey.value,
-          viewTab: newInfo.views[0],
-        });
-      }
-    }
-  },
-  { immediate: true }
-);
-watch(
-  viewTab,
-  (newTab) => {
-    if (newTab) {
-      router.push(`/home/team/${newTab}`);
-      api.request.post("user/clickTab", {
-        teamKey: spaceKey.value,
-        projectKey: teamKey.value,
-        viewTab: newTab,
-      });
-    }
-  },
-  { immediate: true }
-);
 </script>
 <template>
   <div class="team">
-    <cHeader :title="teamInfo.name" v-if="teamInfo">
+    <!-- <cHeader :title="teamInfo.name" v-if="teamInfo">
       <template #button>
-        <q-btn
-          flat
-          round
-          @click="noteDialog = true"
-          v-if="viewTab === 'knowledgeBase'"
-        >
-          <Icon name="a-suji22" :size="22" />
-        </q-btn>
-
-        <q-btn flat round size="12px" @click="memberVisible = true">
-          <Icon name="a-duiyou2" :size="18" />
-        </q-btn>
-        <q-btn flat round size="12px" @click.stop="">
-          <Icon name="gengduo" :size="18" />
-          <q-menu class="q-pa-sm">
-            <q-list dense>
-              <q-item clickable v-close-popup @click="updateVisible = true">
-                <q-item-section class="common-title">编辑</q-item-section>
-              </q-item>
-              <Menu :info="teamInfo" />
-            </q-list>
-          </q-menu>
-        </q-btn>
+     
       </template>
-    </cHeader>
-
-    <q-tabs
-      v-if="teamInfo"
-      dense
-      align="left"
-      indicator-color="primary"
-      active-class="text-primary"
-      class="q-mx-md"
-      v-model="viewTab"
-    >
-      <!-- <q-route-tab label="最近" :to="`/home/team/recent`" exact /> -->
-      <template
-        v-for="(item, index) in teamInfo.views"
-        :key="`viewTab${index}`"
+    </cHeader> -->
+    <div class="team-button-left">
+      <q-btn
+        flat
+        round
+        @click="
+          setClose(1);
+          $router.push('/home/explore');
+        "
       >
-        <q-tab
-          v-if="_.findIndex(viewArray, { value: item }) !== -1"
-          :label="viewArray[_.findIndex(viewArray, { value: item })].label"
-          :name="viewArray[_.findIndex(viewArray, { value: item })].value"
-        />
-      </template>
-      <q-btn flat round class="q-ml-md">
-        <Icon name="a-shezhi2" :size="18" />
+        <Icon name="a-fanhui21" :size="14" />
+      </q-btn>
+    </div>
+    <div class="team-button-right">
+      <q-btn flat round @click="noteDialog = true">
+        <Icon name="a-suji22" :size="22" />
+      </q-btn>
+
+      <q-btn flat round size="12px" @click="memberVisible = true">
+        <Icon name="a-duiyou2" :size="18" />
+      </q-btn>
+      <q-btn flat round size="12px" @click.stop="">
+        <Icon name="gengduo" :size="18" />
         <q-menu class="q-pa-sm">
           <q-list dense>
-            <VueDraggableNext v-model="views" item-key="id" @end="dragTab">
-              <template v-for="(item, index) in views" :key="`tabSet${index}`">
-                <q-item
-                  clickable
-                  v-if="_.findIndex(viewArray, { value: item }) !== -1"
-                  v-close-popup
-                  class="common-title dp--center"
-                >
-                  <Icon
-                    name="a-huibaoyaosu-yidong21"
-                    :size="14"
-                    class="q-mr-sm"
-                  />
-                  <div>
-                    {{
-                      viewArray[_.findIndex(viewArray, { value: item })].label
-                    }}
-                  </div>
-                </q-item>
-              </template>
-              <!-- </template> -->
-            </VueDraggableNext>
+            <q-item clickable v-close-popup @click="updateVisible = true">
+              <q-item-section class="common-title">编辑</q-item-section>
+            </q-item>
+            <Menu :info="teamInfo" />
           </q-list>
         </q-menu>
       </q-btn>
-      <!-- <div class="full-width row justify-end"></div> -->
-    </q-tabs>
-    <div class="team-box"><router-view></router-view></div>
+    </div>
+    <div class="team-box"><TeamKnowledgeBase /></div>
     <Detail
       type="team"
       :visible="updateVisible"
@@ -190,9 +82,23 @@ watch(
 .team {
   width: 100%;
   height: 100%;
+  position: relative;
+  z-index: 1;
+  .team-button-left {
+    position: absolute;
+    z-index: 2;
+    top: 4px;
+    left: 0px;
+  }
+  .team-button-right {
+    position: absolute;
+    z-index: 2;
+    top: 10px;
+    right: 0px;
+  }
   .team-box {
     width: 100%;
-    height: calc(100% - 105px);
+    height: 100%;
   }
 }
 </style>

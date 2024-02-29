@@ -32,6 +32,7 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   text-align: center;
+  color: #333;
   div {
     text-align: center;
   }
@@ -43,7 +44,7 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom:10px
+    margin-bottom: 10px;
   }
 }
 </style>

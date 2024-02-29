@@ -14,9 +14,11 @@ import Icon from "@/components/common/Icon.vue";
 import cDialog from "@/components/common/cDialog.vue";
 
 import createSpace from "@/components/createSpace.vue";
-const { spaceKey, spaceInfo, spaceList } = storeToRefs(appStore.spaceStore);
+const { spaceKey, spaceInfo, spaceList, lockList } = storeToRefs(
+  appStore.spaceStore
+);
 const { user } = storeToRefs(appStore.authStore);
-const { clearStore } = appStore.commonStore;
+const { clearStore, setSearchVisible } = appStore.commonStore;
 const { setUserInfo, setToken } = appStore.authStore;
 const { setSpaceKey, setSpaceList } = appStore.spaceStore;
 const { setTeamKey } = appStore.teamStore;
@@ -137,11 +139,8 @@ watch(
 </script>
 <template>
   <div class="left-title icon-point">
-    <div
-      class="select-third-item"
-      @mouseenter="spaceMenuVisible = true"
-      style="width: 100%; height: 45px"
-    >
+    <!--       @mouseenter="spaceMenuVisible = true" -->
+    <div class="select-third-item" style="width: 100%; height: 45px">
       <q-avatar color="#fff" rounded size="lg">
         <img
           :src="spaceInfo?.logo ? spaceInfo.logo : '/common/defaultGroup.png'"
@@ -155,11 +154,10 @@ watch(
         {{ spaceInfo?.name }}
         <Icon name="a-xiala2" :size="8" class="q-ml-sm" />
       </div>
-
+      <!--   @mouseleave="spaceMenuVisible = false" -->
       <q-menu
         style="width: 280px; padding: 10px; max-height: 70vh"
         v-model="spaceMenuVisible"
-        @mouseleave="spaceMenuVisible = false"
       >
         <q-list class="q-mb-md left-space-item">
           <VueDraggableNext v-model="sortList" item-key="id" @end="dragSpace">
@@ -208,38 +206,71 @@ watch(
     </div>
   </div>
   <div class="left-button">
-    <q-btn flat round @click="$router.push('/home/task')">
-      <Icon name="a-search" :size="20" />
-    </q-btn>
-    <q-btn flat round @click="$router.push('/home/task')">
-      <Icon name="a-renwuchi2" :size="20" />
-    </q-btn>
-    <q-btn flat round @click="$router.push('/home/explore')">
-      <Icon name="a-tansuo21" :size="20" />
-    </q-btn>
-    <q-btn flat round @click="$router.push('/home/resource')">
-      <Icon name="ziyuan" :size="20" />
-    </q-btn>
-    <q-btn flat round>
-      <Icon name="gengduo" :size="20" />
-      <q-menu class="q-pa-sm" auto-close anchor="top right" self="top left">
-        <q-list dense>
-          <!--  @click="editFile(item._key, index)" -->
-          <q-item clickable v-close-popup @click="userVisible = true">
-            <q-item-section>个人设置</q-item-section>
-          </q-item>
-          <q-item clickable v-close-popup @click="chooseSpace(spaceKey)">
-            <q-item-section>空间设置</q-item-section>
-          </q-item>
-          <q-item clickable v-close-popup>
-            <q-item-section>空间升级</q-item-section>
-          </q-item>
-          <q-item clickable v-close-popup @click="logout()">
-            <q-item-section>退出登录</q-item-section>
-          </q-item>
-        </q-list>
-      </q-menu>
-    </q-btn>
+    <div class="left-button-item">
+      <q-btn flat round @click="setSearchVisible(true)">
+        <Icon name="sousuo" :size="20" />
+      </q-btn>
+    </div>
+    <div class="left-button-item">
+      <q-btn flat round @click="$router.push('/home/task')">
+        <Icon
+          name="shoucang"
+          :size="20"
+          :color="$route.name === 'task' ? '#07be51' : '#333'"
+        />
+      </q-btn>
+    </div>
+    <div class="left-button-item">
+      <q-btn flat round @click="$router.push('/home/explore')">
+        <Icon
+          name="tongzhi"
+          :size="20"
+          :color="$route.name === 'explore' ? '#07be51' : '#333'"
+        />
+      </q-btn>
+    </div>
+    <div class="left-button-item">
+      <q-btn flat round @click="$router.push('/home/resource')">
+        <Icon
+          name="zhuye"
+          :size="20"
+          :color="$route.name === 'resource' ? '#07be51' : '#333'"
+        />
+      </q-btn>
+    </div>
+    <div class="left-button-item">
+      <q-btn flat round>
+        <Icon name="caidanrukou" :size="20" />
+        <q-menu class="q-pa-sm" auto-close anchor="top right" self="top left">
+          <q-list dense>
+            <!--  @click="editFile(item._key, index)" -->
+            <q-item clickable v-close-popup @click="userVisible = true">
+              <q-item-section>个人设置</q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup @click="chooseSpace(spaceKey)">
+              <q-item-section>空间设置</q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup>
+              <q-item-section>空间升级</q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup @click="logout()">
+              <q-item-section>退出登录</q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
+      </q-btn>
+    </div>
+  </div>
+  <div class="left-app" v-if="lockList.length > 0">
+    <div
+      class="left-app-item"
+      v-for="(item, index) in lockList"
+      :key="`app${index}`"
+    >
+      <q-btn flat round>
+        <Icon :name="item.icon" :size="20" />
+      </q-btn>
+    </div>
   </div>
   <div class="left-button-icon"></div>
   <q-separator />
@@ -332,7 +363,24 @@ watch(
   @include flex(center, center, null);
 }
 .left-button {
+  width: 100%;
   @include flex(space-between, center, null);
+  .left-button-item {
+    width: 20%;
+    flex-shrink: 0;
+    @include flex(center, center, null);
+  }
+}
+.left-app {
+  width: 100%;
+  background-color: #fff;
+  @include flex(flex-start, center, wrap);
+  .left-app-item {
+    width: 20%;
+    flex-shrink: 0;
+    margin: 5px 0px;
+    @include flex(center, center, null);
+  }
 }
 .form-container {
   width: 400px;

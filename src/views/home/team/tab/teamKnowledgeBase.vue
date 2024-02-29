@@ -3,16 +3,26 @@ import cIframe from "@/components/common/cIframe.vue";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 const { token } = storeToRefs(appStore.authStore);
-const { teamInfo } = storeToRefs(appStore.teamStore);
+const { teamKey, teamInfo } = storeToRefs(appStore.teamStore);
 const knowledgeBaseUrl = ref<string>("");
 onMounted(() => {});
-watchEffect(() => {
-  if (token.value && teamInfo.value?.knowledgeBaseRoot) {
-    knowledgeBaseUrl.value = `${location.origin}/base/#/login?token=${
-      token.value
-    }&id=${teamInfo.value.knowledgeBaseRoot}&v=${new Date().getTime()}`;
-  }
-});
+// watch(
+//   teamKey,
+//   () => {
+//     knowledgeBaseUrl.value = "";
+//   },
+//   { immediate: true }
+// );
+watch(
+  teamInfo,
+  (newInfo) => {
+    console.log(newInfo);
+    if (token.value && newInfo?.knowledgeBaseRoot) {
+      knowledgeBaseUrl.value = `https://soar.cn/base/#/login?token=${token.value}&redirectPath=${newInfo.knowledgeBaseRoot}`;
+    }
+  },
+  { immediate: true, deep: true }
+);
 </script>
 <template>
   <div class="teamKnowledgeBase">

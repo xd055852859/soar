@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import cIframe from "@/components/common/cIframe.vue";
+import cDialog from "@/components/common/cDialog.vue";
 import TeamTree from "@/components/tree/tree.vue";
 import TaskBoard from "@/views/home/task/taskBoard/index.vue";
 import _ from "lodash";
@@ -7,10 +8,12 @@ import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import Left from "./left/left.vue";
 import Icon from "@/components/common/Icon.vue";
+import Search from "@/components/search/search.vue";
+
 import FilePreview from "@/components/note/FilePreview.vue";
 import Editor from "@/components/note/Editor.vue";
 import DocPreview from "./team/tab/docPreview.vue";
-const { closeNum, iframeTaskInfo, iframeTaskVisible } = storeToRefs(
+const { closeNum, iframeInfo, iframeVisible, searchVisible } = storeToRefs(
   appStore.commonStore
 );
 
@@ -28,7 +31,7 @@ const { note } = storeToRefs(appStore.noteStore);
 const { getTeamList, getTeamFoldList } = appStore.teamStore;
 const { setSpaceKey } = appStore.spaceStore;
 const { setCardVisible } = appStore.cardStore;
-const { setClose, setIframeTaskVisible } = appStore.commonStore;
+const { setClose, setIframeVisible, setSearchVisible } = appStore.commonStore;
 const showButton = ref<boolean>(false);
 const route = useRoute();
 // const outSpace = (index) => {
@@ -103,68 +106,30 @@ watch(
       <router-view></router-view>
     </div>
   </div>
+  <c-dialog
+    :visible="searchVisible"
+    title="搜索文件"
+    @close="setSearchVisible(false)"
+    :dialogStyle="{ width: '550px' }"
+  >
+    <template #content><Search /></template>
+  </c-dialog>
   <Teleport to="body">
-    <div class="card-fullDialog" v-if="treeVisible" style="z-index: 10">
+    <div class="card-fullDialog" v-if="iframeVisible">
       <q-btn
         round
         flat
         size="16px"
         class="card-back"
-        @click="setCardVisible(false, 'tasktree')"
+        @click="setIframeVisible(false, null)"
       >
         <Icon name="a-fanhuikongjian21" :size="20" />
       </q-btn>
-      <TeamTree :cardKey="cardKey" ref="treeRef" />
-    </div>
-  </Teleport>
-  <Teleport to="body">
-    <div class="card-fullDialog q-pa-lg" v-if="docVisible" style="z-index: 20">
-      <q-btn
-        round
-        flat
-        size="16px"
-        class="card-back"
-        @click="setCardVisible(false, 'doc')"
-      >
-        <Icon name="a-fanhuikongjian21" :size="20" />
-      </q-btn>
-      <DocPreview :fileKey="cardInfo._key" v-if="cardInfo" />
-    </div>
-  </Teleport>
-  <Teleport to="body">
-    <div class="card-fullDialog" v-if="fileVisible" style="z-index: 20">
-      <q-btn
-        round
-        flat
-        size="16px"
-        class="card-back"
-        @click="setCardVisible(false, 'file')"
-      >
-        <Icon name="a-fanhuikongjian21" :size="20" />
-      </q-btn>
-      <FilePreview
-        :file-url="cardInfo.url"
-        :name="cardInfo.title"
-        :fileType="cardInfo.fileType"
-        v-if="cardInfo && cardInfo.url"
-      />
-    </div>
-  </Teleport>
-  <Teleport to="body">
-    <div class="card-fullDialog" v-if="iframeTaskVisible" style="z-index: 20">
-      <q-btn
-        round
-        flat
-        size="16px"
-        class="card-back"
-        @click="setIframeTaskVisible(false, null)"
-      >
-        <Icon name="a-fanhuikongjian21" :size="20" />
-      </q-btn>
-      <TaskBoard
-        :targetKey="iframeTaskInfo.userKey"
-        :targetTag="iframeTaskInfo.planTag"
-      />
+      <!-- <TaskBoard
+        :targetKey="iframeInfo.userKey"
+        :targetTag="iframeInfo.planTag"
+      /> -->
+      <c-iframe :url="iframeInfo.url" :title="iframeInfo.title" />
     </div>
   </Teleport>
 </template>
@@ -221,7 +186,7 @@ watch(
   width: 100vw;
   height: 100vh;
   position: fixed;
-  z-index: 10;
+  z-index: 9999;
   top: 0px;
   left: 0px;
   background-color: #fff;

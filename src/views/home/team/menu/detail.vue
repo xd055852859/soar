@@ -159,7 +159,7 @@ watchEffect(() => {
         label="取消"
         color="grey-5"
         @click="emits('close')"
-        :dense="true" />
+        dense />
       <q-btn label="确认" color="primary" @click="updateTeam"
     /></template>
   </c-dialog>

@@ -235,8 +235,8 @@ watchEffect(() => {
                   $router.push(`/home/team`);
                 "
               >
-                <q-btn flat round icon="sym_o_share_windows" size="12px">
-                </q-btn>
+                <!-- <q-btn flat round icon="sym_o_share_windows" size="12px">
+                </q-btn> -->
               </div>
             </div>
           </div>

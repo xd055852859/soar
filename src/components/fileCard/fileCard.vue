@@ -319,53 +319,23 @@ const handleDownload = (detail) => {
     <q-card
       flat
       class="teamFile-box-container q-mb-md icon-point card-hover"
-      @click="chooseResource(type, card, false)"
+      @click="emits('chooseCard', card, 'search')"
       :style="chooseKey === card._key ? { border: '2px solid #4a4a4a' } : null"
-      @mouseenter="setOverKey(card._key)"
     >
-      <q-card-section class="teamFile-box-top q-py-none">
-        <div class="teamFile-box-top-title">
-          <template v-if="outType && outType !== 'recent'"
-            ># {{ card.projectInfo?.name }} /
-          </template>
-          <!-- <q-icon
-            name="cloud_upload"
-            size="25px"
-            @click.stop="chooseFile(card, true)"
-          /> -->
-          {{ card.title }}
-        </div>
-        <div class="teamFile-box-top-icon" v-if="overKey === card._key">
-          <q-btn
-            flat
-            round
-            size="8px"
-            @click.stop="chooseResource(type, card, true)"
+      <q-card-section class="teamFile-box-top q-pa-none">
+        {{ card.title }}
+      </q-card-section>
+      <q-card-section class="teamFile-box-bottom q-pa-none">
+        <div class="dp--center">
+          <template
+            v-for="(pathItem, pathIndex) in card.way"
+            :key="`${card._key}path${index}`"
           >
-            <Icon name="quanping_o" :size="22" />
-          </q-btn>
-          <q-btn flat round size="9px" @click.stop="">
-            <Icon name="gengduo" :size="18" />
-            <q-menu class="q-pa-sm">
-              <q-list dense>
-                <!--  @click="editFile(item._key, index)" -->
-                <q-item clickable v-close-popup @click="updateTitle(card)">
-                  <q-item-section class="common-title">重命名</q-item-section>
-                </q-item>
-                <q-item clickable v-close-popup @click="handleDownload(card)">
-                  <q-item-section class="common-title">下载</q-item-section>
-                </q-item>
-                <!-- <q-item clickable v-close-popup @click="deleteCard(card)">
-                  <q-item-section class="common-title">删除</q-item-section>
-                </q-item> -->
-              </q-list>
-            </q-menu>
-          </q-btn>
+            <span>{{ pathItem.title }}</span>
+            <span v-if="pathIndex < card.way.length - 1" style="margin:0px 5px"> / </span>
+          </template>
         </div>
       </q-card-section>
-      <!-- <q-card-section class="teamFile-box-bottom">
-        <div>{{ dayjs(card.updateTime).format("YYYY-MM-DD HH:mm") }}</div>
-      </q-card-section> -->
     </q-card>
   </template>
   <template v-else-if="type === 'taskBox'">
@@ -471,10 +441,6 @@ const handleDownload = (detail) => {
     box-sizing: border-box;
     @include flex(space-between, center, null);
     .teamFile-box-top-title {
-      flex: 1;
-      line-height: 18px;
-      word-wrap: break-word;
-      white-space: pre-wrap;
     }
     .teamFile-box-top-icon {
       width: 52px;
@@ -483,8 +449,9 @@ const handleDownload = (detail) => {
   }
   .teamFile-box-bottom {
     width: 100%;
-    height: 50px;
-    font-size: 16px;
+    height: 30px;
+    font-size: 12px;
+    color: $grey-5;
     @include flex(space-between, center, null);
   }
 }

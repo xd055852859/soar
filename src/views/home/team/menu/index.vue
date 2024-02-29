@@ -17,7 +17,7 @@ const { targetTeamKey, teamKey, teamList, teamFoldList } = storeToRefs(
 );
 const { setTargetTeamKey, setTeamKey, setTeamList, setTeamFoldList } =
   appStore.teamStore;
-
+const { setClose } = appStore.commonStore;
 const addVisible = ref<boolean>(false);
 const detailState = ref<boolean>(false);
 const memberVisible = ref<boolean>(false);
@@ -118,6 +118,7 @@ const topTeam = async (item, index, state) => {
         :key="`team${index}`"
         @mouseenter="setTargetTeamKey(item._key)"
         @click="
+          setClose(0);
           setTeamKey(item._key);
           setTargetTeamKey(item._key);
           $router.push(`/home/team`);

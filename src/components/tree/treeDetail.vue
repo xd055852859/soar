@@ -552,7 +552,7 @@ watch(fileInput, (newName) => {
         </q-menu>
       </div>
     </div>
-    <cDialog
+    <c-dialog
       :visible="fileVisible"
       title="搜索文件"
       @close="fileVisible = false"
@@ -588,7 +588,7 @@ watch(fileInput, (newName) => {
                   class="q-my-sm file-search-item"
                 >
                   <q-item-section avatar>
-                    <q-icon name="o_description" />
+                    <!-- <q-icon name="o_description" /> -->
                   </q-item-section>
 
                   <q-item-section>
@@ -620,7 +620,7 @@ watch(fileInput, (newName) => {
           </div>
         </div>
       </template>
-    </cDialog>
+    </c-dialog>
   </div>
 </template>
 <style scoped lang="scss">

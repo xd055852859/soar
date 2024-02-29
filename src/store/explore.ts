@@ -7,9 +7,50 @@ import { ResultProps } from "@/interface/Common";
 export const exploreStore = defineStore(
   "exploreStore",
   () => {
-    const exploreConfig = ref<any>({ fontPoint: true });
-    return { exploreConfig };
+    const exploreConfig = ref<any>({
+      backType: 0,
+      mask: 0,
+      radius: 20,
+      fontSize: 14,
+      iconSize: 60,
+      showDate: false,
+      right: 30,
+      bottom: 10,
+      fontWeight: 10,
+      fontPoint: true,
+      fontOpacity: 70,
+      backImg: "",
+      backColor: "",
+    });
+    const setExploreConfig = (
+      newConfig?: any,
+      cover?: boolean,
+      clear?: boolean
+    ) => {
+      if (cover) {
+        exploreConfig.value = { ...newConfig };
+      } else if (clear) {
+        exploreConfig.value = {
+          backType: 0,
+          mask: 0,
+          radius: 20,
+          fontSize: 14,
+          iconSize: 60,
+          showDate: false,
+          right: 30,
+          bottom: 10,
+          fontWeight: 10,
+          fontPoint: true,
+          fontOpacity: 70,
+          backImg: "",
+          backColor: "",
+        };
+      } else if (clear) {
+        exploreConfig.value = { ...exploreConfig.value, ...newConfig };
+      }
+    };
+    return { exploreConfig, setExploreConfig };
   }
-//   ,
-//   { persist: true }
+  //   ,
+  //   { persist: true }
 );

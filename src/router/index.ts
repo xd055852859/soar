@@ -11,7 +11,7 @@ const routes: Array<RouteRecordRaw> = [
     path: "/home",
     name: "home",
     component: () => import("@/views/home/index.vue"),
-    redirect: "/home/task",
+    redirect: "/home/explore",
     children: [
       {
         path: "explore",
@@ -93,57 +93,7 @@ const routes: Array<RouteRecordRaw> = [
         path: "team",
         name: "team",
         component: () => import("@/views/home/team/index.vue"),
-        children: [
-          {
-            path: "recent",
-            name: "recent",
-            component: () => import("@/views/home/team/tab/recent.vue"),
-            children: [],
-          },
-          {
-            path: "doc",
-            name: "teamdoc",
-            component: () => import("@/views/home/team/tab/teamDoc.vue"),
-            children: [],
-          },
-          {
-            path: "file",
-            name: "teamfile",
-            component: () => import("@/views/home/team/tab/teamFile.vue"),
-            children: [],
-          },
-          {
-            path: "task",
-            name: "teamtask",
-            component: () => import("@/views/home/team/tab/teamTask.vue"),
-            children: [],
-          },
-          {
-            path: "knowledgeBase",
-            name: "teamknowledgeBase",
-            component: () =>
-              import("@/views/home/team/tab/teamKnowledgeBase.vue"),
-            children: [],
-          },
-          {
-            path: "taskTree",
-            name: "teamtaskTree",
-            component: () => import("@/views/home/team/tab/teamTaskTree.vue"),
-            children: [],
-          },
-          {
-            path: "table",
-            name: "teamtable",
-            component: () => import("@/views/home/team/tab/teamTable.vue"),
-            children: [],
-          },
-          {
-            path: "taskbox",
-            name: "teamtaskbox",
-            component: () => import("@/views/home/team/tab/teamTask.vue"),
-            children: [],
-          },
-        ],
+        children: [],
       },
     ],
   },
@@ -165,7 +115,7 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("@/views/space/manage/member.vue"),
         children: [],
       },
-      
+
       {
         path: "department",
         name: "department",
@@ -184,7 +134,7 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("@/views/space/manage/application.vue"),
         children: [],
       },
-      
+
       {
         path: "safety",
         name: "safety",
@@ -196,6 +146,21 @@ const routes: Array<RouteRecordRaw> = [
         name: "vip",
         component: () => import("@/views/space/manage/vip.vue"),
         children: [],
+      },
+    ],
+    props: true,
+  },
+  {
+    path: "/share/:shareId",
+    name: "share",
+    component: () => import("@/views/share/index.vue"),
+    children: [
+      {
+        path: "shareTree/:cardKey",
+        name: "shareTree",
+        component: () => import("@/components/tree/tree.vue"),
+        children: [],
+        props: true,
       },
     ],
     props: true,

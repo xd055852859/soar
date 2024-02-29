@@ -21,7 +21,7 @@ const { setCardVisible, setCardKey } = appStore.cardStore;
 const { setToken, getUserInfo } = appStore.authStore;
 const { setSpaceKey } = appStore.spaceStore;
 const { setTeamKey } = appStore.teamStore;
-const { setDeviceInfo, setDeviceType, setClose, setIframeTaskVisible } =
+const { setDeviceInfo, setDeviceType, setClose, setIframeVisible } =
   appStore.commonStore;
 const musicRef = ref<any>(null);
 onMounted(() => {
@@ -107,7 +107,7 @@ const getMessage = (e) => {
         break;
       case "showTask":
         setCardKey("");
-        setIframeTaskVisible(true, messageData.data);
+        setIframeVisible(true, messageData.data);
         break;
     }
   }

@@ -1,32 +1,84 @@
 <script setup lang="ts">
 import cHeader from "@/components/common/cHeader.vue";
-import TeamDoc from "@/views/home/team/tab/teamDoc.vue";
-import TeamFile from "@/views/home/team/tab/teamFile.vue";
-import Recent from "@/views/home/team/tab/recent.vue";
-const resourceTab = ref<string>("doc");
+import cIframe from "@/components/common/cIframe.vue";
+import FileCard from "@/components/fileCard/fileCard.vue";
+import { ResultProps } from "@/interface/Common";
+import api from "@/services/api";
+import appStore from "@/store";
+import { storeToRefs } from "pinia";
+const { spaceKey } = storeToRefs(appStore.spaceStore);
+const { token } = storeToRefs(appStore.authStore);
+const fileList = ref<any>([]);
+const page = ref<number>(1);
+const total = ref<number>(0);
+const sortType = ref<string>("");
+const fileKey = ref<string>("");
+const iframeUrl = ref<string>("");
+const getFileList = async () => {
+  let fileRes = (await api.request.get("knowledgeBase/card", {
+    teamKey: spaceKey.value,
+    projectKey: "",
+    sortBy: sortType.value,
+    page: page.value,
+    limit: 30,
+  })) as ResultProps;
+  if (fileRes.msg === "OK") {
+    if (page.value === 1) {
+      fileList.value = [];
+    }
+    fileList.value = [...fileList.value, ...fileRes.data];
+    if (fileRes.data.length > 0 && !fileKey.value) {
+      fileKey.value = fileRes.data[0]._key;
+    }
+    total.value = fileRes.total as number;
+  }
+};
+const chooseCard = (detail, type) => {
+  switch (type) {
+    case "search":
+      fileKey.value = detail._key;
+      break;
+    // case "update":
+    //   let updateIndex = _.findIndex(fileList.value, { _key: detail._key });
+    //   if (updateIndex !== -1) {
+    //     fileList.value[updateIndex] = {
+    //       ...fileList.value[updateIndex],
+    //       ...detail,
+    //     };
+    //   }
+    //   break;
+    // case "delete":
+    //   let delIndex = _.findIndex(fileList.value, { _key: detail._key });
+    //   if (delIndex !== -1) {
+    //     fileList.value.splice(delIndex, 1);
+    //   }
+    //   break;
+  }
+};
+watchEffect(() => {
+  getFileList();
+});
+watch(fileKey, (newKey) => {
+  if (newKey) {
+    iframeUrl.value = `https://soar.cn/base/#/login?token=${token.value}&redirectPath=node/${newKey}`;
+  }
+});
 </script>
 <template>
   <div class="resource">
-    <cHeader title="资源" />
-    <q-tabs
-      v-model="resourceTab"
-      dense
-      align="left"
-      indicator-color="primary"
-      active-class="text-primary"
-      class="q-mx-md"
-    >
-      <!-- <q-tab name="all" label="全部" /> -->
-      <q-tab name="doc" label="文档" />
-      <q-tab name="file" label="文件" />
-      <!-- <q-tab name="mails" label="知识库" /> -->
-      <!-- <q-tab name="mails" label="多维表" /> -->
-      <!-- <q-tab name="mails" label="洞察" /> -->
-    </q-tabs>
-    <div class="resource-box">
-      <!-- <Recent v-if="resourceTab === 'all'" type="resouce" /> -->
-      <TeamDoc v-if="resourceTab === 'doc'" type="resouce" />
-      <TeamFile v-else-if="resourceTab === 'file'" type="resouce" />
+    <div class="resource-left">
+      <cHeader title="资源" />
+      <div class="resource-left-box">
+        <template
+          v-for="(fileItem, fileIndex) in fileList"
+          :key="`fileItem${fileIndex}`"
+        >
+          <FileCard :card="fileItem" :chooseKey="fileKey" type="file" @chooseCard="chooseCard" />
+        </template>
+      </div>
+    </div>
+    <div class="resource-right">
+      <c-iframe :url="iframeUrl" />
     </div>
   </div>
 </template>
@@ -34,9 +86,21 @@ const resourceTab = ref<string>("doc");
 .resource {
   width: 100%;
   height: 100%;
-  .resource-box {
-    width: 100%;
-    height: calc(100% - 45px);
+  @include flex(space-between, center, center);
+  .resource-left {
+    width: 300px;
+    height: 100%;
+
+    .resource-left-box {
+      width: 100%;
+      height: calc(100% - 65px);
+      @include scroll();
+      @include p-number(0px, 10px);
+    }
+  }
+  .resource-right {
+    width: calc(100% - 300px);
+    height: 100%;
   }
 }
 </style>

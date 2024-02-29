@@ -5,6 +5,7 @@ import { spaceStore } from "./space";
 import { mateStore } from "./mate";
 import { noteStore } from "./note";
 import { teamStore } from "./team";
+import router from "@/router";
 // 使用setup模式定义
 export const commonStore = defineStore("commonStore", () => {
   const deviceType = ref<string>("pc");
@@ -15,10 +16,11 @@ export const commonStore = defineStore("commonStore", () => {
   const deviceIconSize = ref<string>("20px");
   const musicSrc = ref<string>("");
   const musicNum = ref<number>(0);
-  const iframeTaskVisible = ref<boolean>(false);
-  const iframeTaskInfo = ref<any>(null);
+  const iframeVisible = ref<boolean>(false);
+  const iframeInfo = ref<any>(null);
   const overKey = ref<string>("");
   const closeNum = ref<number>(-1);
+  const searchVisible = ref<boolean>(false);
   const setDeviceType = (newDeviceType: string) => {
     deviceType.value = newDeviceType;
     if (deviceWidth.value < 400) {
@@ -64,10 +66,31 @@ export const commonStore = defineStore("commonStore", () => {
   const setOverKey = (newKey) => {
     overKey.value = newKey;
   };
-  const setIframeTaskVisible = (visible, info) => {
-    iframeTaskVisible.value = visible;
-    iframeTaskInfo.value = info;
-    console.log(info)
+  const setIframeVisible = (visible, info) => {
+    iframeVisible.value = visible;
+    iframeInfo.value = info;
+  };
+  const setSearchVisible = (visible) => {
+    searchVisible.value = visible;
+  };
+  const chooseSearch = (searchType, searchInfo) => {
+    switch (searchType) {
+      case "群组":
+        setClose(0);
+        teamStore().setTeamKey(searchInfo._key);
+        teamStore().setTargetTeamKey(searchInfo._key);
+        router.push(`/home/team`);
+        break;
+      case "文件":
+        iframeVisible.value = true;
+        iframeInfo.value = {
+          url: `https://soar.cn/base/#/login?token=${
+            authStore().token
+          }&redirectPath=node/${searchInfo._key}`,
+          title: searchInfo.title,
+        };
+        break;
+    }
   };
   const clearStore = () => {
     authStore().$reset();
@@ -91,10 +114,13 @@ export const commonStore = defineStore("commonStore", () => {
     closeNum,
     setClose,
     clearStore,
-    iframeTaskVisible,
-    iframeTaskInfo,
-    setIframeTaskVisible,
+    iframeVisible,
+    iframeInfo,
+    setIframeVisible,
+    searchVisible,
+    setSearchVisible,
+    chooseSearch,
     overKey,
-    setOverKey
+    setOverKey,
   };
 });

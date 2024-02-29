@@ -1,84 +1,644 @@
 <script setup lang="ts">
 import cHeader from "@/components/common/cHeader.vue";
 import cIframe from "@/components/common/cIframe.vue";
+import cDialog from "@/components/common/cDialog.vue";
+import cDrawer from "@/components/common/cDrawer.vue";
+import Icon from "@/components/common/Icon.vue";
 import TimeClock from "./clock/timeClock.vue";
+import ExploreSet from "./exploreSet/exploreSet.vue";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
+import api from "@/services/api";
+import _ from "lodash";
+import { ResultProps } from "@/interface/Common";
+import { useQuasar } from "quasar";
+
+import { setMessage } from "@/services/util/common";
+const $q = useQuasar();
 const { token } = storeToRefs(appStore.authStore);
-const { spaceKey } = storeToRefs(appStore.spaceStore);
+const { exploreConfig } = storeToRefs(appStore.exploreStore);
+const { spaceKey, lockList } = storeToRefs(appStore.spaceStore);
+const { setLockList } = appStore.spaceStore;
 const exploreUrl = ref<string>("");
 const exploreTitle = ref<string>("");
 const exploreState = ref<boolean>(false);
 const searchTitle = ref<string>("");
+const smallList = ref<any>([]);
+const bigList = ref<any>([]);
+const urlList = ref<any>([]);
+const iframeVisible = ref<boolean>(false);
+const iframeUrl = ref<string>("");
+const iframeTitle = ref<string>("");
+const url = ref<string>("");
+const urlIcon = ref<string>("");
+const urlName = ref<string>("");
+const urlKey = ref<string>("");
+const urlVisible = ref<boolean>(false);
+const urlType = ref<string>("https://");
+const urlTypeArr = ["https://", "http://"];
+const setVisible = ref<boolean>(false);
+
 const chooseSearch = (e) => {
   window.open(searchTitle.value);
 };
+const getApplicationList = async () => {
+  let applicationRes = (await api.request.get("app/user", {
+    teamKey: spaceKey.value,
+  })) as ResultProps;
+  if (applicationRes.msg === "OK") {
+    bigList.value = [];
+    smallList.value = [];
+    applicationRes.data.list1.forEach((item) => {
+      if (!item.config) {
+        item.config = {};
+      }
+      if (item.config?.size === "big") {
+        item.config.size === "big";
+        bigList.value.push(item);
+      } else {
+        item.config?.size === "small";
+        smallList.value.push(item);
+      }
+    });
+    urlList.value = applicationRes.data.list2;
+  }
+};
+const clickExplore = (type, url?: string) => {
+  switch (type) {
+    case "report":
+      iframeVisible.value = true;
+      iframeUrl.value = `https://hb.qingtime.cn/?token=${token.value}&teamKey=${spaceKey.value}`;
+      iframeTitle.value = "汇报";
+      break;
+    case "url":
+      window.open(url);
+      break;
+  }
+};
+const changeSize = async (type, index, key) => {
+  let applicationRes = (await api.request.patch("app/user/config", {
+    teamKey: spaceKey.value,
+    appKey: key,
+    config: { size: type },
+  })) as ResultProps;
+  if (applicationRes.msg === "OK") {
+    if (type === "small") {
+      bigList.value[index].config.size = "small";
+      smallList.value.push({ ...bigList.value[index] });
+      bigList.value.splice(index, 1);
+    } else {
+      smallList.value[index].config.size = "big";
+      bigList.value.push({ ...smallList.value[index] });
+      smallList.value.splice(index, 1);
+    }
+  }
+};
+const lockApplication = async (type, index, item) => {
+  let locked = !item.locked;
+  let applicationRes = (await api.request.patch("app/lock", {
+    teamKey: spaceKey.value,
+    appKey: item._key,
+    locked: locked,
+  })) as ResultProps;
+  if (applicationRes.msg === "OK") {
+    item.locked = locked;
+    if (type === "small") {
+      smallList.value[index].locked = locked;
+    } else {
+      bigList.value[index].locked = locked;
+    }
+    let newLockList = [...lockList.value];
+    if (locked) {
+      newLockList.push(item);
+    } else {
+      let index = _.findIndex(newLockList, { _key: item._key });
+      if (index !== -1) {
+        newLockList.splice(index, 1);
+      }
+    }
+    setLockList(newLockList);
+  }
+};
+const chooseUrl = (item) => {
+  if (item) {
+    urlVisible.value = true;
+    urlKey.value = item._key;
+    url.value = item.url.replace("https://", "").replace("http://", "");
+    urlName.value = item.name;
+    urlIcon.value = item.icon;
+  } else {
+    urlKey.value = "";
+    url.value = "";
+    urlName.value = "";
+    urlIcon.value = "";
+  }
+};
+const addUrl = async () => {
+  if (!url.value) {
+    setMessage("error", "请输入网址");
+  }
+  if (urlKey.value) {
+    let urlRes = (await api.request.patch("app/custom", {
+      appKey: urlKey.value,
+      name: urlName.value,
+      url: urlType.value + url.value,
+      icon: urlIcon.value,
+    })) as ResultProps;
+    if (urlRes.msg === "OK") {
+      setMessage("success", "编辑第三方网站成功");
+      let index = _.findIndex(urlList.value, { _key: urlKey.value });
+      if (index !== -1) {
+        urlList.value[index] = {
+          ...urlList.value[index],
+          name: urlName.value,
+          url: urlType.value + url.value,
+          icon: urlIcon.value,
+        };
+      }
+      urlVisible.value = false;
+    }
+  } else {
+    let urlIconRes = (await api.request.get(
+      "",
+      {
+        url: urlType.value + url.value,
+      },
+      true,
+      "https://nodeserver.qingtime.cn/linkInfo"
+    )) as ResultProps;
+    if (urlIconRes.msg === "OK") {
+      let urlRes = (await api.request.post("app/custom", {
+        teamKey: spaceKey.value,
+        name: urlName.value ? urlName.value : urlIconRes.data.title,
+        url: urlType.value + url.value,
+        icon: urlIconRes.data.icon,
+      })) as ResultProps;
+      if (urlRes.msg === "OK") {
+        setMessage("success", "保存第三方网站成功");
+        urlList.value.push(urlRes.data);
+        urlVisible.value = false;
+      }
+    }
+  }
+};
+const deleteUrl = async (item, index) => {
+  $q.dialog({
+    title: "删除链接",
+    message: "是否删除链接",
+    cancel: {
+      color: "grey-5",
+      flat: true,
+    },
+  })
+    .onOk(async () => {
+      let fileRes = (await api.request.delete("app/custom", {
+        appKey: item._key,
+      })) as ResultProps;
+      if (fileRes.msg === "OK") {
+        setMessage("success", "删除成功");
+        urlList.value.splice(index, 1);
+      }
+    })
+    .onCancel(() => {});
+};
+const saveConfig = async () => {
+  api.request.patch("app/team/config", {
+    teamKey: spaceKey.value,
+    config: exploreConfig.value,
+  });
+};
+watchEffect(() => {
+  if (spaceKey.value) {
+    getApplicationList();
+  }
+});
+watch(urlVisible, (newVisible) => {
+  if (!newVisible) {
+    chooseUrl(null);
+  }
+});
 </script>
 <template>
-  <div class="explore">
-    <cHeader
-      :title="exploreState ? exploreTitle : '探索'"
-      :isBackOther="exploreState"
-      @backOther="exploreState = false"
-    />
-    <div class="explore-box">
-      <TimeClock />
-      <div class="explore-search">
-        <q-input
-          outlined
-          rounded
-          v-model="searchTitle"
-          placeholder="输入与搜索"
-          @blur="chooseSearch"
-          @keyup.enter="chooseSearch"
-        >
-          <template v-slot:prepend>
-            <q-icon name="search" />
-          </template>
-        </q-input>
+  <div
+    class="explore-bg"
+    :style="
+      exploreConfig.backType === 1
+        ? {
+            backgroundImage: `url(${exploreConfig.backImg})`,
+          }
+        : { backgroundColor: exploreConfig.backColor }
+    "
+  >
+    <div
+      class="explore-gray"
+      :style="{
+        background: `rgba(0,0,0,${exploreConfig.mask / 100})`,
+      }"
+      v-if="exploreConfig.backType === 1"
+    ></div>
+    <div class="explore">
+      <cHeader title="应用">
+        <template #button>
+          <Icon
+            name="a-shezhi2"
+            :size="18"
+            class="q-mr-sm"
+            color="#bdbdbd"
+            @click="setVisible = true"
+          />
+        </template>
+      </cHeader>
+      <div class="explore-box">
+        <TimeClock />
+        <div class="explore-search">
+          <q-input
+            outlined
+            rounded
+            v-model="searchTitle"
+            placeholder="输入与搜索"
+            @blur="chooseSearch"
+            @keyup.enter="chooseSearch"
+          >
+            <template v-slot:prepend>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+        </div>
+        <div class="explore-container">
+          <div class="explore-container-left" v-if="bigList.length > 0">
+            <div
+              class="explore-left-item"
+              v-for="(item, index) in bigList"
+              :key="`small${index}`"
+            >
+              {{ item.name }}
+              <Icon
+                class="explore-item-lock"
+                name="pin"
+                :size="14"
+                color="#fff"
+                v-if="item.locked"
+              />
+              <q-menu context-menu>
+                <q-list dense>
+                  <q-item
+                    clickable
+                    v-close-popup
+                    @click="changeSize('small', index, item._key)"
+                  >
+                    <q-item-section>1 * 1</q-item-section></q-item
+                  >
+                  <q-item
+                    clickable
+                    v-close-popup
+                    @click="lockApplication('big', index, item)"
+                    ><q-item-section
+                      >{{
+                        !item.locked ? "固定" : "取消"
+                      }}到侧边栏</q-item-section
+                    ></q-item
+                  >
+                </q-list>
+              </q-menu>
+            </div>
+          </div>
+          <div class="explore-container-right">
+            <div class="explore-container-top">
+              <div
+                class="explore-item"
+                v-for="(item, index) in smallList"
+                :key="`small${index}`"
+                @click="clickExplore(item.enName)"
+                :style="{
+                  width: exploreConfig.iconSize + 'px',
+                  height: exploreConfig.iconSize + 30 + 'px',
+                  marginRight: exploreConfig.right + 'px',
+                  marginBottom: exploreConfig.bottom + 'px',
+                  fontSize: exploreConfig.fontSize + 'px',
+                }"
+              >
+                <div
+                  class="explore-item-top"
+                  :style="{
+                    backgroundColor: item.color,
+                    width: exploreConfig.iconSize + 'px',
+                    height: exploreConfig.iconSize + 'px',
+                    borderRadius: exploreConfig.radius + '%',
+                  }"
+                >
+                  <Icon
+                    :name="item.icon"
+                    :size="exploreConfig.iconSize - 25"
+                    color="#fff"
+                  />
+                  <Icon
+                    class="explore-item-lock"
+                    name="pin"
+                    :size="14"
+                    color="#fff"
+                    v-if="item.locked"
+                  />
+                </div>
+                <div class="explore-item-bottom single-to-long">
+                  {{ item.name }}
+                </div>
+                <q-menu context-menu>
+                  <q-list dense>
+                    <q-item
+                      clickable
+                      v-close-popup
+                      @click="changeSize('big', index, item._key)"
+                      ><q-item-section>2 * 4</q-item-section></q-item
+                    >
+                    <q-item
+                      clickable
+                      v-close-popup
+                      @click="lockApplication('small', index, item)"
+                      ><q-item-section
+                        >{{
+                          !item.locked ? "固定" : "取消"
+                        }}到侧边栏</q-item-section
+                      ></q-item
+                    >
+                  </q-list>
+                </q-menu>
+              </div>
+            </div>
+            <q-separator />
+            <div class="explore-container-bottom">
+              <div
+                class="explore-item"
+                v-for="(item, index) in urlList"
+                :key="`url${index}`"
+                @click="clickExplore('url', item.url)"
+                :style="{
+                  width: exploreConfig.iconSize + 'px',
+                  height: exploreConfig.iconSize + 30 + 'px',
+                  marginRight: exploreConfig.right + 'px',
+                  marginBottom: exploreConfig.bottom + 'px',
+                  fontSize: exploreConfig.fontSize + 'px',
+                }"
+              >
+                <div
+                  class="explore-item-top"
+                  :style="{
+                    backgroundColor: item.color,
+                    width: exploreConfig.iconSize + 'px',
+                    height: exploreConfig.iconSize + 'px',
+                    borderRadius: exploreConfig.radius + '%',
+                  }"
+                >
+                  <img :src="item.icon" alt="" />
+                </div>
+                <div class="explore-item-bottom single-to-long">
+                  {{ item.name }}
+                </div>
+                <q-menu context-menu>
+                  <q-list dense>
+                    <q-item clickable v-close-popup @click="chooseUrl(item)">
+                      <q-item-section clickable v-close-popup
+                        >编辑</q-item-section
+                      >
+                    </q-item>
+                    <q-item
+                      clickable
+                      v-close-popup
+                      @click="deleteUrl(item, index)"
+                    >
+                      <q-item-section clickable v-close-popup
+                        >删除</q-item-section
+                      >
+                    </q-item>
+                  </q-list>
+                </q-menu>
+              </div>
+            </div>
+          </div>
+        </div>
+        <q-menu context-menu>
+          <q-list dense>
+            <q-item clickable v-close-popup @click="urlVisible = true">
+              <q-item-section clickable v-close-popup
+                >设置第三方</q-item-section
+              >
+            </q-item>
+            <q-item clickable v-close-popup @click="">
+              <q-item-section clickable v-close-popup>设置</q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
       </div>
-      <div class="explore-container"></div>
+      <Teleport to="body">
+        <div class="explore-dialog" v-if="iframeVisible" style="z-index: 20">
+          <q-btn
+            round
+            color="primary"
+            size="16px"
+            class="explore-back"
+            @click="
+              iframeVisible = false;
+              iframeUrl = '';
+            "
+          >
+            <Icon name="a-fanhuikongjian21" :size="20" />
+          </q-btn>
+          <c-iframe :url="iframeUrl" :title="iframeTitle" />
+        </div>
+      </Teleport>
+      <c-dialog
+        :visible="urlVisible"
+        @close="urlVisible = false"
+        :title="urlKey ? '编辑网址' : '添加网址'"
+        :dialogStyle="{ width: '350px' }"
+      >
+        <template #content>
+          <q-input
+            dense
+            outlined
+            v-model="url"
+            placeholder="网址"
+            class="q-mb-md full-width"
+          >
+            <template v-slot:prepend>
+              <q-select
+                v-model="urlType"
+                :options="urlTypeArr"
+                dense
+                class="explore-url-search"
+              />
+            </template>
+          </q-input>
+          <q-input
+            class="full-width"
+            dense
+            outlined
+            v-model="urlName"
+            placeholder="标题"
+          />
+        </template>
+        <template #footer>
+          <q-btn
+            flat
+            label="取消"
+            color="grey-5"
+            @click="urlVisible = false"
+            :dense="true"
+          />
+          <q-btn label="保存" color="primary" @click="addUrl()" />
+        </template>
+      </c-dialog>
+      <c-drawer
+        :visible="setVisible"
+        @close="
+          setVisible = false;
+          saveConfig();
+        "
+        :drawerStyle="{ width: '400px' }"
+        opacityMask
+      >
+        <template #content>
+          <ExploreSet />
+        </template>
+      </c-drawer>
     </div>
   </div>
 </template>
 <style scoped lang="scss">
-.explore {
+.explore-bg {
   width: 100%;
   height: 100%;
-  .explore-box {
+  position: relative;
+  z-index: 1;
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center 0;
+  .explore-gray {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    bottom: 0px;
+    right: 0px;
+    z-index: 2;
+  }
+  .explore {
     width: 100%;
-    height: calc(100% - 70px);
-    box-sizing: border-box;
-    @include scroll();
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    // @include p-number(10px, 25px);
-    .explore-search {
-      width: 60%;
-      margin: 10px 0px;
-    }
-    .explore-box-item {
-      height: 100px;
-    }
-    .explore-content {
+    height: 100%;
+    position: relative;
+    z-index: 3;
+    .explore-box {
       width: 100%;
-      height: 65px;
-      .explore-content-top {
-        width: 100%;
-        height: calc(100% - 30px);
-        font-size: 16px;
-        @include flex(null, flex-start, null);
+      height: calc(100% - 70px);
+      box-sizing: border-box;
+      @include scroll();
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      // @include p-number(10px, 25px);
+      .explore-search {
+        width: 60%;
+        margin: 10px 0px;
       }
-      .explore-content-bottom {
-        width: 100%;
-        height: 30px;
-        font-size: 14px;
-        color: #9e9e9e;
+      .explore-container {
+        max-width: 90%;
+        width: 950px;
+        height: calc(100% - 200px);
+        margin: 10px 0px;
+        @include flex(space-between, center, center);
+        .explore-container-left {
+          width: 350px;
+          height: 100%;
+          margin-right: 10px;
+          .explore-left-item {
+            // width: 350px;
+            // height: 100px;
+            // border-radius: 12px;
+            background-color: #fff;
+            text-align: center;
+            line-height: 100px;
+            position: relative;
+            z-index: 1;
+            &:hover {
+              .explore-item-lock {
+                @include flex(center, center, null);
+              }
+            }
+          }
+        }
+        .explore-container-right {
+          flex: 1;
+          height: 100%;
+          @include scroll();
+          .explore-container-top {
+            width: 100%;
+
+            @include flex(flex-start, center, wrap);
+          }
+          .explore-container-bottom {
+            width: 100%;
+            margin-top: 10px;
+            @include flex(flex-start, center, wrap);
+          }
+          .explore-item {
+            cursor: pointer;
+            .explore-item-top {
+              width: 100%;
+              height: 70px;
+              background-color: #fff;
+              position: relative;
+              z-index: 1;
+              @include flex(center, center, null);
+              img {
+                width: 60%;
+              }
+              &:hover {
+                .explore-item-lock {
+                  @include flex(center, center, null);
+                }
+              }
+            }
+            .explore-item-bottom {
+              width: 100%;
+              height: 30px;
+              line-height: 30px;
+              text-align: center;
+            }
+          }
+        }
+        .explore-item-lock {
+          width: 20px;
+          height: 20px;
+          position: absolute;
+          z-index: 2;
+          top: 5px;
+          right: 5px;
+          display: none;
+        }
       }
     }
   }
 }
+.explore-dialog {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  z-index: 10;
+  top: 0px;
+  left: 0px;
+  background-color: #fff;
+  @include scroll();
+  .explore-back {
+    position: absolute;
+    z-index: 20;
+    top: 5px;
+    left: 10px;
+  }
+}
 </style>
-<style></style>
+<style lang="scss">
+.explore-url-search {
+  .q-field__control:before {
+    border: 0px;
+  }
+}
+</style>

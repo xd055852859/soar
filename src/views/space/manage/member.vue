@@ -14,7 +14,7 @@ import axios from "axios";
 const { spaceKey, spaceRole, spaceMemberList, spaceList } = storeToRefs(
   appStore.spaceStore
 );
-const { token } = storeToRefs(appStore.authStore);
+const { token,user } = storeToRefs(appStore.authStore);
 const { setSpaceMemberList } = appStore.spaceStore;
 const $q = useQuasar();
 const memberList = ref<SpaceMember[]>([]);
@@ -326,7 +326,9 @@ watch(memberInput, (newName) => {
                 v-model="props.row.userName"
                 v-slot="scope"
                 @save="(value) => updateMember(value, 'userName', props.row)"
-                v-if="spaceRole < props.row.role"
+                v-if="
+                  spaceRole < props.row.role || props.row.userKey === user!._key
+                "
               >
                 <q-input
                   outlined
@@ -344,7 +346,7 @@ watch(memberInput, (newName) => {
                 v-model="props.row.nickName"
                 v-slot="scope"
                 @save="(value) => updateMember(value, 'nickName', props.row)"
-                v-if="spaceRole < props.row.role"
+                v-if="spaceRole < props.row.role|| props.row.userKey === user!._key"
               >
                 <q-input
                   outlined
@@ -362,7 +364,7 @@ watch(memberInput, (newName) => {
                 v-model="props.row.post"
                 v-slot="scope"
                 @save="(value) => updateMember(value, 'post', props.row)"
-                v-if="spaceRole < props.row.role"
+                v-if="spaceRole < props.row.role|| props.row.userKey === user!._key"
               >
                 <q-input
                   outlined
@@ -382,7 +384,7 @@ watch(memberInput, (newName) => {
               <q-popup-edit
                 v-model="props.row.role"
                 v-slot="scope"
-                v-if="spaceRole < props.row.role"
+                v-if="spaceRole < props.row.role|| props.row.userKey === user!._key"
                 auto-save
                 @save="(value) => updateMember(value, 'newRole', props.row)"
               >
@@ -438,8 +440,8 @@ watch(memberInput, (newName) => {
                   <q-avatar color="#fff" size="lg" class="q-mr-sm">
                     <img
                       :src="
-                        item.row?.userAvatar
-                          ? item.row.userAvatar
+                        item.userAvatar
+                          ? item.userAvatar
                           : '/common/defaultPerson.png'
                       "
                     />

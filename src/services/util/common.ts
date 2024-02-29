@@ -33,7 +33,11 @@ export const commonscroll = (e, list, total, callback) => {
   let scrollTop = e.target.scrollTop;
   //窗口可视范围高度
   let height = e.target.clientHeight;
-  if (height + scrollTop >= scrollHeight && list.length < total.value) {
+  console.log(height + scrollTop)
+  console.log(scrollHeight)
+  console.log(list.length)
+  console.log(total)
+  if (height + scrollTop >= scrollHeight && list.length < total) {
     callback();
   }
 };
