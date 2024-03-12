@@ -11,7 +11,9 @@ import api from "@/services/api";
 import _ from "lodash";
 import { formatDocUrl, getSearchParamValue } from "./services/util/url";
 import { setMessage } from "./services/util/common";
+import { useQuasar } from "quasar";
 const dayjs: any = inject("dayjs");
+const $q = useQuasar();
 const socket: any = inject("socket");
 const { token } = storeToRefs(appStore.authStore);
 const {
@@ -23,7 +25,7 @@ const {
   iframeVisible,
   searchVisible,
 } = storeToRefs(appStore.commonStore);
-const { setCardVisible, setCardKey } = appStore.cardStore;
+const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { setToken, getUserInfo } = appStore.authStore;
 const { setSpaceKey } = appStore.spaceStore;
 const { setTeamKey } = appStore.teamStore;
@@ -36,6 +38,7 @@ const {
   setIframeVisible,
 } = appStore.commonStore;
 const musicRef = ref<any>(null);
+const closeMessage = ref<any>(null);
 onMounted(() => {
   changeDevice();
   // 检测设备方向
@@ -71,6 +74,22 @@ onMounted(() => {
     socket.on("connect", () => {
       socket.emit("login", token);
       console.log(socket.id);
+      socket.on("remind", (data) => {
+        console.log(data);
+        if (data.teamKey === spaceKey.value) {
+          console.log(data.title);
+          // setTimeout(() => {
+          $q.notify({
+            progress: true,
+            icon: "warning",
+            color: "warning",
+            message: data.title,
+            timeout: 60000,
+            position: "top-right",
+          });
+          // }, 60000);
+        }
+      });
     });
   } else {
     router.replace("/");

@@ -102,4 +102,8 @@ const noteDialog = ref<boolean>(false);
   }
 }
 </style>
-<style></style>
+<style>
+.note-list-dialog > .q-dialog__backdrop {
+  display: none;
+}
+</style>
