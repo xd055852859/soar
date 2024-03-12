@@ -78,17 +78,11 @@
       />
     </div>
 
-    <c-dialog
-      :visible="detailDialog"
-      title="文件详情"
-      @close="detailDialog = false"
-      :dialogStyle="{ width: '80%', height: '80%', maxWidth: '1200px' }"
-      class="dialog-opacity"
-    >
-      <template #content>
+    <q-dialog v-if="draggable" v-model="detailDialog">
+      <q-card style="width: 80%; height: 80%; max-width: 1200px">
         <NoteEditor />
-      </template>
-    </c-dialog>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 <script setup lang="ts">
@@ -98,8 +92,6 @@ import appStore from "@/store";
 import Card from "@/components/note/Card.vue";
 import NoteEditor from "@/views/home/note/NoteEditor.vue";
 import FileUploader from "./FileUploader.vue";
-import Icon from "@/components/common/Icon.vue";
-import cDialog from "@/components/common/cDialog.vue";
 const { createNote, removeNote } = appStore.noteStore;
 
 const props = defineProps<{

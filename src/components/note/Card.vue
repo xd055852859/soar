@@ -39,6 +39,8 @@
 <script setup lang="ts">
 import { Card } from "@/interface/Card";
 import appStore from "@/store";
+import Icon from "@/components/common/Icon.vue";
+
 const { deleteNote } = appStore.noteStore;
 
 const props = defineProps<{
@@ -85,7 +87,6 @@ const handleDragEnd = (event: DragEvent) => {};
 .content {
   flex: 1;
   overflow: hidden;
-  min-height: 45px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -99,6 +100,7 @@ const handleDragEnd = (event: DragEvent) => {};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: 25px;
 }
 .summary {
   font-size: 14px;
@@ -113,7 +115,7 @@ const handleDragEnd = (event: DragEvent) => {};
 }
 .options {
   position: absolute;
-  top: 8px;
+  top: 15px;
   right: 8px;
   opacity: 0;
 }
@@ -128,5 +130,8 @@ const handleDragEnd = (event: DragEvent) => {};
   background-size: contain;
   background-position: center;
   margin-right: 8px;
+}
+.content-wrapper {
+  height: 500px;
 }
 </style>
