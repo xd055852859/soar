@@ -32,7 +32,9 @@ axios.interceptors.response.use(
       commonStore().clearStore();
     } else if (
       response.data.status !== 200 &&
-      response.data.statusCode !== "200"
+      response.data.statusCode !== "200" &&
+      response.data.status !== 201 &&
+      response.data.statusCode !== "201"
     ) {
       setMessage("error", response.data.msg);
     } else {

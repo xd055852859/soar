@@ -22,7 +22,8 @@ export const mateStore = defineStore(
       })) as ResultProps;
       if (mateRes.msg === "OK") {
         mateRes.data = mateRes.data.map((item) => {
-          [item.chartData, item.chartName] = formatName(item.activeList);
+          item.chartData = item.activeList;
+          item.chartName = item.activeList.map((item) => item[2]);
           return item;
         });
         mateList.value = [...mateRes.data];
@@ -37,7 +38,7 @@ export const mateStore = defineStore(
     watch([mateKey, mateList], ([newKey, newList]) => {
       if (newKey && newList.length > 0) {
         let index = _.findIndex(newList, { _key: newKey });
-        console.log(newList,newKey);
+        console.log(newList, newKey);
         if (index !== -1) {
           setMateInfo({ ...newList[index] });
         }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import cDialog from "@/components/common/cDialog.vue";
 import { ResultProps } from "@/interface/Common";
+import { OnClickOutside } from "@vueuse/components";
 import api from "@/services/api";
 import { setMessage } from "@/services/util/common";
 import appStore from "@/store";
@@ -15,13 +16,16 @@ import Menu from "./menu.vue";
 const { targetTeamKey, teamKey, teamList, teamFoldList } = storeToRefs(
   appStore.teamStore
 );
+const { spaceRole } = storeToRefs(appStore.spaceStore);
 const { setTargetTeamKey, setTeamKey, setTeamList, setTeamFoldList } =
   appStore.teamStore;
 const { setClose } = appStore.commonStore;
 const addVisible = ref<boolean>(false);
 const detailState = ref<boolean>(false);
 const memberVisible = ref<boolean>(false);
-
+const searchList = ref<any>([]);
+const searchInput = ref<string>("");
+const searchVibisible = ref<boolean>(false);
 const toggleTeam = async (item, visible) => {
   if (item) {
     detailState.value = true;
@@ -102,19 +106,48 @@ const topTeam = async (item, index, state) => {
     setTeamList(list);
   }
 };
+watchEffect(() => {
+  if (searchInput.value) {
+    searchList.value = teamList.value.filter(
+      (item) => item.name.indexOf(searchInput.value) !== -1
+    );
+  } else {
+    searchList.value = [...teamList.value];
+  }
+});
 </script>
 <template>
   <div class="teamMenu">
+    <!-- <OnClickOutside @trigger="searchVibisible = false"> -->
     <div class="teamMenu-title">
-      <div>群组</div>
-      <q-btn flat round @click="toggleTeam(null, true)">
-        <Icon name="a-chuangjian2" :size="20" />
-      </q-btn>
+      <div class="teamMenu-title-left">
+        <div class="small-input" v-if="searchVibisible">
+          <q-input
+            outlined
+            dense
+            autofocus
+            v-model="searchInput"
+            class="full-width"
+            @blur="searchVibisible = false"
+          />
+        </div>
+        <template v-else>群组</template>
+      </div>
+      <div class="teamMenu-title-right">
+        <q-btn flat round @click="searchVibisible = !searchVibisible">
+          <Icon name="sousuo" :size="20" />
+        </q-btn>
+        <q-btn flat round @click="toggleTeam(null, true)" v-if="spaceRole < 4">
+          <Icon name="a-chuangjian2" :size="20" />
+        </q-btn>
+      </div>
     </div>
+    <!-- </OnClickOutside> -->
+
     <div class="teamMenu-list">
       <div
         class="teamMenu-item icon-point"
-        v-for="(item, index) in teamList"
+        v-for="(item, index) in searchList"
         :key="`team${index}`"
         @mouseenter="setTargetTeamKey(item._key)"
         @click="
@@ -238,12 +271,23 @@ const topTeam = async (item, index, state) => {
   flex: 1;
   display: flex;
   flex-direction: column;
+  margin-top: 10px;
   .teamMenu-title {
     width: 100%;
     height: 40px;
     font-weight: bold;
     font-size: 16px;
     @include flex(space-between, center, null);
+    .teamMenu-title-left {
+      width: calc(100% - 85px);
+      height: 100%;
+      @include flex(flex-start, center, null);
+    }
+    .teamMenu-title-right {
+      width: 85px;
+      height: 100%;
+      @include flex(flex-start, center, null);
+    }
   }
   .teamMenu-subtitle {
     width: 100%;
@@ -265,12 +309,13 @@ const topTeam = async (item, index, state) => {
 }
 .teamMenu-item {
   width: 100%;
-  height: 40px;
+  height: 30px;
   padding-left: 10px;
   font-size: 14px;
   border-radius: 4px;
   box-sizing: border-box;
-  line-height: 40px;
+  line-height: 30px;
+  margin-bottom: 10px;
   @include flex(space-between, center, null);
   &:hover {
     background: #f5f5f5;

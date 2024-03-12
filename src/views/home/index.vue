@@ -1,57 +1,150 @@
 <script setup lang="ts">
-import cIframe from "@/components/common/cIframe.vue";
-import cDialog from "@/components/common/cDialog.vue";
-import TeamTree from "@/components/tree/tree.vue";
-import TaskBoard from "@/views/home/task/taskBoard/index.vue";
 import _ from "lodash";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import Left from "./left/left.vue";
 import Icon from "@/components/common/Icon.vue";
-import Search from "@/components/search/search.vue";
-
-import FilePreview from "@/components/note/FilePreview.vue";
-import Editor from "@/components/note/Editor.vue";
-import DocPreview from "./team/tab/docPreview.vue";
-const { closeNum, iframeInfo, iframeVisible, searchVisible } = storeToRefs(
-  appStore.commonStore
-);
+import api from "@/services/api";
+import { useQuasar } from "quasar";
+import { ResultProps } from "@/interface/Common";
+import { setMessage } from "@/services/util/common";
+const $q = useQuasar();
+const dayjs: any = inject("dayjs");
+const { token } = storeToRefs(appStore.authStore);
+const { closeNum, showState } = storeToRefs(appStore.commonStore);
 
 const { spaceKey, spaceMessageNum } = storeToRefs(appStore.spaceStore);
-const {
-  cardKey,
-  cardInfo,
-  treeVisible,
-  docVisible,
-  docUrl,
-  fileVisible,
-  noteVisible,
-} = storeToRefs(appStore.cardStore);
-const { note } = storeToRefs(appStore.noteStore);
 const { getTeamList, getTeamFoldList } = appStore.teamStore;
 const { setSpaceKey } = appStore.spaceStore;
-const { setCardVisible } = appStore.cardStore;
-const { setClose, setIframeVisible, setSearchVisible } = appStore.commonStore;
-const showButton = ref<boolean>(false);
-const route = useRoute();
-// const outSpace = (index) => {
-//   ElMessageBox.confirm("是否退出该空间", "退出空间", {
-//     confirmButtonText: "确认",
-//     cancelButtonText: "取消",
-//   }).then(async () => {
-//     let outRes = (await api.request.delete("spaceMember/exit", {
-//       spaceKey: spaceKey.value,
-//     })) as ResultProps;
-//     if (outRes.msg === "OK") {
-//       ElMessage.success("退出空间成功");
-//       const list = _.cloneDeep(spaceList.value);
-//       list.splice(index, 1);
-//       setSpaceKey(list[0]._key);
-//       setSpaceList(list);
-//     }
-//   });
-// };
+const { setClose, setShowState, setIframeVisible } = appStore.commonStore;
 
+const showButton = ref<boolean>(false);
+const leftRef = ref<any>(null);
+const clockInText = ref<string>("上班打卡");
+const clockIn = ref<any>(null);
+const clockType = ref<number>(-1);
+
+const clockTimer = ref<any>(null);
+const clockConfig = ref<any>(null);
+const clockVisible = ref<boolean>(false);
+const clockMessageVisible = ref<boolean>(false);
+const closeMessage = ref<any>(null);
+let observer: ResizeObserver | null = null;
+onMounted(() => {
+  console.log(leftRef.value.offsetLeft);
+  if (leftRef.value.offsetLeft === -300 && closeNum.value === -2) {
+    setShowState(true);
+  } else {
+    observer = new ResizeObserver(handleResize);
+    observer.observe(leftRef.value);
+  }
+  window.addEventListener("message", getMessage);
+});
+onUnmounted(() => {
+  window.removeEventListener("message", getMessage);
+  if (clockTimer.value) {
+    clearInterval(clockTimer.value);
+  }
+});
+const handleResize = (entries: any) => {
+  for (const entry of entries) {
+    const { height } = entry.contentRect;
+    if (height === 0 && !showState.value) {
+      setShowState(true);
+    } else if (showState.value) {
+      setShowState(false);
+    }
+    // 这里可以执行针对宽高变化的操作
+  }
+};
+const getMessage = (e) => {
+  if (e.data && !e.data.source) {
+    const messageData =
+      typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+    console.log(messageData);
+    switch (messageData.eventName) {
+      case "check-in-complete":
+        // router.push(`/home/taskBoard`);
+        setMessage("success", "打卡成功");
+        setIframeVisible(false, null);
+        clockVisible.value = false;
+        clockMessageVisible.value = false;
+        clockType.value = clockType.value + 1;
+        closeMessage.value();
+        break;
+    }
+  }
+};
+const getTodayCheckIn = async (key) => {
+  let checkInRes = (await api.request.get("clockIn/today", {
+    teamKey: key,
+    returnConfig: true,
+  })) as ResultProps;
+  if (checkInRes.msg === "OK") {
+    clockIn.value = checkInRes.data;
+    //@ts-ignore
+    clockConfig.value = checkInRes.config;
+    if (clockIn.value === null) {
+      clockType.value = 0;
+    } else if (clockIn.value.noonBreakTime === null) {
+      clockType.value = 1;
+    } else if (clockIn.value.noonEndTime === null) {
+      clockType.value = 2;
+    } else if (clockIn.value.endWorkTime === null){
+      clockType.value = 3;
+    }else{
+      clockType.value = 4;
+    }
+    clockTimer.value = setInterval(() => {
+      if (clockConfig.value) {
+        let startWorkTime = clockConfig.value.startWorkTime
+          ? new Date(
+              `${dayjs().format("YYYY-MM-DD")} ${
+                clockConfig.value.startWorkTime
+              }`
+            ).getTime() - 900000
+          : 0;
+
+        let noonBreakTime = clockConfig.value.noonBreakTime
+          ? new Date(
+              `${dayjs().format("YYYY-MM-DD")} ${
+                clockConfig.value.noonBreakTime
+              }`
+            ).getTime() - 900000
+          : 100000000000000000;
+        let noonEndTime = clockConfig.value.noonEndTime
+          ? new Date(
+              `${dayjs().format("YYYY-MM-DD")} ${clockConfig.value.noonEndTime}`
+            ).getTime() - 900000
+          : 100000000000000000;
+        let endWorkTime = clockConfig.value.endWorkTime
+          ? new Date(
+              `${dayjs().format("YYYY-MM-DD")} ${clockConfig.value.endWorkTime}`
+            ).getTime() - 900000
+          : 0;
+        // console.log(startWorkTime);
+        // console.log(noonBreakTime);
+        // console.log(noonEndTime);
+        // console.log(endWorkTime);
+        if (
+          (clockType.value === 0 && dayjs().valueOf() > startWorkTime) ||
+          (clockType.value === 1 && dayjs().valueOf() > noonBreakTime) ||
+          (clockType.value === 2 && dayjs().valueOf() > noonEndTime) ||
+          (clockType.value === 3 && dayjs().valueOf() > endWorkTime)
+        ) {
+          clockVisible.value = true;
+        }
+      }
+    }, 1000);
+  }
+};
+
+onUnmounted(() => {
+  // 在组件销毁前取消观察
+  if (observer) {
+    observer.disconnect();
+  }
+});
 watch(
   spaceKey,
   (newKey) => {
@@ -59,15 +152,55 @@ watch(
       setSpaceKey(newKey);
       getTeamList(newKey);
       getTeamFoldList(newKey);
+      getTodayCheckIn(newKey);
     }
   },
   { immediate: true }
 );
-// watch(route, () => {
-//   setCardKey("");
-//   setCardInfo(null);
-// });
+watch(clockVisible, (newVisible) => {
+  if (newVisible) {
+    clockMessageVisible.value = true;
+  }
+});
+watch(clockMessageVisible, (newVisible) => {
+  if (newVisible) {
+    closeMessage.value = $q.notify({
+      icon: "warning",
+      color: "warning",
+      message: `即将可以${clockInText.value}`,
+      position: "top-right",
+      multiLine: true,
+      timeout: 880000,
+      // actions: [
+      //   {
+      //     label: "确认",
+      //     color: "yellow",
+      //     handler: () => {
+      //       clockMessageVisible.value=false;
+      //     },
+      //   },
+      // ],
+    });
+  }
+});
+watch(clockType, (newType) => {
+  switch (newType) {
+    case 0:
+      clockInText.value = "上班打卡";
+      break;
+    case 1:
+      clockInText.value = "午休打卡";
+      break;
+    case 2:
+      clockInText.value = "下午打卡";
+      break;
+    case 3:
+      clockInText.value = "下班打卡";
+      break;
+  }
+});
 </script>
+
 <template>
   <div
     class="home"
@@ -82,10 +215,11 @@ watch(
       class="left"
       @mouseenter="showButton = true"
       @mouseleave="showButton = false"
+      ref="leftRef"
     >
       <div class="left-arrow-button">
-        <q-btn round @click="setClose(0)" size="12px" v-if="showButton">
-          <Icon name="a-shousuo2" :size="36" :style="{ marginTop: '5px' }" />
+        <q-btn flat round @click="setClose(0)" size="11px" v-if="showButton">
+          <Icon name="shouqi" :size="15" :style="{ marginTop: '5px' }" />
         </q-btn>
       </div>
       <q-btn
@@ -105,34 +239,23 @@ watch(
     <div class="right">
       <router-view></router-view>
     </div>
+    <q-btn
+      color="primary"
+      round
+      size="25px"
+      @click.stop="
+        setIframeVisible(true, {
+          url: `https://checkin.qingtime.cn/checkIn?token=${token}&teamKey=${spaceKey}`,
+          title: '打卡',
+        })
+      "
+      v-if="clockVisible"
+      class="clockIn-button"
+      ><div class="clockIn-button-box">{{ clockInText }}</div></q-btn
+    >
   </div>
-  <c-dialog
-    :visible="searchVisible"
-    title="搜索文件"
-    @close="setSearchVisible(false)"
-    :dialogStyle="{ width: '550px' }"
-  >
-    <template #content><Search /></template>
-  </c-dialog>
-  <Teleport to="body">
-    <div class="card-fullDialog" v-if="iframeVisible">
-      <q-btn
-        round
-        flat
-        size="16px"
-        class="card-back"
-        @click="setIframeVisible(false, null)"
-      >
-        <Icon name="a-fanhuikongjian21" :size="20" />
-      </q-btn>
-      <!-- <TaskBoard
-        :targetKey="iframeInfo.userKey"
-        :targetTag="iframeInfo.planTag"
-      /> -->
-      <c-iframe :url="iframeInfo.url" :title="iframeInfo.title" />
-    </div>
-  </Teleport>
 </template>
+
 <style scoped lang="scss">
 .home {
   width: 100%;
@@ -140,6 +263,8 @@ watch(
   box-sizing: border-box;
   position: relative;
   z-index: 10;
+  // background: #f2f3f6;
+  background-color: transparent;
   @include flex(space-between, center, null);
 
   .left {
@@ -156,68 +281,71 @@ watch(
     display: flex;
     flex-direction: column;
     @include p-number(0px, 10px);
+
     .left-arrow-button {
       width: 100px;
       position: absolute;
       z-index: 2;
-      top: 14px;
-      right: -80px;
+      top: 16px;
+      right: -65px;
     }
+
     .left-notice-button {
       position: absolute;
       z-index: 2;
-      top: 20px;
-      right: 18px;
+      top: 18px;
+      right: 30px;
       cursor: pointer;
     }
   }
+
   .right {
     flex: 1;
     height: 100vh;
     position: relative;
-    background: #f2f3f6;
+
     z-index: 1;
     width: 0px;
     // @include p-number(15px, 35px);
   }
 }
 
-.card-fullDialog {
-  width: 100vw;
-  height: 100vh;
+.clockIn-button {
   position: fixed;
-  z-index: 9999;
-  top: 0px;
-  left: 0px;
-  background-color: #fff;
-  @include scroll();
-  .card-back {
-    position: absolute;
-    z-index: 20;
-    top: 5px;
-    left: 10px;
+  z-index: 9000;
+  bottom: 20px;
+  right: 20px;
+  .clockIn-button-box {
+    font-size: 15px;
   }
 }
 .homeLeft {
   padding-left: 300px;
+
   .left {
     left: 0px;
   }
 }
+
 .homeRight {
   padding-left: 0px;
+
   .left {
     left: -300px;
   }
 }
+
 .moveLeft {
   animation: toLeft 0.5s forwards;
+
   .left {
     animation: moveLeft 0.5s forwards;
   }
 }
+
 .moveRight {
   animation: toRight 0.5s forwards;
+
   .left {
     animation: moveRight 0.5s forwards;
   }
@@ -228,31 +356,46 @@ watch(
 @keyframes moveLeft {
   0% {
     left: 0px;
+    top: 0px;
+    height: 100vh;
   }
+
   100% {
     left: -300px;
+    top: 100%;
+    height: 0px;
   }
 }
+
 @keyframes moveRight {
   0% {
     left: -300px;
+    top: 100%;
+    height: 0px;
   }
+
   100% {
     left: 0px;
+    top: 0px;
+    height: 100vh;
   }
 }
+
 @keyframes toLeft {
   0% {
     padding-left: 300px;
   }
+
   100% {
     padding-left: 0px;
   }
 }
+
 @keyframes toRight {
   0% {
     padding-left: 0px;
   }
+
   100% {
     padding-left: 300px;
   }

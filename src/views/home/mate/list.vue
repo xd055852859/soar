@@ -105,6 +105,7 @@ const signVisible = ref<boolean>(false);
   width: 100%;
   height: calc(100% - 60px);
   align-content: flex-start;
+  background-color: #f2f3f6;
   @include scroll();
   @include p-number(10px, 25px);
   @include flex(flex-start, flex-start, wrap);
@@ -118,7 +119,7 @@ const signVisible = ref<boolean>(false);
     position: relative;
     z-index: 1;
     @include p-number(20px, 0px);
-    @include scroll();
+    // @include scroll();
     .mate-box-avatar {
       width: 100%;
       height: 120px;

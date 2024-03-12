@@ -159,6 +159,31 @@ export const signatureArray = [
     label: "出差",
   },
 ];
+export const statusArray = [
+  {
+    value: 1,
+    label: "正常",
+  },
+  {
+    value: 2,
+    label: "未激活",
+  },
+  // {
+  //   value: 3,
+  //   label: "已暂停",
+  // },
+];
+export const searchArray = [
+  { label: "百度", url: "https://www.baidu.com/s?ie=utf-8&word=" },
+  { label: "必应", url: "https://www.bing.com/search?q=" },
+  { label: "谷歌", url: "https://www.google.com/search?q=" },
+  { label: "Magi", url: "https://magi.com/search?q=" },
+  { label: "F搜", url: "https://fsoufsou.com/search?q=" },
+  { label: "Yandex", url: "https://yandex.com/search/?text=" },
+  { label: "DuckDuckGo", url: "https://duckduckgo.com/?q=DuckDuckGo" },
+  { label: "搜狗搜索", url: "https://www.sogou.com/web?query=" },
+  { label: "360搜索", url: "https://www.so.com/s?q=" },
+];
 export const formatName = (list) => {
   let chartArray = [];
   let chartNameArray: any = [];
@@ -166,6 +191,7 @@ export const formatName = (list) => {
     let arr: any = [];
     for (let key in item) {
       if (key !== "time") {
+        console.log(item[key])
         arr.push([
           item.time,
           item[key],
@@ -185,4 +211,16 @@ export const formatName = (list) => {
     return arr;
   });
   return [_.flatten(chartArray), chartNameArray];
+};
+export const typeIcon: { [_key: string]: string } = {
+  folder: "material-symbols:folder-outline",
+  text: "mdi:file-text-outline",
+  outline: "mdi:file-text-outline",
+  ppt: "mingcute:ppt-line",
+  draw: "material-symbols-light:draw-outline",
+  mind: "icon-park-outline:mind-mapping",
+  sheet: "lucide:sheet",
+  file: "mdi:file-outline",
+  link: "mdi:link",
+  taskTree: "mdi:subtasks",
 };

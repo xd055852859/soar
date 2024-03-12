@@ -67,18 +67,18 @@ export const teamStore = defineStore(
       teamMemberList.value = newList;
     };
     const getTeamInfo = async (key, type?: string) => {
-        let teamRes = (await api.request.get("project/detail", {
-          projectKey: key,
-        })) as ResultProps;
-        if (teamRes.msg === "OK") {
-          if (type) {
-            targetTeamInfo.value = teamRes.data;
-            targetTeamRole.value = teamRes.data.role;
-          } else {
-            teamInfo.value = teamRes.data;
-            teamRole.value = teamRes.data.role;
-          }
+      let teamRes = (await api.request.get("project/detail", {
+        projectKey: key,
+      })) as ResultProps;
+      if (teamRes.msg === "OK") {
+        if (type) {
+          targetTeamInfo.value = teamRes.data;
+          targetTeamRole.value = teamRes.data.role;
+        } else {
+          teamInfo.value = teamRes.data;
+          teamRole.value = teamRes.data.role;
         }
+      }
     };
     const setTeamInfo = (newInfo, type?: string) => {
       if (type) {
@@ -89,6 +89,7 @@ export const teamStore = defineStore(
     };
     watch(teamKey, (newKey) => {
       if (newKey) {
+        teamInfo.value = null;
         getTeamInfo(newKey);
         getTeamMemberList(newKey);
       }
@@ -97,6 +98,9 @@ export const teamStore = defineStore(
       if (newKey) {
         getTeamInfo(newKey, "target");
         getTeamMemberList(newKey, "target");
+      } else {
+        targetTeamInfo.value = null;
+        targetTeamMemberList.value = [];
       }
     });
 

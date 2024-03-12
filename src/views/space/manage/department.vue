@@ -10,6 +10,8 @@ import { formatData } from "@/services/util/data";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import { setMessage } from "@/services/util/common";
+import { statusArray } from "@/services/config/config";
+import { totalmem } from "os";
 const $q = useQuasar();
 const { spaceKey, spaceInfo } = storeToRefs(appStore.spaceStore);
 const { departmentList, departmentTree, departmentInfo } = storeToRefs(
@@ -28,12 +30,12 @@ const departmentMemberKey = ref<string>("");
 const departmentMemberIndex = ref<number>(-1);
 const dataepartmentMemberRef = ref(null);
 const departmentMemberName = ref<string>("");
-const activeStatus = ref<boolean>(false);
-const showAll = ref<boolean>(false);
+const activeStatus = ref<number>(1);
+const showAll = ref<boolean>(true);
+const notActiveNum = ref<number>(0);
 const chooseDepartmentKeyList = ref<string[]>([]);
 const dragId = ref<string>("");
 const dropId = ref<string>("");
-
 
 const columns: any = [
   {
@@ -128,7 +130,7 @@ const updateDepartment = async (item) => {
 const deleteDepartment = async (item) => {
   $q.dialog({
     title: "删除部门",
-    message: "是否删除部门",
+    message: `是否删除部门 ${item.label}`,
     cancel: {
       color: "grey-5",
       flat: true,
@@ -154,15 +156,17 @@ const deleteDepartment = async (item) => {
     })
     .onCancel(() => {});
 };
-const chooseDepartment = async (key) => {
-  getDepartmentInfo(key);
+const chooseDepartment = async () => {
+  getDepartmentInfo(departmentKey.value);
   let departmentRes = (await api.request.get("department/member", {
-    departmentKey: key,
+    departmentKey: departmentKey.value,
     activeStatus: activeStatus.value,
-    showAll: showAll.value,
+    showAll: !showAll.value,
   })) as ResultProps;
   if (departmentRes.msg === "OK") {
     departmentMemberList.value = [...departmentRes.data];
+    //@ts-ignore
+    notActiveNum.value = departmentRes.notActiveNum;
   }
 };
 const chooseDepartmentMember = (item, index) => {
@@ -183,11 +187,11 @@ const changeDepartment = async () => {
     departmentKeyArr: chooseDepartmentKeyList.value,
   })) as ResultProps;
   if (departmentRes.msg === "OK") {
-    if (chooseDepartmentKeyList.value.indexOf(departmentKey.value) === -1) {
-      departmentMemberList.value.splice(departmentMemberIndex.value, 1);
-    } else {
-      chooseDepartment(departmentKey.value);
-    }
+    // if (chooseDepartmentKeyList.value.indexOf(departmentKey.value) === -1) {
+    //   departmentMemberList.value.splice(departmentMemberIndex.value, 1);
+    // }else{
+      chooseDepartment();
+    // }
     departmentVisible.value = false;
   }
 };
@@ -235,15 +239,11 @@ watch(
   },
   { immediate: true }
 );
-watch(
-  departmentKey,
-  (newKey) => {
-    if (newKey) {
-      chooseDepartment(newKey);
-    }
-  },
-  { immediate: true }
-);
+watchEffect(() => {
+  if (departmentKey.value) {
+    chooseDepartment();
+  }
+});
 </script>
 <template>
   <div class="department">
@@ -271,7 +271,10 @@ watch(
             no-connectors
             default-expand-all
             no-transition
+            no-nodes-label="当前无部门"
+            no-results-label="未找到匹配的部门"
             :filter="departmentName"
+            style="width: 100%"
             v-if="departmentList && spaceInfo"
           >
             <template v-slot:default-header="prop">
@@ -348,9 +351,32 @@ watch(
           </q-tree>
         </div>
       </div>
-      <div class="department-right" v-if="departmentInfo">
-        <div class="department-right-title">{{ departmentInfo.name }}</div>
-        <div class="department-right-set">仅展示直属部门成员</div>
+      <div class="department-right" v-if="departmentInfo && spaceInfo">
+        <div class="department-right-title dp--center">
+          {{
+            departmentInfo._key === spaceInfo?.rootDepartment
+              ? spaceInfo.name
+              : departmentInfo.name
+          }}
+          <!-- <div class="text-caption q-ml-md">
+            总人数
+            {{ departmentMemberList.length }} &nbsp;&nbsp;&nbsp;未激活人数
+            {{ notActiveNum }}
+          </div> -->
+        </div>
+        <div class="department-right-set">
+          <!-- {{ showAll ? "直属" : "当前" }} -->
+          仅展示直属部门成员
+          <q-toggle v-model="showAll" color="green" />
+          <q-select
+            outlined
+            v-model="activeStatus"
+            :options="statusArray"
+            dense
+            emit-value
+            map-options
+          />
+        </div>
         <q-table
           :rows="departmentMemberList"
           :columns="columns"
@@ -366,7 +392,7 @@ watch(
                 {{ props.row.name }}
               </q-td>
               <q-td key="activeStatus" :props="props">
-                {{ props.row.activeStatus === 1 ? "正常" : "已暂停" }}
+                {{ statusArray[props.row.activeStatus - 1].label }}
               </q-td>
               <q-td key="mobile" :props="props">
                 {{ props.row.mobile }}
@@ -395,7 +421,10 @@ watch(
     </div>
     <c-dialog
       :visible="departmentVisible"
-      @close="departmentVisible = false"
+      @close="
+        departmentVisible = false;
+        departmentMemberName = '';
+      "
       title="变更部门"
       :dialogStyle="{ width: '700px', height: '70vh', maxWidth: '80vw' }"
     >
@@ -415,6 +444,8 @@ watch(
           <q-tree
             :nodes="departmentList"
             node-key="key"
+            no-nodes-label="当前无部门"
+            no-results-label="未找到匹配的部门"
             no-connectors
             default-expand-all
             no-transition
@@ -430,7 +461,10 @@ watch(
           flat
           label="取消"
           color="grey-5"
-          @click="departmentVisible = false"
+          @click="
+            departmentVisible = false;
+            departmentMemberName = '';
+          "
           :dense="true" />
         <q-btn label="确认" color="primary" @click="changeDepartment"
       /></template>
@@ -458,6 +492,13 @@ watch(
         @include flex(space-between, center, null);
       }
       .department-left-tree {
+        width: 100%;
+        // min-height:0px;
+        height: calc(100% - 40px);
+        margin-top: 10px;
+        // align-content: flex-start;
+        @include scroll();
+        @include flex(flex-start, flex-start, null);
         .department-item {
           width: 100%;
           height: 30px;
@@ -482,6 +523,7 @@ watch(
         line-height: 30px;
         font-size: 14px;
         margin-bottom: 15px;
+        @include flex(flex-start, center, null);
       }
       .department-right-table {
         height: calc(100% - 100px);

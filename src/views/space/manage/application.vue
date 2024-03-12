@@ -6,7 +6,7 @@ import api from "@/services/api";
 import appStore from "@/store";
 import _ from "lodash";
 import { storeToRefs } from "pinia";
-const { spaceKey } = storeToRefs(appStore.spaceStore);
+const { spaceKey, spaceRole } = storeToRefs(appStore.spaceStore);
 const { getLockList } = appStore.spaceStore;
 const applicationList = ref<any>([]);
 const columns: any = [
@@ -52,9 +52,9 @@ const getApplicationList = async () => {
 };
 const addApplication = async () => {
   let departmentRes = (await api.request.post("app", {
-    icon: "",
-    name: "打卡",
-    enName: "clockIn",
+    icon: "suji",
+    name: "速记",
+    enName: "note",
     appType: "",
   })) as ResultProps;
   if (departmentRes.msg === "OK") {
@@ -63,6 +63,9 @@ const addApplication = async () => {
 
 const updateApplication = async (value, key, application) => {
   let obj: any = { [key]: value };
+  if (key === "isOpen" && !value) {
+    obj.isDefault = false;
+  }
   let appRes = (await api.request.patch("app/team", {
     teamKey: spaceKey.value,
     appKey: application._key,
@@ -99,9 +102,7 @@ const updateApplicationAll = async (value, key, application) => {
     }
   }
 };
-const test = () => {
-  console.log("???");
-};
+
 watchEffect(() => {
   if (spaceKey.value) {
     getApplicationList();
@@ -118,20 +119,22 @@ watch(
 <template>
   <div class="application">
     <cHeader title="应用配置">
-      <!-- <template #button>
-        <q-btn
+      <template #button>
+        <!-- <q-btn
           style="color: #1976d2"
           label="修改应用"
-          @click="updateApplicationAll('huibao','icon',{
-            _key:'1530700178'
-          })"
-        />
-        <q-btn
+          @click="
+            updateApplicationAll('huibao', 'icon', {
+              _key: '1530700178',
+            })
+          "
+        /> -->
+        <!-- <q-btn
           style="color: #1976d2"
           label="新增应用"
           @click="addApplication()"
-        />
-      </template> -->
+        /> -->
+      </template>
     </cHeader>
     <div class="application-container">
       <q-table
@@ -157,6 +160,7 @@ watch(
             <q-td key="isOpen" :props="props">
               <q-checkbox
                 v-model="props.row.isOpen"
+                :disable="spaceRole > 1"
                 @click.native="
                   updateApplication(props.row.isOpen, 'isOpen', props.row)
                 "
@@ -165,7 +169,7 @@ watch(
             <q-td key="isDefault" :props="props">
               <q-checkbox
                 v-model="props.row.isDefault"
-                :disable="!props.row.isOpen"
+                :disable="!props.row.isOpen || spaceRole > 1"
                 @click.native="
                   updateApplication(props.row.isDefault, 'isDefault', props.row)
                 "

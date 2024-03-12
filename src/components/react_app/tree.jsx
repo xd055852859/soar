@@ -4,7 +4,6 @@ import React, {
   useEffect,
   useMemo,
   useImperativeHandle,
-  useCallback,
 } from "react";
 import { Mind, Tree } from "tree-graph-react";
 import _ from "lodash";
@@ -20,150 +19,6 @@ import {
   getCustmAdornment,
 } from "./treesvg";
 import "./tree.scss";
-//   "001": {
-//     _key: "001",
-//     name: "项目管理",
-//     father: "",
-//     sortList: ["002", "003", "004", "005"],
-//     contract: false,
-//     avatarUri: "https://psnine.com/Upload/game/11387.png",
-//     icon: "https://cdn-icare.qingtime.cn/rooter.svg",
-//     checked: true,
-//     hour: 0.1,
-//     limitDay: 1610726400000,
-//   },
-//   "002": {
-//     _key: "002",
-//     name: "计划进度",
-//     father: "001",
-//     sortList: ["006", "007"],
-//     contract: false,
-//     checked: true,
-//     hour: 0.1,
-//     limitDay: 1610726400000,
-//     icon: "https://cdn-icare.qingtime.cn/docFolder.svg",
-//   },
-//   "003": {
-//     _key: "003",
-//     name: "项目状态",
-//     father: "001",
-//     sortList: ["010", "011"],
-//     checked: false,
-//     hour: 0.1,
-//     limitDay: 1610726400000,
-//     icon: "https://cdn-icare.qingtime.cn/favFolder.svg",
-//   },
-//   "004": {
-//     _key: "004",
-//     name: "项目会议",
-//     father: "001",
-//     sortList: [],
-//     checked: false,
-//     hour: 0.1,
-//     limitDay: 1610726400000,
-//   },
-//   "005": {
-//     _key: "005",
-//     name: "验收",
-//     father: "001",
-//     sortList: [],
-//     checked: false,
-//     hour: 0.1,
-//     limitDay: 1610726400000,
-//   },
-//   "006": {
-//     _key: "006",
-//     name: "阶段壹",
-//     father: "002",
-//     contract: false,
-//     sortList: ["008", "009"],
-//     checked: false,
-//     hour: 0.1,
-//     limitDay: 1610726400000,
-//   },
-//   "007": {
-//     _key: "007",
-//     name: "阶段二",
-//     father: "002",
-//     sortList: [],
-//     checked: false,
-//     hour: 0.1,
-//     limitDay: 1610726400000,
-//   },
-//   "008": {
-//     _key: "008",
-//     name: "备份json文件",
-//     father: "006",
-//     sortList: [],
-//     checked: false,
-//     hour: 0.1,
-//     limitDay: 1610726400000,
-//   },
-//   "009": {
-//     _key: "009",
-//     name: "还原数据",
-//     father: "006",
-//     sortList: ["015"],
-//     checked: false,
-//     hour: 0.1,
-//     limitDay: 1610726400000,
-//   },
-//   "010": {
-//     _key: "010",
-//     name: "4月计划",
-//     father: "003",
-//     sortList: [],
-//     checked: true,
-//     hour: 0.1,
-//     limitDay: 1610726400000,
-//   },
-//   "011": {
-//     _key: "011",
-//     name: "5月计划",
-//     father: "003",
-//     sortList: ["012", "013", "014"],
-//     contract: false,
-//     checked: true,
-//     hour: 0.1,
-//     limitDay: 1610726400000,
-//   },
-//   "012": {
-//     _key: "012",
-//     name: "原型、界面设计",
-//     father: "011",
-//     sortList: [],
-//     checked: true,
-//     hour: 0.1,
-//     limitDay: 1610726400000,
-//   },
-//   "013": {
-//     _key: "013",
-//     name: "开发",
-//     father: "011",
-//     sortList: [],
-//     checked: true,
-//     hour: 0.1,
-//     limitDay: 1610726400000,
-//   },
-//   "014": {
-//     _key: "014",
-//     name: "测试",
-//     father: "011",
-//     sortList: [],
-//     checked: true,
-//     hour: 0.1,
-//     limitDay: 1610726400000,
-//   },
-//   "015": {
-//     _key: "015",
-//     name: "还原数据-还原数据",
-//     father: "009",
-//     sortList: [],
-//     checked: true,
-//     hour: 0.1,
-//     limitDay: 1610726400000,
-//   },
-// };
 const CustomTree = React.forwardRef((props, ref) => {
   const {
     rootKey,
@@ -212,9 +67,6 @@ const CustomTree = React.forwardRef((props, ref) => {
           value.avatarUri = "/common/defaultPerson.png";
         }
         value.checked = value.hasDone;
-        if (value._key === rootKey) {
-          value.backgroundColor = "#07be51";
-        }
         value = formatNode(value);
       }
       if (type === "child") {
@@ -714,6 +566,7 @@ const CustomTree = React.forwardRef((props, ref) => {
             showAvatar={true}
             showChildNum={true}
             uncontrolled={false}
+            startNodeBg="#07be51"
             defaultSelectedId={selectedId || undefined}
             singleColumn={viewType.includes("-single")}
             handleClickAvatar={(selectedNode, e) => {
@@ -766,6 +619,7 @@ const CustomTree = React.forwardRef((props, ref) => {
             ref={treeRef}
             singleColumn={viewType.includes("-single")}
             startId={startId}
+            startNodeBg="#07be51"
             nodes={nodes}
             showIcon={true}
             showAvatar={true}

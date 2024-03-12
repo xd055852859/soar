@@ -2,15 +2,13 @@
 import { ResultProps } from "@/interface/Common";
 import api from "@/services/api";
 import { commonscroll } from "@/services/util/common";
+import { Icon } from "@iconify/vue";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
-
-const props = defineProps<{
-  searchType?: string;
-}>();
+import { typeIcon } from "@/services/config/config";
 const { spaceKey } = storeToRefs(appStore.spaceStore);
-const { teamKey, teamList } = storeToRefs(appStore.teamStore);
-const { chooseSearch } = appStore.commonStore;
+const { teamKey, teamList, teamFoldList } = storeToRefs(appStore.teamStore);
+const { chooseSearch, doSearch } = appStore.commonStore;
 const fileInput = ref<string>("");
 const fileType = ref<string>("文件");
 const searchList = ref<any>([]);
@@ -21,10 +19,9 @@ const total = ref<number>(0);
 const searchFile = async () => {
   searchList.value = [];
   if (fileType.value === "群组") {
-    searchList.value = teamList.value.filter(
+    searchList.value = [...teamList.value, ...teamFoldList.value].filter(
       (item) => item.name.indexOf(fileInput.value) !== -1
     );
-    console.log(searchList.value);
   } else {
     let dataRes = (await api.request.get("knowledgeBase/search", {
       teamKey: spaceKey.value,
@@ -32,6 +29,7 @@ const searchFile = async () => {
       keyword: fileInput.value,
       page: page.value,
       limit: 30,
+      exclude: teamKey.value ? true : false,
       // startTime: dayjs().subtract(90, "day").startOf("day").valueOf(),
       // endTime: dayjs().valueOf(),
     })) as ResultProps;
@@ -39,6 +37,9 @@ const searchFile = async () => {
       if (page.value === 1) {
         searchList.value = [];
       }
+      dataRes.data.forEach((item) => {
+        item.icon = typeIcon[item.type];
+      });
       searchList.value = [...searchList.value, ...dataRes.data];
       total.value = dataRes.total!;
     }
@@ -70,6 +71,7 @@ watch(page, () => {
         dense
         emit-value
         map-options
+        v-if="!teamKey"
       />
       <q-input
         outlined
@@ -101,12 +103,29 @@ watch(page, () => {
             @click="chooseSearch(fileType, item)"
           >
             <q-item-section>
-              <q-item-label>{{
-                fileType === "群组" ? item.name : item.title
-              }}</q-item-label>
+              <div class="dp--center">
+                <Icon
+                  :icon="item.icon"
+                  width="22"
+                  height="22"
+                  color="#757575"
+                />
+                <q-item-label class="q-ml-sm">{{
+                  fileType === "群组" ? item.name : item.title
+                }}</q-item-label>
+              </div>
             </q-item-section>
-
-            <q-item-section side v-if="fileType === '文件'">
+            <q-item-section side v-if="teamKey">
+              <q-btn
+                flat
+                label="链接"
+                color="primary"
+                @click.stop="doSearch(item)"
+                :dense="true"
+                class="file-search-button"
+              />
+            </q-item-section>
+            <q-item-section side v-else-if="fileType === '文件'">
               <div class="dp--center text-caption">
                 <template
                   v-for="(pathItem, pathIndex) in item.way"

@@ -296,6 +296,11 @@ body,
     display: none;
   }
 }
+.dialog-opacity {
+  .q-dialog__backdrop {
+    opacity: 0;
+  }
+}
 .drawer-opacity {
   .q-dialog__backdrop {
     opacity: 0;

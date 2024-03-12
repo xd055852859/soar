@@ -6,6 +6,7 @@ import { SpaceMember } from "@/interface/Space";
 import _ from "lodash";
 import api from "@/services/api";
 import { setLoading, setMessage } from "@/services/util/common";
+import { statusArray } from "@/services/config/config";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
@@ -14,7 +15,7 @@ import axios from "axios";
 const { spaceKey, spaceRole, spaceMemberList, spaceList } = storeToRefs(
   appStore.spaceStore
 );
-const { token,user } = storeToRefs(appStore.authStore);
+const { token, user } = storeToRefs(appStore.authStore);
 const { setSpaceMemberList } = appStore.spaceStore;
 const $q = useQuasar();
 const memberList = ref<SpaceMember[]>([]);
@@ -61,6 +62,12 @@ const columns: any = [
     align: "center",
     label: "权限",
     field: "role",
+  },
+  {
+    name: "activeStatus",
+    align: "center",
+    label: "状态",
+    field: "activeStatus",
   },
   {
     name: "operate",
@@ -115,6 +122,7 @@ const addMember = async (memberKey) => {
     let list = _.cloneDeep(spaceMemberList.value);
     setMessage("success", "添加成员成功");
     memberList.value.push(memberRes.data);
+    console.log(memberList.value);
     list.push(memberRes.data);
     setSpaceMemberList(list);
     addVisible.value = false;
@@ -239,6 +247,7 @@ watch(memberInput, (newName) => {
           <div
             className="upload-button upload-img-button q-mr-sm"
             style="border: 0px"
+            v-if="spaceRole < 2"
           >
             <q-btn
               rounded
@@ -297,7 +306,7 @@ watch(memberInput, (newName) => {
                     <img
                       :src="props.row.userAvatar"
                       alt=""
-                      style="width: 100%, height:100%"
+                      style="width: 100%; height: 100%"
                       class="upload-cover"
                       v-if="props.row.userAvatar"
                     />
@@ -401,20 +410,23 @@ watch(memberInput, (newName) => {
                 />
               </q-popup-edit>
             </q-td>
+            <q-td key="activeStatus" :props="props" style="width: 80px">
+              {{ statusArray[props.row.activeStatus - 1].label }}
+            </q-td>
             <q-td key="operate" :props="props" style="width: 40px">
               <q-btn
                 flat
                 label="移除"
                 color="grey-5"
                 @click="deleteMember(props.row.userKey)"
-                v-if="spaceRole < props.row.role"
+                v-if="spaceRole < props.row.role && spaceRole < 2"
               />
             </q-td>
           </q-tr>
         </template>
       </q-table>
     </div>
-    <cDialog :visible="addVisible" title="搜索用户" @close="addVisible = false">
+    <c-dialog :visible="addVisible" title="搜索用户" @close="addVisible = false">
       <template #content>
         <div class="member-search">
           <div class="member-search-title">
@@ -470,7 +482,7 @@ watch(memberInput, (newName) => {
           </div>
         </div>
       </template>
-    </cDialog>
+    </c-dialog>
   </div>
 </template>
 <style scoped lang="scss">

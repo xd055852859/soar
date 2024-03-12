@@ -14,15 +14,20 @@ import Icon from "@/components/common/Icon.vue";
 import cDialog from "@/components/common/cDialog.vue";
 
 import createSpace from "@/components/createSpace.vue";
-const { spaceKey, spaceInfo, spaceList, lockList } = storeToRefs(
+const { spaceKey, spaceInfo, spaceList, lockList, spaceRole } = storeToRefs(
   appStore.spaceStore
 );
+const props = defineProps<{
+  showState?: boolean;
+}>();
+
 const { user } = storeToRefs(appStore.authStore);
 const { clearStore, setSearchVisible } = appStore.commonStore;
 const { setUserInfo, setToken } = appStore.authStore;
 const { setSpaceKey, setSpaceList } = appStore.spaceStore;
 const { setTeamKey } = appStore.teamStore;
 const { setCardKey } = appStore.cardStore;
+const { clickExplore } = appStore.exploreStore;
 const userVisible = ref<boolean>(false);
 const cropperVisible = ref<boolean>(false);
 const userName = ref<string>("");
@@ -137,14 +142,19 @@ watch(
   { immediate: true }
 );
 </script>
+
 <template>
   <div class="left-title icon-point">
     <!--       @mouseenter="spaceMenuVisible = true" -->
     <div class="select-third-item" style="width: 100%; height: 45px">
-      <q-avatar color="#fff" rounded size="lg">
-        <img
-          :src="spaceInfo?.logo ? spaceInfo.logo : '/common/defaultGroup.png'"
-        />
+      <q-avatar :color="spaceInfo?.logo ? '#fff' : 'primary'" rounded size="lg">
+        <img v-if="spaceInfo?.logo" :src="spaceInfo.logo" />
+        <template v-else-if="spaceInfo?.name">
+          <div class="text-white">
+            {{ spaceInfo.name.substring(0, 1) }}
+          </div>
+        </template>
+        <img v-else src="/common/defaultGroup.png" />
       </q-avatar>
 
       <div
@@ -176,10 +186,20 @@ watch(
             >
               <Icon name="a-huibaoyaosu-yidong21" :size="14" class="q-mr-sm" />
               <div style="width: calc(100% - 40px)">
-                <q-avatar rounded color="#fff" size="sm" class="q-mr-sm">
-                  <img
-                    :src="item.logo ? item.logo : '/common/defaultGroup.png'"
-                  /> </q-avatar
+                <q-avatar
+                  rounded
+                  :color="item?.logo ? '#fff' : 'primary'"
+                  size="sm"
+                  class="q-mr-sm"
+                >
+                  <img v-if="item?.logo" :src="item.logo" />
+
+                  <template v-else-if="item?.name">
+                    <div class="text-white">
+                      {{ item.name.substring(0, 1) }}
+                    </div>
+                  </template>
+                  <img v-else src="/common/defaultGroup.png" /> </q-avatar
                 >{{ item.name }}
               </div>
               <Icon
@@ -187,6 +207,7 @@ watch(
                 :size="18"
                 class="q-mr-sm"
                 color="#bdbdbd"
+                v-if="item.role < 2"
                 @click.stop="chooseSpace(item._key)"
               />
               <q-space />
@@ -207,47 +228,76 @@ watch(
   </div>
   <div class="left-button">
     <div class="left-button-item">
-      <q-btn flat round @click="setSearchVisible(true)">
+      <q-btn
+        flat
+        round
+        @click="
+          setTeamKey('');
+          setSearchVisible(true);
+        "
+      >
         <Icon name="sousuo" :size="20" />
+        <q-tooltip> 搜索 </q-tooltip>
       </q-btn>
     </div>
     <div class="left-button-item">
-      <q-btn flat round @click="$router.push('/home/task')">
+      <q-btn
+        :flat="$route.name !== 'task'"
+        round
+        @click="$router.push('/home/task')"
+      >
         <Icon
           name="shoucang"
           :size="20"
           :color="$route.name === 'task' ? '#07be51' : '#333'"
         />
+        <q-tooltip> 任务中心 </q-tooltip>
       </q-btn>
     </div>
     <div class="left-button-item">
-      <q-btn flat round @click="$router.push('/home/explore')">
+      <q-btn
+        :flat="$route.name !== 'explore'"
+        round
+        @click="$router.push('/home/explore')"
+      >
         <Icon
           name="tongzhi"
           :size="20"
           :color="$route.name === 'explore' ? '#07be51' : '#333'"
         />
+        <q-tooltip> 应用中心 </q-tooltip>
       </q-btn>
     </div>
     <div class="left-button-item">
-      <q-btn flat round @click="$router.push('/home/resource')">
+      <q-btn
+        :flat="$route.name !== 'resource'"
+        round
+        @click="$router.push('/home/resource')"
+      >
         <Icon
           name="zhuye"
           :size="20"
           :color="$route.name === 'resource' ? '#07be51' : '#333'"
         />
+        <q-tooltip> 资源中心 </q-tooltip>
       </q-btn>
     </div>
     <div class="left-button-item">
       <q-btn flat round>
         <Icon name="caidanrukou" :size="20" />
+        <q-tooltip> 更多操作 </q-tooltip>
         <q-menu class="q-pa-sm" auto-close anchor="top right" self="top left">
           <q-list dense>
             <!--  @click="editFile(item._key, index)" -->
             <q-item clickable v-close-popup @click="userVisible = true">
               <q-item-section>个人设置</q-item-section>
             </q-item>
-            <q-item clickable v-close-popup @click="chooseSpace(spaceKey)">
+            <q-item
+              clickable
+              v-close-popup
+              @click="chooseSpace(spaceKey)"
+              v-if="spaceRole < 2"
+            >
               <q-item-section>空间设置</q-item-section>
             </q-item>
             <q-item clickable v-close-popup>
@@ -266,6 +316,7 @@ watch(
       class="left-app-item"
       v-for="(item, index) in lockList"
       :key="`app${index}`"
+      @click="clickExplore(item.enName)"
     >
       <q-btn flat round>
         <Icon :name="item.icon" :size="20" />
@@ -290,6 +341,7 @@ watch(
         />
       </div>
     </template>
+
     <template #footer>
       <q-btn
         flat
@@ -308,7 +360,7 @@ watch(
             <img
               :src="userAvatar"
               alt=""
-              style="width: 100%, height:100%"
+              style="width: 100%; height: 100%"
               class="upload-cover"
               v-if="userAvatar"
             />
@@ -334,6 +386,7 @@ watch(
         </div>
       </div>
     </template>
+
     <template #footer>
       <q-btn
         flat
@@ -356,25 +409,31 @@ watch(
     </template>
   </cDialog>
 </template>
+
 <style scoped lang="scss">
 .left-title {
   width: 100%;
   height: 70px;
   @include flex(center, center, null);
 }
+
 .left-button {
   width: 100%;
   @include flex(space-between, center, null);
+
   .left-button-item {
     width: 20%;
     flex-shrink: 0;
     @include flex(center, center, null);
   }
 }
+
 .left-app {
   width: 100%;
+  margin-bottom: 10px;
   background-color: #fff;
   @include flex(flex-start, center, wrap);
+
   .left-app-item {
     width: 20%;
     flex-shrink: 0;
@@ -382,13 +441,16 @@ watch(
     @include flex(center, center, null);
   }
 }
+
 .form-container {
   width: 400px;
   height: 380px;
+
   .form-logo {
     width: 100%;
     height: 300px;
     @include flex(center, center, null);
+
     .logo-box {
       width: 250px;
       height: 250px;
@@ -396,12 +458,14 @@ watch(
       overflow: hidden;
     }
   }
+
   .form-name {
     width: 100%;
     height: 50px;
     margin: 10px 0px;
   }
 }
+
 .spaceAdd-container {
   width: 716px;
   padding: 15px 34px;
@@ -409,24 +473,30 @@ watch(
   @include scroll();
 }
 </style>
+
 <style lang="scss">
 .left-space-item {
   width: 100%;
+
   .left-space-title {
     // font-size: 14px;
     @include flex(space-between, center, null);
   }
+
   .select-item-icon {
     display: none;
   }
+
   &:hover {
     .select-item-icon {
       @include flex(center, center, null);
     }
   }
 }
+
 .left-menu-item {
   border-radius: 4px;
+
   .left-menu-avatar {
     min-width: 30px;
   }

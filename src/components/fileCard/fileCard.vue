@@ -7,7 +7,13 @@ import { setMessage } from "@/services/util/common";
 import { storeToRefs } from "pinia";
 import appStore from "@/store";
 import { ResultProps } from "@/interface/Common";
-import { docArray, fileArray, viewArray } from "@/services/config/config";
+import {
+  docArray,
+  fileArray,
+  typeIcon,
+  viewArray,
+} from "@/services/config/config";
+import { Icon as FileIcon } from "@iconify/vue";
 import Icon from "../common/Icon.vue";
 import { formatDocUrl } from "@/services/util/url";
 const $q = useQuasar();
@@ -323,16 +329,30 @@ const handleDownload = (detail) => {
       :style="chooseKey === card._key ? { border: '2px solid #4a4a4a' } : null"
     >
       <q-card-section class="teamFile-box-top q-pa-none">
-        {{ card.title }}
+        <div class="dp--center">
+          <FileIcon
+            :icon="typeIcon[card.type]"
+            width="22"
+            height="22"
+            class="q-mr-sm"
+            color="#757575"
+          />
+          {{ card.title }}
+        </div>
       </q-card-section>
       <q-card-section class="teamFile-box-bottom q-pa-none">
         <div class="dp--center">
           <template
             v-for="(pathItem, pathIndex) in card.way"
-            :key="`${card._key}path${index}`"
+            :key="`${card._key}path${pathIndex}`"
           >
             <span>{{ pathItem.title }}</span>
-            <span v-if="pathIndex < card.way.length - 1" style="margin:0px 5px"> / </span>
+            <span
+              v-if="pathIndex < card.way.length - 1"
+              style="margin: 0px 5px"
+            >
+              /
+            </span>
           </template>
         </div>
       </q-card-section>
@@ -375,9 +395,20 @@ const handleDownload = (detail) => {
           </q-btn>
         </div> -->
       </q-card-section>
+      <q-card-section class="teamTask-box-center q-py-none">
+        <template
+          v-for="(pathItem, pathIndex) in card.way"
+          :key="`${card._key}path${pathIndex}`"
+        >
+          <span>{{ pathItem.name }}</span>
+          <span v-if="pathIndex < card.way.length - 1" style="margin: 0px 2px">
+            /
+          </span>
+        </template>
+      </q-card-section>
       <q-card-section class="teamTask-box-bottom q-py-none">
         <div class="dp-center-center">
-          <q-avatar color="#fff" size="30px" class="q-mr-sm">
+          <q-avatar color="#fff" size="20px" class="q-mr-sm">
             <img
               :src="
                 card.assignorInfo?.userAvatar
@@ -385,10 +416,17 @@ const handleDownload = (detail) => {
                   : '/common/defaultGroup.png'
               "
             />
+            <q-tooltip>
+              {{ card.assignorInfo?.userName }}
+            </q-tooltip>
           </q-avatar>
-          {{ card.assignorInfo?.userName }}
+          {{
+            card.assignorInfo?.userName.length > 5
+              ? card.assignorInfo.userName.substring(0, 5)
+              : card.assignorInfo.userName
+          }}
           <q-icon name="arrow_right_alt" size="20px" class="q-ma-sm" />
-          <q-avatar color="#fff" size="30px" class="q-mr-sm">
+          <q-avatar color="#fff" size="20px" class="q-mr-sm">
             <img
               :src="
                 card.executorInfo?.userAvatar
@@ -396,10 +434,18 @@ const handleDownload = (detail) => {
                   : '/common/defaultPerson.png'
               "
             />
+            <q-tooltip>
+              {{ card.executorInfo?.userName }}
+            </q-tooltip>
           </q-avatar>
-          {{ card.executorInfo?.userName }}
+          {{
+            card.executorInfo?.userName.length > 5
+              ? card.executorInfo.userName.substring(0, 3) + "..."
+              : card.executorInfo.userName
+          }}
         </div>
         {{ dayjs(card.createTime).fromNow() }}
+        <!-- {{ dayjs(card.updateTime).fromNow() }} -->
       </q-card-section>
     </q-card></template
   >
@@ -488,13 +534,13 @@ const handleDownload = (detail) => {
 .teamTask-box-container {
   width: 100%;
   min-height: 80px;
-  border-radius: 0px;
+  // border-radius: 0px;
   padding: 5px 0px;
   box-sizing: border-box;
   .teamTask-box-top {
     width: 100%;
-    min-height: 55px;
-    font-size: 14px;
+    min-height: 35px;
+    font-size: 16px;
     position: relative;
     z-index: 1;
     @include flex(space-between, flex-start, null);
@@ -522,10 +568,21 @@ const handleDownload = (detail) => {
       flex-shrink: 0;
     }
   }
+  .teamTask-box-center {
+    width: 100%;
+    min-height: 18px;
+    // height: 80px;
+    color: $grey-6;
+    font-size: 12px;
+    line-height: 14px;
+    margin-bottom: 5px;
+  }
   .teamTask-box-bottom {
     width: 100%;
+    height: 25px;
+
+    font-size: 12px;
     // height: 80px;
-    @include scroll();
     @include flex(space-between, center, null);
   }
 }

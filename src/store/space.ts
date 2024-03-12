@@ -62,7 +62,7 @@ export const spaceStore = defineStore(
         spaceInfo.value = spaceRes.data;
         spaceRole.value = spaceRes.data.role;
         if (spaceRes.data.config) {
-          exploreStore().setExploreConfig({ ...spaceRes.data.config }, true);
+          exploreStore().setExploreConfig({ ...spaceRes.data.config });
         } else {
           exploreStore().setExploreConfig(null, false, true);
         }

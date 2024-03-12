@@ -12,8 +12,10 @@ import { setMessage } from "@/services/util/common";
 import Icon from "../common/Icon.vue";
 import Member from "@/views/space/manage/member.vue";
 const dayjs: any = inject("dayjs");
+
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { teamMemberList, teamKey } = storeToRefs(appStore.teamStore);
+const { setSearchVisible } = appStore.commonStore;
 const props = defineProps<{
   nodeKey: string;
   showFile?: boolean;
@@ -98,10 +100,6 @@ const updateDetail = (type, obj) => {
         return;
       }
       break;
-    case "file":
-      fileName.value = obj.fileName;
-      fileVisible.value = false;
-      break;
     case "relaters":
       let index = _.findIndex(relaters.value, { userKey: obj.member.userKey });
       if (index !== -1) {
@@ -145,19 +143,6 @@ const handleChange = () => {
     saveDoc();
     changed.value = false;
   }, 2000);
-};
-//文件筛选
-const searchFile = async () => {
-  let dataRes = (await api.request.get("knowledgeBase/search", {
-    teamKey: spaceKey.value,
-    projectKey: teamKey.value,
-    keyword: fileInput.value,
-    // startTime: dayjs().subtract(90, "day").startOf("day").valueOf(),
-    // endTime: dayjs().valueOf(),
-  })) as ResultProps;
-  if (dataRes.msg === "OK") {
-    searchList.value = [...dataRes.data];
-  }
 };
 watch(
   () => props.nodeKey,
@@ -472,7 +457,20 @@ watch(fileInput, (newName) => {
             "
           />
         </template>
-        <q-btn flat :round="!fileName" @click="fileVisible = true" v-else>
+        <q-btn
+          flat
+          :round="!fileName"
+          @click="
+            setSearchVisible(true, (node) => {
+              updateDetail('file', {
+                fileKey: node._key,
+                fileName: node.name,
+              });
+              setSearchVisible(false);
+            })
+          "
+          v-else
+        >
           <img src="/add.svg" alt="" />
         </q-btn>
       </div>
@@ -552,75 +550,6 @@ watch(fileInput, (newName) => {
         </q-menu>
       </div>
     </div>
-    <c-dialog
-      :visible="fileVisible"
-      title="搜索文件"
-      @close="fileVisible = false"
-    >
-      <template #content>
-        <div class="file-search">
-          <div class="file-search-title">
-            <!-- <q-select
-              style="width: 150px; margin-right: 10px"
-              outlined
-              v-model="cardType"
-              :options="fileArray"
-              dense
-              emit-value
-              map-options
-            /> -->
-            <q-input
-              outlined
-              v-model="fileInput"
-              placeholder="搜索文件"
-              dense
-              class="full-width"
-              @keyup.enter="searchFile"
-              clearable
-            />
-          </div>
-          <div class="file-search-container">
-            <template v-if="searchList.length > 0">
-              <q-list bordered>
-                <q-item
-                  v-for="(item, index) in searchList"
-                  :key="`search${index}`"
-                  class="q-my-sm file-search-item"
-                >
-                  <q-item-section avatar>
-                    <!-- <q-icon name="o_description" /> -->
-                  </q-item-section>
-
-                  <q-item-section>
-                    <q-item-label>{{ item.title }}</q-item-label>
-                  </q-item-section>
-
-                  <q-item-section side>
-                    <q-btn
-                      flat
-                      label="链接"
-                      color="primary"
-                      @click="
-                        updateDetail('file', {
-                          fileName: item.title,
-                          fileKey: item._key,
-                          fileType: item.type,
-                        })
-                      "
-                      :dense="true"
-                      class="file-search-button"
-                    />
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </template>
-            <div class="dp-center-center" :style="{ height: '100%' }" v-else>
-              未搜索到文件
-            </div>
-          </div>
-        </div>
-      </template>
-    </c-dialog>
   </div>
 </template>
 <style scoped lang="scss">
@@ -683,30 +612,6 @@ watch(fileInput, (newName) => {
       left: 0px;
       cursor: pointer;
       @include flex(flex-start, flex-start, null);
-    }
-  }
-}
-.file-search {
-  width: 500px;
-  .file-search-title {
-    width: 100%;
-    height: 50px;
-    margin-bottom: 10px;
-    @include flex(space-between, center, null);
-  }
-  .file-search-container {
-    width: 100%;
-    height: 50vh;
-    @include scroll();
-    .file-search-item {
-      .file-search-button {
-        display: none;
-      }
-      &:hover {
-        .file-search-button {
-          display: flex;
-        }
-      }
     }
   }
 }

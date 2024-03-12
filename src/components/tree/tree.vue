@@ -22,8 +22,14 @@ const dayjs: any = inject("dayjs");
 const CustomTree = applyReactInVue(Tree);
 const { token, user } = storeToRefs(appStore.authStore);
 const { removeNote } = appStore.noteStore;
-const { targetTeamKey, targetTeamMemberList, teamMemberList, teamKey } =
-  storeToRefs(appStore.teamStore);
+const { setSearchVisible, setIframeVisible } = appStore.commonStore;
+const {
+  teamInfo,
+  targetTeamKey,
+  targetTeamMemberList,
+  teamMemberList,
+  teamKey,
+} = storeToRefs(appStore.teamStore);
 const { setCardKey, setCardVisible } = appStore.cardStore;
 const { note } = storeToRefs(appStore.noteStore);
 const { clearNoteDetail, getNoteDetail } = appStore.noteStore;
@@ -91,7 +97,26 @@ onMounted(() => {
   treeType.value = localStorage.getItem("treeType")
     ? (localStorage.getItem("treeType") as string)
     : "tree";
+  window.addEventListener("message", getMessage);
 });
+onUnmounted(() => {
+  window.removeEventListener("message", getMessage);
+});
+const getMessage = (e) => {
+  if (e.data && !e.data.source) {
+    const messageData =
+      typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+    console.log(messageData);
+    switch (messageData.eventName) {
+      case "changeName":
+        // router.push(`/home/taskBoard`);
+        nodes.value = treeRef.value.__veauryReactRef__.getNodeInfo()[1];
+        nodes.value[rootKey.value].name = messageData.data;
+        treeRef.value.__veauryReactRef__.setNodes({ ...nodes.value });
+        break;
+    }
+  }
+};
 const getTreeInfo = async (key) => {
   let cardRes = (await api.request.get("card/detail", {
     cardKey: key,
@@ -209,16 +234,26 @@ const updateExecutor = async (userKey, avatarUri) => {
 const updateFile = async () => {
   [nodeInfo.value, nodes.value, selectnodes.value] =
     treeRef.value.__veauryReactRef__.getNodeInfo();
-  if (selectnodes.value.length === 1) {
-    nodeKey.value = selectnodes.value[0]._key;
-  } else if (selectnodes.value.length > 1) {
-    setMessage("error", "链只能单选节点,无法批量操作");
+  if (selectnodes.value.length === 0) {
+    if (nodeInfo.value._key) {
+      nodeKey.value = nodeInfo.value._key;
+    } else {
+      setMessage("error", "请选择节点");
+      return;
+    }
+  } else {
+    setMessage("error", "外链只能单选节点,无法批量操作");
     return;
-  } else if (selectnodes.value.length === 0) {
-    nodeKey.value = nodeInfo.value._key;
   }
-  drawerVisible.value = true;
-  showFile.value = true;
+  setSearchVisible(true, (node) => {
+    updateDetail("file", {
+      fileKey: node._key,
+      fileName: node.name,
+    });
+    setSearchVisible(false);
+  });
+  // drawerVisible.value = true;
+  // showFile.value = true;
 };
 const updateIcon = (type, index) => {
   nodeInfo.value = treeRef.value.__veauryReactRef__.getNodeInfo()[0];
@@ -598,10 +633,13 @@ const chooseExecutor = (executorDetail) => {
 
 const openAlt = (node) => {
   let fileKey = node.endAdornmentContent.file.fileKey;
-  let fileType = node.endAdornmentContent.file.fileType;
-  console.log(fileType);
-  setCardKey(fileKey);
-  setCardVisible(true, fileType === "file" ? "file" : "doc");
+  let fileName = node.endAdornmentContent.file.fileName;
+  setIframeVisible(true, {
+    url: `https://soar.cn/base/#/login?token=${token.value}&redirectPath=node/${fileKey}`,
+    title: fileName,
+  });
+  // setCardKey(fileKey);
+  // setCardVisible(true, fileType === "file" ? "file" : "doc");
 };
 const openFile = (node) => {};
 
@@ -1416,6 +1454,9 @@ watch(contentVisible, (newVisible) => {
     .teamTree-right-box {
       height: calc(100% - 40px);
       @include scroll();
+      > div {
+        @include flex(center, center, wrap);
+      }
     }
     .teamTree-right-name {
       text-align: center;

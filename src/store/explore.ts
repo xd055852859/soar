@@ -3,6 +3,10 @@ import { defineStore } from "pinia";
 import { User } from "@/interface/User";
 import api from "@/services/api";
 import { ResultProps } from "@/interface/Common";
+import { commonStore } from "./common";
+import { authStore } from "./auth";
+import { spaceStore } from "./space";
+import router from "@/router";
 // 使用setup模式定义
 export const exploreStore = defineStore(
   "exploreStore",
@@ -21,7 +25,24 @@ export const exploreStore = defineStore(
       fontOpacity: 70,
       backImg: "",
       backColor: "",
+      search: { label: "百度", url: "https://www.baidu.com/s?ie=utf-8&word=" },
     });
+    let initConfig = {
+      backType: 0,
+      mask: 0,
+      radius: 20,
+      fontSize: 14,
+      iconSize: 60,
+      showDate: false,
+      right: 30,
+      bottom: 10,
+      fontWeight: 10,
+      fontPoint: true,
+      fontOpacity: 70,
+      backImg: "",
+      backColor: "",
+      search: { label: "百度", url: "https://www.baidu.com/s?ie=utf-8&word=" },
+    };
     const setExploreConfig = (
       newConfig?: any,
       cover?: boolean,
@@ -31,25 +52,39 @@ export const exploreStore = defineStore(
         exploreConfig.value = { ...newConfig };
       } else if (clear) {
         exploreConfig.value = {
-          backType: 0,
-          mask: 0,
-          radius: 20,
-          fontSize: 14,
-          iconSize: 60,
-          showDate: false,
-          right: 30,
-          bottom: 10,
-          fontWeight: 10,
-          fontPoint: true,
-          fontOpacity: 70,
-          backImg: "",
-          backColor: "",
+          ...initConfig,
         };
-      } else if (clear) {
-        exploreConfig.value = { ...exploreConfig.value, ...newConfig };
+      } else {
+        exploreConfig.value = { ...initConfig, ...newConfig };
+      }
+      console.log(exploreConfig.value);
+    };
+    const clickExplore = (type, url?: string) => {
+      switch (type) {
+        case "report":
+          commonStore().setIframeVisible(true, {
+            url: `https://hb.qingtime.cn/?token=${authStore().token}&teamKey=${
+              spaceStore().spaceKey
+            }`,
+            title: "汇报",
+          });
+          break;
+        case "clockIn":
+          commonStore().setIframeVisible(true, {
+            url: `https://checkin.qingtime.cn/?token=${
+              authStore().token
+            }&teamKey=${spaceStore().spaceKey}`,
+            title: "打卡",
+          });
+          break;
+        case "url":
+          window.open(url);
+          break;
+        default:
+          router.push(`/home/${type}`);
       }
     };
-    return { exploreConfig, setExploreConfig };
+    return { exploreConfig, setExploreConfig, clickExplore };
   }
   //   ,
   //   { persist: true }

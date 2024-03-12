@@ -75,7 +75,7 @@ const routes: Array<RouteRecordRaw> = [
         path: "taskBoard",
         name: "taskBoard",
         component: () => import("@/views/home/task/taskBoard/index.vue"),
-        children: [],
+        children: []
       },
       {
         path: "resource",
@@ -93,7 +93,16 @@ const routes: Array<RouteRecordRaw> = [
         path: "team",
         name: "team",
         component: () => import("@/views/home/team/index.vue"),
-        children: [],
+        redirect: "/home/team/teamKnowledgeBase",
+        children: [
+          
+          {
+            path: "teamKnowledgeBase",
+            name: "teamKnowledgeBase",
+            component: () => import("@/views/home/team/tab/teamKnowledgeBase.vue"),
+            children: [],
+          },
+        ],
       },
     ],
   },
@@ -161,6 +170,12 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("@/components/tree/tree.vue"),
         children: [],
         props: true,
+      },
+      {
+        path: "teamHome",
+        name: "teamHome",
+        component: () => import("@/views/home/team/tab/index.vue"),
+        children: [],
       },
     ],
     props: true,

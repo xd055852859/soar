@@ -52,7 +52,11 @@ const updateSpace = async () => {
   }
 };
 const delateSpace = async () => {
-  if (spaceName.value !== spaceInfo.value?.name) {
+  if (!deleteInput.value) {
+    setMessage("error", "请输入空间名称");
+    return;
+  }
+  if (deleteInput.value !== spaceName.value) {
     setMessage("error", "请输入正确的空间名称");
     return;
   }

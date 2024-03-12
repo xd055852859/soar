@@ -11,9 +11,13 @@ const { token } = storeToRefs(appStore.authStore);
 const fileList = ref<any>([]);
 const page = ref<number>(1);
 const total = ref<number>(0);
-const sortType = ref<string>("");
+const sortType = ref<string>("update");
 const fileKey = ref<string>("");
 const iframeUrl = ref<string>("");
+const sortArray = [
+  { label: "最近更新", value: "update" },
+  { label: "最近打开", value: "view" },
+];
 const getFileList = async () => {
   let fileRes = (await api.request.get("knowledgeBase/card", {
     teamKey: spaceKey.value,
@@ -55,6 +59,9 @@ const chooseCard = (detail, type) => {
     //   break;
   }
 };
+watch(sortType, () => {
+  page.value = 1;
+});
 watchEffect(() => {
   getFileList();
 });
@@ -67,13 +74,30 @@ watch(fileKey, (newKey) => {
 <template>
   <div class="resource">
     <div class="resource-left">
-      <cHeader title="资源" />
-      <div class="resource-left-box">
+      <cHeader title="资源">
+        <template #button>
+          <q-select
+            style="width: 150px; margin-right: 10px"
+            outlined
+            v-model="sortType"
+            :options="sortArray"
+            dense
+            emit-value
+            map-options
+          />
+        </template>
+      </cHeader>
+      <div class="resource-left-box" >
         <template
           v-for="(fileItem, fileIndex) in fileList"
           :key="`fileItem${fileIndex}`"
         >
-          <FileCard :card="fileItem" :chooseKey="fileKey" type="file" @chooseCard="chooseCard" />
+          <FileCard
+            :card="fileItem"
+            :chooseKey="fileKey"
+            type="file"
+            @chooseCard="chooseCard"
+          />
         </template>
       </div>
     </div>

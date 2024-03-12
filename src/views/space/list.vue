@@ -49,7 +49,20 @@ watch(spaceList, (newList) => {
             :style="overKey === item._key ? { background: '#e9f9ef' } : null"
           >
             <div class="space-item-left">
-              <img :src="item.logo ? item.logo : '/common/defaultGroup.png'" />
+              <!-- <img :src="item.logo ? item.logo : '/common/defaultGroup.png'" /> -->
+              <q-avatar
+                :color="item?.logo ? '#fff' : 'primary'"
+                rounded
+                size="lg"
+              >
+                <img v-if="item?.logo" :src="item.logo" />
+                <template v-else-if="item?.name"
+                  ><div class="text-white">
+                    {{ item.name.substring(0, 1) }}
+                  </div></template
+                >
+                <img v-else src="/common/defaultGroup.png" />
+              </q-avatar>
             </div>
 
             <div class="space-item-right">

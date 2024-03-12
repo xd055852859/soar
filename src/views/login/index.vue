@@ -39,7 +39,7 @@ onMounted(() => {
       <div class="login-bottom">
         登录或注册代表你同意
         <a
-          href="https://notecute.com/#/post?key=1518256288&view=digest&hideHead=1&publicShare=1&isWebview=1"
+          href="https://notecute.com/#/post?key=1532911725&view=grid&hideHead=1&publicShare=1&isWebview=1"
           target="_blank"
           >用户条款</a
         >

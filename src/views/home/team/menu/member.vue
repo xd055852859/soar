@@ -14,14 +14,16 @@ const {
   teamInfo,
   teamKey,
 } = storeToRefs(appStore.teamStore);
+const { user } = storeToRefs(appStore.authStore);
 const { spaceMemberList, spaceRole } = storeToRefs(appStore.spaceStore);
 const $q = useQuasar();
 const props = defineProps<{
   type: string;
+  spaceType?: boolean;
 }>();
 const memberTeamKey = ref<string>("");
 const memberList = ref<any>([]);
-const memberTeamKeyInfo = ref<any>([]);
+const memberTeamInfo = ref<any>(null);
 const searchMemberList = ref<any>([]);
 const searchName = ref<string>("");
 const chooseKey = ref<string>("");
@@ -31,12 +33,12 @@ const addMember = async (index) => {
   const memberRes = (await api.request.post("projectMember", {
     projectKey: memberTeamKey.value,
     memberKey: list[index].userKey,
-    role: memberTeamKeyInfo.value?.defaultRole,
+    role: memberTeamInfo.value?.defaultRole,
   })) as ResultProps;
   if (memberRes.msg === "OK") {
     setMessage("success", "添加协作者成功");
     let list = _.cloneDeep(searchMemberList.value);
-    list[index].role = memberTeamKeyInfo.value?.defaultRole;
+    list[index].role = memberTeamInfo.value?.defaultRole;
     memberList.value.push(list[index]);
     // list.splice(index, 1);
     // searchMemberList.value = [...list];
@@ -75,42 +77,38 @@ watch(
   [searchName, memberList],
   ([newName, newList]) => {
     console.log(newList);
-    let memberList: any = [];
+    let list: any = [];
     spaceMemberList.value.forEach((spaceItem) => {
       if (
         newList.findIndex((item) => item.userKey === spaceItem.userKey) === -1
       ) {
-        memberList.push(spaceItem);
+        list.push(spaceItem);
       }
     });
     if (newName) {
       // let list = _.cloneDeep(searchMemberList);
-      memberList = memberList.filter((item) => {
+      list = list.filter((item) => {
         return item.userName && item.userName.indexOf(newName) !== -1;
       });
     }
-    searchMemberList.value = memberList;
+    searchMemberList.value = list;
   },
   { immediate: true, deep: true }
 );
-watch(
-  () => props.type,
-  (newType) => {
-    if (newType === "target") {
-      memberTeamKey.value = targetTeamKey.value;
-      memberTeamKeyInfo.value = targetTeamInfo.value;
-      memberList.value = targetTeamMemberList.value;
-    } else {
-      memberTeamKey.value = teamKey.value;
-      memberTeamKeyInfo.value = teamInfo.value;
-      memberList.value = teamMemberList.value;
-    }
-  },
-  { immediate: true }
-);
+watchEffect(() => {
+  if (props.type === "target") {
+    memberTeamKey.value = targetTeamKey.value;
+    memberTeamInfo.value = targetTeamInfo.value;
+    memberList.value = targetTeamMemberList.value;
+  } else {
+    memberTeamKey.value = teamKey.value;
+    memberTeamInfo.value = teamInfo.value;
+    memberList.value = teamMemberList.value;
+  }
+});
 </script>
 <template>
-  <div class="member" v-if="memberList.length > 0">
+  <div class="member" v-if="memberList.length > 0 && memberTeamInfo">
     <div class="member-title">已添加的协作者</div>
     <div
       class="member-item"
@@ -129,10 +127,21 @@ watch(
         <div class="member-item-nickName">{{ item.userName }}</div>
       </div>
       <div class="member-item-role icon-point">
-        <q-btn flat :label="ROLE_OPTIONS[item.role].label" color="grey-9" />
-        <q-menu class="q-pa-sm" v-if="spaceRole < item.role">
+        <q-btn flat :label="ROLE_OPTIONS[item.role]?.label" color="grey-9" />
+        <q-menu
+          class="q-pa-sm"
+          v-if="
+            ((memberTeamInfo?.role < item.role && memberTeamInfo?.role < 1) ||
+              spaceRole) &&
+            item.userKey !== user?._key
+          "
+        >
           <q-list dense>
             <q-item
+              v-if="
+                !spaceType ||
+                (memberTeamInfo?.role < item.role && memberTeamInfo?.role < 1)
+              "
               clickable
               v-close-popup
               v-for="(item, index) in ROLE_OPTIONS.slice(
@@ -142,9 +151,7 @@ watch(
               :key="`role${index}`"
               @click="changeRole(item.value, memberIndex)"
             >
-              <q-item-section>{{
-                item.label
-              }}</q-item-section>
+              <q-item-section>{{ item.label }}</q-item-section>
             </q-item>
             <q-separator />
             <q-item
@@ -153,9 +160,7 @@ watch(
               @click="deleteMember(memberIndex)"
               class="q-mt-sm"
             >
-              <q-item-section class="text-weight-thin"
-                >删除</q-item-section
-              >
+              <q-item-section class="text-weight-thin">删除</q-item-section>
             </q-item>
           </q-list>
         </q-menu>
@@ -173,7 +178,7 @@ watch(
       </template>
     </q-input>
     <div class="member-title">空间成员</div>
-    <template v-if="searchMemberList.length > 0">
+    <template v-if="searchMemberList.length > 0 && memberTeamInfo">
       <div
         v-for="(item, index) in searchMemberList"
         class="member-item"

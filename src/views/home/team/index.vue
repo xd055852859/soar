@@ -56,7 +56,7 @@ const noteDialog = ref<boolean>(false);
         </q-menu>
       </q-btn>
     </div>
-    <div class="team-box"><TeamKnowledgeBase /></div>
+    <div class="team-box"><router-view></router-view></div>
     <Detail
       type="team"
       :visible="updateVisible"

@@ -11,8 +11,8 @@ import Icon from "@/components/common/Icon.vue";
 const { user } = storeToRefs(appStore.authStore);
 const { spaceMemberList, spaceKey } = storeToRefs(appStore.spaceStore);
 const props = defineProps<{
-  targetKey: string;
-  targetTag: string;
+  targetKey?: string;
+  targetTag?: string;
 }>();
 const boardList = ref<any>([]);
 const relationType = ref<number>(1);

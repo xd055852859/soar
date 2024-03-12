@@ -20,7 +20,12 @@ export const commonStore = defineStore("commonStore", () => {
   const iframeInfo = ref<any>(null);
   const overKey = ref<string>("");
   const closeNum = ref<number>(-1);
+  const showState = ref<boolean>(false);
   const searchVisible = ref<boolean>(false);
+  const searchKey = ref<string | undefined>("");
+  const clockVisible = ref<boolean>(true);
+  const clockMessageVisible = ref<boolean>(false);
+  let searchCallBack: any = null;
   const setDeviceType = (newDeviceType: string) => {
     deviceType.value = newDeviceType;
     if (deviceWidth.value < 400) {
@@ -70,8 +75,12 @@ export const commonStore = defineStore("commonStore", () => {
     iframeVisible.value = visible;
     iframeInfo.value = info;
   };
-  const setSearchVisible = (visible) => {
+  const setSearchVisible = (visible, callback?: any) => {
     searchVisible.value = visible;
+    searchCallBack = callback;
+  };
+  const setShowState = (state: boolean) => {
+    showState.value = state;
   };
   const chooseSearch = (searchType, searchInfo) => {
     switch (searchType) {
@@ -90,6 +99,11 @@ export const commonStore = defineStore("commonStore", () => {
           title: searchInfo.title,
         };
         break;
+    }
+  };
+  const doSearch = (node) => {
+    if (searchCallBack) {
+      searchCallBack(node);
     }
   };
   const clearStore = () => {
@@ -120,7 +134,10 @@ export const commonStore = defineStore("commonStore", () => {
     searchVisible,
     setSearchVisible,
     chooseSearch,
+    doSearch,
     overKey,
     setOverKey,
+    showState,
+    setShowState,
   };
 });

@@ -7,6 +7,7 @@ import { SpaceMember } from "@/interface/Space";
 import _ from "lodash";
 import api from "@/services/api";
 import { setMessage } from "@/services/util/common";
+
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
@@ -50,6 +51,7 @@ const columns: any = [
     label: "资源",
     field: "cardNum",
   },
+
   {
     name: "updateTime",
     align: "center",
@@ -90,9 +92,9 @@ const deleteTeam = (groupKey) => {
       if (groupRes.msg === "OK") {
         let list = _.cloneDeep(teamList.value);
         setMessage("success", "删除群组成功");
-        let groupIndex = _.findIndex(groupList.value, { userKey: groupKey });
+        let groupIndex = _.findIndex(groupList.value, { _key: groupKey });
         groupIndex !== -1 && groupList.value.splice(groupIndex, 1);
-        let index = _.findIndex(list, { userKey: groupKey });
+        let index = _.findIndex(list, { _key: groupKey });
         index !== -1 && list.splice(groupIndex, 1);
         setTeamList(list);
       }
@@ -116,7 +118,7 @@ watch(
       });
       creatorArray.value.unshift({
         value: "",
-        label: "所有成员",
+        label: "所有管理员",
       });
     }
   },
@@ -180,8 +182,9 @@ watch(
               {{ props.row.memberCount }}
             </q-td>
             <q-td key="cardNum" :props="props" style="width: 80px">
-              {{ props.row.cardNum }}
+              {{ props.row.cardNum - 1 }}
             </q-td>
+
             <q-td key="updateTime" :props="props" style="width: 100px">
               {{ dayjs(props.row.updateTime).format("YYYY-MM-DD HH:mm") }}
             </q-td>
@@ -200,7 +203,7 @@ watch(
                 label="移除"
                 color="grey-5"
                 @click="deleteTeam(props.row._key)"
-                v-if="spaceRole === 1"
+                v-if="spaceRole < 2"
               />
             </q-td>
           </q-tr>
@@ -209,12 +212,18 @@ watch(
     </div>
     <cDialog
       :visible="memberVisible"
-      @close="memberVisible = false"
+      @close="
+        memberVisible = false;
+        setTargetTeamKey('');
+      "
       title="成员"
       :dialogStyle="{ width: '700px', maxWidth: '80vw' }"
     >
-      <template #content
-        ><Member v-if="targetTeamMemberList.length > 0" type="target"
+      <template #content>
+        <Member
+          v-if="targetTeamMemberList.length > 0"
+          type="target"
+          :spaceType="true"
       /></template>
     </cDialog>
   </div>

@@ -6,7 +6,7 @@
       @drop="handleDrop"
       @paste="handlePaste"
     >
-      <span class="text">Crtl+V或将文件拖至此处</span>
+      <span class="text">Ctrl+V或将文件拖至此处</span>
       <div class="file-wrapper">
         <q-btn color="primary" size="sm" label="上传" />
         <input accept="*" type="file" @change="handleFileChange" />

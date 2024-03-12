@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import request from "@/services/api";
+import cDialog from "@/components/common/cDialog.vue";
+import cIframe from "@/components/common/cIframe.vue";
+import Search from "@/components/search/search.vue";
+import Icon from "@/components/common/Icon.vue";
 import { storeToRefs } from "pinia";
 import router from "@/router";
 import appStore from "@/store";
 import api from "@/services/api";
 import _ from "lodash";
 import { formatDocUrl, getSearchParamValue } from "./services/util/url";
+import { setMessage } from "./services/util/common";
 const dayjs: any = inject("dayjs");
 const socket: any = inject("socket");
 const { token } = storeToRefs(appStore.authStore);
@@ -14,15 +19,22 @@ const {
   musicNum,
   deviceWidth,
   deviceHeight,
-  deviceSize,
-  deviceFontSize,
+  iframeInfo,
+  iframeVisible,
+  searchVisible,
 } = storeToRefs(appStore.commonStore);
 const { setCardVisible, setCardKey } = appStore.cardStore;
 const { setToken, getUserInfo } = appStore.authStore;
 const { setSpaceKey } = appStore.spaceStore;
 const { setTeamKey } = appStore.teamStore;
-const { setDeviceInfo, setDeviceType, setClose, setIframeVisible } =
-  appStore.commonStore;
+
+const {
+  setDeviceInfo,
+  setDeviceType,
+  setSearchVisible,
+  setClose,
+  setIframeVisible,
+} = appStore.commonStore;
 const musicRef = ref<any>(null);
 onMounted(() => {
   changeDevice();
@@ -64,6 +76,16 @@ onMounted(() => {
     router.replace("/");
   }
 });
+onUnmounted(() => {
+  // 检测设备方向
+  window.removeEventListener(
+    "orientationchange",
+    _.debounce(changeDevice, 100)
+  );
+  // // 检测设备方向
+  window.removeEventListener("resize", changeDevice);
+  window.removeEventListener("message", getMessage);
+});
 const changeDevice = () => {
   setDeviceInfo(
     document.documentElement.offsetWidth,
@@ -90,24 +112,21 @@ const changeDevice = () => {
   }
 };
 const getMessage = (e) => {
-  if (typeof e.data === "string") {
-    const messageData = JSON.parse(e.data);
+  if (e.data && !e.data.source) {
+    const messageData =
+      typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+    console.log(messageData);
     switch (messageData.eventName) {
       case "showFile":
-        setCardKey(messageData.data._key);
-        setCardVisible(true, "file");
-        break;
       case "showDoc":
-        setCardKey(messageData.data._key);
-        setCardVisible(true, "doc");
-        break;
       case "showTree":
-        setCardKey(messageData.data._key);
-        setCardVisible(true, "tasktree");
+        setIframeVisible(true, {
+          url: `https://soar.cn/base/#/login?token=${token}&redirectPath=node/${messageData._key}`,
+          title: messageData.title,
+        });
         break;
       case "showTask":
-        setCardKey("");
-        setIframeVisible(true, messageData.data);
+        router.push(`/home/taskBoard`);
         break;
     }
   }
@@ -136,6 +155,34 @@ watch([musicSrc, musicNum], ([newSrc, newNum]) => {
 
 <template>
   <router-view></router-view>
+  <c-dialog
+    :visible="searchVisible"
+    title="搜索文件"
+    @close="setSearchVisible(false)"
+    :dialogStyle="{ width: '550px' }"
+  >
+    <template #content>
+      <Search />
+    </template>
+  </c-dialog>
+
+  <Teleport to="body">
+    <div class="card-fullDialog" v-if="iframeVisible">
+      <q-btn
+        round
+        color="primary"
+        icon="close"
+        size="16px"
+        class="card-back"
+        @click="setIframeVisible(false, null)"
+      />
+      <!-- <TaskBoard
+        :targetKey="iframeInfo.userKey"
+        :targetTag="iframeInfo.planTag"
+      /> -->
+      <c-iframe :url="iframeInfo.url" :title="iframeInfo.title" />
+    </div>
+  </Teleport>
 </template>
 
 <style lang="scss">
@@ -143,6 +190,23 @@ watch([musicSrc, musicNum], ([newSrc, newNum]) => {
 //   width: 4px;
 //   height: 2px;
 // }
+.card-fullDialog {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  z-index: 9999;
+  top: 0px;
+  left: 0px;
+  background-color: #fff;
+  @include scroll();
+
+  .card-back {
+    position: absolute;
+    z-index: 20;
+    top: 5px;
+    right: 10px;
+  }
+}
 
 *::-webkit-scrollbar-thumb {
   border-radius: 100px;
@@ -155,11 +219,13 @@ watch([musicSrc, musicNum], ([newSrc, newNum]) => {
   /*高宽分别对应横竖滚动条的尺寸*/
   height: 8px;
 }
+
 ::-webkit-scrollbar-track {
   /*滚动条里面轨道*/
   box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.2);
   background: "#474747";
 }
+
 ::-webkit-scrollbar-thumb {
   /*滚动条里面小方块*/
   border-radius: 2px;

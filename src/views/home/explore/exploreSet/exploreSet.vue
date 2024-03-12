@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ResultProps } from "@/interface/Common";
 import api from "@/services/api";
+import Icon from "@/components/common/Icon.vue";
+import { searchArray } from "@/services/config/config";
 import { commonscroll } from "@/services/util/common";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
@@ -21,6 +23,7 @@ const config = reactive({
   fontOpacity: 70,
   backImg: "",
   backColor: "",
+  search: { label: "百度", url: "https://www.baidu.com/s?ie=utf-8&word=" },
 });
 const backImgVisible = ref<boolean>(false);
 const backImgList = ref<any>([]);
@@ -51,6 +54,7 @@ onMounted(() => {
   config.fontWeight = exploreConfig.value.fontWeight;
   config.fontOpacity = exploreConfig.value.fontOpacity;
   config.fontPoint = exploreConfig.value.fontPoint;
+  config.search = exploreConfig.value.search;
 });
 const getImg = async () => {
   let imgRes = (await api.request.get(
@@ -97,6 +101,7 @@ watchEffect(() => {
   <div class="explore-set">
     <q-list class="rounded-borders">
       <q-expansion-item
+        group="set"
         expand-separator
         label="背景"
         default-opened
@@ -208,6 +213,7 @@ watchEffect(() => {
         </q-list>
       </q-expansion-item>
       <q-expansion-item
+        group="set"
         expand-separator
         label="时间"
         header-class="text-bold text-subtitle1"
@@ -220,6 +226,7 @@ watchEffect(() => {
         </q-item>
       </q-expansion-item>
       <q-expansion-item
+        group="set"
         expand-separator
         label="文字"
         header-class="text-bold text-subtitle1"
@@ -239,6 +246,7 @@ watchEffect(() => {
         </q-list>
       </q-expansion-item>
       <q-expansion-item
+        group="set"
         expand-separator
         label="图标"
         header-class="text-bold text-subtitle1"
@@ -290,6 +298,26 @@ watchEffect(() => {
           </q-item>
         </q-list>
       </q-expansion-item>
+      <q-expansion-item
+        group="set"
+        expand-separator
+        label="搜索引擎"
+        header-class="text-bold text-subtitle1"
+      >
+        <q-list class="rounded-borders">
+          <q-item
+            clickable
+            v-for="(item, index) in searchArray"
+            :key="`search${index}`"
+            @click="config.search = item"
+          >
+            <q-item-section class="text-body2">{{ item.label }}</q-item-section>
+            <q-item-section side v-if="config.search?.url === item.url">
+              <Icon name="taskList" :size="25" color="#07be51" />
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-expansion-item>
     </q-list>
   </div>
 </template>
@@ -318,7 +346,7 @@ watchEffect(() => {
   }
   .bg-container {
     width: 100%;
-    height: calc(100vh - 270px);
+    height: calc(100vh - 360px);
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;

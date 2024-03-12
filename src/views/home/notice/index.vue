@@ -35,6 +35,9 @@ const operateNotice = async (key, operate) => {
     operate: operate,
   })) as ResultProps;
   if (noticeRes.msg === "OK") {
+    if (noticeRes.data) {
+      setSpaceMessageNum(noticeRes.data);
+    }
     setMessage("success", `已${operate === "agree" ? "通过" : "驳回"}申请`);
     getNoticeList();
   }
@@ -45,6 +48,7 @@ const readAll = async () => {
   })) as ResultProps;
   if (noticeRes.msg === "OK") {
     setSpaceMessageNum(noticeRes.data);
+
     if (page.value !== 1) {
       page.value === 1;
     } else {
@@ -53,7 +57,9 @@ const readAll = async () => {
   }
 };
 watchEffect(() => {
-  getNoticeList();
+  if (spaceKey.value) {
+    getNoticeList();
+  }
 });
 </script>
 <template>

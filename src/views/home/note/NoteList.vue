@@ -77,11 +77,18 @@
         @click="selectedNoteKey = card._key"
       />
     </div>
-    <q-dialog v-if="draggable" v-model="detailDialog">
-      <q-card style="width: 80%; height: 80%; max-width: 1200px">
+
+    <c-dialog
+      :visible="detailDialog"
+      title="文件详情"
+      @close="detailDialog = false"
+      :dialogStyle="{ width: '80%', height: '80%', maxWidth: '1200px' }"
+      class="dialog-opacity"
+    >
+      <template #content>
         <NoteEditor />
-      </q-card>
-    </q-dialog>
+      </template>
+    </c-dialog>
   </div>
 </template>
 <script setup lang="ts">
@@ -92,6 +99,7 @@ import Card from "@/components/note/Card.vue";
 import NoteEditor from "@/views/home/note/NoteEditor.vue";
 import FileUploader from "./FileUploader.vue";
 import Icon from "@/components/common/Icon.vue";
+import cDialog from "@/components/common/cDialog.vue";
 const { createNote, removeNote } = appStore.noteStore;
 
 const props = defineProps<{
@@ -156,13 +164,14 @@ onUnmounted(() => {
 });
 
 watch(note, (newVal, oldVal) => {
-  if (newVal && !oldVal) {
+  if (newVal && !oldVal && props.draggable) {
     detailDialog.value = true;
   }
 });
 
 watch(detailDialog, (newVal, oldVal) => {
   if (!newVal) {
+    selectedNoteKey.value = "";
     clearNoteDetail();
   }
 });

@@ -4,7 +4,7 @@ import { OnClickOutside } from "@vueuse/components";
 import Icon from "./Icon.vue";
 import appStore from "@/store";
 import Left from "@/views/home/left/left.vue";
-const { closeNum } = storeToRefs(appStore.commonStore);
+const { closeNum, showState } = storeToRefs(appStore.commonStore);
 
 const { setClose } = appStore.commonStore;
 const leftVisible = ref<boolean>(false);
@@ -19,9 +19,19 @@ const props = defineProps<{
 const emits = defineEmits<{
   (e: "backOther"): void;
 }>();
+watch(showState, (newState) => {
+  if (!newState) {
+    leftVisible.value = false;
+  }
+});
+// watch(closeNum, (newNum) => {
+//   if (newNum === 1) {
+//     showState.value = false;
+//   }
+// });
 </script>
 <template>
-  <div className="header" @click="leftVisible ? (leftVisible = false) : null">
+  <div className="header">
     <div
       v-if="backPath || isBackOther"
       @click="
@@ -45,17 +55,16 @@ const emits = defineEmits<{
           leftVisible = false;
         "
         ref="buttonRef"
-        v-if="leftVisible"
+        v-if="leftVisible && showState"
       >
-        <Icon name="a-zhankai2" :size="36" />
+        <Icon name="danchu" :size="15" />
       </q-btn>
+      <!-- @mouseenter="showState ? (leftVisible = true) : null" -->
       <q-btn
         flat
         round
         class="left-arrow-button"
-        @mouseenter="
-          closeNum === 0 || closeNum === -2 ? (leftVisible = true) : null
-        "
+        @mouseenter="showState && closeNum !== 1 ? (leftVisible = true) : null"
         v-else
       >
         <Icon name="a-xuanfuhou2" :size="14" />
@@ -77,7 +86,7 @@ const emits = defineEmits<{
   > -->
   <!--         @mouseleave="leftVisible = false" -->
   <q-dialog v-model="leftVisible" position="left" class="dialog-transparent">
-    <q-card class="left-dialog" >
+    <q-card class="left-dialog">
       <!-- <div class="left-dialog"> -->
       <Left />
       <!-- </div> -->

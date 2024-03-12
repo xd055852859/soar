@@ -14,14 +14,14 @@ import { ResultProps } from "@/interface/Common";
 import { useQuasar } from "quasar";
 
 import { setMessage } from "@/services/util/common";
+import router from "@/router";
 const $q = useQuasar();
 const { token } = storeToRefs(appStore.authStore);
 const { exploreConfig } = storeToRefs(appStore.exploreStore);
 const { spaceKey, lockList } = storeToRefs(appStore.spaceStore);
 const { setLockList } = appStore.spaceStore;
-const exploreUrl = ref<string>("");
-const exploreTitle = ref<string>("");
-const exploreState = ref<boolean>(false);
+const { clickExplore } = appStore.exploreStore;
+
 const searchTitle = ref<string>("");
 const smallList = ref<any>([]);
 const bigList = ref<any>([]);
@@ -39,7 +39,7 @@ const urlTypeArr = ["https://", "http://"];
 const setVisible = ref<boolean>(false);
 
 const chooseSearch = (e) => {
-  window.open(searchTitle.value);
+  window.open(exploreConfig.value.search.url + searchTitle.value);
 };
 const getApplicationList = async () => {
   let applicationRes = (await api.request.get("app/user", {
@@ -63,18 +63,7 @@ const getApplicationList = async () => {
     urlList.value = applicationRes.data.list2;
   }
 };
-const clickExplore = (type, url?: string) => {
-  switch (type) {
-    case "report":
-      iframeVisible.value = true;
-      iframeUrl.value = `https://hb.qingtime.cn/?token=${token.value}&teamKey=${spaceKey.value}`;
-      iframeTitle.value = "汇报";
-      break;
-    case "url":
-      window.open(url);
-      break;
-  }
-};
+
 const changeSize = async (type, index, key) => {
   let applicationRes = (await api.request.patch("app/user/config", {
     teamKey: spaceKey.value,
@@ -136,6 +125,7 @@ const chooseUrl = (item) => {
 const addUrl = async () => {
   if (!url.value) {
     setMessage("error", "请输入网址");
+    return;
   }
   if (urlKey.value) {
     let urlRes = (await api.request.patch("app/custom", {
@@ -169,7 +159,11 @@ const addUrl = async () => {
     if (urlIconRes.msg === "OK") {
       let urlRes = (await api.request.post("app/custom", {
         teamKey: spaceKey.value,
-        name: urlName.value ? urlName.value : urlIconRes.data.title,
+        name: urlName.value
+          ? urlName.value
+          : urlIconRes.data.title === "302 Found"
+          ? "未命名"
+          : urlIconRes.data.title,
         url: urlType.value + url.value,
         icon: urlIconRes.data.icon,
       })) as ResultProps;
@@ -256,7 +250,6 @@ watch(urlVisible, (newVisible) => {
             rounded
             v-model="searchTitle"
             placeholder="输入与搜索"
-            @blur="chooseSearch"
             @keyup.enter="chooseSearch"
           >
             <template v-slot:prepend>
@@ -422,7 +415,7 @@ watch(urlVisible, (newVisible) => {
                 >设置第三方</q-item-section
               >
             </q-item>
-            <q-item clickable v-close-popup @click="">
+            <q-item clickable v-close-popup @click="setVisible = true">
               <q-item-section clickable v-close-popup>设置</q-item-section>
             </q-item>
           </q-list>
@@ -540,8 +533,8 @@ watch(urlVisible, (newVisible) => {
         margin: 10px 0px;
       }
       .explore-container {
-        max-width: 90%;
-        width: 950px;
+        width: 80%;
+        min-width: 700px;
         height: calc(100% - 200px);
         margin: 10px 0px;
         @include flex(space-between, center, center);
