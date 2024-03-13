@@ -92,7 +92,7 @@ import appStore from "@/store";
 import Card from "@/components/note/Card.vue";
 import NoteEditor from "@/views/home/note/NoteEditor.vue";
 import FileUploader from "./FileUploader.vue";
-const { createNote, removeNote } = appStore.noteStore;
+const { createNote, removeNote, editNote } = appStore.noteStore;
 
 const props = defineProps<{
   draggable?: boolean;
@@ -104,9 +104,8 @@ const emit = defineEmits<{
 }>();
 
 const { user } = storeToRefs(appStore.authStore);
-const { notes } = storeToRefs(appStore.noteStore);
+const { notes, note, nextNoteKey } = storeToRefs(appStore.noteStore);
 const { getNotes, getNoteDetail, clearNoteDetail } = appStore.noteStore;
-const { note } = storeToRefs(appStore.noteStore);
 const selectedNoteKey = ref("");
 const detailDialog = ref(false);
 const model = ref({ value: null, label: "全部" });
@@ -134,6 +133,10 @@ watch(notes, (newVal, oldVal) => {
   }
 });
 
+watch(nextNoteKey, (newVal) => {
+  selectedNoteKey.value = newVal;
+});
+
 watchEffect(() => {
   if (user) {
     getNotes({
@@ -148,7 +151,9 @@ watchEffect(() => {
 
 watch(selectedNoteKey, (newVal) => {
   clearNoteDetail();
-  getNoteDetail(newVal);
+  if (newVal) {
+    getNoteDetail(newVal);
+  }
 });
 
 onUnmounted(() => {
@@ -288,6 +293,9 @@ const handleCreateNote = (
 const handleMessage = (e: any) => {
   if (e.data.eventName === "drag2base") {
     removeNote(e.data.data);
+  }
+  if (e.data.eventName === "changeName" && selectedNoteKey.value) {
+    editNote({ noteKey: selectedNoteKey.value, title: e.data.data });
   }
 };
 
