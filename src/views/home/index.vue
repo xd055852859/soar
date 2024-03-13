@@ -140,6 +140,9 @@ const getTodayCheckIn = async (key) => {
 };
 
 onUnmounted(() => {
+  if(closeMessage.value){
+    closeMessage.value();
+  }
   // 在组件销毁前取消观察
   if (observer) {
     observer.disconnect();

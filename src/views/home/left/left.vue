@@ -320,6 +320,9 @@ watch(
     >
       <q-btn flat round>
         <Icon :name="item.icon" :size="20" />
+        <q-tooltip>
+          {{ item.name }}
+        </q-tooltip>
       </q-btn>
     </div>
   </div>
