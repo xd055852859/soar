@@ -6,7 +6,9 @@
       @drop="handleDrop"
       @paste="handlePaste"
     >
-      <span class="text">Ctrl+V或将文件拖至此处</span>
+      <span class="text">{{
+        `${isMac ? "Command" : "Ctrl"}+V或将文件拖至此处`
+      }}</span>
       <div class="file-wrapper">
         <q-btn color="primary" size="sm" label="上传" />
         <input accept="*" type="file" @change="handleFileChange" />
@@ -22,6 +24,7 @@ import appStore from "@/store";
 import { stringify } from "querystring";
 const { createNote } = appStore.noteStore;
 const active = ref(false);
+const isMac = /macintosh|mac os x/i.test(navigator.userAgent);
 
 const handleFileChange = (event: any) => {
   const file = event.target.files[0];
