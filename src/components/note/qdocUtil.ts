@@ -22,7 +22,7 @@ export const getThirdAppUrl = (
   });
   const patchDataApi = JSON.stringify({
     url: `${API_URL}/note`,
-    params: { noteKey: nodeKey, title: name },
+    params: { noteKey: nodeKey },
     docDataName: nodeType === "draw" ? ["content", "name"] : "content",
   });
   const getUptokenApi = JSON.stringify({
