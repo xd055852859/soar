@@ -495,10 +495,13 @@ const handleDownload = (detail) => {
   }
   .teamFile-box-bottom {
     width: 100%;
-    height: 30px;
+    min-height: 30px;
     font-size: 12px;
     color: $grey-5;
     @include flex(space-between, center, null);
+    >div{
+      flex-wrap:wrap;
+    }
   }
 }
 .teamTaskTree-box-container {

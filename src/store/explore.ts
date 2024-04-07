@@ -77,6 +77,18 @@ export const exploreStore = defineStore(
             title: "打卡",
           });
           break;
+        case "ai":
+          commonStore().setIframeVisible(true, {
+            url: `https://soar.cn/chatbot?token=${authStore().token}`,
+            title: "AI",
+          });
+          break;
+        case "apiTable":
+          window.open(
+            `https://apitable.qingtime.cn?username=${authStore().user!._key}@gmail.com&credential=${authStore().user!._key}`
+          );
+
+          break;
         case "url":
           window.open(url);
           break;

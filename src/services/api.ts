@@ -5,7 +5,7 @@ import { commonStore } from "@/store/common";
 import { setLoading, setMessage } from "./util/common";
 import { JSONContent } from "@tiptap/vue-3";
 const AUTH_URL = import.meta.env.VITE_AUTH_URL;
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_BACK_URL;
 let token = localStorage.getItem("auth_token") || "";
 let loadNum = 0;
 axios.interceptors.request.use(
@@ -33,8 +33,8 @@ axios.interceptors.response.use(
     } else if (
       response.data.status !== 200 &&
       response.data.statusCode !== "200" &&
-      response.data.status !== 201 &&
-      response.data.statusCode !== "201"
+      response.data.status !== 202 &&
+      response.data.statusCode !== "202"
     ) {
       setMessage("error", response.data.msg);
     } else {

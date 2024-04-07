@@ -18,7 +18,13 @@ watch(
   (newInfo) => {
     console.log(newInfo);
     if (token.value && newInfo?.knowledgeBaseRoot) {
-      knowledgeBaseUrl.value = `https://soar.cn/base/#/login?token=${token.value}&redirectPath=${newInfo.knowledgeBaseRoot}`;
+      knowledgeBaseUrl.value = `${
+        import.meta.env.MODE === "development"
+          ? "https://soar.cn"
+          : location.origin
+      }/base/#/login?token=${token.value}&redirectPath=${
+        newInfo.knowledgeBaseRoot
+      }`;
     }
   },
   { immediate: true, deep: true }

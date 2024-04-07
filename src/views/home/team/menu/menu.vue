@@ -61,6 +61,31 @@ const outTeam = () => {
     })
     .onCancel(() => {});
 };
+const mergeTeam = (item) => {
+  $q.dialog({
+    title: "合并群组",
+    message: `是否将群组 ${props.info.name} 合并到 ${item.name} `,
+    cancel: {
+      color: "grey-5",
+      flat: true,
+    },
+  })
+    .onOk(async () => {
+      const teamRes = (await api.request.post("project/merge", {
+        projectKey: props.info._key,
+        targetProject: item._key,
+      })) as ResultProps;
+      if (teamRes.msg === "OK") {
+        let list = _.cloneDeep(teamList.value);
+        setMessage("success", "合并群组成功");
+        let index = _.findIndex(list, { _key: props.info._key });
+        index !== -1 && list.splice(index, 1);
+        setTeamList(list);
+        setTeamKey(item._key);
+      }
+    })
+    .onCancel(() => {});
+};
 const copyTeam = () => {
   $q.dialog({
     title: "克隆群组",
@@ -86,8 +111,25 @@ const copyTeam = () => {
 };
 </script>
 <template>
-  <q-item clickable v-close-popup @click="" v-if="info.role === 0">
-    <q-item-section class="common-title">合并到</q-item-section>
+  <q-item clickable @click="" v-if="info.role === 0">
+    <q-item-section class="common-title">合并到 </q-item-section>
+    <q-item-section side>
+      <q-icon name="keyboard_arrow_right" />
+    </q-item-section>
+    <q-menu anchor="top end" self="top start">
+      <q-list>
+        <template v-for="(item, index) in teamList" :key="`merge${index}`">
+          <q-item
+            v-if="item._key !== info._key"
+            clickable
+            @click="mergeTeam(item)"
+            v-close-popup
+          >
+            <q-item-section>{{ item.name }}</q-item-section>
+          </q-item>
+        </template>
+      </q-list>
+    </q-menu>
   </q-item>
   <q-item clickable v-close-popup @click="copyTeam()">
     <q-item-section class="common-title">克隆</q-item-section>

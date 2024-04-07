@@ -180,8 +180,8 @@ const changeState = async () => {
 
   .reset-button {
     width: 120px;
-    height: 55px;
-    font-size: 18px;
+    height: 40px;
+    font-size: 14px;
     outline: none;
     overflow: hidden;
     flex-shrink: 0;

@@ -50,16 +50,16 @@ const getApplicationList = async () => {
     console.log(applicationList.value);
   }
 };
-const addApplication = async () => {
-  let departmentRes = (await api.request.post("app", {
-    icon: "suji",
-    name: "速记",
-    enName: "note",
-    appType: "",
-  })) as ResultProps;
-  if (departmentRes.msg === "OK") {
-  }
-};
+// const addApplication = async () => {
+//   let departmentRes = (await api.request.post("app", {
+//     icon: "apiTable",
+//     name: "维格表",
+//     enName: "apiTable",
+//     appType: "",
+//   })) as ResultProps;
+//   if (departmentRes.msg === "OK") {
+//   }
+// };
 
 const updateApplication = async (value, key, application) => {
   let obj: any = { [key]: value };
@@ -124,16 +124,16 @@ watch(
           style="color: #1976d2"
           label="修改应用"
           @click="
-            updateApplicationAll('huibao', 'icon', {
-              _key: '1530700178',
+            updateApplicationAll('AI', 'name', {
+              _key: '1538755380',
             })
           "
-        /> -->
+        />-->
         <!-- <q-btn
           style="color: #1976d2"
           label="新增应用"
           @click="addApplication()"
-        /> -->
+        />  -->
       </template>
     </cHeader>
     <div class="application-container">

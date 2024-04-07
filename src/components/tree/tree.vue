@@ -127,6 +127,16 @@ const getTreeInfo = async (key) => {
   }
 };
 const showMenu = (node, el, type, other?: string) => {
+  nodes.value = treeRef.value.__veauryReactRef__.getNodeInfo()[1];
+  nodeKey.value = node._key;
+  nodeInfo.value = { ...nodes.value[node._key] };
+  console.log(nodeInfo.value);
+  menuVisible.value = false;
+  contentVisible.value = false;
+  executorVisible.value = false;
+  iconVisible.value = false;
+  tagVisible.value = false;
+  milestoneVisible.value = false;
   switch (type) {
     case "menu":
       menuVisible.value = true;
@@ -151,9 +161,6 @@ const showMenu = (node, el, type, other?: string) => {
       break;
   }
   targetEl.value = el;
-  nodes.value = treeRef.value.__veauryReactRef__.getNodeInfo()[1];
-  nodeKey.value = node._key;
-  nodeInfo.value = { ...nodes.value[node._key] };
 };
 const showDrawer = (key) => {
   drawerVisible.value = true;
@@ -690,6 +697,7 @@ const updateDetail = (type, obj) => {
         "endTime",
         endTime,
         async (newNodes) => {
+          console.log(endTime);
           newNodes[nodeKey.value].endTime = endTime;
           setAdornmentContent(nodeInfo.value, "startAdornmentContent", {
             milestone: {
@@ -698,6 +706,7 @@ const updateDetail = (type, obj) => {
               day: dayjs(obj.date).date(),
             },
           });
+          getmilestoneList(props.cardKey);
         },
         nodeKey.value
       );
@@ -709,9 +718,9 @@ const updateDetail = (type, obj) => {
           newNodes[nodeKey.value].content = obj.content;
           nodeInfo.value.content = obj.content;
           treeRef.value.__veauryReactRef__.setNodes(newNodes);
-          setAdornmentContent(nodeInfo.value, "endAdornmentContent", {
-            note: { content: obj.content },
-          });
+          // setAdornmentContent(nodeInfo.value, "endAdornmentContent", {
+          //   note: { content: obj.content },
+          // });
         },
         nodeKey.value
       );
@@ -726,7 +735,6 @@ const updateDetail = (type, obj) => {
       setAdornmentContent(nodeInfo.value, "endAdornmentContent", {
         file: {
           fileKey: obj.fileKey,
-          fileType: obj.fileType,
           fileName: obj.fileName,
         },
       });
@@ -781,6 +789,18 @@ const clearDetail = (type, key?: string) => {
         },
         selectKeys.value
       );
+      break;
+    case "relaters":
+      treeRef.value.__veauryReactRef__.updateNode(
+        "relaters",
+        [],
+        async (newNodes) => {
+          newNodes[nodeKey.value].relaters = [];
+          treeRef.value.__veauryReactRef__.setNodes(newNodes);
+        },
+        nodeKey.value
+      );
+      break;
       break;
   }
   // targetEl.value = null;
@@ -1104,13 +1124,12 @@ watch(contentVisible, (newVisible) => {
       @changeOutData="changeOutData"
     />
     <!-- 编辑器 -->
-    <q-menu
+    <!-- <q-menu
       :target="targetEl"
       v-model="contentVisible"
       anchor="bottom middle"
       self="top middle"
     >
-      <!-- <q-card-section style="font-size: 18px;font-weight: bold;">备注</q-card-section> -->
       <div class="node-editor">
         <span v-if="nodeInfo" class="node-save">{{
           changed ? "有变更" : "已保存"
@@ -1124,7 +1143,7 @@ watch(contentVisible, (newVisible) => {
           :handleSave="updateContent"
         />
       </div>
-    </q-menu>
+    </q-menu> -->
     <q-menu
       :target="targetEl"
       v-model="executorVisible"
@@ -1249,7 +1268,7 @@ watch(contentVisible, (newVisible) => {
       style="width: 290px"
     >
       <c-calendar
-        :endTime="nodeInfo.endTime"
+        :endTime="nodeInfo.startAdornmentContent.milestone.date"
         @clickDate="updateMilestones"
         @clearDate="clearDetail('milestone')"
       />
@@ -1345,6 +1364,7 @@ watch(contentVisible, (newVisible) => {
           :nodeInfo="nodeInfo"
           :showFile="showFile"
           @updateDetail="updateDetail"
+          @clearDetail="clearDetail"
           @close="drawerVisible = false"
           v-if="nodeKey"
         />

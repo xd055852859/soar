@@ -12,10 +12,14 @@ import Member from "./member.vue";
 import Detail from "./detail.vue";
 import Icon from "@/components/common/Icon.vue";
 import Menu from "./menu.vue";
+const props = defineProps<{
+  line: number;
+}>();
 
 const { targetTeamKey, teamKey, teamList, teamFoldList } = storeToRefs(
   appStore.teamStore
 );
+const { deviceHeight } = storeToRefs(appStore.commonStore);
 const { spaceRole } = storeToRefs(appStore.spaceStore);
 const { setTargetTeamKey, setTeamKey, setTeamList, setTeamFoldList } =
   appStore.teamStore;
@@ -26,6 +30,7 @@ const memberVisible = ref<boolean>(false);
 const searchList = ref<any>([]);
 const searchInput = ref<string>("");
 const searchVibisible = ref<boolean>(false);
+const lineHeight = ref<number>(0);
 const toggleTeam = async (item, visible) => {
   if (item) {
     detailState.value = true;
@@ -115,9 +120,17 @@ watchEffect(() => {
     searchList.value = [...teamList.value];
   }
 });
+watch(
+  () => props.line,
+  (newLine) => {
+    lineHeight.value = deviceHeight.value - newLine * 60 - 160;
+    console.log(lineHeight.value);
+  },
+  { immediate: true }
+);
 </script>
 <template>
-  <div class="teamMenu">
+  <div class="teamMenu" :style="{ height: lineHeight + 'px' }">
     <!-- <OnClickOutside @trigger="searchVibisible = false"> -->
     <div class="teamMenu-title">
       <div class="teamMenu-title-left">
@@ -158,12 +171,12 @@ watchEffect(() => {
         "
         :style="{
           borderLeft: `5px solid ${item.top?'#f44336':'transparent'}`,
-          background: teamKey === item._key&&$route.path!.indexOf('home/team')!==-1 ? '#e0e0e0' : '',
+          background: (teamKey === item._key||targetTeamKey === item._key)&&$route.path!.indexOf('home/team')!==-1 ? '#eee' : '',
         }"
       >
         <div>{{ item.name }}</div>
         <div class="teamMenu-item-icon" v-if="targetTeamKey === item._key">
-          <q-btn flat round size="9px" @click.stop="">
+          <q-btn flat round size="9px" @click.stop="targetTeamKey = item._key">
             <Icon name="gengduo" :size="18" />
             <q-menu anchor="top right" self="top left" class="q-pa-sm">
               <q-list dense>
@@ -267,10 +280,6 @@ watchEffect(() => {
 <style scoped lang="scss">
 .teamMenu {
   width: 100%;
-  // height: calc(100% - 320px);
-  flex: 1;
-  display: flex;
-  flex-direction: column;
   margin-top: 10px;
   .teamMenu-title {
     width: 100%;
@@ -297,7 +306,7 @@ watchEffect(() => {
     @include flex(space-between, center, null);
   }
   .teamMenu-list {
-    // height: calc(100% - 45px);
+    height: calc(100% - 45px);
     flex: 1;
     @include scroll();
   }

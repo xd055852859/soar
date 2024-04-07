@@ -16,6 +16,7 @@ import { useQuasar } from "quasar";
 import { setMessage } from "@/services/util/common";
 import router from "@/router";
 const $q = useQuasar();
+const dayjs: any = inject("dayjs");
 const { token } = storeToRefs(appStore.authStore);
 const { exploreConfig } = storeToRefs(appStore.exploreStore);
 const { spaceKey, lockList } = storeToRefs(appStore.spaceStore);
@@ -37,7 +38,7 @@ const urlVisible = ref<boolean>(false);
 const urlType = ref<string>("https://");
 const urlTypeArr = ["https://", "http://"];
 const setVisible = ref<boolean>(false);
-
+const bigListText = computed(() => bigList.value.map((item) => item.enName));
 const chooseSearch = (e) => {
   window.open(exploreConfig.value.search.url + searchTitle.value);
 };
@@ -63,7 +64,62 @@ const getApplicationList = async () => {
     urlList.value = applicationRes.data.list2;
   }
 };
-
+const getBigList = async (list) => {
+  let bigRes = (await api.request.post("app/trends", {
+    teamKey: spaceKey.value,
+    appArr: list,
+  })) as ResultProps;
+  if (bigRes.msg === "OK") {
+    let bigArray = bigRes.data;
+    bigListText.value.forEach((item, index) => {
+      let bigItem = bigList.value[index];
+      switch (item) {
+        case "clockIn":
+          bigItem.titleArr = [];
+          let clockIn = bigArray[index][0];
+          if (clockIn.startWorkTime) {
+            bigItem.titleArr.push(
+              `${dayjs(clockIn.startWorkTime).format("HH:mm")} 上班打卡`
+            );
+          } else if (clockIn.noonBreakTime) {
+            bigItem.titleArr.push(
+              `${dayjs(clockIn.noonBreakTime).format("HH:mm")} 午休打卡`
+            );
+          } else if (clockIn.noonEndTime) {
+            bigItem.titleArr.push(
+              `${dayjs(clockIn.noonEndTime).format("HH:mm")} 下午打卡`
+            );
+          } else if (clockIn.endWorkTime) {
+            bigItem.titleArr.push(
+              `${dayjs(clockIn.endWorkTime).format("HH:mm")} 下班打卡`
+            );
+          }
+          break;
+        case "report":
+          bigItem.titleArr = [];
+          bigRes.data[index].forEach((reportItem) => {
+            // year week momth total
+            bigItem.titleArr.push(
+              `${dayjs(reportItem.createTime).format("MM-DD HH:mm")} ${
+                reportItem.submitter.userName
+              } 提交${
+                reportItem.reportType === "day"
+                  ? "日"
+                  : reportItem.reportType === "week"
+                  ? "周"
+                  : reportItem.reportType === "month"
+                  ? "月"
+                  : reportItem.reportType === "year"
+                  ? "年"
+                  : "十年"
+              }汇报`
+            );
+          });
+          break;
+      }
+    });
+  }
+};
 const changeSize = async (type, index, key) => {
   let applicationRes = (await api.request.patch("app/user/config", {
     teamKey: spaceKey.value,
@@ -211,6 +267,11 @@ watch(urlVisible, (newVisible) => {
     chooseUrl(null);
   }
 });
+watch(bigListText, (newList) => {
+  if (spaceKey.value && newList.length > 0) {
+    getBigList(newList);
+  }
+});
 </script>
 <template>
   <div
@@ -260,16 +321,22 @@ watch(urlVisible, (newVisible) => {
         <div class="explore-container">
           <div class="explore-container-left" v-if="bigList.length > 0">
             <div
-              class="explore-left-item"
+              class="explore-left-item q-mb-sm"
               v-for="(item, index) in bigList"
-              :key="`small${index}`"
+              :key="`big${index}`"
+              @click="clickExplore(item.enName)"
             >
-              {{ item.name }}
+              <div class="text-bold">{{ item.name }}</div>
+              <div
+                v-for="(titleItem, titleIndex) in item.titleArr"
+                :key="`big${index}-${titleIndex}`"
+              >
+                {{ titleItem }}
+              </div>
               <Icon
                 class="explore-item-lock"
                 name="pin"
                 :size="14"
-                color="#fff"
                 v-if="item.locked"
               />
               <q-menu context-menu>
@@ -328,7 +395,6 @@ watch(urlVisible, (newVisible) => {
                     class="explore-item-lock"
                     name="pin"
                     :size="14"
-                    color="#fff"
                     v-if="item.locked"
                   />
                 </div>
@@ -341,6 +407,9 @@ watch(urlVisible, (newVisible) => {
                       clickable
                       v-close-popup
                       @click="changeSize('big', index, item._key)"
+                      v-if="
+                        item.enName === 'clockIn' || item.enName === 'report'
+                      "
                       ><q-item-section>2 * 4</q-item-section></q-item
                     >
                     <q-item
@@ -543,14 +612,20 @@ watch(urlVisible, (newVisible) => {
           height: 100%;
           margin-right: 10px;
           .explore-left-item {
-            // width: 350px;
-            // height: 100px;
-            // border-radius: 12px;
+            width: 350px;
+            height: 140px;
+            border-radius: 12px;
             background-color: #fff;
-            text-align: center;
-            line-height: 100px;
             position: relative;
             z-index: 1;
+            cursor: pointer;
+            @include p-number(10px, 10px);
+            @include scroll();
+            > div {
+              width: 100%;
+              height: 30px;
+              line-height: 30px;
+            }
             &:hover {
               .explore-item-lock {
                 @include flex(center, center, null);

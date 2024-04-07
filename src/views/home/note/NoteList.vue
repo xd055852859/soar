@@ -148,7 +148,9 @@ watchEffect(() => {
 
 watch(selectedNoteKey, (newVal) => {
   clearNoteDetail();
-  getNoteDetail(newVal);
+  if (newVal) {
+    getNoteDetail(newVal);
+  }
 });
 
 onUnmounted(() => {

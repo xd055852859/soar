@@ -788,7 +788,7 @@
 
 "@quasar/extras@^1.16.9":
   version "1.16.9"
-  resolved "https://registry.npmmirror.com/@quasar/extras/-/extras-1.16.9.tgz#6cdf9d34862e6f58009443a2d1e34b84a5e73ad0"
+  resolved "https://registry.npmjs.org/@quasar/extras/-/extras-1.16.9.tgz#6cdf9d34862e6f58009443a2d1e34b84a5e73ad0"
   integrity sha512-SlOhwzXyPQHWgQIS2ncyDdYdksCJvUYNtgsDQqzAKEG3r3d/ejOxvThle79HTK3Q6HB+gQWFG21Ux00Osr5XSw==
 
 "@quasar/vite-plugin@^1.6.0":

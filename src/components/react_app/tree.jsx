@@ -78,7 +78,6 @@ const CustomTree = React.forwardRef((props, ref) => {
     }
   };
   const formatNode = (node) => {
-
     if (node.startAdornmentContent) {
       node.startAdornment = getStartAdornment(
         node.startAdornmentContent,
@@ -116,10 +115,32 @@ const CustomTree = React.forwardRef((props, ref) => {
     }
     return node;
   };
-  const editNodeText = async (nodeId, text) => {
+  const editNodeText = async (nodeId, text, rootKey) => {
     setSelectedId(nodeId);
     if (text.trim() === "") {
       text = "新节点";
+    }
+
+    if (nodeId === rootKey) {
+      console.log(window.opener);
+      console.log(window.parent);
+      if (window.opener) {
+        window.opener.postMessage(
+          {
+            eventName: "changeName",
+            data: text,
+          },
+          "*"
+        );
+      } else if (window.parent) {
+        window.parent.postMessage(
+          {
+            eventName: "changeName",
+            data: text,
+          },
+          "*"
+        );
+      }
     }
     updateNode(
       "name",
@@ -127,6 +148,7 @@ const CustomTree = React.forwardRef((props, ref) => {
       (newNodes) => {
         newNodes[nodeId].name = text;
         setNodes(newNodes);
+        onChangePath(startId, rootKey, true);
       },
       nodeId
     );
@@ -573,7 +595,9 @@ const CustomTree = React.forwardRef((props, ref) => {
               chooseNode(selectedNode);
               onShowMenu(selectedNode, e, "executor");
             }}
-            handleChangeNodeText={editNodeText}
+            handleChangeNodeText={(nodeId, text) =>
+              editNodeText(nodeId, text, rootKey)
+            }
             handleClickDot={clickDot}
             handleCheck={editFinishPercent}
             handleClickExpand={editContract}

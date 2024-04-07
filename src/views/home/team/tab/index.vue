@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import appStore from "@/store";
+import cIframe from "@/components/common/cIframe.vue";
 import api from "@/services/api";
 import { storeToRefs } from "pinia";
 import FileCard from "@/components/fileCard/fileCard.vue";
 import { ResultProps } from "@/interface/Common";
+const { token } = storeToRefs(appStore.authStore);
 const { teamInfo, teamMemberList, teamKey } = storeToRefs(appStore.teamStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 
@@ -45,7 +47,9 @@ watchEffect(() => {
 
 <template>
   <div class="team-home" ref="homeRef">
-    <div class="team-home-left"></div>
+    <div class="team-home-left">
+      <!-- <c-iframe :url="`https://soar.cn/chatbot?token=${token}`" /> -->
+    </div>
     <div class="team-home-right" v-if="homeRef">
       <q-list>
         <q-expansion-item

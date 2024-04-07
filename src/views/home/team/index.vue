@@ -10,9 +10,9 @@ import { storeToRefs } from "pinia";
 import Member from "./menu/member.vue";
 import Icon from "@/components/common/Icon.vue";
 import TeamKnowledgeBase from "./tab/teamKnowledgeBase.vue";
-
+const { token } = storeToRefs(appStore.authStore);
 const { teamInfo } = storeToRefs(appStore.teamStore);
-const { setClose } = appStore.commonStore;
+const { setClose, setIframeVisible } = appStore.commonStore;
 const updateVisible = ref<boolean>(false);
 const memberVisible = ref<boolean>(false);
 const noteDialog = ref<boolean>(false);
@@ -37,6 +37,19 @@ const noteDialog = ref<boolean>(false);
       </q-btn>
     </div>
     <div class="team-button-right">
+      <q-btn
+        flat
+        round
+        @click="
+          setIframeVisible(true, {
+            url: `https://soar.cn/chatbot?token=${token}`,
+            title: 'AI',
+          })
+        "
+      >
+        <Icon name="ai-21" :size="22" />
+      </q-btn>
+
       <q-btn flat round @click="noteDialog = true">
         <Icon name="a-suji22" :size="22" />
       </q-btn>

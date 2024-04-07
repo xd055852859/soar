@@ -5,6 +5,7 @@ import FileCard from "@/components/fileCard/fileCard.vue";
 import { ResultProps } from "@/interface/Common";
 import api from "@/services/api";
 import appStore from "@/store";
+import _ from "lodash";
 import { storeToRefs } from "pinia";
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { token } = storeToRefs(appStore.authStore);
@@ -18,6 +19,12 @@ const sortArray = [
   { label: "最近更新", value: "update" },
   { label: "最近打开", value: "view" },
 ];
+onMounted(() => {
+  window.addEventListener("message", getMessage);
+});
+onUnmounted(() => {
+  window.removeEventListener("message", getMessage);
+});
 const getFileList = async () => {
   let fileRes = (await api.request.get("knowledgeBase/card", {
     teamKey: spaceKey.value,
@@ -59,11 +66,27 @@ const chooseCard = (detail, type) => {
     //   break;
   }
 };
+const getMessage = (e) => {
+  if (e.data && !e.data.source) {
+    console.log(e.data);
+    const messageData =
+      typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+    switch (messageData.eventName) {
+      case "changeName":
+        let index = _.findIndex(fileList.value, { _key: fileKey.value });
+        if (index !== -1) {
+          fileList.value[index].title = messageData.data;
+        }
+    }
+  }
+};
 watch(sortType, () => {
   page.value = 1;
 });
 watchEffect(() => {
-  getFileList();
+  if (spaceKey.value) {
+    getFileList();
+  }
 });
 watch(fileKey, (newKey) => {
   if (newKey) {
@@ -87,7 +110,7 @@ watch(fileKey, (newKey) => {
           />
         </template>
       </cHeader>
-      <div class="resource-left-box" >
+      <div class="resource-left-box">
         <template
           v-for="(fileItem, fileIndex) in fileList"
           :key="`fileItem${fileIndex}`"

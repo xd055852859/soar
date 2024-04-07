@@ -42,6 +42,13 @@ onMounted(() => {
 });
 onUnmounted(() => {
   window.removeEventListener("message", getMessage);
+  if (closeMessage.value) {
+    closeMessage.value();
+  }
+  // 在组件销毁前取消观察
+  if (observer) {
+    observer.disconnect();
+  }
   if (clockTimer.value) {
     clearInterval(clockTimer.value);
   }
@@ -81,6 +88,14 @@ const getTodayCheckIn = async (key) => {
     returnConfig: true,
   })) as ResultProps;
   if (checkInRes.msg === "OK") {
+    if (closeMessage.value) {
+      closeMessage.value();
+    }
+    if (clockTimer.value) {
+      clearInterval(clockTimer.value);
+    }
+    clockVisible.value = false;
+    clockMessageVisible.value= false;
     clockIn.value = checkInRes.data;
     //@ts-ignore
     clockConfig.value = checkInRes.config;
@@ -90,9 +105,9 @@ const getTodayCheckIn = async (key) => {
       clockType.value = 1;
     } else if (clockIn.value.noonEndTime === null) {
       clockType.value = 2;
-    } else if (clockIn.value.endWorkTime === null){
+    } else if (clockIn.value.endWorkTime === null) {
       clockType.value = 3;
-    }else{
+    } else {
       clockType.value = 4;
     }
     clockTimer.value = setInterval(() => {
@@ -138,16 +153,6 @@ const getTodayCheckIn = async (key) => {
     }, 1000);
   }
 };
-
-onUnmounted(() => {
-  if(closeMessage.value){
-    closeMessage.value();
-  }
-  // 在组件销毁前取消观察
-  if (observer) {
-    observer.disconnect();
-  }
-});
 watch(
   spaceKey,
   (newKey) => {
@@ -168,21 +173,22 @@ watch(clockVisible, (newVisible) => {
 watch(clockMessageVisible, (newVisible) => {
   if (newVisible) {
     closeMessage.value = $q.notify({
+      progress: true,
       icon: "warning",
       color: "warning",
       message: `即将可以${clockInText.value}`,
       position: "top-right",
       multiLine: true,
-      timeout: 880000,
-      // actions: [
-      //   {
-      //     label: "确认",
-      //     color: "yellow",
-      //     handler: () => {
-      //       clockMessageVisible.value=false;
-      //     },
-      //   },
-      // ],
+      timeout: 86400000,
+      actions: [
+        {
+          label: "确认",
+          color: "yellow",
+          handler: () => {
+            closeMessage.value();
+          },
+        },
+      ],
     });
   }
 });
@@ -237,7 +243,7 @@ watch(clockType, (newType) => {
         }}</q-badge>
         <Icon name="xiaoxi1" :size="20" />
       </q-btn>
-      <Left />
+      <Left/>
     </div>
     <div class="right">
       <router-view></router-view>
@@ -359,28 +365,28 @@ watch(clockType, (newType) => {
 @keyframes moveLeft {
   0% {
     left: 0px;
-    top: 0px;
-    height: 100vh;
+    /* top: 0px; */
+    /* height: 100vh; */
   }
 
   100% {
     left: -300px;
-    top: 100%;
-    height: 0px;
+    /* top: 100%; */
+    /* height: 0px; */
   }
 }
 
 @keyframes moveRight {
   0% {
     left: -300px;
-    top: 100%;
-    height: 0px;
+    /* top: 100%;
+    height: 0px; */
   }
 
   100% {
     left: 0px;
-    top: 0px;
-    height: 100vh;
+    /* top: 0px;
+    height: 100vh; */
   }
 }
 

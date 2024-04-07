@@ -241,12 +241,9 @@ watch(
       </q-btn>
     </div>
     <div class="left-button-item">
-      <q-btn
-        :flat="$route.name !== 'task'"
-        round
-        @click="$router.push('/home/task')"
-      >
+      <q-btn round flat @click="$router.push('/home/task')">
         <Icon
+          flat
           name="shoucang"
           :size="20"
           :color="$route.name === 'task' ? '#07be51' : '#333'"
@@ -255,11 +252,7 @@ watch(
       </q-btn>
     </div>
     <div class="left-button-item">
-      <q-btn
-        :flat="$route.name !== 'explore'"
-        round
-        @click="$router.push('/home/explore')"
-      >
+      <q-btn flat round @click="$router.push('/home/explore')">
         <Icon
           name="tongzhi"
           :size="20"
@@ -269,11 +262,7 @@ watch(
       </q-btn>
     </div>
     <div class="left-button-item">
-      <q-btn
-        :flat="$route.name !== 'resource'"
-        round
-        @click="$router.push('/home/resource')"
-      >
+      <q-btn flat round @click="$router.push('/home/resource')">
         <Icon
           name="zhuye"
           :size="20"
@@ -328,7 +317,7 @@ watch(
   </div>
   <div class="left-button-icon"></div>
   <q-separator />
-  <team />
+  <team :line="Math.ceil(lockList.length / 5)" />
   <cDialog
     :visible="cropperVisible"
     @close="cropperVisible = false"

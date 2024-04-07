@@ -2,16 +2,8 @@
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 
-const { spaceKey } = storeToRefs(appStore.spaceStore);
-const { getMateList } = appStore.mateStore;
-onMounted(() => {
-  if (spaceKey.value) {
-    getMateList(spaceKey.value);
-  }
-});
-watch(spaceKey, (newKey) => {
-  getMateList(newKey);
-});
+
+
 </script>
 <template>
   <div class="mate">

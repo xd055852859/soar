@@ -1,8 +1,13 @@
 <script setup lang="ts">
+import { setLoading } from "@/services/util/common";
+
 const props = defineProps<{
   title?: string;
   url: string;
 }>();
+onMounted(() => {
+  setLoading(true);
+});
 </script>
 <template>
   <div
@@ -13,14 +18,16 @@ const props = defineProps<{
       overflow: 'hidden',
     }"
   >
+    <!-- `${url}${url.includes('?') ? '&' : '?'}t=${new Date().getTime()}` -->
     <iframe
-      name="iframe-container"
+      id="iframe-container"
       class="web-view"
       :title="title"
-      :src="`${url}${url.includes('?') ? '&' : '?'}t=${new Date().getTime()}`"
+      :src="url"
       frameBorder="0"
       width="100%"
       height="100%"
+      @load="setLoading(false)"
       allow="clipboard-read; clipboard-write;fullscreen"
     ></iframe>
   </div>

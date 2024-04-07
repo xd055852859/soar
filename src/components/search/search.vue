@@ -18,30 +18,32 @@ const total = ref<number>(0);
 //文件筛选
 const searchFile = async () => {
   searchList.value = [];
-  if (fileType.value === "群组") {
-    searchList.value = [...teamList.value, ...teamFoldList.value].filter(
-      (item) => item.name.indexOf(fileInput.value) !== -1
-    );
-  } else {
-    let dataRes = (await api.request.get("knowledgeBase/search", {
-      teamKey: spaceKey.value,
-      projectKey: teamKey.value,
-      keyword: fileInput.value,
-      page: page.value,
-      limit: 30,
-      exclude: teamKey.value ? true : false,
-      // startTime: dayjs().subtract(90, "day").startOf("day").valueOf(),
-      // endTime: dayjs().valueOf(),
-    })) as ResultProps;
-    if (dataRes.msg === "OK") {
-      if (page.value === 1) {
-        searchList.value = [];
+  if (fileInput.value) {
+    if (fileType.value === "群组") {
+      searchList.value = [...teamList.value, ...teamFoldList.value].filter(
+        (item) => item.name.indexOf(fileInput.value) !== -1
+      );
+    } else {
+      let dataRes = (await api.request.get("knowledgeBase/search", {
+        teamKey: spaceKey.value,
+        projectKey: teamKey.value,
+        keyword: fileInput.value,
+        page: page.value,
+        limit: 30,
+        exclude: teamKey.value ? true : false,
+        // startTime: dayjs().subtract(90, "day").startOf("day").valueOf(),
+        // endTime: dayjs().valueOf(),
+      })) as ResultProps;
+      if (dataRes.msg === "OK") {
+        if (page.value === 1) {
+          searchList.value = [];
+        }
+        dataRes.data.forEach((item) => {
+          item.icon = typeIcon[item.type];
+        });
+        searchList.value = [...searchList.value, ...dataRes.data];
+        total.value = dataRes.total!;
       }
-      dataRes.data.forEach((item) => {
-        item.icon = typeIcon[item.type];
-      });
-      searchList.value = [...searchList.value, ...dataRes.data];
-      total.value = dataRes.total!;
     }
   }
 };
@@ -54,7 +56,7 @@ watch(fileType, (newType) => {
   if (newType === "文件") {
     page.value = 1;
   }
-  searchFile();
+  searchList.value = [];
 });
 watch(page, () => {
   searchFile();
@@ -105,7 +107,7 @@ watch(page, () => {
             <q-item-section>
               <div class="dp--center">
                 <Icon
-                  :icon="item.icon"
+                  :icon="fileType === '文件' ? item.icon : 'fluent-mdl2:group'"
                   width="22"
                   height="22"
                   color="#757575"
@@ -140,7 +142,7 @@ watch(page, () => {
         </q-list>
       </template>
       <div class="dp-center-center" :style="{ height: '100%' }" v-else>
-        未搜索到文件
+        未搜索到{{ fileType }}
       </div>
     </div>
   </div>

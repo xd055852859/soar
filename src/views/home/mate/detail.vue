@@ -280,7 +280,7 @@ watchEffect(() => {
         </div>
         <!-- <div class="right-chart-right"></div> -->
       </q-card>
-      <q-tabs
+      <!-- <q-tabs
         v-model="mateTab"
         dense
         align="left"
@@ -290,9 +290,7 @@ watchEffect(() => {
         <q-tab name="taskBox" label="任务" />
         <q-tab name="doc" label="文档" />
         <q-tab name="file" label="文件" />
-        <!-- <q-tab name="mails" label="知识库" /> -->
-        <!-- <q-tab name="mails" label="多维表" /> -->
-        <!-- <q-tab name="mails" label="洞察" /> -->
+
       </q-tabs>
       <q-card flat class="mateDetail-right-card">
         <q-card-section class="q-pa-none">
@@ -312,7 +310,7 @@ watchEffect(() => {
             </template>
           </div>
         </q-card-section>
-      </q-card>
+      </q-card> -->
     </div>
     <q-btn
       color="primary"

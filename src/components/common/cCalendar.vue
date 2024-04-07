@@ -217,6 +217,12 @@ watchEffect(() => {
     getCalendar(calendarDate.value);
   }
 });
+watch(
+  () => props.endTime,
+  (newTime) => {
+    chooseDate.value = dayjs(newTime).startOf("day").valueOf();
+  }
+);
 </script>
 <template>
   <div class="calendar" :class="{ 'calendar-phone': deviceType === 'phone' }">

@@ -22,6 +22,7 @@ const props = defineProps<{
 }>();
 const emits = defineEmits<{
   (e: "updateDetail", type: string, obj: any): void;
+  (e: "clearDetail", type: string, key?: string): void;
   (e: "close"): void;
 }>();
 const nodeInfo = ref<any>(null);
@@ -100,6 +101,10 @@ const updateDetail = (type, obj) => {
         return;
       }
       break;
+    case "file":
+      console.log(obj)
+      fileName.value = obj.fileName;
+      break;
     case "relaters":
       let index = _.findIndex(relaters.value, { userKey: obj.member.userKey });
       if (index !== -1) {
@@ -120,6 +125,17 @@ const updateDetail = (type, obj) => {
   emits("updateDetail", type, {
     ...obj,
   })!;
+};
+const clearDetail = (type, key?: string) => {
+  switch (type) {
+    case "relaters":
+      relaters.value = [];
+      break;
+    case "milestone":
+      milestoneDate.value = "";
+      break;
+  }
+  emits("clearDetail", type)!;
 };
 const savemilestone = (date) => {
   updateDetail("milestone", {
@@ -372,7 +388,10 @@ watch(fileInput, (newName) => {
           <img src="/add.svg" alt="" />
         </q-btn>
         <q-menu style="width: 250px" auto-close>
-          <c-calendar @clickDate="savemilestone" />
+          <c-calendar
+            @clickDate="savemilestone"
+            @clearDate="clearDetail('milestone')"
+          />
         </q-menu>
       </div>
     </div>
@@ -398,7 +417,12 @@ watch(fileInput, (newName) => {
           <img src="/add.svg" alt="" />
           <q-menu>
             <q-list>
-              <q-item clickable class="row items-center justify-between">
+              <q-item
+                clickable
+                v-close-popup
+                class="row items-center justify-between"
+                @click="clearDetail('relaters')"
+              >
                 无
               </q-item>
               <q-item
@@ -464,7 +488,7 @@ watch(fileInput, (newName) => {
             setSearchVisible(true, (node) => {
               updateDetail('file', {
                 fileKey: node._key,
-                fileName: node.name,
+                fileName: node.title,
               });
               setSearchVisible(false);
             })

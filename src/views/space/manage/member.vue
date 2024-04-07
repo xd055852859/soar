@@ -393,7 +393,7 @@ watch(memberInput, (newName) => {
               <q-popup-edit
                 v-model="props.row.role"
                 v-slot="scope"
-                v-if="spaceRole < props.row.role|| props.row.userKey === user!._key"
+                v-if="spaceRole < props.row.role|| props.row.userKey === user!._key&&props.row.role"
                 auto-save
                 @save="(value) => updateMember(value, 'newRole', props.row)"
               >
@@ -426,7 +426,11 @@ watch(memberInput, (newName) => {
         </template>
       </q-table>
     </div>
-    <c-dialog :visible="addVisible" title="搜索用户" @close="addVisible = false">
+    <c-dialog
+      :visible="addVisible"
+      title="搜索用户"
+      @close="addVisible = false"
+    >
       <template #content>
         <div class="member-search">
           <div class="member-search-title">

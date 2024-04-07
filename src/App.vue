@@ -40,6 +40,7 @@ const {
 const musicRef = ref<any>(null);
 const closeMessage = ref<any>(null);
 onMounted(() => {
+  console.log(import.meta.env.MODE);
   changeDevice();
   // 检测设备方向
   window.addEventListener("orientationchange", _.debounce(changeDevice, 100));
@@ -140,11 +141,12 @@ const getMessage = (e) => {
       case "showDoc":
       case "showTree":
         setIframeVisible(true, {
-          url: `https://soar.cn/base/#/login?token=${token}&redirectPath=node/${messageData._key}`,
+          url: `https://soar.cn/base/#/login?token=${token.value}&redirectPath=node/${messageData.data._key}`,
           title: messageData.title,
         });
         break;
       case "showTask":
+        setIframeVisible(false, null);
         router.push(`/home/taskBoard`);
         break;
     }
@@ -213,7 +215,7 @@ watch([musicSrc, musicNum], ([newSrc, newNum]) => {
   width: 100vw;
   height: 100vh;
   position: fixed;
-  z-index: 9999;
+  z-index: 9900;
   top: 0px;
   left: 0px;
   background-color: #fff;
