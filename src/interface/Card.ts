@@ -3,7 +3,7 @@ import { JSONContent } from "@tiptap/vue-3";
 export interface Card {
   _key: string;
   title: string;
-  type:
+  type?:
     | "text"
     | "outline"
     | "clip"

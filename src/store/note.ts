@@ -8,6 +8,7 @@ import { JSONContent } from "@tiptap/vue-3";
 export const noteStore = defineStore("noteStore", () => {
   const notes = ref<Card[]>([]);
   const note = ref<Card | null>(null);
+  const nextNoteKey = ref("");
 
   const clearNoteDetail = () => {
     note.value = null;
@@ -55,6 +56,8 @@ export const noteStore = defineStore("noteStore", () => {
     if (res.status === 200) {
       const index = notes.value.findIndex((note) => note._key === noteKey);
       if (index !== -1) {
+        nextNoteKey.value = notes.value[index - 1]?._key || "";
+        note.value = null;
         notes.value.splice(index, 1);
       }
     }
@@ -62,10 +65,10 @@ export const noteStore = defineStore("noteStore", () => {
 
   const editNote = async (props: {
     noteKey: string;
-    type: "text" | "outline" | "clip" | "link" | "file";
     title: string;
-    content: JSONContent;
-    summary: string;
+    type?: "text" | "outline" | "clip" | "link" | "file";
+    content?: JSONContent;
+    summary?: string;
     icon?: string;
   }) => {
     const res = (await api.note.edit(props)) as ResultProps<Card>;
@@ -102,6 +105,7 @@ export const noteStore = defineStore("noteStore", () => {
   return {
     note,
     notes,
+    nextNoteKey,
     createNote,
     getNotes,
     deleteNote,

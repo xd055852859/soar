@@ -1,4 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL;
+const DOMAIN = import.meta.env.VITE_QINIU_CDN;
+
 export type Type = "ppt" | "draw" | "mind" | "sheet";
 /**
  * 获取第三方应用地址
@@ -20,7 +22,7 @@ export const getThirdAppUrl = (
   });
   const patchDataApi = JSON.stringify({
     url: `${API_URL}/note`,
-    params: { noteKey: nodeKey, title: name },
+    params: { noteKey: nodeKey },
     docDataName: nodeType === "draw" ? ["content", "name"] : "content",
   });
   const getUptokenApi = JSON.stringify({
@@ -29,13 +31,19 @@ export const getThirdAppUrl = (
   });
   const token = localStorage.getItem("auth_token");
   // isEdit 2:编辑模式 1:预览 0:只读
+
+  const qiniuRegion = "z2";
+  const qiniuDomain = DOMAIN;
+
   const query = `token=${token}&getDataApi=${encodeURIComponent(
     getDataApi
   )}&patchDataApi=${encodeURIComponent(
     patchDataApi
-  )}&getUptokenApi=${encodeURIComponent(getUptokenApi)}&isEdit=${
+  )}&getUptokenApi=${encodeURIComponent(
+    getUptokenApi
+  )}&qiniuRegion=${qiniuRegion}&isEdit=${
     editMode ? 2 : 1
-  }${showHead ? "" : "&hideHead=1"}`;
+  }&qiniuDomain=${qiniuDomain}&hideHead=1`;
   return `${appUrl}?${query}`;
 };
 

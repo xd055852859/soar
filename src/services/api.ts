@@ -198,10 +198,10 @@ const note = {
   },
   edit(props: {
     noteKey: string;
-    type: "text" | "outline" | "clip" | "link" | "file";
     title: string;
-    content: JSONContent;
-    summary: string;
+    type?: "text" | "outline" | "clip" | "link" | "file";
+    content?: JSONContent;
+    summary?: string;
     icon?: string;
   }) {
     return request.patch("/note", props);
