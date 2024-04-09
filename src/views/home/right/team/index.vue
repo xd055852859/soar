@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import cHeader from "@/components/common/cHeader.vue";
 import cDialog from "@/components/common/cDialog.vue";
-import Menu from "@/views/home/team/menu/menu.vue";
-import Detail from "@/views/home/team/menu/detail.vue";
-import NoteList from "@/views/home/note/NoteList.vue";
+import Menu from "@/views/home/left/menu/team/menu.vue";
+import Detail from "@/views/home/right/team/detail.vue";
 import appStore from "@/store";
 import _ from "lodash";
 import { storeToRefs } from "pinia";
-import Member from "./menu/member.vue";
+import Member from "@/views/home/right/team/member.vue";
 import Icon from "@/components/common/Icon.vue";
 import TeamKnowledgeBase from "./tab/teamKnowledgeBase.vue";
 const { token } = storeToRefs(appStore.authStore);
 const { teamInfo } = storeToRefs(appStore.teamStore);
+const { privateTeamKey } = storeToRefs(appStore.spaceStore);
 const { setClose, setIframeVisible } = appStore.commonStore;
 const updateVisible = ref<boolean>(false);
 const memberVisible = ref<boolean>(false);
@@ -36,24 +36,14 @@ const noteDialog = ref<boolean>(false);
         <Icon name="a-fanhui21" :size="14" />
       </q-btn>
     </div>
-    <div class="team-button-right">
-      <q-btn
-        flat
-        round
-        @click="
-          setIframeVisible(true, {
-            url: `https://soar.cn/chatbot?token=${token}`,
-            title: 'AI',
-          })
-        "
-      >
-        <Icon name="ai-21" :size="22" />
-      </q-btn>
-
-      <q-btn flat round @click="noteDialog = true">
-        <Icon name="a-suji22" :size="22" />
-      </q-btn>
-
+    <div
+      class="team-button-right"
+      v-if="
+        $route.name !== 'teamTree' &&
+        teamInfo &&
+        teamInfo._key !== privateTeamKey
+      "
+    >
       <q-btn flat round size="12px" @click="memberVisible = true">
         <Icon name="a-duiyou2" :size="18" />
       </q-btn>
@@ -84,11 +74,6 @@ const noteDialog = ref<boolean>(false);
     >
       <template #content><Member type="team" /></template>
     </c-dialog>
-    <q-dialog v-model="noteDialog" position="right" class="note-list-dialog">
-      <q-card style="width: 350px; height: 100%">
-        <NoteList draggable closable @close="noteDialog = false" />
-      </q-card>
-    </q-dialog>
   </div>
 </template>
 <style scoped lang="scss">

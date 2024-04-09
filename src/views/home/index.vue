@@ -2,7 +2,7 @@
 import _ from "lodash";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
-import Left from "./left/left.vue";
+import Left from "@/views/home/left/index.vue";
 import Icon from "@/components/common/Icon.vue";
 import api from "@/services/api";
 import { useQuasar } from "quasar";
@@ -11,15 +11,16 @@ import { setMessage } from "@/services/util/common";
 const $q = useQuasar();
 const dayjs: any = inject("dayjs");
 const { token } = storeToRefs(appStore.authStore);
-const { closeNum, showState } = storeToRefs(appStore.commonStore);
+const { closeNum, showState,leftVisible } = storeToRefs(appStore.commonStore);
 
 const { spaceKey, spaceMessageNum } = storeToRefs(appStore.spaceStore);
 const { getTeamList, getTeamFoldList } = appStore.teamStore;
+const { getMateList } = appStore.mateStore;
 const { setSpaceKey } = appStore.spaceStore;
-const { setClose, setShowState, setIframeVisible } = appStore.commonStore;
+const { setClose, setShowState, setIframeVisible,setLeftVisible } = appStore.commonStore;
 
-const showButton = ref<boolean>(false);
 const leftRef = ref<any>(null);
+
 const clockInText = ref<string>("上班打卡");
 const clockIn = ref<any>(null);
 const clockType = ref<number>(-1);
@@ -95,7 +96,7 @@ const getTodayCheckIn = async (key) => {
       clearInterval(clockTimer.value);
     }
     clockVisible.value = false;
-    clockMessageVisible.value= false;
+    clockMessageVisible.value = false;
     clockIn.value = checkInRes.data;
     //@ts-ignore
     clockConfig.value = checkInRes.config;
@@ -153,6 +154,17 @@ const getTodayCheckIn = async (key) => {
     }, 1000);
   }
 };
+const toggleIcon = (state) => {
+  if (state) {
+    setClose(0);
+    setTimeout(() => {
+      showState.value = true;
+    }, 500);
+  } else {
+    setClose(1);
+    showState.value = false;
+  }
+};
 watch(
   spaceKey,
   (newKey) => {
@@ -161,6 +173,7 @@ watch(
       getTeamList(newKey);
       getTeamFoldList(newKey);
       getTodayCheckIn(newKey);
+      getMateList(newKey);
     }
   },
   { immediate: true }
@@ -208,6 +221,11 @@ watch(clockType, (newType) => {
       break;
   }
 });
+watch(showState, (newState) => {
+  if (!newState) {
+    setLeftVisible(false)
+  }
+});
 </script>
 
 <template>
@@ -220,33 +238,55 @@ watch(clockType, (newType) => {
       moveRight: closeNum === 1,
     }"
   >
-    <div
-      class="left"
-      @mouseenter="showButton = true"
-      @mouseleave="showButton = false"
-      ref="leftRef"
-    >
-      <div class="left-arrow-button">
-        <q-btn flat round @click="setClose(0)" size="11px" v-if="showButton">
-          <Icon name="shouqi" :size="15" :style="{ marginTop: '5px' }" />
-        </q-btn>
-      </div>
-      <q-btn
-        flat
-        round
-        @click.stop="$router.push('/home/notice')"
-        size="11px"
-        class="left-notice-button"
-      >
-        <q-badge floating rounded color="red" v-if="spaceMessageNum">{{
-          spaceMessageNum
-        }}</q-badge>
-        <Icon name="xiaoxi1" :size="20" />
-      </q-btn>
-      <Left/>
+    <div class="left" ref="leftRef">
+      <Left />
     </div>
     <div class="right">
       <router-view></router-view>
+    </div>
+    <div
+      class="arrow-button"
+      :style="
+        closeNum === 0 || closeNum === 1
+          ? {
+              animation: `${
+                closeNum === 0 ? 'iconLeft' : 'iconRight'
+              } 0.5s forwards`,
+            }
+          : { left: closeNum === -1 ? '280px' : '0px' }
+      "
+    >
+      <q-btn
+        flat
+        round
+        @click="toggleIcon(true)"
+        v-if="closeNum === 1 || closeNum === -1"
+      >
+        <Icon name="shouqi" :size="15" />
+      </q-btn>
+      <template v-else>
+        <q-btn
+          flat
+          round
+          @click.stop="toggleIcon(false)"
+          ref="buttonRef"
+          v-if="leftVisible && showState"
+        >
+          <Icon name="danchu" :size="15" />
+        </q-btn>
+        <q-btn
+          flat
+          round
+          @mouseenter="
+            showState && closeNum !== 1
+              ? (leftVisible = true)
+              : null
+          "
+          v-else
+        >
+          <Icon name="a-xuanfuhou2" :size="14" />
+        </q-btn>
+      </template>
     </div>
     <q-btn
       color="primary"
@@ -262,6 +302,13 @@ watch(clockType, (newType) => {
       class="clockIn-button"
       ><div class="clockIn-button-box">{{ clockInText }}</div></q-btn
     >
+    <q-dialog v-model="leftVisible" position="left" class="dialog-transparent">
+      <q-card class="left-dialog">
+        <!-- <div class="left-dialog"> -->
+        <Left />
+        <!-- </div> -->
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -289,15 +336,7 @@ watch(clockType, (newType) => {
     top: 0px;
     display: flex;
     flex-direction: column;
-    @include p-number(0px, 10px);
-
-    .left-arrow-button {
-      width: 100px;
-      position: absolute;
-      z-index: 2;
-      top: 16px;
-      right: -65px;
-    }
+    @include p-number(0px, 15px);
 
     .left-notice-button {
       position: absolute;
@@ -317,6 +356,12 @@ watch(clockType, (newType) => {
     width: 0px;
     // @include p-number(15px, 35px);
   }
+  .arrow-button {
+    position: fixed;
+    z-index: 9999;
+    top: 12px;
+    left: 280px;
+  }
 }
 
 .clockIn-button {
@@ -327,6 +372,11 @@ watch(clockType, (newType) => {
   .clockIn-button-box {
     font-size: 15px;
   }
+}
+.left-dialog {
+  width: 280px;
+  height: 90%;
+  @include p-number(25px, 10px);
 }
 .homeLeft {
   padding-left: 300px;
@@ -407,6 +457,24 @@ watch(clockType, (newType) => {
 
   100% {
     padding-left: 300px;
+  }
+}
+@keyframes iconLeft {
+  0% {
+    left: 280px;
+  }
+
+  100% {
+    left: 0px;
+  }
+}
+@keyframes iconRight {
+  0% {
+    left: 0px;
+  }
+
+  100% {
+    left: 280px;
   }
 }
 </style>

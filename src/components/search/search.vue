@@ -30,7 +30,7 @@ const searchFile = async () => {
         keyword: fileInput.value,
         page: page.value,
         limit: 30,
-        exclude: teamKey.value ? true : false,
+        exclude: true,
         // startTime: dayjs().subtract(90, "day").startOf("day").valueOf(),
         // endTime: dayjs().valueOf(),
       })) as ResultProps;

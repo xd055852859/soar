@@ -292,7 +292,7 @@ watch(bigListText, (newList) => {
       v-if="exploreConfig.backType === 1"
     ></div>
     <div class="explore">
-      <cHeader title="应用">
+      <c-header title="应用">
         <template #button>
           <Icon
             name="a-shezhi2"
@@ -302,7 +302,7 @@ watch(bigListText, (newList) => {
             @click="setVisible = true"
           />
         </template>
-      </cHeader>
+      </c-header>
       <div class="explore-box">
         <TimeClock />
         <div class="explore-search">

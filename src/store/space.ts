@@ -16,8 +16,11 @@ export const spaceStore = defineStore(
     const spaceInfo = ref<SpaceInfo | null>(null);
     const spaceRole = ref<number>(5);
     const spaceMessageNum = ref<number>(0);
+    const spaceReportNum= ref<number>(0);
+    const spaceTaskNum= ref<number>(0);
     const createState = ref<boolean>(false);
     const lockList = ref<any>([]);
+    const privateTeamKey = ref<string>("");
     const setSpaceKey = (newKey) => {
       spaceKey.value = newKey;
       localStorage.setItem("spaceKey", newKey);
@@ -32,11 +35,13 @@ export const spaceStore = defineStore(
       spaceList.value = newList;
     };
     const getSpaceMessageNum = async () => {
-      let spaceRes = (await api.request.get("message/unReadNum", {
+      let spaceRes = (await api.request.get("message/num", {
         teamKey: spaceKey.value,
       })) as ResultProps;
       if (spaceRes.msg === "OK") {
-        spaceMessageNum.value = spaceRes.data;
+        spaceMessageNum.value = spaceRes.data.messageNum;
+        spaceReportNum.value = spaceRes.data.reviewNum;
+        spaceTaskNum.value = spaceRes.data.taskNum;
       }
     };
 
@@ -66,6 +71,7 @@ export const spaceStore = defineStore(
         } else {
           exploreStore().setExploreConfig(null, false, true);
         }
+        privateTeamKey.value = spaceRes.data.privateProject;
       } else if (spaceRes.status === 202) {
         router.replace("/spaceList");
         spaceKey.value = "";
@@ -110,8 +116,11 @@ export const spaceStore = defineStore(
     });
     return {
       spaceKey,
+      privateTeamKey,
       setSpaceKey,
       spaceMessageNum,
+      spaceReportNum,
+      spaceTaskNum,
       setSpaceMessageNum,
       spaceRole,
       spaceInfo,

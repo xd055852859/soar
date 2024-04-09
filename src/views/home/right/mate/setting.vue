@@ -6,9 +6,14 @@ import { setMessage } from "@/services/util/common";
 import appStore from "@/store";
 import _ from "lodash";
 import { storeToRefs } from "pinia";
+const props = defineProps<{
+  type?: string;
+}>();
 const { user } = storeToRefs(appStore.authStore);
+const { mateList } = storeToRefs(appStore.mateStore);
 const { spaceMemberList, spaceKey } = storeToRefs(appStore.spaceStore);
 const { setSpaceMemberList } = appStore.spaceStore;
+const { getMateList } = appStore.mateStore;
 const columns: any = [
   {
     name: "userAvatar",
@@ -50,6 +55,7 @@ const addMate = async (userKey) => {
       list[index] = { ...list[index], beMate: true };
     }
     setSpaceMemberList(list);
+    getMateList(spaceKey.value);
   }
 };
 const removeMate = async (userKey) => {
@@ -65,13 +71,17 @@ const removeMate = async (userKey) => {
       list[index] = { ...list[index], beMate: false };
     }
     setSpaceMemberList(list);
+    getMateList(spaceKey.value);
   }
 };
 </script>
 <template>
   <div class="setting">
-    <cHeader title="通讯录" backPath="/home/mate" />
-    <div class="setting-container">
+    <cHeader title="通讯录" backPath="/home/mate" v-if="!type" />
+    <div
+      class="setting-container"
+      :style="type === 'inside' ? { padding: '0px', height: '100%' } : {}"
+    >
       <q-table
         :rows="spaceMemberList.filter(item => item.userKey !== user!._key)"
         :columns="columns"
@@ -94,15 +104,15 @@ const removeMate = async (userKey) => {
                 />
               </q-avatar>
             </q-td>
-            <q-td key="userName" :props="props" style="width: 200px">
+            <q-td key="userName" :props="props">
               {{ props.row.userName }}
             </q-td>
 
-            <q-td key="mobile" :props="props" style="width: 200px">
+            <q-td key="mobile" :props="props">
               {{ props.row.mobile }}
             </q-td>
 
-            <q-td key="operate" :props="props" style="width: 100px">
+            <q-td key="operate" :props="props">
               <q-btn
                 flat
                 label="添加"

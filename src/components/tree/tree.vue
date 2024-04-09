@@ -9,7 +9,6 @@ import api from "@/services/api";
 import { storeToRefs } from "pinia";
 import appStore from "@/store";
 import { uploadFile } from "@/services/util/file";
-import NoteList from "@/views/home/note/NoteList.vue";
 import Icon from "../common/Icon.vue";
 import cDrawer from "../common/cDrawer.vue";
 import fileCard from "../fileCard/fileCard.vue";
@@ -55,7 +54,6 @@ const tagVisible = ref<boolean>(false);
 const milestoneVisible = ref<boolean>(false);
 
 const changed = ref(false);
-const nodeDetail = ref<any>(null);
 const nodeKey = ref<string>("");
 const nodeInfo = ref<any>(null);
 const nodes = ref<any>(null);
@@ -88,7 +86,6 @@ const highlightUser = ref<any>(null);
 // const imageUrl = ref<string>("");
 // const imageHeight = ref<number>(0);
 // const imageWidth = ref<number>(0);
-const noteDialog = ref(false);
 
 let timeout: any;
 
@@ -819,6 +816,7 @@ const changeOutData = (type, data) => {
 watch(
   () => props.cardKey,
   (newKey) => {
+    console.log(newKey)
     getTreeInfo(newKey);
     getmilestoneList(newKey);
   },
@@ -1370,11 +1368,6 @@ watch(contentVisible, (newVisible) => {
         />
       </template>
     </c-drawer>
-    <q-dialog v-model="noteDialog" position="right" class="note-list-dialog">
-      <q-card style="width: 350px; height: 100%">
-        <NoteList draggable closable @close="noteDialog = false" />
-      </q-card>
-    </q-dialog>
   </div>
 </template>
 <style scoped lang="scss">
@@ -1392,7 +1385,7 @@ watch(contentVisible, (newVisible) => {
     left: 0px;
     @include flex(space-between, center, null);
     @include p-number(0px, 10px);
-    padding-left: 60px;
+    padding-left: 30px;
     .teamTree-header-path {
       height: 100%;
       font-size: 16px;

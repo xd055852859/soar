@@ -33,10 +33,6 @@ const chartName = ref<string[]>([]);
 const mateTab = ref<string>("task");
 const signature = ref<string>("");
 
-onMounted(() => {
-  setMateKey(props.mateKey);
-  // getMateDetail();
-});
 const getMateTeam = async () => {
   let detailRes = (await api.request.get("teamMate/project", {
     teamKey: spaceKey.value,
@@ -99,6 +95,15 @@ watch(mateInfo, (newInfo) => {
     signature.value = newInfo.signature ? newInfo.signature : "在岗";
   }
 });
+watch(
+  () => props.mateKey,
+  (newKey) => {
+    if (newKey) {
+      setMateKey(newKey);
+    }
+  },
+  { immediate: true }
+);
 watch(
   mateKey,
   (newKey) => {

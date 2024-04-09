@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ResultProps } from "@/interface/Common";
 import api from "@/services/api";
-import team from "@/views/home/team/menu/index.vue";
+import TeamMenu from "@/views/home/left/menu/team/index.vue";
+import ResourceMenu from "@/views/home/left/menu/resource/index.vue";
+import MateMenu from "@/views/home/left/menu/mate/index.vue";
 import "vue-cropper/dist/index.css";
 import { VueCropper } from "vue-cropper";
 import router from "@/router";
@@ -14,18 +16,27 @@ import Icon from "@/components/common/Icon.vue";
 import cDialog from "@/components/common/cDialog.vue";
 
 import createSpace from "@/components/createSpace.vue";
-const { spaceKey, spaceInfo, spaceList, lockList, spaceRole } = storeToRefs(
-  appStore.spaceStore
-);
+import { commonStore } from "@/store/common";
 const props = defineProps<{
   showState?: boolean;
 }>();
+const { token, user } = storeToRefs(appStore.authStore);
+const {
+  spaceKey,
+  spaceInfo,
+  spaceList,
+  lockList,
+  spaceRole,
+  spaceMessageNum,
+  spaceTaskNum,
+  spaceReportNum,
+  privateTeamKey,
+} = storeToRefs(appStore.spaceStore);
 
-const { user } = storeToRefs(appStore.authStore);
-const { clearStore, setSearchVisible } = appStore.commonStore;
+const { clearStore, setSearchVisible, setIframeDetail } = appStore.commonStore;
 const { setUserInfo, setToken } = appStore.authStore;
 const { setSpaceKey, setSpaceList } = appStore.spaceStore;
-const { setTeamKey } = appStore.teamStore;
+const { setTeamKey, setTargetTeamKey } = appStore.teamStore;
 const { setCardKey } = appStore.cardStore;
 const { clickExplore } = appStore.exploreStore;
 const userVisible = ref<boolean>(false);
@@ -37,6 +48,8 @@ const spaceMenuVisible = ref<boolean>(false);
 const sortList = ref<any>([]);
 const urlBase64 = ref<any>(null);
 const cropperRef = ref<any>(null);
+const menuTab = ref<string>("team");
+
 const chooseSpace = (key) => {
   setSpaceKey(key);
   setTeamKey("");
@@ -108,6 +121,7 @@ const logout = () => {
   sessionStorage.clear();
   setMessage("success", "退出登录成功");
   setToken("");
+  commonStore().$reset();
   clearStore();
 };
 watch(
@@ -228,6 +242,16 @@ watch(
   </div>
   <div class="left-button">
     <div class="left-button-item">
+      <q-btn flat round @click="$router.push('/home/explore')">
+        <Icon
+          name="zhuye1"
+          :size="22"
+          :color="$route.name === 'explore' ? '#07be51' : '#333'"
+        />
+        <q-tooltip> 应用中心 </q-tooltip>
+      </q-btn>
+    </div>
+    <div class="left-button-item">
       <q-btn
         flat
         round
@@ -241,36 +265,28 @@ watch(
       </q-btn>
     </div>
     <div class="left-button-item">
-      <q-btn round flat @click="$router.push('/home/task')">
-        <Icon
-          flat
-          name="shoucang"
-          :size="20"
-          :color="$route.name === 'task' ? '#07be51' : '#333'"
-        />
-        <q-tooltip> 任务中心 </q-tooltip>
+      <q-btn
+        flat
+        round
+        @click.stop="$router.push('/home/notice')"
+        class="left-notice-button"
+      >
+        <div class="badge-box">
+          <q-badge
+            rounded
+            color="red"
+            v-if="spaceMessageNum"
+            class="badge-button"
+            style="top: -5px; right: -20px"
+            >{{ spaceMessageNum }}</q-badge
+          >
+          <Icon name="xiaoxi1" :size="20" />
+        </div>
+
+        <q-tooltip> 消息中心 </q-tooltip>
       </q-btn>
     </div>
-    <div class="left-button-item">
-      <q-btn flat round @click="$router.push('/home/explore')">
-        <Icon
-          name="tongzhi"
-          :size="20"
-          :color="$route.name === 'explore' ? '#07be51' : '#333'"
-        />
-        <q-tooltip> 应用中心 </q-tooltip>
-      </q-btn>
-    </div>
-    <div class="left-button-item">
-      <q-btn flat round @click="$router.push('/home/resource')">
-        <Icon
-          name="zhuye"
-          :size="20"
-          :color="$route.name === 'resource' ? '#07be51' : '#333'"
-        />
-        <q-tooltip> 资源中心 </q-tooltip>
-      </q-btn>
-    </div>
+
     <div class="left-button-item">
       <q-btn flat round>
         <Icon name="caidanrukou" :size="20" />
@@ -281,17 +297,6 @@ watch(
             <q-item clickable v-close-popup @click="userVisible = true">
               <q-item-section>个人设置</q-item-section>
             </q-item>
-            <q-item
-              clickable
-              v-close-popup
-              @click="chooseSpace(spaceKey)"
-              v-if="spaceRole < 2"
-            >
-              <q-item-section>空间设置</q-item-section>
-            </q-item>
-            <q-item clickable v-close-popup>
-              <q-item-section>空间升级</q-item-section>
-            </q-item>
             <q-item clickable v-close-popup @click="logout()">
               <q-item-section>退出登录</q-item-section>
             </q-item>
@@ -300,25 +305,70 @@ watch(
       </q-btn>
     </div>
   </div>
-  <div class="left-app" v-if="lockList.length > 0">
-    <div
-      class="left-app-item"
-      v-for="(item, index) in lockList"
-      :key="`app${index}`"
-      @click="clickExplore(item.enName)"
-    >
-      <q-btn flat round>
-        <Icon :name="item.icon" :size="20" />
-        <q-tooltip>
-          {{ item.name }}
-        </q-tooltip>
-      </q-btn>
-    </div>
+  <div
+    class="left-subtitle"
+    @click="
+      setIframeDetail({
+        url: `https://hb.qingtime.cn/?token=${token}&teamKey=${spaceKey}`,
+        title: '汇报',
+      });
+      router.push('/home/freedom');
+    "
+    :style="{ color: $route.name === 'freedom' ? '#07be51' : '#333' }"
+  >
+    <Icon
+      name="huibao1"
+      :size="20"
+      :color="$route.name === 'freedom' ? '#07be51' : '#333'"
+      class="q-mr-sm"
+    />
+
+    <!-- <div class="badge-box"> -->
+    日常汇报
+    <q-badge rounded color="red" v-if="spaceReportNum" class="q-ml-sm">{{
+      spaceReportNum
+    }}</q-badge>
+    <!-- </div> -->
   </div>
-  <div class="left-button-icon"></div>
+  <div
+    class="left-subtitle"
+    @click="$router.push('/home/task')"
+    :style="{ color: $route.name === 'task' ? '#07be51' : '#333' }"
+  >
+    <Icon
+      name="xiangmu"
+      :size="20"
+      :color="$route.name === 'task' ? '#07be51' : '#333'"
+      class="q-mr-sm"
+    />
+    <!-- <div class="badge-box"> -->
+
+    项目任务
+    <q-badge rounded color="red" v-if="spaceTaskNum" class="q-ml-sm">{{
+      spaceTaskNum
+    }}</q-badge>
+    <!-- </div> -->
+  </div>
   <q-separator />
-  <team :line="Math.ceil(lockList.length / 5)" />
-  <cDialog
+  <div class="left-menu">
+    <div class="left-menu-tab">
+      <q-tabs
+        dense
+        v-model="menuTab"
+        active-color="primary"
+        class="text-grey-7"
+      >
+        <q-tab name="team" label="群组" style="width: 60px" />
+        <q-tab name="resource" label="文档" style="width: 60px" />
+        <q-tab name="mate" label="队友" style="width: 60px" />
+      </q-tabs>
+    </div>
+    <TeamMenu v-if="menuTab === 'team'" />
+    <ResourceMenu v-else-if="menuTab === 'resource'" />
+    <MateMenu v-else-if="menuTab === 'mate'" />
+  </div>
+
+  <c-dialog
     :visible="cropperVisible"
     @close="cropperVisible = false"
     title="裁剪图片"
@@ -343,8 +393,12 @@ watch(
         :dense="true" />
       <q-btn label="确认" color="primary" @click="saveImg"
     /></template>
-  </cDialog>
-  <cDialog :visible="userVisible" @close="userVisible = false" title="用户设置">
+  </c-dialog>
+  <c-dialog
+    :visible="userVisible"
+    @close="userVisible = false"
+    title="用户设置"
+  >
     <template #content>
       <div className="form-container">
         <div className="form-logo">
@@ -388,8 +442,8 @@ watch(
         :dense="true" />
       <q-btn label="确认" color="primary" @click="updateUser"
     /></template>
-  </cDialog>
-  <cDialog
+  </c-dialog>
+  <c-dialog
     :visible="spaceVisible"
     @close="spaceVisible = false"
     title="创建团队"
@@ -399,7 +453,7 @@ watch(
         <createSpace @close="spaceVisible = false" />
       </div>
     </template>
-  </cDialog>
+  </c-dialog>
 </template>
 
 <style scoped lang="scss">
@@ -414,23 +468,28 @@ watch(
   @include flex(space-between, center, null);
 
   .left-button-item {
-    width: 20%;
+    width: 35px;
     flex-shrink: 0;
     @include flex(center, center, null);
   }
 }
-
-.left-app {
+.left-subtitle {
   width: 100%;
-  margin-bottom: 10px;
-  background-color: #fff;
-  @include flex(flex-start, center, wrap);
-
-  .left-app-item {
-    width: 20%;
-    flex-shrink: 0;
-    margin: 5px 0px;
-    @include flex(center, center, null);
+  height: 45px;
+  line-height: 45px;
+  cursor: pointer;
+  @include flex(flex-start, center, null);
+}
+.left-menu {
+  width: 100%;
+  height: calc(100% - 210px);
+  position: relative;
+  z-index: 1;
+  .left-menu-tab {
+    position: absolute;
+    left: 0px;
+    top: 8px;
+    z-index: 2;
   }
 }
 
@@ -467,6 +526,17 @@ watch(
 </style>
 
 <style lang="scss">
+.badge-box {
+  position: relative;
+  z-index: 1;
+  .badge-button {
+    position: absolute;
+    z-index: 2;
+    top: 5px;
+    right: -25px;
+  }
+}
+
 .left-space-item {
   width: 100%;
 
@@ -491,6 +561,31 @@ watch(
 
   .left-menu-avatar {
     min-width: 30px;
+  }
+}
+.leftMenu-title {
+  width: 100%;
+  height: 50px;
+  font-weight: bold;
+  font-size: 16px;
+  @include flex(space-between, center, null);
+  .leftMenu-title-left {
+    width: calc(100% - 85px);
+    height: 100%;
+    // @include flex(flex-start, center, null);
+    .leftMenu-title-input {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      z-index: 3;
+      background-color: #fff;
+      @include flex(flex-start, center, null);
+    }
+  }
+  .leftMenu-title-right {
+    width: 85px;
+    height: 100%;
+    @include flex(flex-end, center, null);
   }
 }
 </style>

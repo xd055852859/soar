@@ -2,7 +2,7 @@
 import cDialog from "@/components/common/cDialog.vue";
 import cHeader from "@/components/common/cHeader.vue";
 import { ROLE_OPTIONS, ResultProps } from "@/interface/Common";
-import Member from "@/views/home/team/menu/member.vue";
+import Member from "@/views/home/right/team/member.vue";
 import { SpaceMember } from "@/interface/Space";
 import _ from "lodash";
 import api from "@/services/api";

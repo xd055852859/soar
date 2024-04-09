@@ -1,4 +1,4 @@
-import { Notify, Loading } from "quasar";
+import { Notify, Loading,QSpinnerFacebook } from "quasar";
 export const setMessage = (type: string, text: string) => {
   let icon: string = "";
   let color: string = "";
@@ -25,7 +25,9 @@ export const setMessage = (type: string, text: string) => {
   });
 };
 export const setLoading = (visible: boolean) => {
-  visible ? Loading.show() : Loading.hide();
+  visible ? Loading.show({
+    spinner: QSpinnerFacebook,
+  }) : Loading.hide();
 };
 export const commonscroll = (e, list, total, callback) => {
   //文档内容实际高度（包括超出视窗的溢出部分）

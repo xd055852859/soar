@@ -90,7 +90,7 @@ import NoteInput from "@/components/note/NoteInput.vue";
 import { storeToRefs } from "pinia";
 import appStore from "@/store";
 import Card from "@/components/note/Card.vue";
-import NoteEditor from "@/views/home/note/NoteEditor.vue";
+import NoteEditor from "@/views/home/right/note/NoteEditor.vue";
 import FileUploader from "./FileUploader.vue";
 const { createNote, removeNote, editNote } = appStore.noteStore;
 

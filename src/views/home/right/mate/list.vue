@@ -9,16 +9,7 @@ import Icon from "@/components/common/Icon.vue";
 const { user } = storeToRefs(appStore.authStore);
 const { mateList } = storeToRefs(appStore.mateStore);
 const signVisible = ref<boolean>(false);
-const { spaceKey } = storeToRefs(appStore.spaceStore);
-const { getMateList } = appStore.mateStore;
-onMounted(() => {
-  if (spaceKey.value) {
-    getMateList(spaceKey.value);
-  }
-});
-watch(spaceKey, (newKey) => {
-  getMateList(newKey);
-});
+
 </script>
 <template>
   <cHeader title="队友">
