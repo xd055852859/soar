@@ -15,6 +15,8 @@ import {
 } from "@/services/config/config";
 import { Icon as FileIcon } from "@iconify/vue";
 import Icon from "../common/Icon.vue";
+import cDrawer from "@/components/common/cDrawer.vue";
+import TreeDetail from "@/components/tree/treeDetail.vue";
 import { formatDocUrl } from "@/services/util/url";
 const $q = useQuasar();
 const dayjs: any = inject("dayjs");
@@ -26,13 +28,15 @@ const { setCardKey, setCardVisible } = appStore.cardStore;
 const props = defineProps<{
   type: string;
   card: any;
+  boxIndex?: number;
+  taskIndex?: number;
   outType?: string;
   chooseKey?: string;
 }>();
 const emits = defineEmits<{
   (e: "chooseCard", key: string, type: string): void;
 }>();
-
+const drawerVisible = ref<boolean>(false);
 //任务
 // const chooseTaskTree = (detail) => {
 //   setCardKey(detail._key);
@@ -68,6 +72,7 @@ const chooseTaskTree = (detail, fullstate?: boolean) => {
   // setCardKey(detail._key);
   // emits("chooseCard", detail, "search");
 };
+
 const deleteCard = async (detail) => {
   $q.dialog({
     title: `删除${
@@ -125,7 +130,91 @@ const updateTitle = async (detail) => {
     updatCard("title", data, detail);
   });
 };
+const updateTask = async (type, obj, detail) => {
+  let changeObj: any = {};
+  switch (type) {
+    case "name":
+    case "hasDone":
+    case "content":
+    case "relaters":
+      detail[type] = obj[type];
+      changeObj[type] = obj[type];
+      break;
+    case "executor":
+      detail.executorInfo.userAvatar = obj.userAvatar;
+      detail.executorInfo.userKey = obj.userKey;
+      changeObj.executor = obj.userKey;
+      break;
+    case "tag":
+      changeObj.startAdornmentContent = {
+        ...detail.startAdornmentContent,
+        tag: { label: obj.label, color: obj.color },
+      };
+      break;
+    case "milestone":
+      let endTime = dayjs(obj.date).endOf("day").valueOf();
+      changeObj.endTime = endTime;
+      changeObj.startAdornmentContent = {
+        ...detail.startAdornmentContent,
+        milestone: {
+          date: endTime,
+          month: dayjs(obj.date).month() + 1,
+          day: dayjs(obj.date).date(),
+        },
+      };
+      console.log(detail.startAdornmentContent);
+      console.log(changeObj.startAdornmentContent);
+      break;
 
+    case "link":
+      changeObj.endAdornmentContent = {
+        ...detail.endAdornmentContent,
+        link: { url: obj.nodeUrl, text: obj.nodeUrlText },
+      };
+      break;
+    case "file":
+      changeObj.endAdornmentContent = {
+        ...detail.endAdornmentContent,
+        file: {
+          fileKey: obj.fileKey,
+          fileName: obj.fileName,
+        },
+      };
+      break;
+  }
+  let updateRes = (await api.request.patch("node/more", {
+    nodeKey: props.card._key,
+    obj: { ...changeObj },
+  })) as ResultProps;
+  if (updateRes.msg === "OK") {
+    detail.boxIndex = props.boxIndex;
+    detail.taskIndex = props.taskIndex;
+    emits("chooseCard", detail, "update");
+  }
+};
+const deleteTask = async (detail) => {
+  $q.dialog({
+    title: `删除任务`,
+    message: `是否删除该任务`,
+    cancel: {
+      color: "grey-5",
+      flat: true,
+    },
+  })
+    .onOk(async () => {
+      let fileRes = (await api.request.delete("card", {
+        cardKey: props.card._key,
+      })) as ResultProps;
+      if (fileRes.msg === "OK") {
+        setMessage("success", `删除任务成功`);
+        detail.boxIndex = props.boxIndex;
+        detail.taskIndex = props.taskIndex;
+        emits("chooseCard", props.card, "delete");
+        // fileList.value.splice(index, 1);
+      }
+    })
+    .onCancel(() => {});
+};
 const finishTask = async (detail) => {
   let detailRes = (await api.request.patch("node/finish", {
     nodeKey: detail._key,
@@ -364,6 +453,7 @@ const handleDownload = (detail) => {
       class="teamTask-box-container q-mb-md icon-point card-hover"
       :dense="!outType"
       :style="chooseKey === card._key ? { border: '2px solid #4a4a4a' } : null"
+      @click="drawerVisible = true"
       @mouseenter="setOverKey(card._key)"
     >
       <q-card-section class="teamTask-box-top q-py-none">
@@ -383,17 +473,17 @@ const handleDownload = (detail) => {
         </div>
 
         <div class="teamTask-box-top-title">{{ card.name }}</div>
-        <!-- <div class="teamTask-box-top-icon" v-if="overKey === card._key">
+        <div class="teamTask-box-top-icon" v-if="overKey === card._key">
           <q-btn flat round icon="more_horiz" size="9px" @click.stop="">
             <q-menu class="q-pa-sm">
               <q-list dense>
-                <q-item clickable v-close-popup @click="deleteNode(card)">
+                <q-item clickable v-close-popup @click="deleteTask(card)">
                   <q-item-section>删除</q-item-section>
                 </q-item>
               </q-list>
             </q-menu>
           </q-btn>
-        </div> -->
+        </div>
       </q-card-section>
       <q-card-section class="teamTask-box-center q-py-none">
         <template
@@ -450,6 +540,26 @@ const handleDownload = (detail) => {
     </q-card></template
   >
   <template v-else-if="type === 'knowledgeBase'"></template>
+  <c-drawer
+    :visible="drawerVisible"
+    @close="drawerVisible = false"
+    :drawerStyle="{
+      width: '400px',
+      height: 'calc(100% - 78px)',
+      background: '#f2f3f6',
+      marginTop: '72px',
+    }"
+    opacityMask
+  >
+    <template #content>
+      <TreeDetail
+        :nodeKey="card._key"
+        @updateDetail="updateTask"
+        @close="drawerVisible = false"
+        v-if="card?._key"
+      />
+    </template>
+  </c-drawer>
 </template>
 <style scoped lang="scss">
 // .teamDoc-box-container {
@@ -499,8 +609,8 @@ const handleDownload = (detail) => {
     font-size: 12px;
     color: $grey-5;
     @include flex(space-between, center, null);
-    >div{
-      flex-wrap:wrap;
+    > div {
+      flex-wrap: wrap;
     }
   }
 }

@@ -54,6 +54,7 @@ watch(sortType, () => {
 });
 watchEffect(() => {
   if (spaceKey.value) {
+    page.value = 1;
     getFileList();
   }
 });
@@ -113,7 +114,7 @@ watchEffect(() => {
             background: fileKey === item._key ? '#eee' : '',
           }"
         >
-          <div class="dp--center"  style="width:100%">
+          <div class="dp--center" style="width: 100%">
             <Icon
               :icon="item.icon"
               width="20"
@@ -121,7 +122,7 @@ watchEffect(() => {
               color="#757575"
               class="q-mr-sm"
             />
-            <div style="width:calc(100% - 30px)">{{ item.title }}</div>
+            <div style="width: calc(100% - 30px)">{{ item.title }}</div>
           </div>
           <div
             class="resourceMenu-item-icon"

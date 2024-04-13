@@ -16,11 +16,12 @@ export const spaceStore = defineStore(
     const spaceInfo = ref<SpaceInfo | null>(null);
     const spaceRole = ref<number>(5);
     const spaceMessageNum = ref<number>(0);
-    const spaceReportNum= ref<number>(0);
-    const spaceTaskNum= ref<number>(0);
+    const spaceReportNum = ref<number>(0);
+    const spaceTaskNum = ref<number>(0);
     const createState = ref<boolean>(false);
     const lockList = ref<any>([]);
     const privateTeamKey = ref<string>("");
+    const reportConfig = ref<any>(null);
     const setSpaceKey = (newKey) => {
       spaceKey.value = newKey;
       localStorage.setItem("spaceKey", newKey);
@@ -42,9 +43,12 @@ export const spaceStore = defineStore(
         spaceMessageNum.value = spaceRes.data.messageNum;
         spaceReportNum.value = spaceRes.data.reviewNum;
         spaceTaskNum.value = spaceRes.data.taskNum;
+        reportConfig.value = spaceRes.data.reportStatus;
       }
     };
-
+    const setReportConfig = (newConfig) => {
+      reportConfig.value = { ...reportConfig.value, ...newConfig };
+    };
     const setSpaceMessageNum = async (newNum) => {
       spaceMessageNum.value = newNum;
     };
@@ -122,6 +126,8 @@ export const spaceStore = defineStore(
       spaceReportNum,
       spaceTaskNum,
       setSpaceMessageNum,
+      reportConfig,
+      setReportConfig,
       spaceRole,
       spaceInfo,
       setSpaceInfo,

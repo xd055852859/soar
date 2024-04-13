@@ -4,6 +4,7 @@ import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import Left from "@/views/home/left/index.vue";
 import Icon from "@/components/common/Icon.vue";
+import CelebrateAnimate from "@/components/celebrateAnimate/index.vue";
 import api from "@/services/api";
 import { useQuasar } from "quasar";
 import { ResultProps } from "@/interface/Common";
@@ -11,17 +12,20 @@ import { setMessage } from "@/services/util/common";
 const $q = useQuasar();
 const dayjs: any = inject("dayjs");
 const { token } = storeToRefs(appStore.authStore);
-const { closeNum, showState,leftVisible } = storeToRefs(appStore.commonStore);
-
+const { closeNum, showState, leftVisible } = storeToRefs(appStore.commonStore);
+const { celebrateAnimate } = storeToRefs(appStore.exploreStore);
 const { spaceKey, spaceMessageNum } = storeToRefs(appStore.spaceStore);
 const { getTeamList, getTeamFoldList } = appStore.teamStore;
 const { getMateList } = appStore.mateStore;
 const { setSpaceKey } = appStore.spaceStore;
-const { setClose, setShowState, setIframeVisible,setLeftVisible } = appStore.commonStore;
+const { setClose, setShowState, setIframeVisible, setLeftVisible } =
+  appStore.commonStore;
+const { setCelebrateAnimate } = appStore.exploreStore;
 
 const leftRef = ref<any>(null);
-
 const clockInText = ref<string>("上班打卡");
+const clockTime = ref<string>("");
+const clockDate = ref<string>("");
 const clockIn = ref<any>(null);
 const clockType = ref<number>(-1);
 
@@ -30,6 +34,7 @@ const clockConfig = ref<any>(null);
 const clockVisible = ref<boolean>(false);
 const clockMessageVisible = ref<boolean>(false);
 const closeMessage = ref<any>(null);
+const timer = ref<any>(null);
 let observer: ResizeObserver | null = null;
 onMounted(() => {
   console.log(leftRef.value.offsetLeft);
@@ -39,10 +44,8 @@ onMounted(() => {
     observer = new ResizeObserver(handleResize);
     observer.observe(leftRef.value);
   }
-  window.addEventListener("message", getMessage);
 });
 onUnmounted(() => {
-  window.removeEventListener("message", getMessage);
   if (closeMessage.value) {
     closeMessage.value();
   }
@@ -65,24 +68,7 @@ const handleResize = (entries: any) => {
     // 这里可以执行针对宽高变化的操作
   }
 };
-const getMessage = (e) => {
-  if (e.data && !e.data.source) {
-    const messageData =
-      typeof e.data === "string" ? JSON.parse(e.data) : e.data;
-    console.log(messageData);
-    switch (messageData.eventName) {
-      case "check-in-complete":
-        // router.push(`/home/taskBoard`);
-        setMessage("success", "打卡成功");
-        setIframeVisible(false, null);
-        clockVisible.value = false;
-        clockMessageVisible.value = false;
-        clockType.value = clockType.value + 1;
-        closeMessage.value();
-        break;
-    }
-  }
-};
+
 const getTodayCheckIn = async (key) => {
   let checkInRes = (await api.request.get("clockIn/today", {
     teamKey: key,
@@ -100,13 +86,22 @@ const getTodayCheckIn = async (key) => {
     clockIn.value = checkInRes.data;
     //@ts-ignore
     clockConfig.value = checkInRes.config;
-    if (clockIn.value === null) {
+    if (clockIn.value === null && clockConfig.value.openStartWork) {
       clockType.value = 0;
-    } else if (clockIn.value.noonBreakTime === null) {
+    } else if (
+      clockIn.value.noonBreakTime === null &&
+      clockConfig.value.openNoonBreak
+    ) {
       clockType.value = 1;
-    } else if (clockIn.value.noonEndTime === null) {
+    } else if (
+      clockIn.value.noonEndTime === null &&
+      clockConfig.value.openNoonEnd
+    ) {
       clockType.value = 2;
-    } else if (clockIn.value.endWorkTime === null) {
+    } else if (
+      clockIn.value.endWorkTime === null &&
+      clockConfig.value.openEndWork
+    ) {
       clockType.value = 3;
     } else {
       clockType.value = 4;
@@ -143,10 +138,18 @@ const getTodayCheckIn = async (key) => {
         // console.log(noonEndTime);
         // console.log(endWorkTime);
         if (
-          (clockType.value === 0 && dayjs().valueOf() > startWorkTime) ||
-          (clockType.value === 1 && dayjs().valueOf() > noonBreakTime) ||
-          (clockType.value === 2 && dayjs().valueOf() > noonEndTime) ||
-          (clockType.value === 3 && dayjs().valueOf() > endWorkTime)
+          (clockType.value === 0 &&
+            dayjs().valueOf() > startWorkTime &&
+            clockConfig.value.openStartWork) ||
+          (clockType.value === 1 &&
+            dayjs().valueOf() > noonBreakTime &&
+            clockConfig.value.openNoonBreak) ||
+          (clockType.value === 2 &&
+            dayjs().valueOf() > noonEndTime &&
+            clockConfig.value.openNoonEnd) ||
+          (clockType.value === 3 &&
+            dayjs().valueOf() > endWorkTime &&
+            clockConfig.value.openEndWork)
         ) {
           clockVisible.value = true;
         }
@@ -154,6 +157,22 @@ const getTodayCheckIn = async (key) => {
     }, 1000);
   }
 };
+const setTodayCheckIn = async () => {
+  let checkInRes = (await api.request.post("clockIn", {
+    teamKey: spaceKey.value,
+    clockType: clockType.value + 1,
+  })) as ResultProps;
+  if (checkInRes.msg === "OK") {
+    setMessage("success", `${clockInText.value}成功`);
+    clockVisible.value = false;
+    clockType.value = clockType.value + 1;
+    setCelebrateAnimate(true);
+    setTimeout(() => {
+      setCelebrateAnimate(false);
+    }, 4000);
+  }
+};
+
 const toggleIcon = (state) => {
   if (state) {
     setClose(0);
@@ -178,33 +197,49 @@ watch(
   },
   { immediate: true }
 );
-watch(clockVisible, (newVisible) => {
-  if (newVisible) {
-    clockMessageVisible.value = true;
-  }
-});
-watch(clockMessageVisible, (newVisible) => {
-  if (newVisible) {
-    closeMessage.value = $q.notify({
-      progress: true,
-      icon: "warning",
-      color: "warning",
-      message: `即将可以${clockInText.value}`,
-      position: "top-right",
-      multiLine: true,
-      timeout: 86400000,
-      actions: [
-        {
-          label: "确认",
-          color: "yellow",
-          handler: () => {
-            closeMessage.value();
-          },
-        },
-      ],
-    });
-  }
-});
+watch(
+  clockVisible,
+  (newVisible) => {
+    if (newVisible) {
+      clockTime.value = dayjs().format("H:mm");
+      clockDate.value =
+        dayjs().format("M月D日") + " 星期" + "日一二三四五六"[dayjs().day()];
+      timer.value = setInterval(() => {
+        clockTime.value = dayjs().format("H:mm");
+        clockDate.value =
+          dayjs().format("M月") + " 星期" + "日一二三四五六"[dayjs().day()];
+      }, 60000);
+    } else {
+      if (timer.value) {
+        clearInterval(timer.value);
+        timer.value = null;
+      }
+    }
+  },
+  { immediate: true }
+);
+// watch(clockMessageVisible, (newVisible) => {
+//   if (newVisible) {
+//     closeMessage.value = $q.notify({
+//       progress: true,
+//       icon: "warning",
+//       color: "warning",
+//       message: `即将可以${clockInText.value}`,
+//       position: "top-right",
+//       multiLine: true,
+//       timeout: 86400000,
+//       actions: [
+//         {
+//           label: "确认",
+//           color: "yellow",
+//           handler: () => {
+//             closeMessage.value();
+//           },
+//         },
+//       ],
+//     });
+//   }
+// });
 watch(clockType, (newType) => {
   switch (newType) {
     case 0:
@@ -223,7 +258,7 @@ watch(clockType, (newType) => {
 });
 watch(showState, (newState) => {
   if (!newState) {
-    setLeftVisible(false)
+    setLeftVisible(false);
   }
 });
 </script>
@@ -278,9 +313,7 @@ watch(showState, (newState) => {
           flat
           round
           @mouseenter="
-            showState && closeNum !== 1
-              ? (leftVisible = true)
-              : null
+            showState && closeNum !== 1 ? (leftVisible = true) : null
           "
           v-else
         >
@@ -288,7 +321,33 @@ watch(showState, (newState) => {
         </q-btn>
       </template>
     </div>
-    <q-btn
+    <!-- -->
+    <div v-if="clockVisible" class="clockIn-box">
+      <div class="clockIn-left">
+        <div class="clockIn-time">{{ clockTime }}</div>
+        <div class="clockIn-date">{{ clockDate }}</div>
+      </div>
+      <div class="clockIn-button">
+        <q-btn flat round size="45px" @click="setTodayCheckIn">
+          <div style="font-size: 22px">{{ clockInText }}</div>
+        </q-btn>
+      </div>
+      <!-- <div class="clockIn-button">{{ clockInText }}</div> -->
+      <div
+        class="clockIn-link"
+        @click="
+          setIframeVisible(true, {
+            url: `https://checkin.qingtime.cn/checkIn?token=${token}&teamKey=${spaceKey}`,
+            title: '打卡',
+          })
+        "
+      >
+        查看工作
+        <Icon name="rightArrow" :size="12" class="q-ml-xs" />
+      </div>
+    </div>
+    <CelebrateAnimate v-if="celebrateAnimate" />
+    <!-- <q-btn
       color="primary"
       round
       size="25px"
@@ -298,10 +357,9 @@ watch(showState, (newState) => {
           title: '打卡',
         })
       "
-      v-if="clockVisible"
-      class="clockIn-button"
+  
       ><div class="clockIn-button-box">{{ clockInText }}</div></q-btn
-    >
+    > -->
     <q-dialog v-model="leftVisible" position="left" class="dialog-transparent">
       <q-card class="left-dialog">
         <!-- <div class="left-dialog"> -->
@@ -364,13 +422,54 @@ watch(showState, (newState) => {
   }
 }
 
-.clockIn-button {
+.clockIn-box {
+  width: 370px;
+  height: 220px;
   position: fixed;
   z-index: 9000;
   bottom: 20px;
   right: 20px;
-  .clockIn-button-box {
-    font-size: 15px;
+  background-image: url("/clockBg.png");
+  background-size: 100% 100%;
+  // background-attachment: fixed;
+  .clockIn-left {
+    width: 180px;
+    height: 150px;
+    position: absolute;
+    z-index: 2;
+    left: 0px;
+    top: 60px;
+    text-align: center;
+    .clockIn-time {
+      font-size: 50px;
+    }
+    .clockIn-date {
+      font-size: 14px;
+    }
+  }
+  .clockIn-link {
+    position: absolute;
+    z-index: 2;
+    right: 20px;
+    top: 15px;
+    color: #2a8a51;
+    cursor: pointer;
+  }
+  .clockIn-button {
+    width: 140px;
+    height: 140px;
+    position: absolute;
+    z-index: 2;
+    right: 20px;
+    bottom: 20px;
+    background: linear-gradient(132deg, #16ca4c 14%, #18ae44 86%);
+    border: 1px solid #33ba69;
+    border-radius: 50%;
+    box-shadow: 0px 0px 22px 0px #07be51;
+    font-size: 18px;
+    color: #fff;
+    text-align: center;
+    line-height: 140px;
   }
 }
 .left-dialog {

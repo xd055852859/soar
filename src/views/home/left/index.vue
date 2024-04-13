@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ResultProps } from "@/interface/Common";
 import api from "@/services/api";
+import _ from "lodash";
 import TeamMenu from "@/views/home/left/menu/team/index.vue";
 import ResourceMenu from "@/views/home/left/menu/resource/index.vue";
 import MateMenu from "@/views/home/left/menu/mate/index.vue";
@@ -31,11 +32,12 @@ const {
   spaceTaskNum,
   spaceReportNum,
   privateTeamKey,
+  reportConfig,
 } = storeToRefs(appStore.spaceStore);
 
 const { clearStore, setSearchVisible, setIframeDetail } = appStore.commonStore;
 const { setUserInfo, setToken } = appStore.authStore;
-const { setSpaceKey, setSpaceList } = appStore.spaceStore;
+const { setSpaceKey, setSpaceList, setReportConfig } = appStore.spaceStore;
 const { setTeamKey, setTargetTeamKey } = appStore.teamStore;
 const { setCardKey } = appStore.cardStore;
 const { clickExplore } = appStore.exploreStore;
@@ -49,7 +51,57 @@ const sortList = ref<any>([]);
 const urlBase64 = ref<any>(null);
 const cropperRef = ref<any>(null);
 const menuTab = ref<string>("team");
-
+const reportState = ref<boolean>(false);
+onMounted(() => {
+  window.addEventListener("message", getMessage);
+});
+onUnmounted(() => {
+  window.removeEventListener("message", getMessage);
+});
+const getMessage = (e) => {
+  if (e.data && !e.data.source) {
+    const messageData =
+      typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+    console.log(messageData);
+    switch (messageData.eventName) {
+      case "saveReport":
+        let config = _.cloneDeep(reportConfig.value);
+        //messageData.data.reportType
+        switch (messageData.data.reportType) {
+          case "day":
+            reportState.value = true;
+            config.dayDone = true;
+            config.dayKey = messageData.data.reportKey;
+            break;
+          case "day":
+            config.weekDone = true;
+            config.weekKey = messageData.data.reportKey;
+            break;
+          case "month":
+            config.monthDone = true;
+            config.monthKey = messageData.data.reportKey;
+            break;
+          case "year":
+            config.yearDone = true;
+            config.yearKey = messageData.data.reportKey;
+            break;
+        }
+        setReportConfig(config);
+        break;
+    }
+  }
+};
+const toReport = (reportType) => {
+  setIframeDetail({
+    url: `https://hb.qingtime.cn/?token=${token.value}&teamKey=${spaceKey.value}&reportType=${reportType}&${
+      reportConfig.value[`${reportType}Done`]
+        ? `reportKey=${reportConfig.value[`${reportType}Key`]}`
+        : "isWrite=1"
+    }`,
+    title: "汇报",
+  });
+  router.push("/home/freedom");
+};
 const chooseSpace = (key) => {
   setSpaceKey(key);
   setTeamKey("");
@@ -306,7 +358,7 @@ watch(
     </div>
   </div>
   <div
-    class="left-subtitle"
+    class="left-subtitle dp-space-center"
     @click="
       setIframeDetail({
         url: `https://hb.qingtime.cn/?token=${token}&teamKey=${spaceKey}`,
@@ -316,22 +368,74 @@ watch(
     "
     :style="{ color: $route.name === 'freedom' ? '#07be51' : '#333' }"
   >
-    <Icon
-      name="huibao1"
-      :size="20"
-      :color="$route.name === 'freedom' ? '#07be51' : '#333'"
-      class="q-mr-sm"
-    />
+    <div class="dp--center">
+      <Icon
+        name="huibao1"
+        :size="20"
+        :color="$route.name === 'freedom' ? '#07be51' : '#333'"
+        class="q-mr-sm"
+      />
 
-    <!-- <div class="badge-box"> -->
-    日常汇报
-    <q-badge rounded color="red" v-if="spaceReportNum" class="q-ml-sm">{{
-      spaceReportNum
-    }}</q-badge>
-    <!-- </div> -->
+      <!-- <div class="badge-box"> -->
+      汇报
+      <q-badge rounded color="red" v-if="spaceReportNum" class="q-ml-sm">{{
+        spaceReportNum
+      }}</q-badge>
+      <!-- </div> -->
+    </div>
+    <div class="dp--center">
+      <template v-if="reportConfig?.dayDone">
+        <span
+          class="icon-point"
+          @click.stop="toReport('day')"
+          :style="{ color: '#bdbdbd' }"
+          >日</span
+        >
+        <span class="text-grey-5 q-ma-xs">|</span>
+
+        <span
+          class="icon-point"
+          @click.stop="toReport('week')"
+          :style="{
+            color: reportConfig.weekDone ? '#bdbdbd' : '#07be51',
+          }"
+          >周</span
+        >
+        <span class="text-grey-5 q-ma-xs">|</span>
+        <span
+          class="icon-point"
+          @click.stop="toReport('month')"
+          :style="{
+            color: reportConfig.monthDone ? '#bdbdbd' : '#07be51',
+          }"
+          >月</span
+        >
+        <span class="text-grey-5 q-ma-xs">|</span>
+        <span
+          class="icon-point"
+          @click.stop="toReport('year')"
+          :style="{
+            color: reportConfig.yearDone ? '#bdbdbd' : '#07be51',
+          }"
+          >年</span
+        >
+      </template>
+      <template v-else>
+        <q-btn
+          label="写日报"
+          color="primary"
+          @click.stop="
+            setIframeDetail({
+              url: `https://hb.qingtime.cn/?token=${token}&teamKey=${spaceKey}&reportType=day&isWrite=1`,
+              title: '汇报',
+            });
+            router.push('/home/freedom');
+          "
+      /></template>
+    </div>
   </div>
   <div
-    class="left-subtitle"
+    class="left-subtitle dp--center"
     @click="$router.push('/home/task')"
     :style="{ color: $route.name === 'task' ? '#07be51' : '#333' }"
   >
@@ -343,7 +447,7 @@ watch(
     />
     <!-- <div class="badge-box"> -->
 
-    项目任务
+    任务
     <q-badge rounded color="red" v-if="spaceTaskNum" class="q-ml-sm">{{
       spaceTaskNum
     }}</q-badge>
@@ -478,7 +582,7 @@ watch(
   height: 45px;
   line-height: 45px;
   cursor: pointer;
-  @include flex(flex-start, center, null);
+  // @include flex(flex-start, center, null);
 }
 .left-menu {
   width: 100%;

@@ -125,6 +125,10 @@ const createTree = async (item, index) => {
       flat: true,
     },
   }).onOk(async (data) => {
+    if (!data) {
+      setMessage("error", "请输入事务树名称");
+      return;
+    }
     let taskRes = (await api.request.post("card", {
       projectKey: teamKey.value,
       type: "taskTree",
@@ -135,7 +139,7 @@ const createTree = async (item, index) => {
       let list = _.cloneDeep(teamList.value);
       list[index].cardList.unshift(taskRes.data);
       setTeamList(list);
-      teamKey.value = taskRes.data._key;
+      // teamKey.value = taskRes.data._key;
       router.push(`/home/team/teamTree/${taskRes.data._key}`);
     }
   });
@@ -161,9 +165,9 @@ const deleteTree = (item, index, teamIndex) => {
           treeKey.value = "";
           router.push(`/home/team`);
         } else {
-          treeKey.value = list[teamIndex].cardList[index - 1]._key;
+          treeKey.value = list[teamIndex].cardList[0]._key;
           router.push(
-            `/home/team/teamTree/${list[teamIndex].cardList[index - 1]._key}`
+            `/home/team/teamTree/${list[teamIndex].cardList[0]._key}`
           );
         }
         setTeamList(list);
@@ -266,12 +270,7 @@ watchEffect(() => {
               >
                 <Icon name="a-chuangjian2" :size="20" />
               </q-btn>
-              <q-btn
-                flat
-                round
-                size="9px"
-                @click.stop="targetTeamKey = item._key"
-              >
+              <q-btn flat round @click.stop="targetTeamKey = item._key">
                 <Icon name="gengduo" :size="18" />
                 <q-menu anchor="top right" self="top left" class="q-pa-sm">
                   <q-list dense>
@@ -319,7 +318,7 @@ watchEffect(() => {
             </div>
           </div>
           <template
-            v-if="item.cardList.length > 0 && teamKey === item._key&&$route.path!.indexOf('home/team')!==-1 "
+            v-if="item.cardList&&item.cardList.length > 0 && teamKey === item._key&&$route.path!.indexOf('home/team')!==-1 "
           >
             <div
               class="teamMenu-item-subtitle icon-point"

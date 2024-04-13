@@ -20,15 +20,13 @@ export const commonStore = defineStore(
     const musicNum = ref<number>(0);
     const iframeVisible = ref<boolean>(false);
     const iframeInfo = ref<any>(null);
-    const iframeDetail= ref<any>(null);
+    const iframeDetail = ref<any>(null);
     const overKey = ref<string>("");
     const closeNum = ref<number>(-1);
     const showState = ref<boolean>(false);
     const searchVisible = ref<boolean>(false);
     const leftVisible = ref<boolean>(false);
     const searchKey = ref<string | undefined>("");
-    const clockVisible = ref<boolean>(true);
-    const clockMessageVisible = ref<boolean>(false);
     let searchCallBack: any = null;
     const setDeviceType = (newDeviceType: string) => {
       deviceType.value = newDeviceType;
@@ -116,6 +114,7 @@ export const commonStore = defineStore(
         searchCallBack(node);
       }
     };
+
     const clearStore = () => {
       authStore().$reset();
       noteStore().$reset();

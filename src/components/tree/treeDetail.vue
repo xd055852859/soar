@@ -21,7 +21,7 @@ const props = defineProps<{
   showFile?: boolean;
 }>();
 const emits = defineEmits<{
-  (e: "updateDetail", type: string, obj: any): void;
+  (e: "updateDetail", type: string, obj: any, detail?: any): void;
   (e: "clearDetail", type: string, key?: string): void;
   (e: "close"): void;
 }>();
@@ -102,7 +102,7 @@ const updateDetail = (type, obj) => {
       }
       break;
     case "file":
-      console.log(obj)
+      console.log(obj);
       fileName.value = obj.fileName;
       break;
     case "relaters":
@@ -122,9 +122,14 @@ const updateDetail = (type, obj) => {
       }
       break;
   }
-  emits("updateDetail", type, {
-    ...obj,
-  })!;
+  emits(
+    "updateDetail",
+    type,
+    {
+      ...obj,
+    },
+    nodeInfo.value
+  )!;
 };
 const clearDetail = (type, key?: string) => {
   switch (type) {

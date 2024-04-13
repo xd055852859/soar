@@ -77,7 +77,15 @@ const updateTeam = async () => {
       setLoading(false);
       setMessage("success", "创建群组成功");
       setTeamKey(teamRes.data._key);
-      setTeamList([...teamList.value, teamRes.data]);
+      let list = _.cloneDeep(teamList.value);
+      let targetIndex = -1;
+      list.forEach((item, index) => {
+        if (targetIndex === -1 && item.top) {
+          targetIndex = index + 1;
+        }
+      });
+      list.splice(targetIndex, 0, teamRes.data);
+      setTeamList(list);
       emits("close");
     }
   }
@@ -154,12 +162,7 @@ watchEffect(() => {
       </div>
     </template>
     <template #footer>
-      <q-btn
-        flat
-        label="取消"
-        color="grey-5"
-        @click="emits('close')"
-        dense />
+      <q-btn flat label="取消" color="grey-5" @click="emits('close')" dense />
       <q-btn label="确认" color="primary" @click="updateTeam"
     /></template>
   </c-dialog>

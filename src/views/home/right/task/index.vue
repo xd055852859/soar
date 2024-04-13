@@ -7,23 +7,24 @@ import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import _ from "lodash";
 import Icon from "@/components/common/Icon.vue";
-import TeamTask from "../team/tab/teamTask.vue";
+
 import FileCard from "@/components/fileCard/fileCard.vue";
 import search from "@/components/search/search.vue";
-const { spaceKey, spaceMemberList } = storeToRefs(appStore.spaceStore);
-const { token } = storeToRefs(appStore.authStore);
+const dayjs: any = inject("dayjs");
+const { spaceKey } = storeToRefs(appStore.spaceStore);
+const { token, user } = storeToRefs(appStore.authStore);
+const { mateList } = storeToRefs(appStore.mateStore);
 const { setTeamKey } = appStore.teamStore;
-const { setCardKey, setCardVisible } = appStore.cardStore;
 const { setIframeVisible } = appStore.commonStore;
 const nodeKey = ref<string>("");
-const taskTab = ref<string>("tree");
+const nodeInfo = ref<any>(null);
+const taskTab = ref<string>("execute");
 const taskList = ref<any>([]);
 const searchMemberList = ref<any>([]);
-const taskIndex = ref<number>(0);
+const lineIndex = ref<number>(0);
+const taskLineIndex = ref<number>(0);
 const taskUser = ref<any>(null);
 const searchName = ref<string>("");
-const { user } = storeToRefs(appStore.authStore);
-const { treeVisible } = storeToRefs(appStore.cardStore);
 
 const getTaskList = async () => {
   let taskRes = (await api.request.get("task/team", {
@@ -31,19 +32,24 @@ const getTaskList = async () => {
     targetUserKey: taskUser.value._key
       ? taskUser.value._key
       : taskUser.value.userKey,
+    type: taskTab.value,
   })) as ResultProps;
   if (taskRes.msg === "OK") {
     taskList.value = [...taskRes.data];
   }
 };
-const chooseCard = (detail, index) => {
-  nodeKey.value = detail._key;
-  setTeamKey(detail.projectInfo._key);
-  taskIndex.value = index;
-};
-const chooseTaskTree = (detail) => {
-  setCardKey(detail._key);
-  setCardVisible(true, "tasktree");
+const chooseCard = (detail, type) => {
+  switch (type) {
+    case "update":
+      taskList.value[detail.boxIndex].taskList[detail.taskIndex] = {
+        ...taskList.value[detail.boxIndex].taskList[detail.taskIndex],
+        ...detail,
+      };
+      break;
+    case "delete":
+    taskList.value[detail.boxIndex].taskList.splice(detail.taskIndex, 1);
+      break;
+  }
 };
 watchEffect(() => {
   console.log(taskUser.value);
@@ -56,22 +62,21 @@ watchEffect(() => {
     taskUser.value = { ...user.value };
   }
 });
-watch(
-  searchName,
-  (newName) => {
+watchEffect(() => {
+  if (user.value && mateList.value) {
     let memberList: any = [];
-    if (newName) {
+    if (searchName.value) {
       // let list = _.cloneDeep(searchMemberList);
-      memberList = spaceMemberList.value.filter((item) => {
-        return item.userName && item.userName.indexOf(newName) !== -1;
+      memberList = [user.value, ...mateList.value].filter((item) => {
+        return item.userName && item.userName.indexOf(searchName.value) !== -1;
       });
     } else {
-      memberList = [...spaceMemberList.value];
+      memberList = [user.value, ...mateList.value];
     }
     searchMemberList.value = memberList;
-  },
-  { immediate: true, deep: true }
-);
+    console.log(memberList);
+  }
+});
 </script>
 <template>
   <div class="task">
@@ -124,12 +129,23 @@ watch(
                         "
                       />
                     </q-avatar>
-                    {{ item.userName }}
+                    {{ item?.userName }}
                   </div></q-item-section
                 >
               </q-item>
             </q-list>
           </q-menu>
+        </div>
+        <div class="q-ml-lg">
+          <q-tabs
+            dense
+            v-model="taskTab"
+            active-color="primary"
+            class="text-grey-7"
+          >
+            <q-tab name="execute" label="执行" style="width: 60px" />
+            <q-tab name="create" label="创建" style="width: 60px" />
+          </q-tabs>
         </div>
       </template>
     </cHeader>
@@ -141,7 +157,7 @@ watch(
       >
         <div class="taskItem-top">
           <div>{{ item.projectName }} / {{ item.title }}</div>
-          <div>
+          <!-- <div>
             <q-btn
               round
               flat
@@ -155,7 +171,7 @@ watch(
             >
               <Icon name="quanping_o" :size="20" />
             </q-btn>
-          </div>
+          </div> -->
         </div>
         <div class="taskItem-bottom">
           <template
@@ -164,6 +180,8 @@ watch(
           >
             <FileCard
               :card="taskItem"
+              :boxIndex="lineIndex"
+              :taskIndex="taskIndex"
               type="taskBox"
               @chooseCard="chooseCard"
             />

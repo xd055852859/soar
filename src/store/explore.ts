@@ -27,6 +27,7 @@ export const exploreStore = defineStore(
       backColor: "",
       search: { label: "百度", url: "https://www.baidu.com/s?ie=utf-8&word=" },
     });
+    const celebrateAnimate = ref<boolean>(false);
     let initConfig = {
       backType: 0,
       mask: 0,
@@ -85,7 +86,9 @@ export const exploreStore = defineStore(
           break;
         case "apiTable":
           window.open(
-            `https://apitable.qingtime.cn?username=${authStore().user!._key}@gmail.com&credential=${authStore().user!._key}`
+            `https://apitable.qingtime.cn?username=${
+              authStore().user!._key
+            }@gmail.com&credential=${authStore().user!._key}`
           );
 
           break;
@@ -96,7 +99,16 @@ export const exploreStore = defineStore(
           router.push(`/home/${type}`);
       }
     };
-    return { exploreConfig, setExploreConfig, clickExplore };
+    const setCelebrateAnimate = (state) => {
+      celebrateAnimate.value = state;
+    };
+    return {
+      exploreConfig,
+      setExploreConfig,
+      clickExplore,
+      celebrateAnimate,
+      setCelebrateAnimate,
+    };
   }
   //   ,
   //   { persist: true }

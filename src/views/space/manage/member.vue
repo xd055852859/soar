@@ -335,6 +335,7 @@ watch(memberInput, (newName) => {
                 v-model="props.row.userName"
                 v-slot="scope"
                 @save="(value) => updateMember(value, 'userName', props.row)"
+                auto-save
                 v-if="
                   spaceRole < props.row.role || props.row.userKey === user!._key
                 "
@@ -354,6 +355,7 @@ watch(memberInput, (newName) => {
               <q-popup-edit
                 v-model="props.row.nickName"
                 v-slot="scope"
+                auto-save
                 @save="(value) => updateMember(value, 'nickName', props.row)"
                 v-if="spaceRole < props.row.role|| props.row.userKey === user!._key"
               >
@@ -373,6 +375,7 @@ watch(memberInput, (newName) => {
                 v-model="props.row.post"
                 v-slot="scope"
                 @save="(value) => updateMember(value, 'post', props.row)"
+                auto-save
                 v-if="spaceRole < props.row.role|| props.row.userKey === user!._key"
               >
                 <q-input
