@@ -73,7 +73,7 @@ const getMessage = (e) => {
             config.dayDone = true;
             config.dayKey = messageData.data.reportKey;
             break;
-          case "day":
+          case "week":
             config.weekDone = true;
             config.weekKey = messageData.data.reportKey;
             break;

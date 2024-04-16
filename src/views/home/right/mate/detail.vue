@@ -12,7 +12,7 @@ import _ from "lodash";
 import { formatName, dayArray, signatureArray } from "@/services/config/config";
 import { commonscroll } from "@/services/util/common";
 
-const { spaceKey } = storeToRefs(appStore.spaceStore);
+const { spaceKey, privateTeamKey } = storeToRefs(appStore.spaceStore);
 const { mateKey, mateList, mateInfo } = storeToRefs(appStore.mateStore);
 const { setMateKey, getMateList } = appStore.mateStore;
 const { setTeamKey } = appStore.teamStore;
@@ -82,6 +82,7 @@ const getMateCard = async () => {
     }
     mateCardList.value = [...mateCardList.value, ...detailRes.data];
     total.value = detailRes.total as number;
+    console.log(mateCardList.value);
   }
 };
 const joinTeam = async (key) => {
@@ -174,8 +175,8 @@ const getPayNumData = async () => {
       if (item[0]?.begTime) {
         monthTitleArr.value.unshift(dayjs(item[0].begTime).format("M") + "月");
         item = formatMonth(item[0].begTime, item);
-      }else{
-        monthTitleArr.value.unshift("")
+      } else {
+        monthTitleArr.value.unshift("");
       }
     });
     monthData.value.reverse();
@@ -373,7 +374,11 @@ watchEffect(() => {
               v-for="(item, index) in monthData"
               :key="`monthData${index}`"
             >
-              <div class="vitality-month-title" @click="" v-if="monthTitleArr[index]">
+              <div
+                class="vitality-month-title"
+                @click=""
+                v-if="monthTitleArr[index]"
+              >
                 {{ monthTitleArr[index] }}
               </div>
               <div class="vitality-month-info">
@@ -442,16 +447,17 @@ watchEffect(() => {
           </div>
         </div>
         <div class="teamMenu-list" v-else-if="menuTab === 'notJoined'">
-          <div
-            class="teamMenu-item icon-point"
-            v-for="(item, index) in mateJoinList"
-            :key="`team${index}`"
-          >
-            <div># {{ item.name }}</div>
-            <div @click="joinTeam(item._key)">
-              <q-btn color="primary" flat label="申请加入" size="12px" />
+          <template v-for="(item, index) in mateJoinList" :key="`team${index}`">
+            <div
+              class="teamMenu-item icon-point"
+              v-if="item._key !== privateTeamKey"
+            >
+              <div># {{ item.name }}</div>
+              <div @click="joinTeam(item._key)">
+                <q-btn color="primary" flat label="申请加入" size="12px" />
+              </div>
             </div>
-          </div>
+          </template>
         </div>
       </div>
     </div>
@@ -486,7 +492,7 @@ watchEffect(() => {
           indicator-color="primary"
           active-class="text-primary"
         >
-          <q-tab name="taskBox" label="任务" />
+          <q-tab name="task" label="任务" />
           <q-tab name="doc" label="文档" />
         </q-tabs>
         <q-card flat class="mateDetail-right-card">
@@ -503,7 +509,11 @@ watchEffect(() => {
                 v-for="(item, index) in mateCardList"
                 :key="`file${index}`"
               >
-                <fileCard :card="item" :type="mateTab" outType="mate" />
+                <fileCard
+                  :card="item"
+                  :type="mateTab === 'task' ? 'taskBox' : 'doc'"
+                  outType="mate"
+                />
               </template>
             </div>
           </q-card-section>

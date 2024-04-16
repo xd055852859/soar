@@ -353,28 +353,31 @@ const updateMilestones = (date) => {
     selectnodes.value = [nodes.value[nodeInfo.value._key]];
   }
   let endTime = dayjs(date).endOf("day").valueOf();
-  let obj = {
-    milestone: {
-      date: endTime,
-      month: dayjs(date).month() + 1,
-      day: dayjs(date).date(),
-    },
-  };
+  // let obj = {
+  //   milestone: {
+  //     date: endTime,
+  //     month: dayjs(date).month() + 1,
+  //     day: dayjs(date).date(),
+  //   },
+  // };
   treeRef.value.__veauryReactRef__.updateNodeBatch(
     {
       endTime: endTime,
-      startAdornmentContent: {
-        ...obj,
-      },
+      // startAdornmentContent: {
+      //   ...obj,
+      // },
     },
     async (newNodes) => {
       selectnodes.value.forEach((item) => {
         newNodes[item._key].endTime = endTime;
-        newNodes[item._key].startAdornmentContent = setAdornmentContentArr(
-          newNodes[item._key],
-          "startAdornmentContent",
-          obj
-        );
+        newNodes[item._key].showStatus = true;
+        newNodes[item._key].limitDay =
+          dayjs(endTime).endOf("day").valueOf() + 1;
+        // newNodes[item._key].startAdornmentContent = setAdornmentContentArr(
+        //   newNodes[item._key],
+        //   "startAdornmentContent",
+        //   obj
+        // );
         newNodes[item._key] = treeRef.value.__veauryReactRef__.formatNode(
           newNodes[item._key]
         );
@@ -696,13 +699,16 @@ const updateDetail = (type, obj) => {
         async (newNodes) => {
           console.log(endTime);
           newNodes[nodeKey.value].endTime = endTime;
-          setAdornmentContent(nodeInfo.value, "startAdornmentContent", {
-            milestone: {
-              date: endTime,
-              month: dayjs(obj.date).month() + 1,
-              day: dayjs(obj.date).date(),
-            },
-          });
+          newNodes[nodeKey.value].showStatus = true;
+          newNodes[nodeKey.value].limitDay =
+            dayjs(endTime).endOf("day").valueOf() + 1;
+          // setAdornmentContent(nodeInfo.value, "startAdornmentContent", {
+          //   milestone: {
+          //     date: endTime,
+          //     month: dayjs(obj.date).month() + 1,
+          //     day: dayjs(obj.date).date(),
+          //   },
+          // });
           getmilestoneList(props.cardKey);
         },
         nodeKey.value
@@ -779,10 +785,12 @@ const clearDetail = (type, key?: string) => {
         async (newNodes) => {
           selectnodes.value.forEach((item) => {
             newNodes[item._key].endTime = null;
+            newNodes[item._key].limitDay = null;
+            newNodes[item._key].showStatus = false;
           });
-          clearAdornmentContent("startAdornmentContent", type, newNodes, () => {
-            getmilestoneList(props.cardKey);
-          });
+          // clearAdornmentContent("startAdornmentContent", type, newNodes, () => {
+          //   getmilestoneList(props.cardKey);
+          // });
         },
         selectKeys.value
       );
@@ -816,7 +824,7 @@ const changeOutData = (type, data) => {
 watch(
   () => props.cardKey,
   (newKey) => {
-    console.log(newKey)
+    console.log(newKey);
     getTreeInfo(newKey);
     getmilestoneList(newKey);
   },

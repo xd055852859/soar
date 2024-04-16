@@ -67,11 +67,11 @@ const mateKey = ref<string>("");
   .mateMenu-item {
     .mateMenu-item-title {
       width: 100%;
-      height: 40px;
+      height: 50px;
       font-size: 14px;
       border-radius: 4px;
       box-sizing: border-box;
-      line-height: 40px;
+      line-height: 50px;
       @include flex(flex-start, center, null);
     }
     .mateMenu-item-avatar {

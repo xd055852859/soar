@@ -86,26 +86,6 @@ const getTodayCheckIn = async (key) => {
     clockIn.value = checkInRes.data;
     //@ts-ignore
     clockConfig.value = checkInRes.config;
-    if (clockIn.value === null && clockConfig.value.openStartWork) {
-      clockType.value = 0;
-    } else if (
-      clockIn.value.noonBreakTime === null &&
-      clockConfig.value.openNoonBreak
-    ) {
-      clockType.value = 1;
-    } else if (
-      clockIn.value.noonEndTime === null &&
-      clockConfig.value.openNoonEnd
-    ) {
-      clockType.value = 2;
-    } else if (
-      clockIn.value.endWorkTime === null &&
-      clockConfig.value.openEndWork
-    ) {
-      clockType.value = 3;
-    } else {
-      clockType.value = 4;
-    }
     clockTimer.value = setInterval(() => {
       if (clockConfig.value) {
         let startWorkTime = clockConfig.value.startWorkTime
@@ -137,22 +117,40 @@ const getTodayCheckIn = async (key) => {
         // console.log(noonBreakTime);
         // console.log(noonEndTime);
         // console.log(endWorkTime);
+
         if (
-          (clockType.value === 0 &&
-            dayjs().valueOf() > startWorkTime &&
-            clockConfig.value.openStartWork) ||
-          (clockType.value === 1 &&
-            dayjs().valueOf() > noonBreakTime &&
-            clockConfig.value.openNoonBreak) ||
-          (clockType.value === 2 &&
-            dayjs().valueOf() > noonEndTime &&
-            clockConfig.value.openNoonEnd) ||
-          (clockType.value === 3 &&
-            dayjs().valueOf() > endWorkTime &&
-            clockConfig.value.openEndWork)
+          dayjs().valueOf() > startWorkTime &&
+          dayjs().valueOf() <= startWorkTime + 4500000 &&
+          clockConfig.value.openStartWork&&!clockIn.value.startWorkTime
         ) {
+          clockType.value = 1;
           clockVisible.value = true;
         }
+        if (
+          dayjs().valueOf() > noonBreakTime &&
+          dayjs().valueOf() <= noonBreakTime + 4500000 &&
+          clockConfig.value.openNoonBreak&&!clockIn.value.noonBreakTime
+        ) {
+          clockType.value = 2;
+          clockVisible.value = true;
+        }
+        if (
+          dayjs().valueOf() > noonEndTime &&
+          dayjs().valueOf() <= noonEndTime + 4500000 &&
+          clockConfig.value.openNoonEnd&&!clockIn.value.noonEndTime
+        ) {
+          clockType.value = 3;
+          clockVisible.value = true;
+        }
+        if (
+          dayjs().valueOf() > endWorkTime &&
+          dayjs().valueOf() <= endWorkTime + 4500000 &&
+          clockConfig.value.openEndWork&&!clockIn.value.endWorkTime
+        ) {
+          clockType.value = 4;
+          clockVisible.value = true;
+        }
+        console.log(clockType.value);
       }
     }, 1000);
   }
@@ -160,12 +158,11 @@ const getTodayCheckIn = async (key) => {
 const setTodayCheckIn = async () => {
   let checkInRes = (await api.request.post("clockIn", {
     teamKey: spaceKey.value,
-    clockType: clockType.value + 1,
+    clockType: clockType.value,
   })) as ResultProps;
   if (checkInRes.msg === "OK") {
     setMessage("success", `${clockInText.value}成功`);
     clockVisible.value = false;
-    clockType.value = clockType.value + 1;
     setCelebrateAnimate(true);
     setTimeout(() => {
       setCelebrateAnimate(false);
@@ -242,16 +239,16 @@ watch(
 // });
 watch(clockType, (newType) => {
   switch (newType) {
-    case 0:
+    case 1:
       clockInText.value = "上班打卡";
       break;
-    case 1:
+    case 2:
       clockInText.value = "午休打卡";
       break;
-    case 2:
+    case 3:
       clockInText.value = "下午打卡";
       break;
-    case 3:
+    case 4:
       clockInText.value = "下班打卡";
       break;
   }
@@ -332,7 +329,6 @@ watch(showState, (newState) => {
           <div style="font-size: 22px">{{ clockInText }}</div>
         </q-btn>
       </div>
-      <!-- <div class="clockIn-button">{{ clockInText }}</div> -->
       <div
         class="clockIn-link"
         @click="

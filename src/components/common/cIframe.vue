@@ -1,13 +1,10 @@
 <script setup lang="ts">
-import { setLoading } from "@/services/util/common";
-
+import cOutLoading from "@/components/common/cOutLoading.vue";
 const props = defineProps<{
   title?: string;
   url: string;
 }>();
-onMounted(() => {
-  setLoading(true);
-});
+const loading = ref<boolean>(true);
 </script>
 <template>
   <div
@@ -18,6 +15,10 @@ onMounted(() => {
       overflow: 'hidden',
     }"
   >
+    <!-- <q-inner-loading :showing="loading">
+      <q-spinner-gears size="50px" color="primary" />
+    </q-inner-loading> -->
+    <c-out-loading :visible="loading" />
     <!-- `${url}${url.includes('?') ? '&' : '?'}t=${new Date().getTime()}` -->
     <iframe
       id="iframe-container"
@@ -27,9 +28,10 @@ onMounted(() => {
       frameBorder="0"
       width="100%"
       height="100%"
-      @load="setLoading(false)"
+      @load="loading = false"
       allow="clipboard-read; clipboard-write;fullscreen"
     ></iframe>
+    <!--       -->
   </div>
 </template>
 <style scoped lang="scss"></style>

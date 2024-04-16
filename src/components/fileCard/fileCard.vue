@@ -22,7 +22,7 @@ const $q = useQuasar();
 const dayjs: any = inject("dayjs");
 const { token, user } = storeToRefs(appStore.authStore);
 const { overKey } = storeToRefs(appStore.commonStore);
-const { setOverKey } = appStore.commonStore;
+const { setOverKey, setIframeVisible } = appStore.commonStore;
 const { setTeamKey } = appStore.teamStore;
 const { setCardKey, setCardVisible } = appStore.cardStore;
 const props = defineProps<{
@@ -47,18 +47,12 @@ const drawerVisible = ref<boolean>(false);
 //   setCardVisible(true, "tasktree");
 // };
 //文档
-const chooseResource = (type, detail, fullstate?: boolean) => {
-  if (type === "doc") {
-    setTeamKey(detail.projectInfo._key);
-  } else {
-    setTeamKey(detail.projectKey);
-  }
-  if (fullstate) {
-    setCardKey(detail._key);
-    setCardVisible(true, type);
-  } else {
-    emits("chooseCard", detail, "search");
-  }
+const chooseResource = () => {
+  setTeamKey(props.card.projectInfo._key);
+  setIframeVisible(true, {
+    url: `https://soar.cn/base/#/login?token=${token.value}&redirectPath=node/${props.card._key}`,
+    title: props.card.title,
+  });
 };
 const chooseTaskTree = (detail, fullstate?: boolean) => {
   console.log(detail);
@@ -202,14 +196,14 @@ const deleteTask = async (detail) => {
     },
   })
     .onOk(async () => {
-      let fileRes = (await api.request.delete("card", {
-        cardKey: props.card._key,
+      let fileRes = (await api.request.delete("node", {
+        nodeKey: props.card._key,
       })) as ResultProps;
       if (fileRes.msg === "OK") {
         setMessage("success", `删除任务成功`);
         detail.boxIndex = props.boxIndex;
         detail.taskIndex = props.taskIndex;
-        emits("chooseCard", props.card, "delete");
+        emits("chooseCard", detail, "delete");
         // fileList.value.splice(index, 1);
       }
     })
@@ -368,56 +362,11 @@ const handleDownload = (detail) => {
   <template v-else-if="type === 'doc'">
     <q-card
       flat
-      class="teamFile-box-container q-mb-md icon-point card-hover q-py-none"
-      @click="chooseResource(type, card, false)"
-      :style="chooseKey === card._key ? { border: '2px solid #4a4a4a' } : null"
-      @mouseenter="setOverKey(card._key)"
-    >
-      <q-card-section class="teamFile-box-top q-py-none">
-        <div class="teamFile-box-top-title">
-          <template v-if="outType"># {{ card.projectInfo?.name }} / </template>
-          {{ card.title }}
-        </div>
-        <div class="teamFile-box-top-icon" v-if="overKey === card._key">
-          <!-- <q-chip color="teal" text-color="white" icon="description">
-            {{
-              docArray[_.findIndex(docArray, { value: card.subType })]?.label
-            }}
-          </q-chip> -->
-          <q-btn
-            flat
-            round
-            size="8px"
-            @click.stop="chooseResource(type, card, true)"
-          >
-            <Icon name="quanping_o" :size="22" />
-          </q-btn>
-          <q-btn flat round size="9px" @click.stop="">
-            <Icon name="gengduo" :size="18" />
-            <q-menu class="q-pa-sm">
-              <q-list dense>
-                <!--  @click="editFile(item._key, index)" -->
-                <q-item clickable v-close-popup @click="updateTitle(card)">
-                  <q-item-section class="common-title">重命名</q-item-section>
-                </q-item>
-                <!-- <q-item clickable v-close-popup @click="deleteCard(card)">
-                  <q-item-section class="common-title">删除</q-item-section>
-                </q-item> -->
-              </q-list>
-            </q-menu>
-          </q-btn>
-        </div>
-      </q-card-section>
-    </q-card>
-  </template>
-  <template v-else-if="type === 'file'">
-    <q-card
-      flat
-      class="teamFile-box-container q-mb-md icon-point card-hover"
-      @click="emits('chooseCard', card, 'search')"
+      class="teamDoc-box-container q-mb-md icon-point card-hover"
+      @click="chooseResource()"
       :style="chooseKey === card._key ? { border: '2px solid #4a4a4a' } : null"
     >
-      <q-card-section class="teamFile-box-top q-pa-none">
+      <q-card-section class="teamDoc-box-top q-pa-none">
         <div class="dp--center">
           <FileIcon
             :icon="typeIcon[card.type]"
@@ -429,7 +378,7 @@ const handleDownload = (detail) => {
           {{ card.title }}
         </div>
       </q-card-section>
-      <q-card-section class="teamFile-box-bottom q-pa-none">
+      <q-card-section class="teamDoc-box-bottom q-pa-none">
         <div class="dp--center">
           <template
             v-for="(pathItem, pathIndex) in card.way"
@@ -447,6 +396,7 @@ const handleDownload = (detail) => {
       </q-card-section>
     </q-card>
   </template>
+
   <template v-else-if="type === 'taskBox'">
     <!--      @click="chooseTask(card)" -->
     <q-card
@@ -539,7 +489,6 @@ const handleDownload = (detail) => {
       </q-card-section>
     </q-card></template
   >
-  <template v-else-if="type === 'knowledgeBase'"></template>
   <c-drawer
     :visible="drawerVisible"
     @close="drawerVisible = false"
@@ -583,27 +532,27 @@ const handleDownload = (detail) => {
 //     @include flex(space-between, center, null);
 //   }
 // }
-.teamFile-box-container {
+.teamDoc-box-container {
   width: 100%;
   min-height: 40px;
   border-radius: 0px;
   padding: 0px 10px;
   box-sizing: border-box;
-  .teamFile-box-top {
+  .teamDoc-box-top {
     width: 100%;
     min-height: 40px;
     font-size: 14px;
     padding: 5px 0px;
     box-sizing: border-box;
     @include flex(space-between, center, null);
-    .teamFile-box-top-title {
+    .teamDoc-box-top-title {
     }
-    .teamFile-box-top-icon {
+    .teamDoc-box-top-icon {
       width: 52px;
       flex-shrink: 0;
     }
   }
-  .teamFile-box-bottom {
+  .teamDoc-box-bottom {
     width: 100%;
     min-height: 30px;
     font-size: 12px;

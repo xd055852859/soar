@@ -217,41 +217,7 @@ watch(fileInput, (newName) => {
         @click=""
       /> -->
     </div>
-    <div
-      class="node-detail-name"
-      :style="executor ? { paddingLeft: '35px' } : null"
-    >
-      <div class="node-name-check" v-if="executor">
-        <Icon
-          :name="hasDone ? 'a-quangouxuan21' : 'a-quanxuan-weixuanzhong21'"
-          :size="20"
-          color="#333"
-          class="q-mr-xs"
-          @click="
-            hasDone = !hasDone;
-            updateDetail('hasDone', {
-              hasDone: hasDone,
-            });
-          "
-        />
-      </div>
-      <div class="node-name-input no-input-border">
-        <q-input
-          type="textarea"
-          v-model="name"
-          class="node-detail-name"
-          autogrow
-          @blur="
-            updateDetail('name', {
-              name,
-            })
-          "
-        />
-      </div>
-    </div>
-
-    <div class="node-detail-item dp--center">
-      <div class="node-detail-title">执行人</div>
+    <div class="dp-space-center">
       <div class="icon-point" v-if="teamMemberList">
         <template
           v-if="
@@ -278,9 +244,7 @@ watch(fileInput, (newName) => {
               .userName
           }}
         </template>
-        <q-btn flat round v-else>
-          <img src="/add.svg" alt="" />
-        </q-btn>
+        <template v-else> 选择执行人</template>
         <q-menu auto-close>
           <q-list>
             <q-item
@@ -331,60 +295,83 @@ watch(fileInput, (newName) => {
           </q-list>
         </q-menu>
       </div>
-    </div>
-    <div class="node-detail-item dp--center">
-      <div class="node-detail-title">紧急程度</div>
+
       <div>
-        <q-btn
-          :flat="!tagLabel"
-          :round="!tagLabel"
-          :class="{ 'text-white': tagLabel }"
-          :style="tagLabel ? { backgroundColor: tagColor } : null"
-        >
-          <template v-if="tagLabel">{{ tagLabel }}</template>
-          <img src="/add.svg" alt="" v-else />
-          <q-menu>
-            <q-list dense>
-              <!--  @click="editFile(item._key, index)" -->
-              <!-- @click="updateTag(item.value)" -->
-              <q-item
-                clickable
-                v-close-popup
-                :style="{ backgroundColor: '#fff' }"
-                @click="
-                  tagLabel = '';
-                  updateDetail('clear', {
-                    type: 'tag',
-                    adornmentContent: 'start',
-                  });
-                "
-              >
-                <q-item-section>无</q-item-section>
-              </q-item>
-              <q-item
-                clickable
-                v-close-popup
-                v-for="(item, index) in tagArray"
-                :key="`tag${index}`"
-                :style="{ backgroundColor: item.value }"
-                @click="
-                  updateDetail('tag', {
-                    label: item.label,
-                    color: item.value,
-                  })
-                "
-              >
-                <q-item-section class="text-white">{{
-                  item.label
-                }}</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
+        {{ tagLabel ? tagLabel : "无" }}
+        <q-menu>
+          <q-list dense>
+            <!--  @click="editFile(item._key, index)" -->
+            <!-- @click="updateTag(item.value)" -->
+            <q-item
+              clickable
+              v-close-popup
+              :style="{ backgroundColor: '#fff' }"
+              @click="
+                tagLabel = '';
+                updateDetail('clear', {
+                  type: 'tag',
+                  adornmentContent: 'start',
+                });
+              "
+            >
+              <q-item-section>无</q-item-section>
+            </q-item>
+            <q-item
+              clickable
+              v-close-popup
+              v-for="(item, index) in tagArray"
+              :key="`tag${index}`"
+              :style="{ backgroundColor: item.value }"
+              @click="
+                updateDetail('tag', {
+                  label: item.label,
+                  color: item.value,
+                })
+              "
+            >
+              <q-item-section class="text-white">{{
+                item.label
+              }}</q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
       </div>
     </div>
+    <div
+      class="node-detail-name"
+      :style="executor ? { paddingLeft: '35px' } : null"
+    >
+      <div class="node-name-check" v-if="executor">
+        <Icon
+          :name="hasDone ? 'a-quangouxuan21' : 'a-quanxuan-weixuanzhong21'"
+          :size="20"
+          color="#333"
+          class="q-mr-xs"
+          @click="
+            hasDone = !hasDone;
+            updateDetail('hasDone', {
+              hasDone: hasDone,
+            });
+          "
+        />
+      </div>
+      <div class="node-name-input no-input-border">
+        <q-input
+          type="textarea"
+          v-model="name"
+          class="node-detail-name"
+          autogrow
+          @blur="
+            updateDetail('name', {
+              name,
+            })
+          "
+        />
+      </div>
+    </div>
+
     <div class="node-detail-item dp--center">
-      <div class="node-detail-title">里程碑</div>
+      <div class="node-detail-title">日期</div>
       <div>
         <template v-if="milestoneDate">{{
           dayjs(milestoneDate).format("YYYY - M - D")
@@ -504,23 +491,6 @@ watch(fileInput, (newName) => {
         </q-btn>
       </div>
     </div>
-    <div class="node-detail-content">
-      <div class="node-detail-title">备注</div>
-      <div class="node-detail-editor">
-        <!-- :handleSave="updateContent" -->
-        <span v-if="nodeInfo" class="node-detail-save">{{
-          changed ? "有变更" : "已保存"
-        }}</span>
-        <Editor
-          v-if="nodeInfo"
-          ref="editorRef"
-          :initData="nodeInfo"
-          :autoSave="true"
-          @onChange="handleChange"
-          :handleSave="saveContent"
-        />
-      </div>
-    </div>
     <div class="node-detail-item dp--center">
       <div class="node-detail-title">外链</div>
       <div class="node-detail-link dp--center">
@@ -577,6 +547,23 @@ watch(fileInput, (newName) => {
             </q-card-actions>
           </q-card>
         </q-menu>
+      </div>
+    </div>
+    <div class="node-detail-content">
+      <div class="node-detail-title">备注</div>
+      <div class="node-detail-editor">
+        <!-- :handleSave="updateContent" -->
+        <span v-if="nodeInfo" class="node-detail-save">{{
+          changed ? "有变更" : "已保存"
+        }}</span>
+        <Editor
+          v-if="nodeInfo"
+          ref="editorRef"
+          :initData="nodeInfo"
+          :autoSave="true"
+          @onChange="handleChange"
+          :handleSave="saveContent"
+        />
       </div>
     </div>
   </div>

@@ -21,8 +21,6 @@ const nodeInfo = ref<any>(null);
 const taskTab = ref<string>("execute");
 const taskList = ref<any>([]);
 const searchMemberList = ref<any>([]);
-const lineIndex = ref<number>(0);
-const taskLineIndex = ref<number>(0);
 const taskUser = ref<any>(null);
 const searchName = ref<string>("");
 
@@ -47,7 +45,14 @@ const chooseCard = (detail, type) => {
       };
       break;
     case "delete":
-    taskList.value[detail.boxIndex].taskList.splice(detail.taskIndex, 1);
+      console.log(detail.boxIndex, detail.taskIndex);
+      console.log(taskList.value[detail.boxIndex]);
+      console.log(taskList.value[detail.boxIndex].taskList);
+      console.log(taskList.value[detail.boxIndex].taskList[detail.taskIndex]);
+      taskList.value[detail.boxIndex].taskList.splice(detail.taskIndex, 1);
+      if (taskList.value[detail.boxIndex].taskList.length === 0) {
+        taskList.value.splice(detail.boxIndex, 1);
+      }
       break;
   }
 };
@@ -180,7 +185,7 @@ watchEffect(() => {
           >
             <FileCard
               :card="taskItem"
-              :boxIndex="lineIndex"
+              :boxIndex="index"
               :taskIndex="taskIndex"
               type="taskBox"
               @chooseCard="chooseCard"

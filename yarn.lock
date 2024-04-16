@@ -2956,10 +2956,10 @@ to-regex-range@^5.0.1:
   dependencies:
     is-number "^7.0.0"
 
-tree-graph-react@^2.4.5:
-  version "2.4.5"
-  resolved "https://registry.npmjs.org/tree-graph-react/-/tree-graph-react-2.4.5.tgz#3439d154a6f5eec6d98d03cafa43d4f5964139fd"
-  integrity sha512-MvJ8bC0xUxQt0KChp/SRP7v6i6neo3IGCzpCskPcrO0Km8EyGuRuukb5oO5dapugIDmuRRZfzSz4bytucPesDg==
+tree-graph-react@^2.4.6:
+  version "2.4.6"
+  resolved "https://registry.npmjs.org/tree-graph-react/-/tree-graph-react-2.4.6.tgz#f4b827499003fc6ffe32b0e9336da4474cc5290d"
+  integrity sha512-Ae3xCRUBanmnqw5hqYTlBQ80N1REEs4WK2W5hgxuhrIoFPlfRU2k2/rA/C8vfhZfmFNjFAfQ0HRPTHQh8u5slw==
   dependencies:
     jspdf "^2.5.1"
     lodash "^4.17.21"

@@ -22,12 +22,12 @@ export function getStartAdornment(startAdornment, handleClick, node) {
         let fill = "#333";
         let clickKey = "";
         switch (key) {
-          case "milestone":
-            clickKey = "milestone";
-            let time = new Date().setHours(23, 59, 59, 999);
-            viewBox = [0, -960, 960, 960];
-            fill = node.endTime < time ? "#f44336" : "#07be51";
-            break;
+          // case "milestone":
+          //   clickKey = "milestone";
+          //   let time = new Date().setHours(23, 59, 59, 999);
+          //   viewBox = [0, -960, 960, 960];
+          //   fill = node.endTime < time ? "#f44336" : "#07be51";
+          //   break;
           case "tag":
             clickKey = "tag";
             viewBox = [0, -960, 960, 960];

@@ -81,15 +81,18 @@ const getBigList = async (list) => {
             bigItem.titleArr.push(
               `${dayjs(clockIn.startWorkTime).format("HH:mm")} 上班打卡`
             );
-          } else if (clockIn.noonBreakTime) {
+          }
+          if (clockIn.noonBreakTime) {
             bigItem.titleArr.push(
               `${dayjs(clockIn.noonBreakTime).format("HH:mm")} 午休打卡`
             );
-          } else if (clockIn.noonEndTime) {
+          }
+          if (clockIn.noonEndTime) {
             bigItem.titleArr.push(
               `${dayjs(clockIn.noonEndTime).format("HH:mm")} 下午打卡`
             );
-          } else if (clockIn.endWorkTime) {
+          }
+          if (clockIn.endWorkTime) {
             bigItem.titleArr.push(
               `${dayjs(clockIn.endWorkTime).format("HH:mm")} 下班打卡`
             );

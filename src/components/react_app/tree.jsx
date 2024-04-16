@@ -19,6 +19,7 @@ import {
   getCustmAdornment,
 } from "./treesvg";
 import "./tree.scss";
+import dayjs from "dayjs";
 const CustomTree = React.forwardRef((props, ref) => {
   const {
     rootKey,
@@ -66,6 +67,10 @@ const CustomTree = React.forwardRef((props, ref) => {
         if (value.executor && !value.avatarUri) {
           value.avatarUri = "/common/defaultPerson.png";
         }
+        if (value.endTime) {
+          value.showStatus = true;
+          value.limitDay = dayjs(value.endTime).endOf("day").valueOf() + 1;
+        }
         value.checked = value.hasDone;
         value = formatNode(value);
       }
@@ -81,7 +86,7 @@ const CustomTree = React.forwardRef((props, ref) => {
     if (node.startAdornmentContent) {
       node.startAdornment = getStartAdornment(
         node.startAdornmentContent,
-        { tag: onShowMenu, icon: onShowMenu, milestone: onShowMenu },
+        { tag: onShowMenu, icon: onShowMenu },
         node
       );
       node.startAdornmentWidth =
@@ -591,9 +596,14 @@ const CustomTree = React.forwardRef((props, ref) => {
             startNodeBg="#07be51"
             defaultSelectedId={selectedId || undefined}
             singleColumn={viewType.includes("-single")}
+            hideHour
             handleClickAvatar={(selectedNode, e) => {
               chooseNode(selectedNode);
               onShowMenu(selectedNode, e, "executor");
+            }}
+            handleClickStatus={(selectedNode, e) => {
+              chooseNode(selectedNode);
+              onShowMenu(selectedNode, e, "milestone");
             }}
             handleChangeNodeText={(nodeId, text) =>
               editNodeText(nodeId, text, rootKey)
@@ -649,9 +659,14 @@ const CustomTree = React.forwardRef((props, ref) => {
             showAvatar={true}
             showChildNum={true}
             uncontrolled={false}
+            hideHour
             handleClickAvatar={(selectedNode, e) => {
               chooseNode(selectedNode);
               onShowMenu(selectedNode, e, "executor");
+            }}
+            handleClickStatus={(selectedNode, e) => {
+              chooseNode(selectedNode);
+              onShowMenu(selectedNode, e, "milestone");
             }}
             handleChangeNodeText={editNodeText}
             defaultSelectedId={selectedId || undefined}

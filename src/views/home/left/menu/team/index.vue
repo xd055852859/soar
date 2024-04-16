@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import cDialog from "@/components/common/cDialog.vue";
+import cInLoading from "@/components/common/cInLoading.vue";
 import { ResultProps } from "@/interface/Common";
 import { OnClickOutside } from "@vueuse/components";
 import api from "@/services/api";
@@ -215,6 +216,7 @@ watchEffect(() => {
 </script>
 <template>
   <div class="teamMenu">
+    <c-in-loading  :visible="!teamList" />
     <!-- <OnClickOutside @trigger="searchVibisible = false"> -->
     <div class="leftMenu-title">
       <div class="leftMenu-title-left">
@@ -372,10 +374,7 @@ watchEffect(() => {
       </template>
       <div class="teamMenu-subtitle" @click="foldVisible = !foldVisible">
         <div>折叠的群组</div>
-        <Icon
-          :name="foldVisible ? 'a-youcezhedie21' : 'a-youcexiala21'"
-          :size="8"
-        />
+        <Icon :name="foldVisible ? 'a-youcezhedie21' : 'a-xiala2'" :size="8" />
       </div>
       <template
         v-for="(item, index) in teamFoldList"
@@ -398,7 +397,7 @@ watchEffect(() => {
           background: (teamKey === item._key||targetTeamKey === item._key)&&$route.path!.indexOf('home/team')!==-1 ? '#eee' : '',
         }"
           >
-            <div>{{ item.name }}</div>
+            <div class="">{{ item.name }}</div>
             <div class="teamMenu-item-icon" v-if="targetTeamKey === item._key">
               <q-btn
                 flat
@@ -475,6 +474,8 @@ watchEffect(() => {
 .teamMenu {
   width: 100%;
   height: 100%;
+  position: relative;
+  z-index: 1;
   .teamMenu-subtitle {
     width: 100%;
     height: 30px;
@@ -508,6 +509,12 @@ watchEffect(() => {
     margin-top: 5px;
     box-sizing: border-box;
     @include flex(space-between, center, null);
+    > div:nth-child(1) {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     &:hover {
       background: #f5f5f5;
     }

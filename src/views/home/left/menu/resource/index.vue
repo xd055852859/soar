@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import cDialog from "@/components/common/cDialog.vue";
+import cInLoading from "@/components/common/cInLoading.vue";
 import { ResultProps } from "@/interface/Common";
 import { commonscroll } from "@/services/util/common";
 import api from "@/services/api";
@@ -66,9 +67,10 @@ watchEffect(() => {
 </script>
 <template>
   <div class="resourceMenu">
-    <q-inner-loading :showing="loading">
+    <!-- <q-inner-loading :showing="loading">
       <q-spinner-gears size="50px" color="primary" />
-    </q-inner-loading>
+    </q-inner-loading> -->
+    <c-in-loading :visible="loading" />
     <!-- <OnClickOutside @trigger="searchVibisible = false"> -->
     <div class="leftMenu-title">
       <div class="leftMenu-title-left"></div>
@@ -106,13 +108,13 @@ watchEffect(() => {
           $router.push('/home/freedom');
           fileKey = item._key;
         "
+        :style="{
+          background: fileKey === item._key ? '#eee' : '',
+        }"
       >
         <div
           class="resourceMenu-item-title icon-point"
           @click="$router.push(`/home/team`)"
-          :style="{
-            background: fileKey === item._key ? '#eee' : '',
-          }"
         >
           <div class="dp--center" style="width: 100%">
             <Icon
