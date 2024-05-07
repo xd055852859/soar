@@ -1,12 +1,4 @@
-time=$(date "+%Y-%m-%d %H:%M:%S")
-memo="fix: $time"
-
-if [ -n "$1" ]
-then
-   memo=$1
-fi
-
-echo $memo
+read memo
 git add .
 git commit -m "$memo"
 git pull
