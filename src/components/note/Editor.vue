@@ -953,4 +953,3 @@ ul[data-type="taskList"] {
   margin: 0;
 }
 </style>
-./image

@@ -122,7 +122,7 @@ const removeMate = async (userKey) => {
               />
               <q-btn
                 flat
-                label="移除"
+                label="取消"
                 color="grey-5"
                 @click="removeMate(props.row.userKey)"
                 v-else-if="props.row.beMate && props.row.userKey !== user?._key"

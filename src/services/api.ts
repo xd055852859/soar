@@ -1,9 +1,11 @@
 import router from "@/router";
 import appStore from "@/store";
 import axios from "axios";
-import { commonStore } from "@/store/common";
 import { setLoading, setMessage } from "./util/common";
 import { JSONContent } from "@tiptap/vue-3";
+import { storeToRefs } from "pinia";
+import { commonStore } from "@/store/common";
+
 const AUTH_URL = import.meta.env.VITE_AUTH_URL;
 const API_URL = import.meta.env.VITE_BACK_URL;
 let token = localStorage.getItem("auth_token") || "";
@@ -16,7 +18,7 @@ axios.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 axios.interceptors.response.use(
   (response) => {
@@ -30,7 +32,7 @@ axios.interceptors.response.use(
       sessionStorage.clear();
       router.replace("/");
       token = "";
-      commonStore().$reset;
+      commonStore().$reset();
       commonStore().clearStore();
     } else if (
       response.data.status !== 200 &&
@@ -45,7 +47,7 @@ axios.interceptors.response.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 const request = {
   get(path: string, params?: object, otherUrl?: boolean, otherPath?: string) {
@@ -56,8 +58,8 @@ const request = {
           url: otherPath
             ? otherPath
             : otherUrl
-            ? AUTH_URL + path
-            : API_URL + path,
+              ? AUTH_URL + path
+              : API_URL + path,
           params: params,
           headers: {
             token: token,
@@ -155,7 +157,7 @@ const qiniu = {
     cardKey: string,
     url: string,
     fileSize: number,
-    nodeKey?: string
+    nodeKey?: string,
   ) {
     return request.post("/qiniu", {
       cardKey,
@@ -224,7 +226,7 @@ export default {
         url,
       },
       undefined,
-      "https://nodeserver.qingtime.cn/linkInfo"
+      "https://nodeserver.qingtime.cn/linkInfo",
     );
   },
   setToken: (_token: string) => {

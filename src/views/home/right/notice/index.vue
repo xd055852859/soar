@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import cHeader from "@/components/common/cHeader.vue";
 import api from "@/services/api";
-import { storeToRefs } from "pinia";
+import {storeToRefs} from "pinia";
 import appStore from "@/store";
-import { ResultProps } from "@/interface/Common";
-import { commonscroll, setMessage } from "@/services/util/common";
+import {ResultProps} from "@/interface/Common";
+import {commonscroll, setMessage} from "@/services/util/common";
+
 const socket: any = inject("socket");
 const dayjs: any = inject("dayjs");
-const { spaceKey } = storeToRefs(appStore.spaceStore);
-const { setSpaceMessageNum } = appStore.spaceStore;
+const {spaceKey} = storeToRefs(appStore.spaceStore);
+const {setSpaceMessageNum} = appStore.spaceStore;
 
 const noticeList = ref<any>([]);
 const page = ref<number>(1);
@@ -25,6 +26,9 @@ const getNoticeList = async () => {
     if (page.value === 1) {
       noticeList.value = [];
     }
+    noticeRes.data.forEach(item => {
+      item.log = item.log.replace("null", "");
+    })
     noticeList.value = [...noticeList.value, ...noticeRes.data];
     total.value = noticeRes.total as number;
   }
@@ -67,26 +71,26 @@ watchEffect(() => {
     <c-header title="消息">
       <template #button>
         <q-btn
-          color="primary"
-          label="一键已读"
-          v-if="noticeTab === 'unRead'"
-          @click="readAll()"
+            color="primary"
+            label="一键已读"
+            v-if="noticeTab === 'unRead'"
+            @click="readAll()"
         />
       </template>
     </c-header>
     <q-tabs
-      v-model="noticeTab"
-      dense
-      align="left"
-      indicator-color="primary"
-      active-class="text-primary"
+        v-model="noticeTab"
+        dense
+        align="left"
+        indicator-color="primary"
+        active-class="text-primary"
     >
-      <q-tab name="unRead" label="未读" />
-      <q-tab name="read" label="已读" />
+      <q-tab name="unRead" label="未读"/>
+      <q-tab name="read" label="已读"/>
     </q-tabs>
     <div
-      class="notice-box"
-      @scroll="
+        class="notice-box"
+        @scroll="
         commonscroll($event, noticeList, total, () => {
           page++;
         })
@@ -98,7 +102,7 @@ watchEffect(() => {
             <div style="width: 20%">
               <q-avatar color="#fff" size="30px" class="q-mr-xs">
                 <img
-                  :src="
+                    :src="
                     item.fromUserInfo?.userAvatar
                       ? item.fromUserInfo.userAvatar
                       : '/common/defaultPerson.png'
@@ -114,20 +118,20 @@ watchEffect(() => {
             <div style="width: 15%" v-if="item.type === 'applyJoin'">
               <template v-if="item.needReply === 1">
                 <q-btn
-                  color="red"
-                  rounded
-                  dense
-                  label="驳回"
-                  class="q-px-md q-px-sm q-mr-sm"
-                  @click="operateNotice(item._key, 'refuse')"
+                    color="red"
+                    rounded
+                    dense
+                    label="驳回"
+                    class="q-px-md q-px-sm q-mr-sm"
+                    @click="operateNotice(item._key, 'refuse')"
                 />
                 <q-btn
-                  color="primary"
-                  rounded
-                  dense
-                  label="同意"
-                  class="q-px-md q-px-sm"
-                  @click="operateNotice(item._key, 'agree')"
+                    color="primary"
+                    rounded
+                    dense
+                    label="同意"
+                    class="q-px-md q-px-sm"
+                    @click="operateNotice(item._key, 'agree')"
                 />
               </template>
               <template v-else-if="item.needReply === 2">已同意</template>
@@ -149,13 +153,16 @@ watchEffect(() => {
 .notice {
   width: 100%;
   height: 100%;
+
   .notice-box {
     width: 100%;
     height: calc(100% - 110px);
     @include scroll();
     @include p-number(10px, 25px);
+
     .notice-item {
       font-size: 16px;
+
       .notice-item-box {
         @include flex(space-between, center, null);
       }

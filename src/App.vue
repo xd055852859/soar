@@ -7,7 +7,6 @@ import Icon from "@/components/common/Icon.vue";
 import { storeToRefs } from "pinia";
 import router from "@/router";
 import appStore from "@/store";
-import api from "@/services/api";
 import _ from "lodash";
 import { formatDocUrl, getSearchParamValue } from "./services/util/url";
 import { setMessage } from "./services/util/common";
@@ -48,7 +47,7 @@ onMounted(() => {
   window.addEventListener("resize", changeDevice);
   window.addEventListener("message", getMessage);
   setClose(
-    localStorage.getItem("closeNum") ? +localStorage.getItem("closeNum")! : -1
+    localStorage.getItem("closeNum") ? +localStorage.getItem("closeNum")! : -1,
   );
   const search = window.location.search
     ? window.location.search.split("?")[1]
@@ -64,13 +63,13 @@ onMounted(() => {
       localStorage.getItem("spaceKey") &&
         localStorage.getItem("spaceKey") != "undefined"
         ? localStorage.getItem("spaceKey")
-        : ""
+        : "",
     );
     setTeamKey(
       localStorage.getItem("teamKey") &&
         localStorage.getItem("teamKey") != "undefined"
         ? localStorage.getItem("teamKey")
-        : ""
+        : "",
     );
     socket.on("connect", () => {
       socket.emit("login", token);
@@ -100,7 +99,7 @@ onUnmounted(() => {
   // 检测设备方向
   window.removeEventListener(
     "orientationchange",
-    _.debounce(changeDevice, 100)
+    _.debounce(changeDevice, 100),
   );
   // // 检测设备方向
   window.removeEventListener("resize", changeDevice);
@@ -109,7 +108,7 @@ onUnmounted(() => {
 const changeDevice = () => {
   setDeviceInfo(
     document.documentElement.offsetWidth,
-    document.documentElement.offsetHeight
+    document.documentElement.offsetHeight,
   );
   let html: any = document.getElementById("htmlId");
 
@@ -161,7 +160,7 @@ watch(
       getUserInfo();
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 watch([musicSrc, musicNum], ([newSrc, newNum]) => {
   if (musicRef.value) {
@@ -231,7 +230,7 @@ watch([musicSrc, musicNum], ([newSrc, newNum]) => {
 
 *::-webkit-scrollbar-thumb {
   border-radius: 100px;
-  background-color: var(--el-text-color-secondary);
+  background-color: rgb(7, 190, 81, 0.5);
 }
 
 ::-webkit-scrollbar {
@@ -241,15 +240,15 @@ watch([musicSrc, musicNum], ([newSrc, newNum]) => {
   height: 8px;
 }
 
-::-webkit-scrollbar-track {
-  /*滚动条里面轨道*/
-  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.2);
-  background: "#474747";
-}
-
-::-webkit-scrollbar-thumb {
-  /*滚动条里面小方块*/
-  border-radius: 2px;
-  background-color: rgb(7, 190, 81, 0.5);
-}
+//::-webkit-scrollbar-track {
+//  /*滚动条里面轨道*/
+//  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.2);
+//  background: #474747;
+//}
+//
+//::-webkit-scrollbar-thumb {
+//  /*滚动条里面小方块*/
+//  border-radius: 2px;
+//  background-color: rgb(7, 190, 81, 0.5);
+//}
 </style>

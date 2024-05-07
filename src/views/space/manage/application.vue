@@ -7,7 +7,7 @@ import appStore from "@/store";
 import _ from "lodash";
 import { storeToRefs } from "pinia";
 const { spaceKey, spaceRole } = storeToRefs(appStore.spaceStore);
-const { getLockList } = appStore.spaceStore;
+// const { getLockList } = appStore.spaceStore;
 const applicationList = ref<any>([]);
 const columns: any = [
   {
@@ -81,7 +81,7 @@ const updateApplication = async (value, key, application) => {
         ...obj,
       };
     }
-    getLockList(spaceKey.value);
+    // getLockList(spaceKey.value);
   }
 };
 const updateApplicationAll = async (value, key, application) => {

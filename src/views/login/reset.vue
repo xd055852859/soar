@@ -5,6 +5,7 @@ import api from "@/services/api";
 import { setMessage } from "@/services/util/common";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
+import {commonStore} from "@/store/common";
 const { loginState } = storeToRefs(appStore.authStore);
 const { setToken, setLoginState } = appStore.authStore;
 const mobile = ref<string>("");
@@ -30,6 +31,7 @@ const getCode = async () => {
     let timer = setInterval(() => {
       if (codeTime.value === 0) {
         codeState.value = false;
+        codeTime.value=60;
         clearInterval(timer);
       }
       codeTime.value = codeTime.value - 1;
@@ -84,6 +86,8 @@ const changeState = async () => {
     })) as ResultProps;
     if (registerRes.msg === "OK") {
       localStorage.clear();
+      commonStore().$reset;
+      commonStore().clearStore();
       setMessage("success", "登录成功");
       setToken(registerRes.data.token);
       api.setToken(registerRes.data.token);

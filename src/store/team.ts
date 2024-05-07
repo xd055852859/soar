@@ -89,6 +89,7 @@ export const teamStore = defineStore(
     };
     watch(teamKey, (newKey) => {
       if (newKey) {
+        console.log("team", newKey);
         teamInfo.value = null;
         getTeamInfo(newKey);
         getTeamMemberList(newKey);
@@ -96,6 +97,8 @@ export const teamStore = defineStore(
     });
     watch(targetTeamKey, (newKey) => {
       if (newKey) {
+        console.log("target", newKey);
+        targetTeamInfo.value == null;
         getTeamInfo(newKey, "target");
         getTeamMemberList(newKey, "target");
       } else {

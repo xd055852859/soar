@@ -64,7 +64,7 @@ app
 registerStore();
 app //@ts-ignore
   .use(SocketIO, {
-    connection: "https://soardata.qingtime.cn",
+    connection: "https://data.soar.cn",
     options: {},
   })
   .mount("#app");

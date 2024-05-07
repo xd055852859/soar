@@ -6,6 +6,7 @@ import { setMessage } from "@/services/util/common";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
+import {commonStore} from "@/store/common";
 const $q = useQuasar();
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { setToken, setLoginState } = appStore.authStore;
@@ -40,6 +41,8 @@ const login = async () => {
   })) as ResultProps;
   if (loginRes.msg === "OK") {
     localStorage.clear();
+    commonStore().$reset;
+    commonStore().clearStore();
     setMessage("success", "登录成功");
     setToken(loginRes.data.token);
     api.setToken(loginRes.data.token);

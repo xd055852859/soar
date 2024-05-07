@@ -418,7 +418,7 @@ const handleDownload = (detail) => {
             :size="20"
             color="#333"
             class="q-mr-sm"
-            @click="finishTask(card)"
+            @click.stop="finishTask(card)"
           />
         </div>
 

@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import cDialog from "@/components/common/cDialog.vue";
-import cInLoading from "@/components/common/cInLoading.vue";
+import cOutLoading from "@/components/common/cOutLoading.vue";
 import { ResultProps } from "@/interface/Common";
 import { commonscroll } from "@/services/util/common";
 import api from "@/services/api";
@@ -21,6 +20,7 @@ const { spaceKey, spaceRole, privateTeamKey } = storeToRefs(
 const { setTargetTeamKey, setTeamKey, setTeamList, setTeamFoldList } =
   appStore.teamStore;
 const { setIframeDetail } = appStore.commonStore;
+
 const fileList = ref<any>([]);
 const fileKey = ref<string>("");
 const detailState = ref<boolean>(false);
@@ -70,7 +70,7 @@ watchEffect(() => {
     <!-- <q-inner-loading :showing="loading">
       <q-spinner-gears size="50px" color="primary" />
     </q-inner-loading> -->
-    <c-in-loading :visible="loading" />
+    <c-out-loading :visible="loading" />
     <!-- <OnClickOutside @trigger="searchVibisible = false"> -->
     <div class="leftMenu-title">
       <div class="leftMenu-title-left"></div>
@@ -180,6 +180,8 @@ watchEffect(() => {
 .resourceMenu {
   width: 100%;
   height: 100%;
+  position: relative;
+  z-index:1;
   &::-webkit-scrollbar {
     /*滚动条整体样式*/
     width: 0px;

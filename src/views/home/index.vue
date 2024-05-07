@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import _ from "lodash";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import Left from "@/views/home/left/index.vue";
@@ -9,12 +8,15 @@ import api from "@/services/api";
 import { useQuasar } from "quasar";
 import { ResultProps } from "@/interface/Common";
 import { setMessage } from "@/services/util/common";
+
 const $q = useQuasar();
 const dayjs: any = inject("dayjs");
 const { token } = storeToRefs(appStore.authStore);
 const { closeNum, showState, leftVisible } = storeToRefs(appStore.commonStore);
-const { celebrateAnimate } = storeToRefs(appStore.exploreStore);
-const { spaceKey, spaceMessageNum } = storeToRefs(appStore.spaceStore);
+const { exploreConfig, celebrateAnimate } = storeToRefs(appStore.exploreStore);
+const { spaceKey, spaceMessageNum, spaceInfo } = storeToRefs(
+  appStore.spaceStore,
+);
 const { getTeamList, getTeamFoldList } = appStore.teamStore;
 const { getMateList } = appStore.mateStore;
 const { setSpaceKey } = appStore.spaceStore;
@@ -92,7 +94,7 @@ const getTodayCheckIn = async (key) => {
           ? new Date(
               `${dayjs().format("YYYY-MM-DD")} ${
                 clockConfig.value.startWorkTime
-              }`
+              }`,
             ).getTime() - 900000
           : 0;
 
@@ -100,57 +102,52 @@ const getTodayCheckIn = async (key) => {
           ? new Date(
               `${dayjs().format("YYYY-MM-DD")} ${
                 clockConfig.value.noonBreakTime
-              }`
+              }`,
             ).getTime() - 900000
           : 100000000000000000;
         let noonEndTime = clockConfig.value.noonEndTime
           ? new Date(
-              `${dayjs().format("YYYY-MM-DD")} ${clockConfig.value.noonEndTime}`
+              `${dayjs().format("YYYY-MM-DD")} ${clockConfig.value.noonEndTime}`,
             ).getTime() - 900000
           : 100000000000000000;
         let endWorkTime = clockConfig.value.endWorkTime
           ? new Date(
-              `${dayjs().format("YYYY-MM-DD")} ${clockConfig.value.endWorkTime}`
+              `${dayjs().format("YYYY-MM-DD")} ${clockConfig.value.endWorkTime}`,
             ).getTime() - 900000
           : 0;
-        // console.log(startWorkTime);
-        // console.log(noonBreakTime);
-        // console.log(noonEndTime);
-        // console.log(endWorkTime);
-
         if (
           dayjs().valueOf() > startWorkTime &&
           dayjs().valueOf() <= startWorkTime + 4500000 &&
-          clockConfig.value.openStartWork&&!clockIn.value.startWorkTime
+          clockConfig.value.openStartWork &&
+          (!clockIn.value || !clockIn.value.startWorkTime)
         ) {
           clockType.value = 1;
           clockVisible.value = true;
-        }
-        if (
+        } else if (
           dayjs().valueOf() > noonBreakTime &&
           dayjs().valueOf() <= noonBreakTime + 4500000 &&
-          clockConfig.value.openNoonBreak&&!clockIn.value.noonBreakTime
+          clockConfig.value.openNoonBreak &&
+          (!clockIn.value || !clockIn.value.noonBreakTime)
         ) {
           clockType.value = 2;
           clockVisible.value = true;
-        }
-        if (
+        } else if (
           dayjs().valueOf() > noonEndTime &&
           dayjs().valueOf() <= noonEndTime + 4500000 &&
-          clockConfig.value.openNoonEnd&&!clockIn.value.noonEndTime
+          clockConfig.value.openNoonEnd &&
+          (!clockIn.value || !clockIn.value.noonEndTime)
         ) {
           clockType.value = 3;
           clockVisible.value = true;
-        }
-        if (
+        } else if (
           dayjs().valueOf() > endWorkTime &&
           dayjs().valueOf() <= endWorkTime + 4500000 &&
-          clockConfig.value.openEndWork&&!clockIn.value.endWorkTime
+          clockConfig.value.openEndWork &&
+          (!clockIn.value || !clockIn.value.endWorkTime)
         ) {
           clockType.value = 4;
           clockVisible.value = true;
         }
-        console.log(clockType.value);
       }
     }, 1000);
   }
@@ -163,6 +160,27 @@ const setTodayCheckIn = async () => {
   if (checkInRes.msg === "OK") {
     setMessage("success", `${clockInText.value}成功`);
     clockVisible.value = false;
+    console.log(clockType.value);
+    if (!clockIn.value) {
+      clockIn.value = {};
+    }
+    switch (clockType.value) {
+      case 1:
+        clockIn.value.startWorkTime = dayjs().valueOf();
+        break;
+      case 2:
+        clockIn.value.noonBreakTime = dayjs().valueOf();
+        break;
+      case 3:
+        clockIn.value.noonEndTime = dayjs().valueOf();
+        break;
+      case 4:
+        clockIn.value.endWorkTime = dayjs().valueOf();
+        break;
+    }
+    console.log(clockIn.value);
+    clockType.value = -1;
+    // startInterval();
     setCelebrateAnimate(true);
     setTimeout(() => {
       setCelebrateAnimate(false);
@@ -188,11 +206,19 @@ watch(
       setSpaceKey(newKey);
       getTeamList(newKey);
       getTeamFoldList(newKey);
-      getTodayCheckIn(newKey);
       getMateList(newKey);
     }
   },
-  { immediate: true }
+  { immediate: true },
+);
+watch(
+  spaceInfo,
+  (newInfo) => {
+    if (newInfo) {
+      getTodayCheckIn(newInfo._key);
+    }
+  },
+  { immediate: true },
 );
 watch(
   clockVisible,
@@ -213,7 +239,7 @@ watch(
       }
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 // watch(clockMessageVisible, (newVisible) => {
 //   if (newVisible) {
@@ -410,6 +436,7 @@ watch(showState, (newState) => {
     width: 0px;
     // @include p-number(15px, 35px);
   }
+
   .arrow-button {
     position: fixed;
     z-index: 9999;
@@ -436,13 +463,16 @@ watch(showState, (newState) => {
     left: 0px;
     top: 60px;
     text-align: center;
+
     .clockIn-time {
       font-size: 50px;
     }
+
     .clockIn-date {
       font-size: 14px;
     }
   }
+
   .clockIn-link {
     position: absolute;
     z-index: 2;
@@ -451,6 +481,7 @@ watch(showState, (newState) => {
     color: #2a8a51;
     cursor: pointer;
   }
+
   .clockIn-button {
     width: 140px;
     height: 140px;
@@ -468,11 +499,13 @@ watch(showState, (newState) => {
     line-height: 140px;
   }
 }
+
 .left-dialog {
   width: 280px;
   height: 90%;
   @include p-number(25px, 10px);
 }
+
 .homeLeft {
   padding-left: 300px;
 
@@ -554,6 +587,7 @@ watch(showState, (newState) => {
     padding-left: 300px;
   }
 }
+
 @keyframes iconLeft {
   0% {
     left: 280px;
@@ -563,6 +597,7 @@ watch(showState, (newState) => {
     left: 0px;
   }
 }
+
 @keyframes iconRight {
   0% {
     left: 0px;

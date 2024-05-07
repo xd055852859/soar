@@ -4,11 +4,28 @@ import cIframe from "@/components/common/cIframe.vue";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 const { iframeDetail } = storeToRefs(appStore.commonStore);
+onUnmounted(() => {
+  // destroyIframe();
+});
+// const destroyIframe = () => {
+//   let freeIframe: any = document.getElementById("freeIframe");
+//   if (freeIframe) {
+//     freeIframe.src = "about:blank";
+//     try {
+//       freeIframe.contentWindow.document.write("");
+//     } catch (e) {}
+//     freeIframe.parentNode.removeChild(freeIframe);
+//   }
+// };
 </script>
 <template>
   <div class="freedom">
     <!-- <cHeader :title="iframeDetail.title" /> -->
-    <c-iframe :url="iframeDetail.url" :title="iframeDetail.title" />
+    <c-iframe
+      id="freeIframe"
+      :url="iframeDetail.url"
+      :title="iframeDetail.title"
+    />
   </div>
 </template>
 <style scoped lang="scss">
