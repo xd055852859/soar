@@ -97,17 +97,17 @@ watch(
       userKey.value = newInfo._key;
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 watch(
   () => props.targetTag,
   (newTag) => {
     if (newTag) {
-      console.log(newTag)
+      console.log(newTag);
       planTag.value = newTag;
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 watch(
   spaceMemberList,
@@ -125,7 +125,7 @@ watch(
       console.log(memberList.value);
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 watchEffect(() => {
   getTaskBoardList();
@@ -262,7 +262,7 @@ watchEffect(() => {
                           <q-item
                             v-for="(planItem, planIndex) in planArray.slice(
                               1,
-                              planArray.length
+                              planArray.length,
                             )"
                             :key="`planButton${planIndex}`"
                             :label="item.label"
@@ -295,7 +295,7 @@ watchEffect(() => {
   height: 100%;
   .taskBoard-box {
     width: 100%;
-    height: calc(100% - 105px);
+    height: calc(100% - 95px);
     // height:3000px;
     @include p-number(10px, 25px);
     @include scroll();

@@ -2,10 +2,10 @@
 import MateSetting from "@/views/home/right/mate/setting.vue";
 import Icon from "@/components/common/Icon.vue";
 import appStore from "@/store";
-import {storeToRefs} from "pinia";
+import { storeToRefs } from "pinia";
 import _ from "lodash";
 
-const {mateList} = storeToRefs(appStore.mateStore);
+const { mateList } = storeToRefs(appStore.mateStore);
 const mateKey = ref<string>("");
 </script>
 <template>
@@ -15,46 +15,53 @@ const mateKey = ref<string>("");
       <div class="leftMenu-title-left"></div>
       <div class="leftMenu-title-right">
         <q-btn flat round>
-          <Icon name="a-chuangjian2" :size="20"/>
-          <q-menu anchor="top end" class="q-pa-none" style="height: 50vh;">
-            <MateSetting type="inside"/>
+          <Icon name="a-chuangjian2" :size="20" />
+          <q-menu anchor="top end" class="q-pa-none" style="height: 70vh">
+            <MateSetting type="inside" />
           </q-menu>
         </q-btn>
       </div>
     </div>
     <div class="mateMenu-list">
       <div
-          class="mateMenu-item"
-          v-for="(item, index) in mateList"
-          :key="`mate${index}`"
-          @click="
+        class="mateMenu-item"
+        v-for="(item, index) in mateList"
+        :key="`mate${index}`"
+        @click="
           $router.push(`/home/mate/detail/${item._key}`);
           mateKey = item._key;
         "
       >
         <div
-            class="mateMenu-item-title icon-point"
-            @click=""
-            :style="{
+          class="mateMenu-item-title icon-point"
+          @click=""
+          :style="{
             background: mateKey === item._key ? '#eee' : '',
           }"
         >
           <div class="mateMenu-item-avatar q-mr-sm">
             <img
-                :src="item.userAvatar ? item.userAvatar : '/common/defaultPerson.png'"
-                alt=""
+              :src="
+                item.userAvatar ? item.userAvatar : '/common/defaultPerson.png'
+              "
+              alt=""
             />
 
             <!--            -->
-
           </div>
           <img
-              class="mateMenu-item-online"
-              src="/online.svg"
-              v-if="item.online"
-              alt=""
+            class="mateMenu-item-online"
+            src="/online.svg"
+            v-if="item.online"
+            alt=""
           />
-          <div>{{ item.userName }}</div>
+          <div>
+            {{ item.userName }}
+
+            <span class="text-grey-6" style="font-size: 12px" v-if="item.post"
+              >( {{ item.post }} )
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -98,22 +105,20 @@ const mateKey = ref<string>("");
       border-radius: 50%;
       overflow: hidden;
 
-
       img {
         width: 100%;
         height: 100%;
         object-fit: cover;
       }
-
-
     }
 
     .mateMenu-item-online {
-      width: 12px;
+      width: 16px;
       position: absolute;
       z-index: 2;
-      left: 20px;
+      left: 15px;
       bottom: 10px;
+      border-radius: 50%;
     }
 
     &:hover {

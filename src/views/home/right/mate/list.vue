@@ -9,7 +9,6 @@ import Icon from "@/components/common/Icon.vue";
 const { user } = storeToRefs(appStore.authStore);
 const { mateList } = storeToRefs(appStore.mateStore);
 const signVisible = ref<boolean>(false);
-
 </script>
 <template>
   <cHeader title="队友">
@@ -54,50 +53,6 @@ const signVisible = ref<boolean>(false);
           v-if="item.chartData"
         />
       </div>
-      <div class="mate-item-signature">
-        <q-btn
-          flat
-          dense
-          rounded
-          padding="2px 16px"
-          class="createSpace-button full-width"
-          :style="{
-            backgroundColor: `${
-              signatureArray[
-                _.findIndex(signatureArray, {
-                  label: item.signature ? item.signature : '在岗',
-                })
-              ].color
-            } !important`,
-            color: '#fff',
-          }"
-          :label="
-            signatureArray[
-              _.findIndex(signatureArray, {
-                label: item.signature ? item.signature : '在岗',
-              })
-            ].label
-          "
-          @click.stop="item._key === user?._key ? (signVisible = true) : null"
-        />
-        <!-- <q-menu v-model="signVisible">
-          <q-list>
-            <q-item
-              v-for="(item, index) in signatureArray"
-              :key="`signature${index}`"
-              clickable
-              v-close-popup
-              :style="{
-                backgroundColor: item.color,
-              }"
-            >
-              <q-item-section class="text-white common-title">
-                {{ item.label }}</q-item-section
-              ></q-item
-            >
-          </q-list>
-        </q-menu> -->
-      </div>
     </div>
   </div>
 </template>
@@ -111,11 +66,12 @@ const signVisible = ref<boolean>(false);
   @include p-number(10px, 25px);
   @include flex(flex-start, flex-start, wrap);
   .mate-box-item {
-    width: 21%;
+    width: 23.5%;
+    min-width: 220px;
     // height: 328px;
     background: #ffffff;
     border-radius: 14px;
-    margin-right: 5%;
+    margin-right: 2%;
     margin-bottom: 20px;
     position: relative;
     z-index: 1;

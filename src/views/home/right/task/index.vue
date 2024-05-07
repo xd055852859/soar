@@ -202,7 +202,7 @@ watchEffect(() => {
   height: 100%;
   .task-box {
     min-width: 100%;
-    height: calc(100% - 68px);
+    height: calc(100% - 50px);
     overflow-x: auto;
     overflow-y: hidden;
     background: #f2f3f6;

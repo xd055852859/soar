@@ -12,7 +12,6 @@ import TeamKnowledgeBase from "./tab/teamKnowledgeBase.vue";
 const { token } = storeToRefs(appStore.authStore);
 const { teamInfo } = storeToRefs(appStore.teamStore);
 const { privateTeamKey } = storeToRefs(appStore.spaceStore);
-const { setClose, setIframeVisible } = appStore.commonStore;
 const updateVisible = ref<boolean>(false);
 const memberVisible = ref<boolean>(false);
 const noteDialog = ref<boolean>(false);

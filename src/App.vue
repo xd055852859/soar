@@ -215,8 +215,8 @@ watch([musicSrc, musicNum], ([newSrc, newNum]) => {
   height: 100vh;
   position: fixed;
   z-index: 9900;
-  top: 0px;
-  left: 0px;
+  top: 0;
+  left: 0;
   background-color: #fff;
   @include scroll();
 

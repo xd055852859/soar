@@ -13,7 +13,7 @@ import { useQuasar } from "quasar";
 import { uploadFile } from "@/services/util/file";
 import axios from "axios";
 const { spaceKey, spaceRole, spaceMemberList, spaceList } = storeToRefs(
-  appStore.spaceStore
+  appStore.spaceStore,
 );
 const { token, user } = storeToRefs(appStore.authStore);
 const { setSpaceMemberList } = appStore.spaceStore;
@@ -75,6 +75,14 @@ const columns: any = [
     label: "操作",
     field: "operate",
   },
+];
+const postArray: string[] = [
+  "CEO/CTO",
+  "企划部部长",
+  "研发部部长",
+  "后端工程师",
+  "人事经理",
+  "行政经理",
 ];
 const getSpaceMemberList = async () => {
   let memberRes = (await api.request.get("teamMember", {
@@ -178,7 +186,7 @@ const chooseMemberFile = async (e, file) => {
         "Content-Type": "multipart/form-data",
         token: token.value,
       },
-    }
+    },
   )) as ResultProps;
   if (createRes.data.msg === "OK") {
     setMessage("success", "上传文件成功,导入中...");
@@ -245,7 +253,7 @@ watch(memberInput, (newName) => {
             @click="downloadMemberFile()"
           />
           <div
-            className="upload-button upload-img-button q-mr-sm"
+            class="upload-button upload-img-button q-mr-sm"
             style="border: 0px"
             v-if="spaceRole < 2"
           >
@@ -301,8 +309,8 @@ watch(memberInput, (newName) => {
                 v-slot="scope"
                 v-if="spaceRole < props.row.role"
               >
-                <div className="form-logo">
-                  <div className="upload-button upload-img-button logo-box">
+                <div class="form-logo">
+                  <div class="upload-button upload-img-button logo-box">
                     <img
                       :src="props.row.userAvatar"
                       alt=""
@@ -357,7 +365,9 @@ watch(memberInput, (newName) => {
                 v-slot="scope"
                 auto-save
                 @save="(value) => updateMember(value, 'nickName', props.row)"
-                v-if="spaceRole < props.row.role|| props.row.userKey === user!._key"
+                v-if="
+                  spaceRole < props.row.role || props.row.userKey === user!._key
+                "
               >
                 <q-input
                   outlined
@@ -376,15 +386,16 @@ watch(memberInput, (newName) => {
                 v-slot="scope"
                 @save="(value) => updateMember(value, 'post', props.row)"
                 auto-save
-                v-if="spaceRole < props.row.role|| props.row.userKey === user!._key"
+                v-if="
+                  spaceRole < props.row.role || props.row.userKey === user!._key
+                "
               >
-                <q-input
+                <q-select
                   outlined
-                  v-model="scope.value"
-                  label="职位头衔"
                   dense
-                  autofocus
-                  @keyup.enter="scope.set"
+                  v-model="scope.value"
+                  :options="postArray"
+                  class="full-width q-mb-md"
                 />
               </q-popup-edit>
             </q-td>
@@ -396,7 +407,10 @@ watch(memberInput, (newName) => {
               <q-popup-edit
                 v-model="props.row.role"
                 v-slot="scope"
-                v-if="spaceRole < props.row.role|| props.row.userKey === user!._key&&props.row.role"
+                v-if="
+                  spaceRole < props.row.role ||
+                  (props.row.userKey === user!._key && props.row.role)
+                "
                 auto-save
                 @save="(value) => updateMember(value, 'newRole', props.row)"
               >

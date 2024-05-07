@@ -216,11 +216,11 @@ const formatMonth = (time: number, arr: any) => {
   }
   return arr;
 };
-watch(mateInfo, (newInfo) => {
-  if (newInfo) {
-    signature.value = newInfo.signature ? newInfo.signature : "在岗";
-  }
-});
+// watch(mateInfo, (newInfo) => {
+//   if (newInfo) {
+//     signature.value = newInfo.signature ? newInfo.signature : "在岗";
+//   }
+// });
 watch(
   () => props.mateKey,
   (newKey) => {
@@ -228,7 +228,7 @@ watch(
       setMateKey(newKey);
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 watch(
   mateKey,
@@ -238,7 +238,7 @@ watch(
       getPayNumData();
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 watch(
   mateTeamKey,
@@ -253,7 +253,7 @@ watch(
       }
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 watch(mateTab, () => {
   getMateCard();
@@ -294,19 +294,19 @@ watchEffect(() => {
           <div class="mateCard-bottom">
             {{ mateInfo.post }}
           </div>
-          <div class="mateCard-signature">
-            <q-btn
-              color="#fff"
-              dense
-              class="createSpace-button full-width"
-              flat
-              :label="
-                signatureArray[
-                  _.findIndex(signatureArray, { label: signature })
-                ]?.label
-              "
-            />
-          </div>
+          <!--          <div class="mateCard-signature">-->
+          <!--            <q-btn-->
+          <!--              color="#fff"-->
+          <!--              dense-->
+          <!--              class="createSpace-button full-width"-->
+          <!--              flat-->
+          <!--              :label="-->
+          <!--                signatureArray[-->
+          <!--                  _.findIndex(signatureArray, { label: signature })-->
+          <!--                ]?.label-->
+          <!--              "-->
+          <!--            />-->
+          <!--          </div>-->
         </div>
         <q-menu style="width: 240px; padding: 10px 0px">
           <q-list>

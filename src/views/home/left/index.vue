@@ -1,28 +1,28 @@
 <script setup lang="ts">
-import {ResultProps} from "@/interface/Common";
+import { ResultProps } from "@/interface/Common";
 import api from "@/services/api";
 import _ from "lodash";
 import TeamMenu from "@/views/home/left/menu/team/index.vue";
 import ResourceMenu from "@/views/home/left/menu/resource/index.vue";
 import MateMenu from "@/views/home/left/menu/mate/index.vue";
 import "vue-cropper/dist/index.css";
-import {VueCropper} from "vue-cropper";
+import { VueCropper } from "vue-cropper";
 import router from "@/router";
-import {VueDraggableNext} from "vue-draggable-next";
-import {setMessage} from "@/services/util/common";
-import {base64ToFile, fileToBase64, uploadFile} from "@/services/util/file";
+import { VueDraggableNext } from "vue-draggable-next";
+import { setMessage } from "@/services/util/common";
+import { base64ToFile, fileToBase64, uploadFile } from "@/services/util/file";
 import appStore from "@/store";
-import {storeToRefs} from "pinia";
+import { storeToRefs } from "pinia";
 import Icon from "@/components/common/Icon.vue";
 import cDialog from "@/components/common/cDialog.vue";
 
 import createSpace from "@/components/createSpace.vue";
-import {commonStore} from "@/store/common";
+import { commonStore } from "@/store/common";
 
 const props = defineProps<{
   showState?: boolean;
 }>();
-const {token, user} = storeToRefs(appStore.authStore);
+const { token, user } = storeToRefs(appStore.authStore);
 const {
   spaceKey,
   spaceInfo,
@@ -36,12 +36,12 @@ const {
   reportConfig,
 } = storeToRefs(appStore.spaceStore);
 
-const {clearStore, setSearchVisible, setIframeDetail} = appStore.commonStore;
-const {setUserInfo, setToken} = appStore.authStore;
-const {setSpaceKey, setSpaceList, setReportConfig} = appStore.spaceStore;
-const {setTeamKey, setTargetTeamKey} = appStore.teamStore;
-const {setCardKey} = appStore.cardStore;
-const {clickExplore} = appStore.exploreStore;
+const { clearStore, setSearchVisible, setIframeDetail } = appStore.commonStore;
+const { setUserInfo, setToken } = appStore.authStore;
+const { setSpaceKey, setSpaceList, setReportConfig } = appStore.spaceStore;
+const { setTeamKey, setTargetTeamKey } = appStore.teamStore;
+const { setCardKey } = appStore.cardStore;
+const { clickExplore } = appStore.exploreStore;
 const userVisible = ref<boolean>(false);
 const cropperVisible = ref<boolean>(false);
 const userName = ref<string>("");
@@ -63,7 +63,7 @@ onUnmounted(() => {
 const getMessage = (e) => {
   if (e.data && !e.data.source) {
     const messageData =
-        typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+      typeof e.data === "string" ? JSON.parse(e.data) : e.data;
     console.log(messageData);
     switch (messageData.eventName) {
       case "saveReport":
@@ -96,9 +96,9 @@ const getMessage = (e) => {
 const toReport = (reportType) => {
   setIframeDetail({
     url: `https://hb.qingtime.cn/?token=${token.value}&teamKey=${spaceKey.value}&reportType=${reportType}&${
-        reportConfig.value[`${reportType}Done`]
-            ? `reportKey=${reportConfig.value[`${reportType}Key`]}`
-            : "isWrite=1"
+      reportConfig.value[`${reportType}Done`]
+        ? `reportKey=${reportConfig.value[`${reportType}Key`]}`
+        : "isWrite=1"
     }`,
     title: "汇报",
   });
@@ -180,19 +180,19 @@ const logout = () => {
 };
 
 watch(
-    user,
-    (newUser) => {
-      if (newUser) {
-        userAvatar.value = newUser?.userAvatar ? newUser.userAvatar : "";
-        userName.value = newUser?.userName ? newUser.userName : "";
-        console.log(newUser);
-        console.log(userAvatar.value, userName.value);
-        if (newUser && !newUser.userAvatar && !newUser.userName) {
-          userVisible.value = true;
-        }
+  user,
+  (newUser) => {
+    if (newUser) {
+      userAvatar.value = newUser?.userAvatar ? newUser.userAvatar : "";
+      userName.value = newUser?.userName ? newUser.userName : "";
+      console.log(newUser);
+      console.log(userAvatar.value, userName.value);
+      if (newUser && !newUser.userAvatar && !newUser.userName) {
+        userVisible.value = true;
       }
-    },
-    {immediate: true}
+    }
+  },
+  { immediate: true },
 );
 
 watch(userVisible, (newVisible) => {
@@ -202,13 +202,13 @@ watch(userVisible, (newVisible) => {
   }
 });
 watch(
-    spaceList,
-    (newList) => {
-      if (newList) {
-        sortList.value = [...newList];
-      }
-    },
-    {immediate: true}
+  spaceList,
+  (newList) => {
+    if (newList) {
+      sortList.value = [...newList];
+    }
+  },
+  { immediate: true },
 );
 </script>
 
@@ -217,78 +217,78 @@ watch(
     <!--       @mouseenter="spaceMenuVisible = true" -->
     <div class="select-third-item" style="width: 100%; height: 45px">
       <q-avatar :color="spaceInfo?.logo ? '#fff' : 'primary'" rounded size="lg">
-        <img v-if="spaceInfo?.logo" :src="spaceInfo.logo"/>
+        <img v-if="spaceInfo?.logo" :src="spaceInfo.logo" />
         <template v-else-if="spaceInfo?.name">
           <div class="text-white">
             {{ spaceInfo.name.substring(0, 1) }}
           </div>
         </template>
-        <img v-else src="/common/defaultGroup.png"/>
+        <img v-else src="/common/defaultGroup.png" />
       </q-avatar>
 
       <div
-          class="select-item-name single-to-long dp--center"
-          style="max-width: calc(100% - 80px); font-weight: bolder"
+        class="select-item-name single-to-long dp--center"
+        style="max-width: calc(100% - 80px); font-weight: bolder"
       >
         {{ spaceInfo?.name }}
-        <Icon name="a-xiala2" :size="8" class="q-ml-sm"/>
+        <Icon name="a-xiala2" :size="8" class="q-ml-sm" />
       </div>
       <!--   @mouseleave="spaceMenuVisible = false" -->
       <q-menu
-          style="width: 280px; padding: 10px; max-height: 70vh"
-          v-model="spaceMenuVisible"
+        style="width: 280px; padding: 10px; max-height: 70vh"
+        v-model="spaceMenuVisible"
       >
         <q-list class="q-mb-md left-space-item">
           <VueDraggableNext v-model="sortList" item-key="id" @end="dragSpace">
             <q-item
-                v-for="(item, index) in sortList"
-                :key="`space${index}`"
-                clickable
-                v-close-popup
-                class="left-space-title dp--center q-px-xs q-py-xs"
-                @click="
+              v-for="(item, index) in sortList"
+              :key="`space${index}`"
+              clickable
+              v-close-popup
+              class="left-space-title dp--center q-px-xs q-py-xs"
+              @click="
                 setSpaceKey(item._key);
                 setTeamKey('');
                 setCardKey('');
                 router.push('/home');
               "
             >
-              <Icon name="a-huibaoyaosu-yidong21" :size="14" class="q-mr-sm"/>
+              <Icon name="a-huibaoyaosu-yidong21" :size="14" class="q-mr-sm" />
               <div style="width: calc(100% - 40px)">
                 <q-avatar
-                    rounded
-                    :color="item?.logo ? '#fff' : 'primary'"
-                    size="sm"
-                    class="q-mr-sm"
+                  rounded
+                  :color="item?.logo ? '#fff' : 'primary'"
+                  size="sm"
+                  class="q-mr-sm"
                 >
-                  <img v-if="item?.logo" :src="item.logo"/>
+                  <img v-if="item?.logo" :src="item.logo" />
 
                   <template v-else-if="item?.name">
                     <div class="text-white">
                       {{ item.name.substring(0, 1) }}
                     </div>
                   </template>
-                  <img v-else src="/common/defaultGroup.png"/></q-avatar
-                >
+                  <img v-else src="/common/defaultGroup.png"
+                /></q-avatar>
                 {{ item.name }}
               </div>
               <Icon
-                  name="a-shezhi2"
-                  :size="18"
-                  class="q-mr-sm"
-                  color="#bdbdbd"
-                  v-if="item.role < 2"
-                  @click.stop="chooseSpace(item._key)"
+                name="a-shezhi2"
+                :size="18"
+                class="q-mr-sm"
+                color="#bdbdbd"
+                v-if="item.role < 2"
+                @click.stop="chooseSpace(item._key)"
               />
-              <q-space/>
+              <q-space />
             </q-item>
           </VueDraggableNext>
         </q-list>
         <q-btn
-            class="full-width"
-            label="创建空间"
-            color="primary"
-            @click="spaceVisible = true"
+          class="full-width"
+          label="创建空间"
+          color="primary"
+          @click="spaceVisible = true"
         />
         <!-- <div class="row justify-end items-center q-mt-sm">
           <q-btn flat label="退出登录" color="grey-5" @click="logout" />
@@ -300,44 +300,43 @@ watch(
     <div class="left-button-item">
       <q-btn flat round @click="$router.push('/home/explore')">
         <Icon
-            name="zhuye1"
-            :size="22"
-            :color="$route.name === 'explore' ? '#07be51' : '#333'"
+          name="zhuye1"
+          :size="22"
+          :color="$route.name === 'explore' ? '#07be51' : '#333'"
         />
         <q-tooltip> 应用中心</q-tooltip>
       </q-btn>
     </div>
     <div class="left-button-item">
       <q-btn
-          flat
-          round
-          @click="
+        flat
+        round
+        @click="
           setTeamKey('');
           setSearchVisible(true);
         "
       >
-        <Icon name="sousuo" :size="20"/>
+        <Icon name="sousuo" :size="20" />
         <q-tooltip> 搜索</q-tooltip>
       </q-btn>
     </div>
     <div class="left-button-item">
       <q-btn
-          flat
-          round
-          @click.stop="$router.push('/home/notice')"
-          class="left-notice-button"
+        flat
+        round
+        @click.stop="$router.push('/home/notice')"
+        class="left-notice-button"
       >
         <div class="badge-box">
           <q-badge
-              rounded
-              color="red"
-              v-if="spaceMessageNum"
-              class="badge-button"
-              style="top: -5px; right: -20px"
-          >{{ spaceMessageNum }}
-          </q-badge
-          >
-          <Icon name="xiaoxi1" :size="20"/>
+            rounded
+            color="red"
+            v-if="spaceMessageNum"
+            class="badge-button"
+            style="top: -5px; right: -20px"
+            >{{ spaceMessageNum }}
+          </q-badge>
+          <Icon name="xiaoxi1" :size="20" />
         </div>
 
         <q-tooltip> 消息中心</q-tooltip>
@@ -346,7 +345,7 @@ watch(
 
     <div class="left-button-item">
       <q-btn flat round>
-        <Icon name="caidanrukou" :size="20"/>
+        <Icon name="caidanrukou" :size="20" />
         <q-tooltip> 更多操作</q-tooltip>
         <q-menu class="q-pa-sm" auto-close anchor="top right" self="top left">
           <q-list dense>
@@ -363,74 +362,73 @@ watch(
     </div>
   </div>
   <div
-      class="left-subtitle dp-space-center"
-      @click="
+    class="left-subtitle dp-space-center"
+    @click="
       setIframeDetail({
         url: `https://hb.qingtime.cn/?token=${token}&teamKey=${spaceKey}`,
         title: '汇报',
       });
       router.push('/home/freedom');
     "
-      :style="{ color: $route.name === 'freedom' ? '#07be51' : '#333' }"
+    :style="{ color: $route.name === 'freedom' ? '#07be51' : '#333' }"
   >
     <div class="dp--center">
       <Icon
-          name="huibao1"
-          :size="20"
-          :color="$route.name === 'freedom' ? '#07be51' : '#333'"
-          class="q-mr-sm"
+        name="huibao1"
+        :size="20"
+        :color="$route.name === 'freedom' ? '#07be51' : '#333'"
+        class="q-mr-sm"
       />
 
       <!-- <div class="badge-box"> -->
       汇报
-      <q-badge rounded color="red" v-if="spaceReportNum" class="q-ml-sm">{{
-          spaceReportNum
-        }}
+      <q-badge rounded color="red" v-if="spaceReportNum" class="q-ml-sm"
+        >{{ spaceReportNum }}
       </q-badge>
       <!-- </div> -->
     </div>
     <div class="dp--center">
       <template v-if="reportConfig?.dayDone">
         <span
-            class="icon-point"
-            @click.stop="toReport('day')"
-            :style="{ color: '#bdbdbd' }"
-        >日</span
+          class="icon-point"
+          @click.stop="toReport('day')"
+          :style="{ color: '#bdbdbd' }"
+          >日</span
         >
         <span class="text-grey-5 q-ma-xs">|</span>
 
         <span
-            class="icon-point"
-            @click.stop="toReport('week')"
-            :style="{
+          class="icon-point"
+          @click.stop="toReport('week')"
+          :style="{
             color: reportConfig.weekDone ? '#bdbdbd' : '#07be51',
           }"
-        >周</span
+          >周</span
         >
         <span class="text-grey-5 q-ma-xs">|</span>
         <span
-            class="icon-point"
-            @click.stop="toReport('month')"
-            :style="{
+          class="icon-point"
+          @click.stop="toReport('month')"
+          :style="{
             color: reportConfig.monthDone ? '#bdbdbd' : '#07be51',
           }"
-        >月</span
+          >月</span
         >
         <span class="text-grey-5 q-ma-xs">|</span>
         <span
-            class="icon-point"
-            @click.stop="toReport('year')"
-            :style="{
+          class="icon-point"
+          @click.stop="toReport('year')"
+          :style="{
             color: reportConfig.yearDone ? '#bdbdbd' : '#07be51',
           }"
-        >年</span
+          >年</span
         >
       </template>
       <template v-else>
         <q-btn
-            label="写日报"
-            color="primary"
-            @click.stop="
+          label="写日报"
+          color="primary"
+          @click.stop="
             setIframeDetail({
               url: `https://hb.qingtime.cn/?token=${token}&teamKey=${spaceKey}&reportType=day&isWrite=1`,
               title: '汇报',
@@ -442,105 +440,104 @@ watch(
     </div>
   </div>
   <div
-      class="left-subtitle dp--center"
-      @click="$router.push('/home/task')"
-      :style="{ color: $route.name === 'task' ? '#07be51' : '#333' }"
+    class="left-subtitle dp--center"
+    @click="$router.push('/home/task')"
+    :style="{ color: $route.name === 'task' ? '#07be51' : '#333' }"
   >
     <Icon
-        name="xiangmu"
-        :size="20"
-        :color="$route.name === 'task' ? '#07be51' : '#333'"
-        class="q-mr-sm"
+      name="xiangmu"
+      :size="20"
+      :color="$route.name === 'task' ? '#07be51' : '#333'"
+      class="q-mr-sm"
     />
     <!-- <div class="badge-box"> -->
 
     任务
-    <q-badge rounded color="red" v-if="spaceTaskNum" class="q-ml-sm">{{
-        spaceTaskNum
-      }}
+    <q-badge rounded color="red" v-if="spaceTaskNum" class="q-ml-sm"
+      >{{ spaceTaskNum }}
     </q-badge>
     <!-- </div> -->
   </div>
-  <q-separator/>
+  <q-separator />
   <div class="left-menu">
     <div class="left-menu-tab">
-        <q-tabs
-            dense
-            v-model="menuTab"
-            active-color="primary"
-            class="text-grey-7"
-        >
-          <q-tab name="team" label="群组" style="width: 60px"/>
-          <q-tab name="resource" label="文档" style="width: 60px"/>
-          <q-tab name="mate" label="队友" style="width: 60px"/>
-        </q-tabs>
+      <q-tabs
+        dense
+        v-model="menuTab"
+        active-color="primary"
+        class="text-grey-7"
+      >
+        <q-tab name="team" label="群组" style="width: 60px" />
+        <q-tab name="resource" label="文档" style="width: 60px" />
+        <q-tab name="mate" label="队友" style="width: 60px" />
+      </q-tabs>
     </div>
-    <TeamMenu v-if="menuTab === 'team'"/>
-    <ResourceMenu v-else-if="menuTab === 'resource'"/>
-    <MateMenu v-else-if="menuTab === 'mate'"/>
+    <TeamMenu v-if="menuTab === 'team'" />
+    <ResourceMenu v-else-if="menuTab === 'resource'" />
+    <MateMenu v-else-if="menuTab === 'mate'" />
   </div>
 
   <c-dialog
-      :visible="cropperVisible"
-      @close="cropperVisible = false"
-      title="裁剪图片"
+    :visible="cropperVisible"
+    @close="cropperVisible = false"
+    title="裁剪图片"
   >
     <template #content>
       <div style="width: 500px; height: 400px">
         <VueCropper
-            ref="cropperRef"
-            :img="urlBase64"
-            :autoCrop="true"
-            :centerBox="true"
+          ref="cropperRef"
+          :img="urlBase64"
+          :autoCrop="true"
+          :centerBox="true"
         />
       </div>
     </template>
 
     <template #footer>
       <q-btn
-          flat
-          label="取消"
-          color="grey-5"
-          @click="cropperVisible = false"
-          :dense="true"/>
-      <q-btn label="确认" color="primary" @click="saveImg"
+        flat
+        label="取消"
+        color="grey-5"
+        @click="cropperVisible = false"
+        :dense="true"
       />
+      <q-btn label="确认" color="primary" @click="saveImg" />
     </template>
   </c-dialog>
   <c-dialog
-      :visible="userVisible"
-      @close="userVisible = false"
-      title="用户设置"
+    :visible="userVisible"
+    @close="userVisible = false"
+    title="用户设置"
   >
     <template #content>
       <div className="form-container">
         <div className="form-logo">
           <div className="upload-button upload-img-button logo-box">
             <img
-                :src="userAvatar"
-                alt=""
-                style="width: 100%; height: 100%"
-                class="upload-cover"
-                v-if="userAvatar"
+              :src="userAvatar"
+              alt=""
+              style="width: 100%; height: 100%"
+              class="upload-cover"
+              v-if="userAvatar"
             />
-            <q-icon name="add" style="color: #ebebeb" size="80px" v-else/>
+            <q-icon name="add" style="color: #ebebeb" size="80px" v-else />
             <input
-                type="file"
-                accept="image/*"
-                @change="
+              type="file"
+              accept="image/*"
+              @change="
                 //@ts-ignore
                 uploadImage($event.target.files[0], 'avatar')
               "
-                class="upload-img"
+              class="upload-img"
             />
           </div>
         </div>
         <div className="form-name">
           <q-input
-              outlined
-              v-model="userName"
-              label="用户名"
-              :rules="[(val) => !!val || '用户名必填']"
+            outlined
+            v-model="userName"
+            label="用户名"
+            :rules="[(val) => !!val || '用户名必填']"
           />
         </div>
       </div>
@@ -548,23 +545,23 @@ watch(
 
     <template #footer>
       <q-btn
-          flat
-          label="取消"
-          color="grey-5"
-          @click="userVisible = false"
-          :dense="true"/>
-      <q-btn label="确认" color="primary" @click="updateUser"
+        flat
+        label="取消"
+        color="grey-5"
+        @click="userVisible = false"
+        :dense="true"
       />
+      <q-btn label="确认" color="primary" @click="updateUser" />
     </template>
   </c-dialog>
   <c-dialog
-      :visible="spaceVisible"
-      @close="spaceVisible = false"
-      title="创建团队"
+    :visible="spaceVisible"
+    @close="spaceVisible = false"
+    title="创建团队"
   >
     <template #content>
       <div class="spaceAdd-container">
-        <createSpace @close="spaceVisible = false"/>
+        <createSpace @close="spaceVisible = false" />
       </div>
     </template>
   </c-dialog>
@@ -573,7 +570,7 @@ watch(
 <style scoped lang="scss">
 .left-title {
   width: 100%;
-  height: 70px;
+  height: 55px;
   @include flex(center, center, null);
 }
 
@@ -598,13 +595,13 @@ watch(
 
 .left-menu {
   width: 100%;
-  height: calc(100% - 210px);
+  height: calc(100% - 195px);
   position: relative;
   z-index: 1;
 
   .left-menu-tab {
     position: absolute;
-    left: 0px;
+    left: 0;
     top: 8px;
     z-index: 2;
   }

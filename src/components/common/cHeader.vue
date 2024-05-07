@@ -24,15 +24,15 @@ const emits = defineEmits<{
 // });
 </script>
 <template>
-  <div className="header" @click="leftVisible ? setLeftVisible(false) : null">
+  <div class="header" @click="leftVisible ? setLeftVisible(false) : null">
     <div
       v-if="backPath || isBackOther"
       @click="
         isBackOther
           ? emits('backOther')
           : backPath
-          ? $router.push(backPath)
-          : null
+            ? $router.push(backPath)
+            : null
       "
       class="icon-point q-mr-sm"
     >
@@ -42,7 +42,7 @@ const emits = defineEmits<{
       v-else
       :style="{ width: closeNum === 0 || closeNum === -2 ? '30px' : '20px' }"
     ></div>
-    <div className="header-title single-to-long">
+    <div class="header-title single-to-long">
       <template v-if="!noTitle">{{ title }}</template>
     </div>
     <slot name="subtitle"></slot>
@@ -63,8 +63,8 @@ const emits = defineEmits<{
 <style scoped lang="scss">
 .header {
   width: 100%;
-  height: 65px;
-  padding: 0px 10px;
+  height: 50px;
+  padding: 0 10px;
   box-sizing: border-box;
   line-height: 75px;
   @include flex(space-between, center, null);

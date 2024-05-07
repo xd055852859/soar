@@ -433,14 +433,14 @@ watch(showState, (newState) => {
     position: relative;
 
     z-index: 1;
-    width: 0px;
+    width: 0;
     // @include p-number(15px, 35px);
   }
 
   .arrow-button {
     position: fixed;
     z-index: 9999;
-    top: 12px;
+    top: 5px;
     left: 280px;
   }
 }
@@ -510,12 +510,12 @@ watch(showState, (newState) => {
   padding-left: 300px;
 
   .left {
-    left: 0px;
+    left: 0;
   }
 }
 
 .homeRight {
-  padding-left: 0px;
+  padding-left: 0;
 
   .left {
     left: -300px;
