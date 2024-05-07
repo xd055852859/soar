@@ -54,6 +54,11 @@ const chooseResource = () => {
     title: props.card.title,
   });
 };
+const chooseTask = () => {
+  // console.log(props.card);
+  // setTeamKey(props.card.projectInfo._key);
+  drawerVisible.value = true;
+};
 const chooseTaskTree = (detail, fullstate?: boolean) => {
   console.log(detail);
   setTeamKey(detail.projectInfo._key);
@@ -89,7 +94,7 @@ const deleteCard = async (detail) => {
           "success",
           `删除${
             viewArray[_.findIndex(viewArray, { value: props.type })].label
-          }成功`
+          }成功`,
         );
         emits("chooseCard", detail, "delete");
         // fileList.value.splice(index, 1);
@@ -266,8 +271,8 @@ const handleDownload = (detail) => {
                 card.iconStatus === 2
                   ? '#ffc107'
                   : card.iconStatus === 3
-                  ? 'red'
-                  : 'green'
+                    ? 'red'
+                    : 'green'
               "
             />
             <q-menu class="q-pa-sm">
@@ -403,7 +408,7 @@ const handleDownload = (detail) => {
       class="teamTask-box-container q-mb-md icon-point card-hover"
       :dense="!outType"
       :style="chooseKey === card._key ? { border: '2px solid #4a4a4a' } : null"
-      @click="drawerVisible = true"
+      @click="chooseTask()"
       @mouseenter="setOverKey(card._key)"
     >
       <q-card-section class="teamTask-box-top q-py-none">

@@ -24,18 +24,19 @@ const noteDialog = ref<boolean>(false);
      
       </template>
     </cHeader> -->
-    <div class="team-button-left">
-      <q-btn
-        flat
-        round
-        @click="
-          setClose(1);
-          $router.push('/home/explore');
-        "
-      >
-        <Icon name="a-fanhui21" :size="14" />
-      </q-btn>
-    </div>
+    <!--    <div class="team-button-left">-->
+    <!--      <q-btn-->
+    <!--        flat-->
+    <!--        round-->
+    <!--        @click="-->
+    <!--          setClose(1);-->
+    <!--          $router.push('/home/explore');-->
+    <!--        "-->
+    <!--      >-->
+    <!--        <Icon name="a-fanhui21" :size="14" />-->
+    <!--      </q-btn>-->
+    <!--    </div>-->
+    <q-space />
     <div
       class="team-button-right"
       v-if="

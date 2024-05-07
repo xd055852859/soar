@@ -9,6 +9,7 @@ fi
 echo $memo
 git add .
 git commit -m "$memo"
+git pull
 git push
 
 # feat: 新功能（feature）

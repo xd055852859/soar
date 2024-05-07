@@ -6,15 +6,13 @@ import _ from "lodash";
 import Editor from "../note/Editor.vue";
 import { storeToRefs } from "pinia";
 import appStore from "@/store";
-import cDialog from "@/components/common/cDialog.vue";
 import cCalendar from "@/components/common/cCalendar.vue";
 import { setMessage } from "@/services/util/common";
 import Icon from "../common/Icon.vue";
-import Member from "@/views/space/manage/member.vue";
-const dayjs: any = inject("dayjs");
 
-const { spaceKey } = storeToRefs(appStore.spaceStore);
-const { teamMemberList, teamKey } = storeToRefs(appStore.teamStore);
+const dayjs: any = inject("dayjs");
+const { targetTeamMemberList } = storeToRefs(appStore.teamStore);
+const { setTargetTeamKey } = appStore.teamStore;
 const { setSearchVisible } = appStore.commonStore;
 const props = defineProps<{
   nodeKey: string;
@@ -52,6 +50,7 @@ const getNodeInfo = async (key) => {
   if (dataRes.msg === "OK") {
     nodeInfo.value = dataRes.data;
     if (nodeInfo.value) {
+      setTargetTeamKey(nodeInfo.value.projectKey);
       name.value = nodeInfo.value.name;
       hasDone.value = nodeInfo.value.hasDone;
       executor.value = nodeInfo.value.executor;
@@ -73,9 +72,11 @@ const getNodeInfo = async (key) => {
       }
       if (nodeInfo.value?.relaters) {
         relaters.value = nodeInfo.value.relaters.map((item) => {
-          let index = _.findIndex(teamMemberList.value, { userKey: item });
+          let index = _.findIndex(targetTeamMemberList.value, {
+            userKey: item,
+          });
           if (index !== -1) {
-            return teamMemberList.value[index];
+            return targetTeamMemberList.value[index];
           }
         });
       }
@@ -110,7 +111,7 @@ const updateDetail = (type, obj) => {
       if (index !== -1) {
         relaters.value.splice(index, 1);
       } else {
-        relaters.value.push(teamMemberList.value[obj.memberIndex]);
+        relaters.value.push(targetTeamMemberList.value[obj.memberIndex]);
       }
       obj = { relaters: relatersKey.value };
     case "clear":
@@ -128,7 +129,7 @@ const updateDetail = (type, obj) => {
     {
       ...obj,
     },
-    nodeInfo.value
+    nodeInfo.value,
   )!;
 };
 const clearDetail = (type, key?: string) => {
@@ -173,14 +174,14 @@ watch(
       getNodeInfo(newKey);
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 watch(
   () => props.showFile,
   (newState) => {
     fileVisible.value = newState;
   },
-  { immediate: true }
+  { immediate: true },
 );
 watch(
   nodeInfo,
@@ -189,7 +190,7 @@ watch(
       console.log(newInfo);
     }
   },
-  { deep: true }
+  { deep: true },
 );
 watch(fileInput, (newName) => {
   if (!newName) {
@@ -218,30 +219,32 @@ watch(fileInput, (newName) => {
       /> -->
     </div>
     <div class="dp-space-center">
-      <div class="icon-point" v-if="teamMemberList">
+      <div class="icon-point" v-if="targetTeamMemberList">
         <template
           v-if="
             executor &&
-            _.findIndex(teamMemberList, { userKey: executor }) !== -1
+            _.findIndex(targetTeamMemberList, { userKey: executor }) !== -1
           "
         >
           <q-avatar color="#fff" size="30px" class="shadow-3 q-mr-sm">
             <img
               :src="
-                teamMemberList[
-                  _.findIndex(teamMemberList, { userKey: executor })
+                targetTeamMemberList[
+                  _.findIndex(targetTeamMemberList, { userKey: executor })
                 ]?.userAvatar
-                  ? teamMemberList[
-                      _.findIndex(teamMemberList, { userKey: executor })
+                  ? targetTeamMemberList[
+                      _.findIndex(targetTeamMemberList, { userKey: executor })
                     ].userAvatar
                   : '/common/defaultPerson.png'
               "
+              alt=""
             />
           </q-avatar>
 
           {{
-            teamMemberList[_.findIndex(teamMemberList, { userKey: executor })]
-              .userName
+            targetTeamMemberList[
+              _.findIndex(targetTeamMemberList, { userKey: executor })
+            ].userName
           }}
         </template>
         <template v-else> 选择执行人</template>
@@ -260,7 +263,7 @@ watch(fileInput, (newName) => {
               无
             </q-item>
             <q-item
-              v-for="(item, index) in teamMemberList"
+              v-for="(item, index) in targetTeamMemberList"
               :key="`member${index}`"
               clickable
               class="row items-center justify-between"
@@ -278,6 +281,7 @@ watch(fileInput, (newName) => {
                       ? item?.userAvatar
                       : '/common/defaultPerson.png'
                   "
+                  alt=""
                 />
               </q-avatar>
               <div class="single-to-long" style="width: 120px">
@@ -297,7 +301,7 @@ watch(fileInput, (newName) => {
       </div>
 
       <div>
-        {{ tagLabel ? tagLabel : "无" }}
+        {{ tagLabel ? tagLabel : "选择标签" }}
         <q-menu>
           <q-list dense>
             <!--  @click="editFile(item._key, index)" -->
@@ -418,7 +422,7 @@ watch(fileInput, (newName) => {
                 无
               </q-item>
               <q-item
-                v-for="(item, index) in teamMemberList"
+                v-for="(item, index) in targetTeamMemberList"
                 :key="`member${index}`"
                 clickable
                 class="row items-center justify-between"
@@ -578,8 +582,8 @@ watch(fileInput, (newName) => {
   .node-detail-close {
     position: absolute;
     z-index: 2;
-    top: 0px;
-    right: 0px;
+    top: 0;
+    right: 0;
   }
   .node-detail-title {
     height: 30px;
@@ -592,7 +596,7 @@ watch(fileInput, (newName) => {
   .node-detail-content {
     .node-detail-editor {
       border: 1px solid $grey-4;
-      margin: 10px 0px;
+      margin: 10px 0;
       position: relative;
       z-index: 1;
       .node-detail-save {
@@ -624,8 +628,8 @@ watch(fileInput, (newName) => {
       height: 100%;
       position: absolute;
       z-index: 2;
-      top: 0px;
-      left: 0px;
+      top: 0;
+      left: 0;
       cursor: pointer;
       @include flex(flex-start, flex-start, null);
     }
@@ -637,7 +641,7 @@ watch(fileInput, (newName) => {
   .q-field__native {
     font-size: 18px;
     line-height: 25px;
-    padding-top: 0px;
+    padding-top: 0;
   }
 }
 </style>
