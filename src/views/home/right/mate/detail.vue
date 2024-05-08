@@ -308,7 +308,7 @@ watchEffect(() => {
           <!--            />-->
           <!--          </div>-->
         </div>
-        <q-menu style="width: 240px; padding: 10px 0px">
+        <q-menu style="width: 348px; padding: 10px 0px">
           <q-list>
             <q-item
               v-for="(item, index) in mateList"
@@ -326,6 +326,7 @@ watchEffect(() => {
                         ? item.userAvatar
                         : '/common/defaultGroup.png'
                     "
+                    alt=""
                   />
                 </div>
               </div>
@@ -573,7 +574,6 @@ watchEffect(() => {
       .teamMenu-title {
         width: 100%;
         height: 30px;
-        font-weight: bold;
         font-size: 16px;
         font-weight: bolder;
         color: #161616;

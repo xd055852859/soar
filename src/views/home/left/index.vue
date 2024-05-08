@@ -619,7 +619,7 @@ watch(
     .logo-box {
       width: 250px;
       height: 250px;
-      border-radius: 12px;
+      //border-radius: 12px;
       overflow: hidden;
     }
   }

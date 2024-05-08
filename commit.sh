@@ -2,7 +2,7 @@ time=$(date "+%Y-%m-%d")
 
 read memo
 git add .
-git commit -m "$memo-$time "
+git commit -m "$time:$memo"
 git pull
 git push
 

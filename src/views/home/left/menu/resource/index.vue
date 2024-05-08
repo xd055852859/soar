@@ -11,11 +11,11 @@ import _ from "lodash";
 import CIcon from "@/components/common/Icon.vue";
 
 const { targetTeamKey, teamKey, teamList, teamFoldList } = storeToRefs(
-  appStore.teamStore
+  appStore.teamStore,
 );
 const { token } = storeToRefs(appStore.authStore);
 const { spaceKey, spaceRole, privateTeamKey } = storeToRefs(
-  appStore.spaceStore
+  appStore.spaceStore,
 );
 const { setTargetTeamKey, setTeamKey, setTeamList, setTeamFoldList } =
   appStore.teamStore;
@@ -24,7 +24,7 @@ const { setIframeDetail } = appStore.commonStore;
 const fileList = ref<any>([]);
 const fileKey = ref<string>("");
 const detailState = ref<boolean>(false);
-const sortType = ref<string>("update");
+const sortType = ref<string>("view");
 const page = ref<number>(1);
 const total = ref<number>(0);
 const loading = ref<boolean>(false);
@@ -181,7 +181,7 @@ watchEffect(() => {
   width: 100%;
   height: 100%;
   position: relative;
-  z-index:1;
+  z-index: 1;
   &::-webkit-scrollbar {
     /*滚动条整体样式*/
     width: 0px;

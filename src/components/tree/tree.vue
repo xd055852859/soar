@@ -61,7 +61,7 @@ const selectnodes = ref<any>(null);
 const selectKeys = computed(() =>
   selectnodes.value.map((item) => {
     return item._key;
-  })
+  }),
 );
 const nodeContent = ref<any>("");
 const editorRef = ref();
@@ -175,7 +175,7 @@ const updateContent = (title, json) => {
       treeRef.value.__veauryReactRef__.setNodes(newNodes);
       nodes.value = newNodes;
     },
-    nodeInfo.value._key
+    nodeInfo.value._key,
   );
 };
 const saveContent = () => {
@@ -282,17 +282,17 @@ const updateIcon = (type, index) => {
         newNodes[item._key].startAdornmentContent = setAdornmentContentArr(
           newNodes[item._key],
           "startAdornmentContent",
-          obj
+          obj,
         );
         newNodes[item._key] = treeRef.value.__veauryReactRef__.formatNode(
-          newNodes[item._key]
+          newNodes[item._key],
         );
       });
       nodes.value = newNodes;
       treeRef.value.__veauryReactRef__.setNodes(newNodes);
     },
     selectKeys.value,
-    false
+    false,
   );
 };
 const updateStyle = (key, value?: string) => {
@@ -305,7 +305,7 @@ const updateStyle = (key, value?: string) => {
       treeRef.value.__veauryReactRef__.setNodes(newNodes);
       nodes.value = newNodes;
     },
-    nodeInfo.value._key
+    nodeInfo.value._key,
   );
 };
 const uploadImage = (file) => {
@@ -339,7 +339,7 @@ const uploadImage = (file) => {
             menuVisible.value = false;
             nodes.value = newNodes;
           },
-          nodeInfo.value._key
+          nodeInfo.value._key,
         );
       };
     });
@@ -379,7 +379,7 @@ const updateMilestones = (date) => {
         //   obj
         // );
         newNodes[item._key] = treeRef.value.__veauryReactRef__.formatNode(
-          newNodes[item._key]
+          newNodes[item._key],
         );
       });
       nodes.value = newNodes;
@@ -387,7 +387,7 @@ const updateMilestones = (date) => {
       getmilestoneList(props.cardKey);
     },
     selectKeys.value,
-    false
+    false,
   );
 };
 const updateNoExecutorTask = () => {
@@ -398,7 +398,7 @@ const updateNoExecutorTask = () => {
     selectnodes.value = [nodes.value[nodeInfo.value._key]];
   }
   selectnodes.value = selectnodes.value.filter(
-    (item) => item._key !== rootKey.value
+    (item) => item._key !== rootKey.value,
   );
   selectnodes.value.forEach((item) => {
     if (!nodes.value[item._key].isTask) {
@@ -419,7 +419,7 @@ const updateNoExecutorTask = () => {
         nodes.value = newNodes;
         treeRef.value.__veauryReactRef__.setNodes(newNodes);
       },
-      selectKeys.value
+      selectKeys.value,
     );
   }
 };
@@ -495,17 +495,17 @@ const setAdornmentContent = (node, adornmentContent, obj) => {
         adornmentContent,
         { ...adornmentContentObj },
         node,
-        newNodes
+        newNodes,
       );
     },
-    nodeKey.value
+    nodeKey.value,
   );
 };
 const clearAdornmentContent = (
   adornmentContent,
   key,
   newNodes,
-  callback?: any
+  callback?: any,
 ) => {
   [nodeInfo.value, nodes.value, selectnodes.value] =
     treeRef.value.__veauryReactRef__.getNodeInfo();
@@ -525,7 +525,7 @@ const clearAdornmentContent = (
         console.log(newNodes[item._key][adornmentContent]);
         console.log(newNodes[item._key]);
         newNodes[item._key] = treeRef.value.__veauryReactRef__.formatNode(
-          newNodes[item._key]
+          newNodes[item._key],
         );
       });
       nodes.value = newNodes;
@@ -534,7 +534,7 @@ const clearAdornmentContent = (
         callback();
       }
     },
-    selectKeys.value
+    selectKeys.value,
   );
 };
 const formatAdornmentContent = (adornmentContent, obj, node, newNodes) => {
@@ -543,10 +543,10 @@ const formatAdornmentContent = (adornmentContent, obj, node, newNodes) => {
     ...obj,
   };
   newNodes[node._key] = treeRef.value.__veauryReactRef__.formatNode(
-    newNodes[node._key]
+    newNodes[node._key],
   );
   nodeInfo.value = treeRef.value.__veauryReactRef__.formatNode(
-    newNodes[node._key]
+    newNodes[node._key],
   );
   nodes.value = newNodes;
   console.log(newNodes);
@@ -667,7 +667,7 @@ const updateDetail = (type, obj) => {
           newNodes[nodeKey.value].name = obj.name;
           treeRef.value.__veauryReactRef__.setNodes(newNodes);
         },
-        nodeKey.value
+        nodeKey.value,
       );
       break;
     case "hasDone":
@@ -679,7 +679,7 @@ const updateDetail = (type, obj) => {
           newNodes[nodeKey.value].checked = obj.hasDone;
           treeRef.value.__veauryReactRef__.setNodes(newNodes);
         },
-        nodeKey.value
+        nodeKey.value,
       );
       break;
     case "executor":
@@ -711,7 +711,7 @@ const updateDetail = (type, obj) => {
           // });
           getmilestoneList(props.cardKey);
         },
-        nodeKey.value
+        nodeKey.value,
       );
       break;
     case "content":
@@ -725,7 +725,7 @@ const updateDetail = (type, obj) => {
           //   note: { content: obj.content },
           // });
         },
-        nodeKey.value
+        nodeKey.value,
       );
       break;
     case "link":
@@ -750,7 +750,7 @@ const updateDetail = (type, obj) => {
           newNodes[nodeKey.value].relaters = obj.relaters;
           treeRef.value.__veauryReactRef__.setNodes(newNodes);
         },
-        nodeKey.value
+        nodeKey.value,
       );
       break;
     case "clear":
@@ -760,7 +760,7 @@ const updateDetail = (type, obj) => {
       setAdornmentContent(
         nodeInfo.value,
         obj.adornmentContent + "AdornmentContent",
-        {}
+        {},
       );
   }
   // setAdornmentContent(newNode, "endAdornmentContent", {
@@ -788,11 +788,13 @@ const clearDetail = (type, key?: string) => {
             newNodes[item._key].limitDay = null;
             newNodes[item._key].showStatus = false;
           });
+          treeRef.value.__veauryReactRef__.setNodes(newNodes);
+          getmilestoneList(props.cardKey);
           // clearAdornmentContent("startAdornmentContent", type, newNodes, () => {
           //   getmilestoneList(props.cardKey);
           // });
         },
-        selectKeys.value
+        selectKeys.value,
       );
       break;
     case "relaters":
@@ -803,9 +805,8 @@ const clearDetail = (type, key?: string) => {
           newNodes[nodeKey.value].relaters = [];
           treeRef.value.__veauryReactRef__.setNodes(newNodes);
         },
-        nodeKey.value
+        nodeKey.value,
       );
-      break;
       break;
   }
   // targetEl.value = null;
@@ -828,7 +829,7 @@ watch(
     getTreeInfo(newKey);
     getmilestoneList(newKey);
   },
-  { immediate: true }
+  { immediate: true },
 );
 watch(updateVisible, (newVisible) => {
   console.log(newVisible);
@@ -1037,7 +1038,7 @@ watch(contentVisible, (newVisible) => {
                 @click="
                   chooseHighlight(
                     highlightUser === 'unfinish' ? 'clear' : 'finish',
-                    highlightUser === 'unfinish' ? null : 'unfinish'
+                    highlightUser === 'unfinish' ? null : 'unfinish',
                   )
                 "
               >
@@ -1107,6 +1108,7 @@ watch(contentVisible, (newVisible) => {
               :src="
                 item.userAvatar ? item.userAvatar : '/common/defaultPerson.png'
               "
+              alt=""
             />
           </q-avatar>
           <div class="teamTree-right-name single-to-long">
@@ -1172,6 +1174,7 @@ watch(contentVisible, (newVisible) => {
                     ? item.userAvatar
                     : '/common/defaultPerson.png'
                 "
+                alt=""
               />
             </q-avatar>
           </q-item-section>
@@ -1274,7 +1277,7 @@ watch(contentVisible, (newVisible) => {
       style="width: 290px"
     >
       <c-calendar
-        :endTime="nodeInfo.startAdornmentContent.milestone.date"
+        :endTime="nodeInfo.endTime"
         @clickDate="updateMilestones"
         @clearDate="clearDetail('milestone')"
       />
@@ -1389,8 +1392,8 @@ watch(contentVisible, (newVisible) => {
     height: 40px;
     position: absolute;
     z-index: 2;
-    top: 10px;
-    left: 0px;
+    top: 5px;
+    left: 0;
     @include flex(space-between, center, null);
     @include p-number(0px, 10px);
     padding-left: 30px;

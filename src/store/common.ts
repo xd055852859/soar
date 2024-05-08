@@ -154,5 +154,5 @@ export const commonStore = defineStore(
       setLeftVisible,
     };
   },
-  { persist: true }
+  { persist: true },
 );

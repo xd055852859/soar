@@ -9,7 +9,7 @@ const props = withDefaults(
     showClose?: boolean;
     position?: "right" | "standard" | "top" | "bottom" | "left" | undefined;
   }>(),
-  { position: "right" }
+  { position: "right" },
 );
 const emits = defineEmits<{
   (e: "close"): void;
@@ -20,7 +20,7 @@ watch(
   (newVisible) => {
     drawerVisible.value = newVisible;
   },
-  { immediate: true }
+  { immediate: true },
 );
 watch(drawerVisible, (newVisible) => {
   if (!newVisible) {
@@ -32,7 +32,7 @@ watch(drawerVisible, (newVisible) => {
   <q-dialog
     v-model="drawerVisible"
     :position="position"
-    :class="{ 'drawer-noMask': noMask,'drawer-opacity':opacityMask }"
+    :class="{ 'drawer-noMask': noMask, 'drawer-opacity': opacityMask }"
     class="drawer"
   >
     <q-card :style="{ ...drawerStyle }" class="drawer-box">
@@ -86,9 +86,9 @@ watch(drawerVisible, (newVisible) => {
 <style lang="scss">
 .drawer {
   .q-dialog__inner {
-    padding: 0px;
+    padding: 0;
     > div {
-      border-radius: 0px;
+      border-radius: 0;
     }
   }
   .q-dialog__inner--minimized > div {

@@ -20,7 +20,7 @@ const { spaceKey, spaceMessageNum, spaceInfo } = storeToRefs(
 const { getTeamList, getTeamFoldList } = appStore.teamStore;
 const { getMateList } = appStore.mateStore;
 const { setSpaceKey } = appStore.spaceStore;
-const { setClose, setShowState, setIframeVisible, setLeftVisible } =
+const { setClose, setIframeVisible, setShowState, setLeftVisible } =
   appStore.commonStore;
 const { setCelebrateAnimate } = appStore.exploreStore;
 
@@ -37,39 +37,14 @@ const clockVisible = ref<boolean>(false);
 const clockMessageVisible = ref<boolean>(false);
 const closeMessage = ref<any>(null);
 const timer = ref<any>(null);
-let observer: ResizeObserver | null = null;
-onMounted(() => {
-  console.log(leftRef.value.offsetLeft);
-  if (leftRef.value.offsetLeft === -300 && closeNum.value === -2) {
-    setShowState(true);
-  } else {
-    observer = new ResizeObserver(handleResize);
-    observer.observe(leftRef.value);
-  }
-});
 onUnmounted(() => {
   if (closeMessage.value) {
     closeMessage.value();
-  }
-  // 在组件销毁前取消观察
-  if (observer) {
-    observer.disconnect();
   }
   if (clockTimer.value) {
     clearInterval(clockTimer.value);
   }
 });
-const handleResize = (entries: any) => {
-  for (const entry of entries) {
-    const { height } = entry.contentRect;
-    if (height === 0 && !showState.value) {
-      setShowState(true);
-    } else if (showState.value) {
-      setShowState(false);
-    }
-    // 这里可以执行针对宽高变化的操作
-  }
-};
 
 const getTodayCheckIn = async (key) => {
   let checkInRes = (await api.request.get("clockIn/today", {
@@ -191,14 +166,13 @@ const setTodayCheckIn = async () => {
 const toggleIcon = (state) => {
   if (state) {
     setClose(0);
-    setTimeout(() => {
-      showState.value = true;
-    }, 500);
   } else {
     setClose(1);
-    showState.value = false;
+    setShowState(false);
+    setLeftVisible(false);
   }
 };
+
 watch(
   spaceKey,
   (newKey) => {
@@ -279,11 +253,17 @@ watch(clockType, (newType) => {
       break;
   }
 });
-watch(showState, (newState) => {
-  if (!newState) {
-    setLeftVisible(false);
-  }
-});
+watch(
+  closeNum,
+  (newNum) => {
+    if (newNum === -2 || newNum === 0) {
+      setTimeout(() => {
+        setShowState(true);
+      }, 500);
+    }
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
@@ -335,8 +315,10 @@ watch(showState, (newState) => {
         <q-btn
           flat
           round
-          @mouseenter="
-            showState && closeNum !== 1 ? (leftVisible = true) : null
+          @mouseover="
+            showState && (closeNum === 0 || closeNum === -2)
+              ? setLeftVisible(true)
+              : null
           "
           v-else
         >
@@ -382,7 +364,12 @@ watch(showState, (newState) => {
   
       ><div class="clockIn-button-box">{{ clockInText }}</div></q-btn
     > -->
-    <q-dialog v-model="leftVisible" position="left" class="dialog-transparent">
+    <q-dialog
+      v-model="leftVisible"
+      position="left"
+      class="dialog-transparent"
+      style="top: 0 !important"
+    >
       <q-card class="left-dialog">
         <!-- <div class="left-dialog"> -->
         <Left />

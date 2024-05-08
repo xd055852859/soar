@@ -11,7 +11,7 @@ import _ from "lodash";
 import { formatDocUrl, getSearchParamValue } from "./services/util/url";
 import { setMessage } from "./services/util/common";
 import { useQuasar } from "quasar";
-const dayjs: any = inject("dayjs");
+
 const $q = useQuasar();
 const socket: any = inject("socket");
 const { token } = storeToRefs(appStore.authStore);

@@ -2,10 +2,11 @@
 import cIframe from "@/components/common/cIframe.vue";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
+const dayjs: any = inject("dayjs");
 const { token } = storeToRefs(appStore.authStore);
 const { teamKey, teamInfo } = storeToRefs(appStore.teamStore);
 const knowledgeBaseUrl = ref<string>("");
-onMounted(() => {});
+
 // watch(
 //   teamKey,
 //   () => {
@@ -15,9 +16,15 @@ onMounted(() => {});
 // );
 watch(
   teamInfo,
-  (newInfo) => {
-    console.log(newInfo);
-    if (token.value && newInfo?.knowledgeBaseRoot) {
+  (newInfo, oldInfo) => {
+    console.log(newInfo, oldInfo);
+    if (
+      (token.value &&
+        newInfo &&
+        oldInfo &&
+        newInfo?.knowledgeBaseRoot !== oldInfo?.knowledgeBaseRoot) ||
+      (!oldInfo && newInfo !== null)
+    ) {
       knowledgeBaseUrl.value = `${
         import.meta.env.MODE === "development"
           ? "https://soar.cn"
@@ -25,14 +32,15 @@ watch(
       }/base/#/login?token=${token.value}&redirectPath=${
         newInfo.knowledgeBaseRoot
       }`;
+      console.log(knowledgeBaseUrl.value);
     }
   },
-  { deep: true, immediate: true }
+  { immediate: true, deep: true },
 );
 </script>
 <template>
-  <div class="teamKnowledgeBase">
-    <cIframe :url="knowledgeBaseUrl" title="知识库" v-if="knowledgeBaseUrl" />
+  <div class="teamKnowledgeBase" v-if="knowledgeBaseUrl">
+    <cIframe :url="knowledgeBaseUrl" title="知识库" />
   </div>
 </template>
 <style scoped lang="scss">

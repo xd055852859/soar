@@ -86,7 +86,7 @@ watch(
       spaceName.value = newInfo?.name ? newInfo.name : "";
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 watch(deleteVisible, (newVisible) => {
   if (!newVisible) {
@@ -111,12 +111,12 @@ watch(deleteVisible, (newVisible) => {
     </cHeader>
     <div class="setting-container flex justify-start content-start">
       <div>空间图标</div>
-      <div className="form-logo">
-        <div className="upload-button upload-img-button logo-box">
+      <div class="form-logo">
+        <div class="upload-button upload-img-button logo-box">
           <img
             :src="spaceLogo"
             alt=""
-            style="width: 100%, height:100%"
+            style="width: 100%; height: 100%"
             class="upload-cover"
             v-if="spaceLogo"
           />
@@ -133,7 +133,7 @@ watch(deleteVisible, (newVisible) => {
         </div>
       </div>
       <div>空间名称</div>
-      <div className="form-name">
+      <div class="form-name">
         <q-input
           style="width: 50%"
           outlined
@@ -182,7 +182,7 @@ watch(deleteVisible, (newVisible) => {
   .setting-container {
     width: 100%;
     height: calc(100% - 75px);
-    font-size:14px;
+    font-size: 14px;
     @include p-number(15px, 25px);
     .form-logo {
       width: 100%;
@@ -191,14 +191,14 @@ watch(deleteVisible, (newVisible) => {
       .logo-box {
         width: 250px;
         height: 250px;
-        border-radius: 12px;
+        //border-radius: 12px;
         overflow: hidden;
       }
     }
     .form-name {
       width: 100%;
       height: 50px;
-      margin: 20px 0px;
+      margin: 20px 0;
     }
   }
 }

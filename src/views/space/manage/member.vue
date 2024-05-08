@@ -554,7 +554,7 @@ watch(memberInput, (newName) => {
   .logo-box {
     width: 150px;
     height: 150px;
-    border-radius: 12px;
+    //border-radius: 12px;
     overflow: hidden;
   }
 }

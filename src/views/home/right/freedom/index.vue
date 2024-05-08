@@ -3,20 +3,8 @@ import cIframe from "@/components/common/cIframe.vue";
 // import cHeader from "@/components/common/cHeader.vue";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
+const dayjs: any = inject("dayjs");
 const { iframeDetail } = storeToRefs(appStore.commonStore);
-onUnmounted(() => {
-  // destroyIframe();
-});
-// const destroyIframe = () => {
-//   let freeIframe: any = document.getElementById("freeIframe");
-//   if (freeIframe) {
-//     freeIframe.src = "about:blank";
-//     try {
-//       freeIframe.contentWindow.document.write("");
-//     } catch (e) {}
-//     freeIframe.parentNode.removeChild(freeIframe);
-//   }
-// };
 </script>
 <template>
   <div class="freedom">
