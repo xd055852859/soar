@@ -390,13 +390,21 @@ watch(memberInput, (newName) => {
                   spaceRole < props.row.role || props.row.userKey === user!._key
                 "
               >
-                <q-select
+                <q-input
                   outlined
-                  dense
                   v-model="scope.value"
-                  :options="postArray"
-                  class="full-width q-mb-md"
+                  label="职位头衔"
+                  dense
+                  autofocus
+                  @keyup.enter="scope.set"
                 />
+                <!--                <q-select-->
+                <!--                  outlined-->
+                <!--                  dense-->
+                <!--                  v-model="scope.value"-->
+                <!--                  :options="postArray"-->
+                <!--                  class="full-width q-mb-md"-->
+                <!--                />-->
               </q-popup-edit>
             </q-td>
             <q-td key="mobile" :props="props">

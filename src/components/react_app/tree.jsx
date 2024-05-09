@@ -87,7 +87,7 @@ const CustomTree = React.forwardRef((props, ref) => {
       node.startAdornment = getStartAdornment(
         node.startAdornmentContent,
         { tag: onShowMenu, icon: onShowMenu },
-        node
+        node,
       );
       node.startAdornmentWidth =
         Object.keys(node.startAdornmentContent).length * (18 + 2);
@@ -102,7 +102,7 @@ const CustomTree = React.forwardRef((props, ref) => {
           file: onOpenAlt,
           // notefile: onOpenFile,
         },
-        node
+        node,
       );
       node.endAdornmentWidth =
         Object.keys(node.endAdornmentContent).length * (18 + 2);
@@ -112,7 +112,7 @@ const CustomTree = React.forwardRef((props, ref) => {
       node.bottomAdornment = getBottomAdornment(
         node.bottomAdornmentContent,
         {},
-        node
+        node,
       );
       node.bottomAdornmentWidth =
         Object.keys(node.bottomAdornmentContent).length * (18 + 2);
@@ -135,7 +135,7 @@ const CustomTree = React.forwardRef((props, ref) => {
             eventName: "changeName",
             data: text,
           },
-          "*"
+          "*",
         );
       } else if (window.parent) {
         window.parent.postMessage(
@@ -143,7 +143,7 @@ const CustomTree = React.forwardRef((props, ref) => {
             eventName: "changeName",
             data: text,
           },
-          "*"
+          "*",
         );
       }
     }
@@ -155,7 +155,7 @@ const CustomTree = React.forwardRef((props, ref) => {
         setNodes(newNodes);
         onChangePath(startId, rootKey, true);
       },
-      nodeId
+      nodeId,
     );
   };
   const clickDot = (node) => {
@@ -288,7 +288,7 @@ const CustomTree = React.forwardRef((props, ref) => {
           selectIds.forEach((delItem) => {
             let fatherKey = newNodes[delItem].father;
             let index = newNodes[fatherKey].sortList.findIndex(
-              (item) => item === delItem
+              (item) => item === delItem,
             );
             if (index !== -1) {
               newNodes[fatherKey].sortList.splice(index, 1);
@@ -319,7 +319,7 @@ const CustomTree = React.forwardRef((props, ref) => {
           setMessage("success", "删除成功");
           let fatherKey = newNodes[selectedId].father;
           let index = newNodes[fatherKey].sortList.findIndex(
-            (item) => item === selectedId
+            (item) => item === selectedId,
           );
           console.log(index);
           if (index !== -1) {
@@ -356,7 +356,7 @@ const CustomTree = React.forwardRef((props, ref) => {
         newNodes[fatherKey].sortList.push(nodeKey);
       } else if (fatherKey) {
         let nodeIndex = newNodes[fatherKey].sortList.indexOf(
-          dragInfo.dropNodeId
+          dragInfo.dropNodeId,
         );
         let childrenIndex =
           dragInfo.placement === "up" ? nodeIndex : nodeIndex + 1;
@@ -431,7 +431,7 @@ const CustomTree = React.forwardRef((props, ref) => {
           newNodes[node._key].checked = newNodes[node._key].hasDone;
           setNodes(newNodes);
         },
-        [node._key]
+        [node._key],
       );
     }
   };
@@ -462,7 +462,7 @@ const CustomTree = React.forwardRef((props, ref) => {
         newNodes[newNodes[nodeId].father].sortList = sortList;
         setNodes(newNodes);
       },
-      nodes[nodeId].father
+      nodes[nodeId].father,
     );
   };
 
@@ -488,7 +488,7 @@ const CustomTree = React.forwardRef((props, ref) => {
         newNodes[nodeId] = { ...newNodes[nodeId], imageWidth: nodeWidth };
         setNodes(newNodes);
       },
-      nodeId
+      nodeId,
     );
   };
   //外部拖入
@@ -510,7 +510,7 @@ const CustomTree = React.forwardRef((props, ref) => {
               //   note: { content: note.content },
               // });
             },
-            node._key
+            node._key,
           );
           break;
         case "outline":
@@ -529,7 +529,7 @@ const CustomTree = React.forwardRef((props, ref) => {
                 note: { content: note.content, type: "clip", key: text },
               });
             },
-            node._key
+            node._key,
           );
           break;
         case "link":
@@ -576,7 +576,7 @@ const CustomTree = React.forwardRef((props, ref) => {
         newNodes[node._key] = formatNode(newNodes[node._key]);
         setNodes(newNodes);
       },
-      node._key
+      node._key,
     );
   };
   const tree = useMemo(() => {
@@ -642,7 +642,7 @@ const CustomTree = React.forwardRef((props, ref) => {
                 height,
                 nodeKey,
                 rootKey,
-                onShowDrawer
+                onShowDrawer,
               )
             }
           />
@@ -705,7 +705,7 @@ const CustomTree = React.forwardRef((props, ref) => {
                 height,
                 nodeKey,
                 rootKey,
-                onShowDrawer
+                onShowDrawer,
               )
             }
           />

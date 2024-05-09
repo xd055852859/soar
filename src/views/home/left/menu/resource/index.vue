@@ -166,7 +166,7 @@ watchEffect(() => {
             v-for="(pathItem, pathIndex) in item.way"
             :key="`${item._key}path${pathIndex}`"
           >
-            <div>{{ pathItem.title }}</div>
+            <div>{{ pathIndex === 0 ? "# " : "" }}{{ pathItem.title }}</div>
             <div v-if="pathIndex < item.way.length - 1" style="margin: 0px 5px">
               /
             </div>

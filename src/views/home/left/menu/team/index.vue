@@ -118,7 +118,7 @@ const topTeam = async (item, index, state) => {
 };
 const createTree = async (item, index) => {
   $q.dialog({
-    title: "事务树标题",
+    title: "任务树标题",
     prompt: {
       model: "",
       type: "text", // optional
@@ -129,7 +129,7 @@ const createTree = async (item, index) => {
     },
   }).onOk(async (data) => {
     if (!data) {
-      setMessage("error", "请输入事务树名称");
+      setMessage("error", "请输入任务树名称");
       return;
     }
     let taskRes = (await api.request.post("card", {
@@ -138,7 +138,7 @@ const createTree = async (item, index) => {
       title: data,
     })) as ResultProps;
     if (taskRes.msg === "OK") {
-      setMessage("success", `创建事务树成功`);
+      setMessage("success", `创建任务树成功`);
       let list = _.cloneDeep(teamList.value);
       list[index].cardList.unshift(taskRes.data);
       setTeamList(list);
@@ -149,8 +149,8 @@ const createTree = async (item, index) => {
 };
 const deleteTree = (item, index, teamIndex) => {
   $q.dialog({
-    title: `删除事务树`,
-    message: `是否删除该事务树`,
+    title: `删除任务树`,
+    message: `是否删除该任务树`,
     cancel: {
       color: "grey-5",
       flat: true,
@@ -161,7 +161,7 @@ const deleteTree = (item, index, teamIndex) => {
         cardKey: item._key,
       })) as ResultProps;
       if (fileRes.msg === "OK") {
-        setMessage("success", `删除事务树成功`);
+        setMessage("success", `删除任务树成功`);
         let list = _.cloneDeep(teamList.value);
         list[teamIndex].cardList.splice(index, 1);
         if (list[teamIndex].cardList.length === 0) {
@@ -181,7 +181,7 @@ const deleteTree = (item, index, teamIndex) => {
 };
 const editTree = (item, index, teamIndex) => {
   $q.dialog({
-    title: `重命名事务树`,
+    title: `重命名任务树`,
     prompt: {
       model: item.title,
       type: "text", // optional
@@ -197,7 +197,7 @@ const editTree = (item, index, teamIndex) => {
         title: data,
       })) as ResultProps;
       if (fileRes.msg === "OK") {
-        setMessage("success", `重命名事务树成功`);
+        setMessage("success", `重命名任务树成功`);
         let list = _.cloneDeep(teamList.value);
         list[teamIndex].cardList[index].title = data;
         setTeamList(list);
@@ -275,7 +275,7 @@ watchEffect(() => {
                   : '',
             }"
           >
-            <div>{{ item.name }}</div>
+            <div># {{ item.name }}</div>
             <div class="teamMenu-item-icon" v-if="targetTeamKey === item._key">
               <q-btn
                 flat
@@ -419,7 +419,7 @@ watchEffect(() => {
                   : '',
             }"
           >
-            <div class="">{{ item.name }}</div>
+            <div class=""># {{ item.name }}</div>
             <div class="teamMenu-item-icon" v-if="targetTeamKey === item._key">
               <q-btn
                 flat

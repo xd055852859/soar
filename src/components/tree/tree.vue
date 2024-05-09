@@ -875,6 +875,7 @@ watch(contentVisible, (newVisible) => {
           <template v-slot:separator>
             <q-icon size="1.5em" name="chevron_right" color="primary" />
           </template>
+          <q-breadcrumbs-el :label="teamInfo.name" />
           <q-breadcrumbs-el
             v-for="(item, index) in pathList"
             :key="`path${index}`"
@@ -1002,6 +1003,7 @@ watch(contentVisible, (newVisible) => {
                           ? item.userAvatar
                           : '/common/defaultPerson.png'
                       "
+                      alt=""
                     />
                   </q-avatar>
                 </q-item-section>
@@ -1023,10 +1025,6 @@ watch(contentVisible, (newVisible) => {
           </q-menu>
         </q-btn>
 
-        <!-- <q-btn flat round size="12px" @click="noteDialog = true">
-          <Icon name="a-suji22" :size="20" />
-        </q-btn> -->
-        <!-- <q-btn flat round icon="o_update" @click="updateVisible = true" /> -->
         <q-btn flat round size="12px" @click.stop="">
           <Icon name="gengduo" :size="18" />
           <q-menu class="q-pa-sm">
@@ -1051,33 +1049,6 @@ watch(contentVisible, (newVisible) => {
         </q-btn>
       </div>
     </div>
-    <div class="teamTree-footer">
-      <div
-        class="footer-milestone"
-        @click="chooseMilestone(item)"
-        v-for="(item, index) in milestoneList"
-        :key="`milestone${index}`"
-      >
-        <div class="footer-top" :style="{ backgroundColor: item.bgColor }">
-          {{ item.month }}
-        </div>
-        <div class="footer-bottom">{{ item.day }}</div>
-        <q-badge color="red" floating>{{ item.count }}</q-badge>
-        <q-menu
-          style="width: 350px"
-          anchor="top left"
-          self="bottom left"
-          class="q-px-md q-pt-md q-pb-xs milestone-menu"
-        >
-          <template
-            v-for="(taskItem, taskIndex) in milestoneTaskList"
-            :key="`taskItem${taskIndex}`"
-          >
-            <fileCard :card="taskItem" type="taskBox" />
-          </template>
-        </q-menu>
-      </div>
-    </div>
     <div class="teamTree-right" v-if="memberVisible">
       <div class="teamTree-right-title">执行人</div>
       <div class="teamTree-right-box">
@@ -1087,22 +1058,6 @@ watch(contentVisible, (newVisible) => {
           :key="`task${index}`"
           @click.stop="chooseExecutor(item)"
         >
-          <!-- <q-circular-progress
-       
-          show-value
-          font-size="10px"
-          class="q-mr-sm"
-          :value="
-            taskItem.totalTask === 0
-              ? 0
-              : (taskItem.finishTask / taskItem.totalTask) * 100
-          "
-          size="45px"
-          :thickness="0.25"
-          color="primary"
-          track-color="grey-3"
-        > -->
-
           <q-avatar color="#fff" size="35px" class="q-mb-sm">
             <img
               :src="
@@ -1114,7 +1069,6 @@ watch(contentVisible, (newVisible) => {
           <div class="teamTree-right-name single-to-long">
             {{ item.userName }}
           </div>
-          <!-- </q-circular-progress> -->
         </div>
       </div>
     </div>
