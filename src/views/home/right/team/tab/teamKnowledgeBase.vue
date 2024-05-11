@@ -14,29 +14,22 @@ const knowledgeBaseUrl = ref<string>("");
 //   },
 //   { immediate: true }
 // );
-watch(
-  teamInfo,
-  (newInfo, oldInfo) => {
-    console.log(newInfo, oldInfo);
-    if (
-      (token.value &&
-        newInfo &&
-        oldInfo &&
-        newInfo?.knowledgeBaseRoot !== oldInfo?.knowledgeBaseRoot) ||
-      (!oldInfo && newInfo !== null)
-    ) {
-      knowledgeBaseUrl.value = `${
-        import.meta.env.MODE === "development"
-          ? "https://soar.cn"
-          : location.origin
-      }/base/#/login?token=${token.value}&redirectPath=${
-        newInfo.knowledgeBaseRoot
-      }`;
-      console.log(knowledgeBaseUrl.value);
-    }
-  },
-  { immediate: true, deep: true },
-);
+watch(teamInfo, (newInfo, oldInfo) => {
+  console.log(newInfo, oldInfo);
+  if (
+    token.value &&
+    newInfo?.knowledgeBaseRoot !== oldInfo?.knowledgeBaseRoot
+  ) {
+    knowledgeBaseUrl.value = `${
+      import.meta.env.MODE === "development"
+        ? "https://soar.cn"
+        : location.origin
+    }/base/#/login?token=${token.value}&redirectPath=${
+      newInfo.knowledgeBaseRoot
+    }`;
+    console.log(knowledgeBaseUrl.value);
+  }
+});
 </script>
 <template>
   <div class="teamKnowledgeBase" v-if="knowledgeBaseUrl">

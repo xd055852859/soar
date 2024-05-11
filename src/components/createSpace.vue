@@ -119,8 +119,6 @@ const createSpace = async () => {
   height: 22px;
   opacity: 0.8;
   font-size: 14px;
-  font-family: PingFang SC, PingFang SC-Regular;
-  font-weight: Regular;
   text-align: left;
   color: #161616;
   line-height: 22px;

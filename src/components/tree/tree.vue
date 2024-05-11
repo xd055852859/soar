@@ -866,7 +866,7 @@ watch(contentVisible, (newVisible) => {
 // );
 </script>
 <template>
-  <div class="teamTree" id="teamTree">
+  <div class="teamTree" id="teamTree" v-if="teamInfo">
     <!--     @contextmenu.prevent="menuVisible = false" -->
     <!-- <button :draggable="true">测试</button> -->
     <div class="teamTree-header">

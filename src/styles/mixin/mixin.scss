@@ -1,9 +1,14 @@
 @import "../var/var.scss";
-@mixin p-number($padding1, $padding2) {
-  padding-left: $padding2;
-  padding-right: $padding2;
+@mixin p-number(
+  $padding1,
+  $padding2: $padding1,
+  $padding3: $padding1,
+  $padding4: $padding2
+) {
   padding-top: $padding1;
-  padding-bottom: $padding1;
+  padding-right: $padding2;
+  padding-bottom: $padding3;
+  padding-left: $padding4;
   box-sizing: border-box;
 }
 @mixin flex($justify, $align, $wrap) {

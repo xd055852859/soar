@@ -1,28 +1,27 @@
 <script setup lang="ts">
 import cHeader from "@/components/common/cHeader.vue";
-import TeamTree from "@/components/tree/tree.vue";
+import Icon from "@/components/common/Icon.vue";
+import FileCard from "@/components/fileCard/fileCard.vue";
+import CDrawer from "@/components/common/cDrawer.vue";
+import CreateTask from "@/components/task/createTask.vue";
+
 import { ResultProps } from "@/interface/Common";
 import api from "@/services/api";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
-import _ from "lodash";
-import Icon from "@/components/common/Icon.vue";
 
-import FileCard from "@/components/fileCard/fileCard.vue";
-import search from "@/components/search/search.vue";
 const dayjs: any = inject("dayjs");
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const { token, user } = storeToRefs(appStore.authStore);
 const { mateList } = storeToRefs(appStore.mateStore);
-const { setTeamKey } = appStore.teamStore;
-const { setIframeVisible } = appStore.commonStore;
-const nodeKey = ref<string>("");
-const nodeInfo = ref<any>(null);
 const taskTab = ref<string>("execute");
 const taskList = ref<any>([]);
 const searchMemberList = ref<any>([]);
+const treeInfo = ref<any>(null);
+const teamKey = ref<any>(null);
 const taskUser = ref<any>(null);
 const searchName = ref<string>("");
+const drawerVisible = ref<boolean>(false);
 
 const getTaskList = async () => {
   let taskRes = (await api.request.get("task/team", {
@@ -56,6 +55,13 @@ const chooseCard = (detail, type) => {
       break;
   }
 };
+const chooseTree = (item) => {
+  drawerVisible.value = true;
+  treeInfo.value = {
+    ...item,
+  };
+  teamKey.value = item.projectKey;
+};
 watchEffect(() => {
   console.log(taskUser.value);
   if (spaceKey.value && taskUser.value) {
@@ -85,7 +91,7 @@ watchEffect(() => {
 </script>
 <template>
   <div class="task">
-    <cHeader title="事务">
+    <cHeader title="任务">
       <template #subtitle>
         <div
           class="icon-point q-ml-lg dp--center"
@@ -99,6 +105,7 @@ watchEffect(() => {
                   ? taskUser.userAvatar
                   : '/common/defaultPerson.png'
               "
+              alt=""
             />
           </q-avatar>
           {{ taskUser.userName }}
@@ -162,21 +169,11 @@ watchEffect(() => {
       >
         <div class="taskItem-top">
           <div>{{ item.projectName }} / {{ item.title }}</div>
-          <!-- <div>
-            <q-btn
-              round
-              flat
-              size="16px"
-              @click="
-                setIframeVisible(true, {
-                  url: `https://soar.cn/base/#/login?token=${token}&redirectPath=node/${item._key}`,
-                  title: item.title,
-                })
-              "
-            >
-              <Icon name="quanping_o" :size="20" />
+          <div>
+            <q-btn round flat size="16px" @click="chooseTree(item)">
+              <Icon name="a-chuangjian2" :size="20" />
             </q-btn>
-          </div> -->
+          </div>
         </div>
         <div class="taskItem-bottom">
           <template
@@ -194,6 +191,18 @@ watchEffect(() => {
         </div>
       </div>
     </div>
+    <c-drawer
+      :visible="drawerVisible"
+      @close="drawerVisible = false"
+      :drawerStyle="{
+        width: '400px',
+      }"
+      opacityMask
+    >
+      <template #content>
+        <CreateTask :father-team-key="teamKey" :father-tree-info="treeInfo" />
+      </template>
+    </c-drawer>
   </div>
 </template>
 <style scoped lang="scss">

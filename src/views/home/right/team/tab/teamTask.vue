@@ -45,7 +45,7 @@ const chooseCard = (detail, type) => {
             taskList.value[userIndex].finishTask--;
           }
           taskList.value[userIndex].taskList[updateIndex] = {
-            ...taskList.value[userIndex].taskList[updateIndex] ,
+            ...taskList.value[userIndex].taskList[updateIndex],
             ...detail,
           };
         }
@@ -89,6 +89,7 @@ watchEffect(() => {
                     ? item.userAvatar
                     : '/common/defaultPerson.png'
                 "
+                alt=""
               />
             </q-avatar>
           </q-circular-progress>

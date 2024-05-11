@@ -15,7 +15,7 @@ import { totalmem } from "os";
 const $q = useQuasar();
 const { spaceKey, spaceInfo } = storeToRefs(appStore.spaceStore);
 const { departmentList, departmentTree, departmentInfo } = storeToRefs(
-  appStore.departmentStore
+  appStore.departmentStore,
 );
 const { setDepartmentTree, getDepartmentInfo } = appStore.departmentStore;
 const departmentMemberList = ref<any>([]);
@@ -46,18 +46,19 @@ const columns: any = [
     field: "name",
   },
   {
+    name: "post",
+    align: "center",
+    label: "职位",
+    field: "post",
+  },
+  {
     name: "activeStatus",
     align: "center",
     label: "账号状态",
     field: "activeStatus",
     style: "width: 200px",
   },
-  {
-    name: "mobile",
-    align: "center",
-    label: "联系手机号",
-    field: "mobile",
-  },
+
   {
     name: "department",
     align: "center",
@@ -190,7 +191,7 @@ const changeDepartment = async () => {
     // if (chooseDepartmentKeyList.value.indexOf(departmentKey.value) === -1) {
     //   departmentMemberList.value.splice(departmentMemberIndex.value, 1);
     // }else{
-      chooseDepartment();
+    chooseDepartment();
     // }
     departmentVisible.value = false;
   }
@@ -237,7 +238,7 @@ watch(
       departmentKey.value = newInfo.rootDepartment;
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 watchEffect(() => {
   if (departmentKey.value) {
@@ -285,8 +286,8 @@ watchEffect(() => {
                   departmentKey === prop.node._key
                     ? { color: '#07be51' }
                     : dragDepartmentKey === prop.node._key
-                    ? { border: '1px solid #07be51' }
-                    : {}
+                      ? { border: '1px solid #07be51' }
+                      : {}
                 "
                 :id="prop.node._key"
                 @mouseenter="moveDepartmentKey = prop.node._key"
@@ -391,12 +392,13 @@ watchEffect(() => {
               <q-td key="name" :props="props" style="width: 200px">
                 {{ props.row.name }}
               </q-td>
+              <q-td key="post" :props="props">
+                {{ props.row.post }}
+              </q-td>
               <q-td key="activeStatus" :props="props">
                 {{ statusArray[props.row.activeStatus - 1].label }}
               </q-td>
-              <q-td key="mobile" :props="props">
-                {{ props.row.mobile }}
-              </q-td>
+
               <q-td key="department" :props="props">
                 <q-chip
                   v-for="(item, index) in props.row.department"
@@ -425,7 +427,7 @@ watchEffect(() => {
         departmentVisible = false;
         departmentMemberName = '';
       "
-      title="变更部门"
+      :title="`设置 ${departmentMemberList[departmentMemberIndex]?.name} 部门`"
       :dialogStyle="{ width: '700px', height: '70vh', maxWidth: '80vw' }"
     >
       <template #content>

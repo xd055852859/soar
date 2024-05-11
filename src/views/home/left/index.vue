@@ -261,15 +261,15 @@ watch(
                   size="sm"
                   class="q-mr-sm"
                 >
-                  <img v-if="item?.logo" :src="item.logo" />
+                  <img v-if="item?.logo" :src="item.logo" alt="" />
 
                   <template v-else-if="item?.name">
                     <div class="text-white">
                       {{ item.name.substring(0, 1) }}
                     </div>
                   </template>
-                  <img v-else src="/common/defaultGroup.png"
-                /></q-avatar>
+                  <img v-else src="/common/defaultGroup.png" alt="" />
+                </q-avatar>
                 {{ item.name }}
               </div>
               <Icon
@@ -510,9 +510,9 @@ watch(
     title="用户设置"
   >
     <template #content>
-      <div className="form-container">
-        <div className="form-logo">
-          <div className="upload-button upload-img-button logo-box">
+      <div class="form-container">
+        <div class="form-logo">
+          <div class="upload-button upload-img-button logo-box">
             <img
               :src="userAvatar"
               alt=""
@@ -532,7 +532,7 @@ watch(
             />
           </div>
         </div>
-        <div className="form-name">
+        <div class="form-name">
           <q-input
             outlined
             v-model="userName"
