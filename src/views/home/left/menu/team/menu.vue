@@ -31,6 +31,7 @@ const deleteTeam = () => {
         setMessage("success", "删除群组成功");
         let index = _.findIndex(list, { _key: props.info._key });
         index !== -1 && list.splice(index, 1);
+        setTeamKey("");
         setTeamList(list);
         router.push("/home/explore");
       }

@@ -3,12 +3,12 @@ import api from "@/services/api";
 import { ResultProps } from "@/interface/Common";
 import { storeToRefs } from "pinia";
 import appStore from "@/store";
-import FileCard from "@/components/fileCard/fileCard.vue";
+import Task from "@/components/task/task.vue";
 const { user } = storeToRefs(appStore.authStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const props = defineProps<{
-  fatherTeamKey: string;
-  fatherTreeInfo: any;
+  fatherTeamKey?: string;
+  fatherTreeInfo?: any;
   fatherExecutorInfo?: any;
 }>();
 
@@ -28,12 +28,14 @@ const searchTreeInput = ref<string>("");
 const searchMemberInput = ref<string>("");
 const topRef = ref<any>(null);
 onMounted(() => {
-  teamKey.value = props.fatherTeamKey;
-  treeKey.value = props.fatherTreeInfo._key;
-  treeInfo.value = props.fatherTreeInfo;
-  executorInfo.value = props.fatherExecutorInfo
-    ? props.fatherExecutorInfo
-    : { ...user.value, userKey: user.value!._key };
+  if (props.fatherTeamKey) {
+    teamKey.value = props.fatherTeamKey;
+    treeKey.value = props.fatherTreeInfo._key;
+    treeInfo.value = props.fatherTreeInfo;
+    executorInfo.value = props.fatherExecutorInfo
+      ? props.fatherExecutorInfo
+      : { ...user.value, userKey: user.value!._key };
+  }
   getData();
 });
 const getData = async () => {
@@ -104,14 +106,14 @@ watchEffect(() => {
   }
 });
 watchEffect(() => {
-  if (treeInfo.value) {
+  if (treeInfo.value && executorInfo.value) {
     getTaskData();
   }
 });
 </script>
 
 <template>
-  <div class="create-task" v-if="treeInfo">
+  <div class="create-task">
     <div class="create-task-top" ref="topRef">
       <div class="create-task-header">
         <q-input
@@ -124,12 +126,24 @@ watchEffect(() => {
         />
         <div class="create-task-button dp-space-center">
           <q-checkbox v-model="moreState" label="多任务" dense />
-          <q-btn label="保存" color="primary" @click="addTask()" />
+          <q-btn
+            label="发布"
+            color="primary"
+            @click="addTask()"
+            :disable="!treeInfo || !executorInfo"
+          />
         </div>
       </div>
       <div class="create-task-search">
-        <div>{{ treeInfo.title }}</div>
-        <div>{{ executorInfo.userName }}</div>
+        <template v-if="treeInfo">
+          <div>{{ treeInfo.title }}</div>
+          <div>{{ executorInfo?.userName }}</div>
+        </template>
+        <template v-else
+          ><span style="font-size: 14px" class="text-grey-5"
+            >请选择任务树与执行人</span
+          ></template
+        >
         <q-menu style="margin-left: 20px">
           <div class="create-task-choose">
             <div class="create-choose">
@@ -151,16 +165,18 @@ watchEffect(() => {
                   v-for="(treeItem, treeIndex) in searchTreeList"
                   :key="`treeItem-${treeIndex}`"
                   :style="{
-                    background: treeInfo._key === treeItem._key ? '#eee' : '',
+                    background: treeInfo?._key === treeItem._key ? '#eee' : '',
                   }"
                   class="choose-container-item"
                   @click="
+                    console.log(treeItem);
                     teamKey = treeItem.projectInfo._key;
-                    treeInfo = treeItem;
+                    treeInfo = { ...treeItem };
                   "
                 >
                   <div>
-                    {{ treeItem.projectInfo.name }} / {{ treeItem.title }}
+                    {{ treeItem.projectInfo.name }} /
+                    {{ treeItem.title }}
                   </div>
                 </div>
               </div>
@@ -185,7 +201,9 @@ watchEffect(() => {
                   :key="`memberItem-${memberIndex}`"
                   :style="{
                     background:
-                      executorInfo.userKey === memberItem.userKey ? '#eee' : '',
+                      executorInfo?.userKey === memberItem.userKey
+                        ? '#eee'
+                        : '',
                   }"
                   v-close-popup
                   class="choose-container-item"
@@ -229,7 +247,7 @@ watchEffect(() => {
         v-for="(taskItem, taskIndex) in taskList"
         :key="`taskItem${taskIndex}`"
       >
-        <FileCard :card="taskItem" :taskIndex="taskIndex" type="taskBox" />
+        <Task :card="taskItem" :taskIndex="taskIndex" />
       </template>
     </div>
   </div>

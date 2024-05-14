@@ -97,9 +97,9 @@ const routes: Array<RouteRecordRaw> = [
             children: [],
           },
           {
-            path: "teamTree/:cardKey",
-            name: "teamTree",
-            component: () => import("@/components/tree/tree.vue"),
+            path: "teamTask/:cardKey",
+            name: "teamTask",
+            component: () => import("@/views/home/right/team/tab/teamTask.vue"),
             children: [],
             props: true,
           },

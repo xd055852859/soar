@@ -16,7 +16,7 @@ import dayjs from "dayjs";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 import langDe from "quasar/lang/zh-CN";
 import "./styles/common/index.scss";
-import masonry from "vue-next-masonry";
+// import masonry from "vue-next-masonry";
 // import "amfe-flexible/index.js";
 // Import Quasar css
 import "quasar/src/css/index.sass";
@@ -36,8 +36,7 @@ pinia.use(({ store }) => {
   };
 });
 app
-  //@ts-ignore
-  .use(masonry)
+  // .use(masonry)
   .use(router)
   .use(pinia)
   .use(Quasar, {
@@ -60,11 +59,10 @@ app
         /* look at QuasarConfOptions from the API card */
       },
     },
-  });
-registerStore();
-app //@ts-ignore
+  })
   .use(SocketIO, {
     connection: "https://data.soar.cn",
     options: {},
-  })
-  .mount("#app");
+  });
+registerStore();
+app.mount("#app");

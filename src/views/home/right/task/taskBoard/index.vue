@@ -192,100 +192,95 @@ watchEffect(() => {
       />
     </q-tabs>
     <div class="taskBoard-box">
-      <masonry :cols="2" :gutter="15">
-        <q-card
-          class="q-mb-md taskBoard-card"
-          v-for="(item, index) in boardList"
-          :key="`taskTree${index}`"
-        >
-          <q-card-section class="row items-center q-pb-none common-title">
-            # {{ item.projectInfo?.name }}
-          </q-card-section>
-          <q-card-section class="q-pt-none">
-            <q-tree
-              :nodes="item.tree"
-              node-key="key"
-              no-connectors
-              default-expand-all
-              no-transition
-            >
-              <template v-slot:default-header="prop">
-                <div
-                  class="row items-center justify-between full-width taskBoard-item"
-                >
-                  <template v-if="prop.node.executor">
-                    <Icon
-                      :name="
-                        prop.node.hasDone
-                          ? 'a-quangouxuan21'
-                          : 'a-quanxuan-weixuanzhong21'
+      <!--      <masonry :cols="2" :gutter="15">-->
+      <q-card
+        class="q-mb-md taskBoard-card"
+        v-for="(item, index) in boardList"
+        :key="`taskTree${index}`"
+      >
+        <q-card-section class="row items-center q-pb-none common-title">
+          # {{ item.projectInfo?.name }}
+        </q-card-section>
+        <q-card-section class="q-pt-none">
+          <q-tree
+            :nodes="item.tree"
+            node-key="key"
+            no-connectors
+            default-expand-all
+            no-transition
+          >
+            <template v-slot:default-header="prop">
+              <div
+                class="row items-center justify-between full-width taskBoard-item"
+              >
+                <template v-if="prop.node.executor">
+                  <Icon
+                    :name="
+                      prop.node.hasDone
+                        ? 'a-quangouxuan21'
+                        : 'a-quanxuan-weixuanzhong21'
+                    "
+                    :size="20"
+                    color="#333"
+                    class="q-mr-xs"
+                    @click="editFinishPercent(prop.node, index)"
+                  />
+                  <q-avatar color="#fff" size="lg" class="q-mr-sm">
+                    <img
+                      :src="
+                        prop.node?.avatarUri
+                          ? prop.node.avatarUri
+                          : '/common/defaultPerson.png'
                       "
-                      :size="20"
-                      color="#333"
-                      class="q-mr-xs"
-                      @click="editFinishPercent(prop.node, index)"
                     />
-                    <q-avatar color="#fff" size="lg" class="q-mr-sm">
-                      <img
-                        :src="
-                          prop.node?.avatarUri
-                            ? prop.node.avatarUri
-                            : '/common/defaultPerson.png'
-                        "
-                      />
-                    </q-avatar>
-                  </template>
-                  <div class="common-title taskBoard-item-title">
-                    {{ prop.node.label }}
-                  </div>
-                  <div class="common-title taskBoard-item-icon">
-                    <q-btn
-                      flat
-                      size="12px"
-                      @click.stop=""
-                      :class="{ 'taskBoard-button': !prop.node.planTag }"
-                      v-if="prop.node.executor"
-                    >
-                      <template v-if="prop.node.planTag">{{
-                        planArray[
-                          _.findIndex(planArray, { value: prop.node.planTag })
-                        ]?.label
-                      }}</template>
-                      <Icon
-                        name="a-shezhi2"
-                        :size="18"
-                        color="#bdbdbd"
-                        v-else
-                      />
-                      <q-menu class="q-pa-sm">
-                        <q-list dense>
-                          <q-item
-                            v-for="(planItem, planIndex) in planArray.slice(
-                              1,
-                              planArray.length,
-                            )"
-                            :key="`planButton${planIndex}`"
-                            :label="item.label"
-                            :name="item.value"
-                            class="common-title"
-                            clickable
-                            v-close-popup
-                            @click="
-                              changeTaskBoard(prop.node, index, planItem.value)
-                            "
-                          >
-                            {{ planItem.label }}
-                          </q-item>
-                        </q-list>
-                      </q-menu>
-                    </q-btn>
-                  </div>
+                  </q-avatar>
+                </template>
+                <div class="common-title taskBoard-item-title">
+                  {{ prop.node.label }}
                 </div>
-              </template>
-            </q-tree>
-          </q-card-section>
-        </q-card>
-      </masonry>
+                <div class="common-title taskBoard-item-icon">
+                  <q-btn
+                    flat
+                    size="12px"
+                    @click.stop=""
+                    :class="{ 'taskBoard-button': !prop.node.planTag }"
+                    v-if="prop.node.executor"
+                  >
+                    <template v-if="prop.node.planTag">{{
+                      planArray[
+                        _.findIndex(planArray, { value: prop.node.planTag })
+                      ]?.label
+                    }}</template>
+                    <Icon name="a-shezhi2" :size="18" color="#bdbdbd" v-else />
+                    <q-menu class="q-pa-sm">
+                      <q-list dense>
+                        <q-item
+                          v-for="(planItem, planIndex) in planArray.slice(
+                            1,
+                            planArray.length,
+                          )"
+                          :key="`planButton${planIndex}`"
+                          :label="item.label"
+                          :name="item.value"
+                          class="common-title"
+                          clickable
+                          v-close-popup
+                          @click="
+                            changeTaskBoard(prop.node, index, planItem.value)
+                          "
+                        >
+                          {{ planItem.label }}
+                        </q-item>
+                      </q-list>
+                    </q-menu>
+                  </q-btn>
+                </div>
+              </div>
+            </template>
+          </q-tree>
+        </q-card-section>
+      </q-card>
+      <!--      </masonry>-->
     </div>
   </div>
 </template>

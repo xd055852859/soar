@@ -15,9 +15,11 @@ import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import Icon from "@/components/common/Icon.vue";
 import cDialog from "@/components/common/cDialog.vue";
-
+import cDrawer from "@/components/common/cDrawer.vue";
 import createSpace from "@/components/createSpace.vue";
 import { commonStore } from "@/store/common";
+import CDrawer from "@/components/common/cDrawer.vue";
+import CreateTask from "@/components/task/createTask.vue";
 
 const props = defineProps<{
   showState?: boolean;
@@ -53,7 +55,7 @@ const urlBase64 = ref<any>(null);
 const cropperRef = ref<any>(null);
 const menuTab = ref<string>("team");
 const reportState = ref<boolean>(false);
-const searchVisible = ref<boolean>(true);
+const drawerVisible = ref<boolean>(false);
 onMounted(() => {
   window.addEventListener("message", getMessage);
 });
@@ -217,13 +219,13 @@ watch(
     <!--       @mouseenter="spaceMenuVisible = true" -->
     <div class="select-third-item" style="width: 100%; height: 45px">
       <q-avatar :color="spaceInfo?.logo ? '#fff' : 'primary'" rounded size="lg">
-        <img v-if="spaceInfo?.logo" :src="spaceInfo.logo" />
+        <img v-if="spaceInfo?.logo" :src="spaceInfo.logo" alt="" />
         <template v-else-if="spaceInfo?.name">
           <div class="text-white">
             {{ spaceInfo.name.substring(0, 1) }}
           </div>
         </template>
-        <img v-else src="/common/defaultGroup.png" />
+        <img v-else src="/common/defaultGroup.png" alt="" />
       </q-avatar>
 
       <div
@@ -440,23 +442,26 @@ watch(
     </div>
   </div>
   <div
-    class="left-subtitle dp--center"
+    class="left-subtitle dp-space-center"
     @click="$router.push('/home/task')"
     :style="{ color: $route.name === 'task' ? '#07be51' : '#333' }"
   >
-    <Icon
-      name="xiangmu"
-      :size="20"
-      :color="$route.name === 'task' ? '#07be51' : '#333'"
-      class="q-mr-sm"
-    />
-    <!-- <div class="badge-box"> -->
+    <div class="dp--center">
+      <Icon
+        name="xiangmu"
+        :size="20"
+        :color="$route.name === 'task' ? '#07be51' : '#333'"
+        class="q-mr-sm"
+      />
 
-    任务
-    <q-badge rounded color="red" v-if="spaceTaskNum" class="q-ml-sm"
-      >{{ spaceTaskNum }}
-    </q-badge>
-    <!-- </div> -->
+      任务
+      <q-badge rounded color="red" v-if="spaceTaskNum" class="q-ml-sm"
+        >{{ spaceTaskNum }}
+      </q-badge>
+    </div>
+    <q-btn round flat @click.stop="drawerVisible = true">
+      <Icon name="a-chuangjian2" :size="20" />
+    </q-btn>
   </div>
   <q-separator />
   <div class="left-menu">
@@ -475,96 +480,107 @@ watch(
     <TeamMenu v-if="menuTab === 'team'" />
     <ResourceMenu v-else-if="menuTab === 'resource'" />
     <MateMenu v-else-if="menuTab === 'mate'" />
-  </div>
+    <c-dialog
+      :visible="cropperVisible"
+      @close="cropperVisible = false"
+      title="裁剪图片"
+    >
+      <template #content>
+        <div style="width: 500px; height: 400px">
+          <VueCropper
+            ref="cropperRef"
+            :img="urlBase64"
+            :autoCrop="true"
+            :centerBox="true"
+          />
+        </div>
+      </template>
 
-  <c-dialog
-    :visible="cropperVisible"
-    @close="cropperVisible = false"
-    title="裁剪图片"
-  >
-    <template #content>
-      <div style="width: 500px; height: 400px">
-        <VueCropper
-          ref="cropperRef"
-          :img="urlBase64"
-          :autoCrop="true"
-          :centerBox="true"
+      <template #footer>
+        <q-btn
+          flat
+          label="取消"
+          color="grey-5"
+          @click="cropperVisible = false"
+          :dense="true"
         />
-      </div>
-    </template>
-
-    <template #footer>
-      <q-btn
-        flat
-        label="取消"
-        color="grey-5"
-        @click="cropperVisible = false"
-        :dense="true"
-      />
-      <q-btn label="确认" color="primary" @click="saveImg" />
-    </template>
-  </c-dialog>
-  <c-dialog
-    :visible="userVisible"
-    @close="userVisible = false"
-    title="用户设置"
-  >
-    <template #content>
-      <div class="form-container">
-        <div class="form-logo">
-          <div class="upload-button upload-img-button logo-box">
-            <img
-              :src="userAvatar"
-              alt=""
-              style="width: 100%; height: 100%"
-              class="upload-cover"
-              v-if="userAvatar"
-            />
-            <q-icon name="add" style="color: #ebebeb" size="80px" v-else />
-            <input
-              type="file"
-              accept="image/*"
-              @change="
-                //@ts-ignore
-                uploadImage($event.target.files[0], 'avatar')
-              "
-              class="upload-img"
+        <q-btn label="确认" color="primary" @click="saveImg" />
+      </template>
+    </c-dialog>
+    <c-dialog
+      :visible="userVisible"
+      @close="userVisible = false"
+      title="用户设置"
+    >
+      <template #content>
+        <div class="form-container">
+          <div class="form-logo">
+            <div class="upload-button upload-img-button logo-box">
+              <img
+                :src="userAvatar"
+                alt=""
+                style="width: 100%; height: 100%"
+                class="upload-cover"
+                v-if="userAvatar"
+              />
+              <q-icon name="add" style="color: #ebebeb" size="80px" v-else />
+              <input
+                type="file"
+                accept="image/*"
+                @change="
+                  //@ts-ignore
+                  uploadImage($event.target.files[0], 'avatar')
+                "
+                class="upload-img"
+              />
+            </div>
+          </div>
+          <div class="form-name">
+            <q-input
+              outlined
+              v-model="userName"
+              label="用户名"
+              :rules="[(val) => !!val || '用户名必填']"
             />
           </div>
         </div>
-        <div class="form-name">
-          <q-input
-            outlined
-            v-model="userName"
-            label="用户名"
-            :rules="[(val) => !!val || '用户名必填']"
-          />
-        </div>
-      </div>
-    </template>
+      </template>
 
-    <template #footer>
-      <q-btn
-        flat
-        label="取消"
-        color="grey-5"
-        @click="userVisible = false"
-        :dense="true"
-      />
-      <q-btn label="确认" color="primary" @click="updateUser" />
-    </template>
-  </c-dialog>
-  <c-dialog
-    :visible="spaceVisible"
-    @close="spaceVisible = false"
-    title="创建团队"
-  >
-    <template #content>
-      <div class="spaceAdd-container">
-        <createSpace @close="spaceVisible = false" />
-      </div>
-    </template>
-  </c-dialog>
+      <template #footer>
+        <q-btn
+          flat
+          label="取消"
+          color="grey-5"
+          @click="userVisible = false"
+          :dense="true"
+        />
+        <q-btn label="确认" color="primary" @click="updateUser" />
+      </template>
+    </c-dialog>
+    <c-dialog
+      :visible="spaceVisible"
+      @close="spaceVisible = false"
+      title="创建团队"
+    >
+      <template #content>
+        <div class="spaceAdd-container">
+          <createSpace @close="spaceVisible = false" />
+        </div>
+      </template>
+    </c-dialog>
+    <c-drawer
+      :visible="drawerVisible"
+      @close="drawerVisible = false"
+      :drawerStyle="{
+        width: '400px',
+      }"
+      opacityMask
+    >
+      <template #content>
+        <CreateTask />
+      </template>
+    </c-drawer>
+  </div>
 </template>
 
 <style scoped lang="scss">

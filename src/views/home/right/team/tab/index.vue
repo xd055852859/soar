@@ -3,7 +3,6 @@ import appStore from "@/store";
 import cIframe from "@/components/common/cIframe.vue";
 import api from "@/services/api";
 import { storeToRefs } from "pinia";
-import FileCard from "@/components/fileCard/fileCard.vue";
 import { ResultProps } from "@/interface/Common";
 const { token } = storeToRefs(appStore.authStore);
 const { teamInfo, teamMemberList, teamKey } = storeToRefs(appStore.teamStore);
@@ -66,46 +65,46 @@ watchEffect(() => {
             {{ teamInfo?.memo }}
           </div>
         </q-expansion-item>
-        <q-expansion-item
-          group="team"
-          expand-separator
-          label="最新文档"
-          header-class="text-bold text-subtitle1"
-        >
-          <div
-            class="team-right-box"
-            :style="{ maxHeight: homeRef.offsetHeight - 190 + 'px' }"
-          >
-            <template
-              v-for="(fileItem, fileIndex) in fileList"
-              :key="`fileItem${fileIndex}`"
-            >
-              <FileCard :card="fileItem" type="file" @chooseCard="chooseCard" />
-            </template>
-          </div>
-        </q-expansion-item>
-        <q-expansion-item
-          group="team"
-          expand-separator
-          label="最近任务"
-          header-class="text-bold text-subtitle1"
-        >
-          <div
-            class="team-right-box"
-            :style="{ maxHeight: homeRef.offsetHeight - 190 + 'px' }"
-          >
-            <template
-              v-for="(taskItem, taskIndex) in taskList"
-              :key="`taskItem${fileIndex}`"
-            >
-              <FileCard
-                :card="taskItem"
-                type="taskBox"
-                @chooseCard="chooseCard"
-              />
-            </template>
-          </div>
-        </q-expansion-item>
+        <!--        <q-expansion-item-->
+        <!--          group="team"-->
+        <!--          expand-separator-->
+        <!--          label="最新文档"-->
+        <!--          header-class="text-bold text-subtitle1"-->
+        <!--        >-->
+        <!--          <div-->
+        <!--            class="team-right-box"-->
+        <!--            :style="{ maxHeight: homeRef.offsetHeight - 190 + 'px' }"-->
+        <!--          >-->
+        <!--            <template-->
+        <!--              v-for="(fileItem, fileIndex) in fileList"-->
+        <!--              :key="`fileItem${fileIndex}`"-->
+        <!--            >-->
+        <!--              <FileCard :card="fileItem" type="file" @chooseCard="chooseCard" />-->
+        <!--            </template>-->
+        <!--          </div>-->
+        <!--        </q-expansion-item>-->
+        <!--        <q-expansion-item-->
+        <!--          group="team"-->
+        <!--          expand-separator-->
+        <!--          label="最近任务"-->
+        <!--          header-class="text-bold text-subtitle1"-->
+        <!--        >-->
+        <!--          <div-->
+        <!--            class="team-right-box"-->
+        <!--            :style="{ maxHeight: homeRef.offsetHeight - 190 + 'px' }"-->
+        <!--          >-->
+        <!--            <template-->
+        <!--              v-for="(taskItem, taskIndex) in taskList"-->
+        <!--              :key="`taskItem${fileIndex}`"-->
+        <!--            >-->
+        <!--              <FileCard-->
+        <!--                :card="taskItem"-->
+        <!--                type="taskBox"-->
+        <!--                @chooseCard="chooseCard"-->
+        <!--              />-->
+        <!--            </template>-->
+        <!--          </div>-->
+        <!--        </q-expansion-item>-->
         <q-expansion-item
           group="team"
           expand-separator

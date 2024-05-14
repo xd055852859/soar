@@ -2,14 +2,14 @@
 import cHeader from "@/components/common/cHeader.vue";
 import { ResultProps } from "@/interface/Common";
 import riverChart from "@/components/chart/riverChart.vue";
-import fileCard from "@/components/fileCard/fileCard.vue";
+
 import api from "@/services/api";
 import { setLoading, setMessage } from "@/services/util/common";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 
 import _ from "lodash";
-import { formatName, dayArray, signatureArray } from "@/services/config/config";
+import { formatName, dayArray } from "@/services/config/config";
 import { commonscroll } from "@/services/util/common";
 
 const { spaceKey, privateTeamKey } = storeToRefs(appStore.spaceStore);

@@ -40,6 +40,8 @@ const fileVisible = ref<boolean>(false);
 const fileInput = ref<string>("");
 const fileName = ref<string>("");
 const searchList = ref<any>([]);
+const menuTab = ref<string>("content");
+const topRef = ref<any>(null);
 const linkVisible = ref<boolean>(false);
 const relatersKey = computed(() => relaters.value.map((item) => item.userKey));
 let timeout: any = null;
@@ -200,224 +202,48 @@ watch(fileInput, (newName) => {
 </script>
 <template>
   <div class="node-detail" v-if="nodeInfo">
-    <div class="node-detail-close">
-      <!-- <q-btn
-        icon="close"
-        color="grey-5"
-        flat
-        round
-        dense
-        @click="emits('close')"
-      /> -->
-      <!-- <q-btn
-        icon="o_more_horiz"
-        color="grey-5"
-        flat
-        round
-        dense
-        @click=""
-      /> -->
-    </div>
-    <div class="dp-space-center">
-      <div class="icon-point" v-if="targetTeamMemberList">
-        <template
-          v-if="
-            executor &&
-            _.findIndex(targetTeamMemberList, { userKey: executor }) !== -1
-          "
-        >
-          <q-avatar color="#fff" size="30px" class="shadow-3 q-mr-sm">
-            <img
-              :src="
-                targetTeamMemberList[
-                  _.findIndex(targetTeamMemberList, { userKey: executor })
-                ]?.userAvatar
-                  ? targetTeamMemberList[
-                      _.findIndex(targetTeamMemberList, { userKey: executor })
-                    ].userAvatar
-                  : '/common/defaultPerson.png'
-              "
-              alt=""
-            />
-          </q-avatar>
-
-          {{
-            targetTeamMemberList[
-              _.findIndex(targetTeamMemberList, { userKey: executor })
-            ].userName
-          }}
-        </template>
-        <template v-else> 选择执行人</template>
-        <q-menu auto-close>
-          <q-list>
-            <q-item
-              clickable
-              class="row items-center justify-between"
-              @click.stop="
-                updateDetail('executor', {
-                  userKey: '',
-                  userAvatar: '',
-                })
-              "
-            >
-              无
-            </q-item>
-            <q-item
-              v-for="(item, index) in targetTeamMemberList"
-              :key="`member${index}`"
-              clickable
-              class="row items-center justify-between"
-              @click.stop="
-                updateDetail('executor', {
-                  userKey: item.userKey,
-                  userAvatar: item.userAvatar,
-                })
-              "
-            >
-              <q-avatar color="#fff" size="24px" class="q-mr-sm">
-                <img
-                  :src="
-                    item?.userAvatar
-                      ? item?.userAvatar
-                      : '/common/defaultPerson.png'
-                  "
-                  alt=""
-                />
-              </q-avatar>
-              <div class="single-to-long" style="width: 120px">
-                {{ item.userName }}
-              </div>
-
-              <q-icon
-                name="check"
-                color="primary"
-                size="24px"
-                v-if="item.userKey === executor"
-              />
-              <q-space v-else />
-            </q-item>
-          </q-list>
-        </q-menu>
-      </div>
-
-      <div>
-        {{ tagLabel ? tagLabel : "选择标签" }}
-        <q-menu>
-          <q-list dense>
-            <!--  @click="editFile(item._key, index)" -->
-            <!-- @click="updateTag(item.value)" -->
-            <q-item
-              clickable
-              v-close-popup
-              :style="{ backgroundColor: '#fff' }"
-              @click="
-                tagLabel = '';
-                updateDetail('clear', {
-                  type: 'tag',
-                  adornmentContent: 'start',
-                });
-              "
-            >
-              <q-item-section>无</q-item-section>
-            </q-item>
-            <q-item
-              clickable
-              v-close-popup
-              v-for="(item, index) in tagArray"
-              :key="`tag${index}`"
-              :style="{ backgroundColor: item.value }"
-              @click="
-                updateDetail('tag', {
-                  label: item.label,
-                  color: item.value,
-                })
-              "
-            >
-              <q-item-section class="text-white">{{
-                item.label
-              }}</q-item-section>
-            </q-item>
-          </q-list>
-        </q-menu>
-      </div>
-    </div>
-    <div
-      class="node-detail-name"
-      :style="executor ? { paddingLeft: '35px' } : null"
-    >
-      <div class="node-name-check" v-if="executor">
-        <Icon
-          :name="hasDone ? 'a-quangouxuan21' : 'a-quanxuan-weixuanzhong21'"
-          :size="20"
-          color="#333"
-          class="q-mr-xs"
-          @click="
-            hasDone = !hasDone;
-            updateDetail('hasDone', {
-              hasDone: hasDone,
-            });
-          "
-        />
-      </div>
-      <div class="node-name-input no-input-border">
-        <q-input
-          type="textarea"
-          v-model="name"
-          class="node-detail-name"
-          autogrow
-          @blur="
-            updateDetail('name', {
-              name,
-            })
-          "
-        />
-      </div>
-    </div>
-
-    <div class="node-detail-item dp--center">
-      <div class="node-detail-title">日期</div>
-      <div>
-        <template v-if="milestoneDate">{{
-          dayjs(milestoneDate).format("YYYY - M - D")
-        }}</template>
-        <q-btn flat round v-else>
-          <img src="/add.svg" alt="" />
-        </q-btn>
-        <q-menu style="width: 250px" auto-close>
-          <c-calendar
-            @clickDate="savemilestone"
-            @clearDate="clearDetail('milestone')"
-          />
-        </q-menu>
-      </div>
-    </div>
-    <div class="node-detail-item dp--center">
-      <div class="node-detail-title q-mb-sm">干系人</div>
-      <div class="dp--center">
-        <q-avatar
-          v-for="(item, index) in relaters"
-          :key="`relaters${index}`"
-          size="30px"
-          class="q-mr-sm q-mb-sm"
-        >
-          <img
-            :src="
-              item.userAvatar ? item.userAvatar : '/common/defaultPerson.png'
+    <div class="node-detail-top" ref="topRef">
+      <div class="node-detail-header dp-space-center">
+        <div class="icon-point" v-if="targetTeamMemberList">
+          <template
+            v-if="
+              executor &&
+              _.findIndex(targetTeamMemberList, { userKey: executor }) !== -1
             "
-          />
-          <q-tooltip :offset="[10, 5]">
-            {{ item.userName }}
-          </q-tooltip>
-        </q-avatar>
-        <q-btn flat round class="q-mb-sm">
-          <img src="/add.svg" alt="" />
-          <q-menu>
+          >
+            <q-avatar color="#fff" size="30px" class="shadow-3 q-mr-sm">
+              <img
+                :src="
+                  targetTeamMemberList[
+                    _.findIndex(targetTeamMemberList, { userKey: executor })
+                  ]?.userAvatar
+                    ? targetTeamMemberList[
+                        _.findIndex(targetTeamMemberList, { userKey: executor })
+                      ].userAvatar
+                    : '/common/defaultPerson.png'
+                "
+                alt=""
+              />
+            </q-avatar>
+
+            {{
+              targetTeamMemberList[
+                _.findIndex(targetTeamMemberList, { userKey: executor })
+              ].userName
+            }}
+          </template>
+          <template v-else> 选择执行人</template>
+          <q-menu auto-close>
             <q-list>
               <q-item
                 clickable
-                v-close-popup
                 class="row items-center justify-between"
-                @click="clearDetail('relaters')"
+                @click.stop="
+                  updateDetail('executor', {
+                    userKey: '',
+                    userAvatar: '',
+                  })
+                "
               >
                 无
               </q-item>
@@ -426,10 +252,10 @@ watch(fileInput, (newName) => {
                 :key="`member${index}`"
                 clickable
                 class="row items-center justify-between"
-                @click="
-                  updateDetail('relaters', {
-                    member: item,
-                    memberIndex: index,
+                @click.stop="
+                  updateDetail('executor', {
+                    userKey: item.userKey,
+                    userAvatar: item.userAvatar,
                   })
                 "
               >
@@ -440,6 +266,7 @@ watch(fileInput, (newName) => {
                         ? item?.userAvatar
                         : '/common/defaultPerson.png'
                     "
+                    alt=""
                   />
                 </q-avatar>
                 <div class="single-to-long" style="width: 120px">
@@ -450,124 +277,244 @@ watch(fileInput, (newName) => {
                   name="check"
                   color="primary"
                   size="24px"
-                  v-if="relatersKey.indexOf(item.userKey) !== -1"
+                  v-if="item.userKey === executor"
                 />
                 <q-space v-else />
               </q-item>
             </q-list>
           </q-menu>
-        </q-btn>
-      </div>
-    </div>
-    <div class="node-detail-item dp--center">
-      <div class="node-detail-title">内链</div>
-      <div class="node-detail-link dp--center">
-        <template v-if="fileName">
-          <div class="node-link-title single-to-long q-mr-sm">
-            {{ fileName }}
-          </div>
-          <img
-            src="/close.svg"
-            alt=""
-            @click="
-              updateDetail('clear', {
-                type: 'file',
-                adornmentContent: 'end',
-              })
-            "
-          />
-        </template>
-        <q-btn
-          flat
-          :round="!fileName"
-          @click="
-            setSearchVisible(true, (node) => {
-              updateDetail('file', {
-                fileKey: node._key,
-                fileName: node.title,
-              });
-              setSearchVisible(false);
-            })
-          "
-          v-else
-        >
-          <img src="/add.svg" alt="" />
-        </q-btn>
-      </div>
-    </div>
-    <div class="node-detail-item dp--center">
-      <div class="node-detail-title">外链</div>
-      <div class="node-detail-link dp--center">
-        <template v-if="nodeUrl">
-          <div class="node-link-title single-to-long q-mr-sm">
-            {{ nodeUrl }}
-          </div>
-          <img
-            src="/close.svg"
-            alt=""
-            @click="
-              updateDetail('clear', {
-                type: 'link',
-                adornmentContent: 'end',
-              })
-            "
-          />
-        </template>
-        <q-btn flat round v-else>
-          <img src="/add.svg" alt="" />
-        </q-btn>
-        <q-menu style="width: 250px">
-          <q-card>
-            <q-card-section class="full-width">链接</q-card-section>
-            <q-card-section class="full-width">
-              <q-input
-                outlined
-                v-model="nodeUrl"
-                label="链接地址"
-                dense
-                class="full-width"
-              />
-            </q-card-section>
-            <q-card-section class="full-width">
-              <q-input
-                outlined
-                v-model="nodeUrlText"
-                label="链接名称"
-                dense
-                class="full-width"
-              />
-            </q-card-section>
-            <q-card-actions align="right">
-              <q-btn
-                label="保存"
-                color="primary"
+        </div>
+        <div class="icon-point" :style="{ color: tagColor }">
+          {{ tagLabel ? tagLabel : "选择标签" }}
+          <q-menu>
+            <q-list dense>
+              <!--  @click="editFile(item._key, index)" -->
+              <!-- @click="updateTag(item.value)" -->
+              <q-item
+                clickable
+                v-close-popup
+                :style="{ backgroundColor: '#fff' }"
                 @click="
-                  updateDetail('link', {
-                    nodeUrl,
-                    text: nodeUrlText,
+                  tagLabel = '';
+                  updateDetail('clear', {
+                    type: 'tag',
+                    adornmentContent: 'start',
+                  });
+                "
+              >
+                <q-item-section>无</q-item-section>
+              </q-item>
+              <q-item
+                clickable
+                v-close-popup
+                v-for="(item, index) in tagArray"
+                :key="`tag${index}`"
+                :style="{ backgroundColor: item.value }"
+                @click="
+                  updateDetail('tag', {
+                    label: item.label,
+                    color: item.value,
                   })
                 "
-              />
-            </q-card-actions>
-          </q-card>
-        </q-menu>
+              >
+                <q-item-section class="text-white">{{
+                  item.label
+                }}</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </div>
+      </div>
+      <div
+        class="node-detail-name"
+        :style="executor ? { paddingLeft: '35px' } : null"
+      >
+        <div class="node-name-check" v-if="executor">
+          <Icon
+            :name="hasDone ? 'a-quangouxuan21' : 'a-quanxuan-weixuanzhong21'"
+            :size="20"
+            color="#333"
+            class="q-mr-xs"
+            @click="
+              hasDone = !hasDone;
+              updateDetail('hasDone', {
+                hasDone: hasDone,
+              });
+            "
+          />
+        </div>
+        <div class="node-name-input no-input-border">
+          <!--        <q-input-->
+          <!--          type="textarea"-->
+          <!--          v-model="name"-->
+          <!--          class="node-detail-name"-->
+          <!--          autogrow-->
+          <!--          @blur="-->
+          <!--            updateDetail('name', {-->
+          <!--              name,-->
+          <!--            })-->
+          <!--          "-->
+          <!--        />-->
+          <q-input
+            v-model="name"
+            borderless
+            dense
+            autogrow
+            class="node-detail-name"
+            placeholder="请输入任务"
+            @blur="
+              updateDetail('name', {
+                name,
+              })
+            "
+          />
+        </div>
+      </div>
+
+      <div class="node-detail-item dp--center">
+        <div class="node-detail-title">日期</div>
+        <div class="node-detail-time">
+          {{
+            milestoneDate
+              ? dayjs(milestoneDate).format("YYYY - M - D")
+              : "请选择截止时间"
+          }}
+
+          <q-menu style="width: 300px" auto-close>
+            <c-calendar
+              @clickDate="savemilestone"
+              @clearDate="clearDetail('milestone')"
+            />
+          </q-menu>
+        </div>
+      </div>
+      <div class="node-detail-item dp--center">
+        <div class="node-detail-title">内链</div>
+        <div class="node-detail-link dp--center">
+          <template v-if="fileName">
+            <div class="node-link-title single-to-long q-mr-sm">
+              {{ fileName }}
+            </div>
+            <img
+              src="/close.svg"
+              alt=""
+              @click="
+                updateDetail('clear', {
+                  type: 'file',
+                  adornmentContent: 'end',
+                })
+              "
+            />
+          </template>
+          <q-btn
+            flat
+            :round="!fileName"
+            @click="
+              setSearchVisible(true, (node) => {
+                updateDetail('file', {
+                  fileKey: node._key,
+                  fileName: node.title,
+                });
+                setSearchVisible(false);
+              })
+            "
+            v-else
+          >
+            <img src="/add.svg" alt="" />
+          </q-btn>
+        </div>
+      </div>
+      <div class="node-detail-item dp--center">
+        <div class="node-detail-title">外链</div>
+        <div class="node-detail-link dp--center">
+          <template v-if="nodeUrl">
+            <div class="node-link-title single-to-long q-mr-sm">
+              {{ nodeUrl }}
+            </div>
+            <img
+              src="/close.svg"
+              alt=""
+              @click="
+                updateDetail('clear', {
+                  type: 'link',
+                  adornmentContent: 'end',
+                })
+              "
+            />
+          </template>
+          <q-btn flat round v-else>
+            <img src="/add.svg" alt="" />
+          </q-btn>
+          <q-menu style="width: 250px">
+            <q-card>
+              <q-card-section class="full-width">链接</q-card-section>
+              <q-card-section class="full-width">
+                <q-input
+                  outlined
+                  v-model="nodeUrl"
+                  label="链接地址"
+                  dense
+                  class="full-width"
+                />
+              </q-card-section>
+              <q-card-section class="full-width">
+                <q-input
+                  outlined
+                  v-model="nodeUrlText"
+                  label="链接名称"
+                  dense
+                  class="full-width"
+                />
+              </q-card-section>
+              <q-card-actions align="right">
+                <q-btn
+                  label="保存"
+                  color="primary"
+                  @click="
+                    updateDetail('link', {
+                      nodeUrl,
+                      text: nodeUrlText,
+                    })
+                  "
+                />
+              </q-card-actions>
+            </q-card>
+          </q-menu>
+        </div>
       </div>
     </div>
-    <div class="node-detail-content">
-      <div class="node-detail-title">备注</div>
-      <div class="node-detail-editor">
-        <!-- :handleSave="updateContent" -->
-        <span v-if="nodeInfo" class="node-detail-save">{{
-          changed ? "有变更" : "已保存"
-        }}</span>
-        <Editor
-          v-if="nodeInfo"
-          ref="editorRef"
-          :initData="nodeInfo"
-          :autoSave="true"
-          @onChange="handleChange"
-          :handleSave="saveContent"
-        />
+    <div
+      class="node-detail-bottom"
+      v-if="topRef"
+      :style="{ height: `calc(100vh - ${topRef.offsetHeight + 40}px)` }"
+    >
+      <q-tabs
+        dense
+        v-model="menuTab"
+        active-color="primary"
+        class="text-grey-7"
+      >
+        <q-tab name="content" label="备注" />
+        <q-tab name="comment" label="评论" />
+        <q-tab name="history" label="历史" />
+      </q-tabs>
+      <div class="node-detail-content">
+        <template v-if="menuTab === 'content'">
+          <span v-if="nodeInfo" class="node-detail-save">{{
+            changed ? "有变更" : "已保存"
+          }}</span>
+          <div class="node-detail-editor">
+            <!-- :handleSave="updateContent" -->
+            <Editor
+              v-if="nodeInfo"
+              ref="editorRef"
+              :initData="nodeInfo"
+              :autoSave="true"
+              @onChange="handleChange"
+              :handleSave="saveContent"
+            />
+          </div>
+        </template>
       </div>
     </div>
   </div>
@@ -578,60 +525,89 @@ watch(fileInput, (newName) => {
   height: 100%;
   position: relative;
   z-index: 1;
-  @include scroll();
-  .node-detail-close {
-    position: absolute;
-    z-index: 2;
-    top: 0;
-    right: 0;
-  }
-  .node-detail-title {
-    height: 30px;
-    font-size: 16px;
-    margin-right: 15px;
-    line-height: 30px;
-    color: #121212;
-    font-weight: bolder;
-  }
-  .node-detail-content {
-    .node-detail-editor {
-      border: 1px solid $grey-4;
-      margin: 10px 0;
+
+  .node-detail-top {
+    width: 100%;
+    .node-detail-header {
+      width: 100%;
+      height: 45px;
+      font-size: 15px;
+      @include flex(space-between, center, null);
+    }
+
+    .node-detail-title {
+      width: 50px;
+      height: 30px;
+      font-size: 14px;
+      margin-right: 15px;
+      line-height: 30px;
+      color: #121212;
+      font-weight: bolder;
+    }
+
+    .node-detail-time {
+      width: calc(100% - 50px);
+      height: 40px;
+      border: 1px solid #bebebf;
+      border-radius: 5px;
+      line-height: 40px;
+      @include p-number(0, 10px);
+    }
+
+    .node-detail-item,
+    .node-detail-name {
+      width: 100%;
+      min-height: 30px;
+      margin-bottom: 15px;
+
+      .node-detail-link {
+        width: calc(100% - 50px);
+
+        .node-link-title {
+          max-width: calc(100% - 50px);
+        }
+      }
+    }
+
+    .node-detail-name {
       position: relative;
       z-index: 1;
+
+      .node-name-check {
+        width: 35px;
+        height: 100%;
+        position: absolute;
+        z-index: 2;
+        top: 8px;
+        left: 0;
+        cursor: pointer;
+        @include flex(flex-start, flex-start, null);
+      }
+    }
+  }
+  .node-detail-bottom {
+    width: 100%;
+
+    .node-detail-content {
+      width: 100%;
+      height: calc(100% - 50px);
+      position: relative;
+      z-index: 1;
+
       .node-detail-save {
         position: absolute;
         z-index: 2;
-        right: 5px;
+        right: 10px;
         top: 5px;
         color: $grey-6;
       }
-    }
-  }
-  .node-detail-item,
-  .node-detail-name {
-    width: 100%;
-    min-height: 30px;
-    margin-bottom: 15px;
-    .node-detail-link {
-      width: calc(100% - 50px);
-      .node-link-title {
-        max-width: calc(100% - 50px);
+      .node-detail-editor {
+        width: 100%;
+        height: 100%;
+        border: 1px solid $grey-4;
+        margin: 10px 0;
+        @include scroll();
       }
-    }
-  }
-  .node-detail-name {
-    position: relative;
-    z-index: 1;
-    .node-name-check {
-      width: 35px;
-      height: 100%;
-      position: absolute;
-      z-index: 2;
-      top: 0;
-      left: 0;
-      cursor: pointer;
-      @include flex(flex-start, flex-start, null);
     }
   }
 }

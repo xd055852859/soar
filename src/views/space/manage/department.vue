@@ -89,17 +89,24 @@ const addDepartment = async () => {
       flat: true,
     },
   }).onOk(async (data) => {
-    let departmentRes = (await api.request.post("department", {
-      teamKey: spaceKey.value,
-      fatherId: departmentKey.value,
-      name: data,
-    })) as ResultProps;
-    if (departmentRes.msg === "OK") {
-      setMessage("success", "新增部门成功");
-      let newTree = { ...departmentTree.value };
-      newTree[departmentRes.data._key] = { ...departmentRes.data };
-      newTree[departmentRes.data.father].sortList.push(departmentRes.data._key);
-      setDepartmentTree(newTree, true);
+    if (data) {
+      let departmentRes = (await api.request.post("department", {
+        teamKey: spaceKey.value,
+        fatherId: departmentKey.value,
+        name: data,
+      })) as ResultProps;
+      if (departmentRes.msg === "OK") {
+        setMessage("success", "新增部门成功");
+        let newTree = { ...departmentTree.value };
+        newTree[departmentRes.data._key] = { ...departmentRes.data };
+        newTree[departmentRes.data.father].sortList.push(
+          departmentRes.data._key,
+        );
+        setDepartmentTree(newTree, true);
+      }
+    } else {
+      setMessage("error", "请输入部门名");
+      return;
     }
   });
 };

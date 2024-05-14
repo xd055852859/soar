@@ -11,7 +11,6 @@ import appStore from "@/store";
 import { uploadFile } from "@/services/util/file";
 import Icon from "../common/Icon.vue";
 import cDrawer from "../common/cDrawer.vue";
-import fileCard from "../fileCard/fileCard.vue";
 import { startAdornments } from "@/components/common/treesvg.js";
 import { tagArray } from "@/services/config/config";
 import { setMessage } from "@/services/util/common";
@@ -580,7 +579,8 @@ const chooseHighlight = (type, value) => {
           if (value === "all") {
             element!.style.opacity = !node.executor ? "0.6" : "1";
           } else {
-            element!.style.opacity = node.executor !== value ? "0.6" : "1";
+            element!.style.opacity =
+              node.executor !== value.userKey ? "0.6" : "1";
           }
 
           // node.color = node.executor === value ? "#fff" : "#fafafa";
@@ -627,15 +627,16 @@ const chooseHighlight = (type, value) => {
 const chooseExecutor = (executorDetail) => {
   nodeInfo.value = treeRef.value.__veauryReactRef__.getNodeInfo()[0];
   selectnodes.value = treeRef.value.__veauryReactRef__.getNodeInfo()[2];
-  if (!nodeInfo.value) {
-    setMessage("error", "请选择节点");
-    return;
+
+  if (selectnodes.value.length > 0 || nodeInfo.value) {
+    if (nodeInfo.value?._key === rootKey.value) {
+      setMessage("error", "不能选择根节点");
+      return;
+    }
+    updateExecutor(executorDetail.userKey, executorDetail.userAvatar);
+  } else {
+    chooseHighlight("executor", executorDetail);
   }
-  if (nodeInfo.value._key === rootKey.value) {
-    setMessage("error", "不能选择根节点");
-    return;
-  }
-  updateExecutor(executorDetail.userKey, executorDetail.userAvatar);
 };
 
 const openAlt = (node) => {
@@ -885,39 +886,6 @@ watch(contentVisible, (newVisible) => {
         </q-breadcrumbs>
       </div>
       <div class="teamTree-header-center">
-        <q-btn round flat size="sm" class="q-mr-sm">
-          <Icon name="a-kuangjia2" :size="16" />
-          <q-menu
-            anchor="bottom middle"
-            self="top middle"
-            style="width: 200px"
-            auto-close
-          >
-            <q-btn
-              round
-              flat
-              class="q-mr-sm"
-              @click="changeTreeType('mind-single')"
-            >
-              <Icon name="xiangyou" :size="22"
-            /></q-btn>
-            <q-btn round flat class="q-mr-sm" @click="changeTreeType('mind')">
-              <Icon name="bazhaoyu" :size="22"
-            /></q-btn>
-            <q-btn round flat class="q-mr-sm" @click="changeTreeType('tree')">
-              <Icon name="duolie" :size="22"
-            /></q-btn>
-            <q-btn
-              round
-              flat
-              class="q-mr-sm"
-              @click="changeTreeType('tree-single')"
-            >
-              <Icon name="a-luojitu1" :size="22"
-            /></q-btn>
-          </q-menu>
-        </q-btn>
-        <q-separator vertical />
         <q-btn
           round
           flat
@@ -926,15 +894,6 @@ watch(contentVisible, (newVisible) => {
           @click="updateNoExecutorTask"
         >
           <Icon name="a-xuanzhong2" :size="16" />
-        </q-btn>
-        <q-btn
-          round
-          flat
-          size="sm"
-          class="q-mx-xs"
-          @click="memberVisible = !memberVisible"
-        >
-          <Icon name="a-renyuan2" :size="16" />
         </q-btn>
         <q-btn round flat size="sm" class="q-mx-xs">
           <Icon name="a-biaoqing22" :size="16" />
@@ -954,106 +913,51 @@ watch(contentVisible, (newVisible) => {
           <Icon name="a-2" :size="16" />
         </q-btn>
       </div>
-      <div class="teamTree-header-button">
-        <template v-if="highlightUser">
-          <template v-if="highlightUser === 'all'">全部任务</template>
-          <template v-else-if="highlightUser === 'unfinish'"
-            >隐藏已完成</template
+    </div>
+    <div class="teamTree-left">
+      <div class="treeTree-left-box">
+        <q-btn round flat size="sm" class="q-mb-sm">
+          <Icon name="a-kuangjia2" :size="16" />
+          <q-menu
+            anchor="top right"
+            self="top left"
+            style="width: 60px"
+            auto-close
           >
-          <template v-else
-            ><q-avatar color="#fff" size="22px" class="q-mr-sm">
-              <img
-                :src="
-                  highlightUser.userAvatar
-                    ? highlightUser.userAvatar
-                    : '/common/defaultPerson.png'
-                "
-              />
-            </q-avatar>
-            {{ highlightUser.userName }}
-          </template>
-          <img
-            src="/close.svg"
-            class="q-ml-sm icon-point"
-            style="width: 15px; height: 15px"
-            alt=""
-            @click="chooseHighlight('clear', null)"
-          />
-        </template>
-
-        <q-btn flat round size="12px">
-          <Icon name="a-guolv2" :size="16" />
-          <q-menu auto-close class="q-pa-sm" style="width: 250px">
-            <q-list>
-              <q-item clickable @click="chooseHighlight('executor', 'all')">
-                <q-item-section class="common-title">全部任务</q-item-section>
-              </q-item>
-              <q-item
-                v-for="(item, index) in teamMemberList"
-                :key="`filter${index}`"
-                clickable
-                @click="chooseHighlight('executor', item)"
-              >
-                <q-item-section avatar>
-                  <!--  @click="editFile(item._key, index)" -->
-                  <q-avatar color="#fff" size="35px" class="q-mb-sm">
-                    <img
-                      :src="
-                        item.userAvatar
-                          ? item.userAvatar
-                          : '/common/defaultPerson.png'
-                      "
-                      alt=""
-                    />
-                  </q-avatar>
-                </q-item-section>
-                <q-item-section>
-                  {{ item.userName }}
-                  {{
-                    item.userKey === user?._key ? "(我)" : ""
-                  }}</q-item-section
-                >
-                <q-item-section
-                  side
-                  v-if="highlightUser?.userKey === item.userKey"
-                >
-                  <q-icon name="check" color="primary" size="24px" />
-                </q-item-section>
-                <q-space v-else />
-              </q-item>
-            </q-list>
+            <q-btn
+              round
+              flat
+              class="q-mr-sm"
+              @click="changeTreeType('mind-single')"
+            >
+              <Icon name="xiangyou" :size="22"
+            /></q-btn>
+            <q-btn round flat class="q-mr-sm" @click="changeTreeType('mind')">
+              <Icon name="bazhaoyu" :size="22"
+            /></q-btn>
+            <q-btn round flat class="q-mr-sm" @click="changeTreeType('tree')">
+              <Icon name="duolie" :size="22"
+            /></q-btn>
+            <q-btn
+              round
+              flat
+              class="q-mb-sm"
+              @click="changeTreeType('tree-single')"
+            >
+              <Icon name="a-luojitu1" :size="22"
+            /></q-btn>
           </q-menu>
         </q-btn>
-
-        <q-btn flat round size="12px" @click.stop="">
-          <Icon name="gengduo" :size="18" />
-          <q-menu class="q-pa-sm">
-            <q-list dense>
-              <!--  @click="editFile(item._key, index)" -->
-              <q-item
-                clickable
-                v-close-popup
-                @click="
-                  chooseHighlight(
-                    highlightUser === 'unfinish' ? 'clear' : 'finish',
-                    highlightUser === 'unfinish' ? null : 'unfinish',
-                  )
-                "
-              >
-                <q-item-section class="common-title">{{
-                  highlightUser === "unfinish" ? "显示已完成" : "隐藏已完成"
-                }}</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
+        <q-btn round flat size="sm" class="q-mb-sm">
+          <Icon name="renwu" :size="28" />
         </q-btn>
       </div>
     </div>
-    <div class="teamTree-right" v-if="memberVisible">
+    <div class="teamTree-right">
       <div class="teamTree-right-title">执行人</div>
       <div class="teamTree-right-box">
         <div
-          class="icon-point"
+          class="icon-point q-my-xs"
           v-for="(item, index) in teamMemberList"
           :key="`task${index}`"
           @click.stop="chooseExecutor(item)"
@@ -1066,9 +970,9 @@ watch(contentVisible, (newVisible) => {
               alt=""
             />
           </q-avatar>
-          <div class="teamTree-right-name single-to-long">
+          <q-tooltip :offset="[0, -5]">
             {{ item.userName }}
-          </div>
+          </q-tooltip>
         </div>
       </div>
     </div>
@@ -1315,9 +1219,6 @@ watch(contentVisible, (newVisible) => {
       @close="drawerVisible = false"
       :drawerStyle="{
         width: '400px',
-        height: 'calc(100% - 78px)',
-        background: '#f2f3f6',
-        marginTop: '72px',
       }"
       opacityMask
     >
@@ -1364,7 +1265,7 @@ watch(contentVisible, (newVisible) => {
       position: absolute;
       z-index: 2;
       left: calc(50% - 130px);
-      top: 0px;
+      top: 0;
       background-color: #fff;
       @include flex(space-between, center, null);
       @include p-number(10px, 15px);
@@ -1407,26 +1308,40 @@ watch(contentVisible, (newVisible) => {
       }
     }
   }
+  .teamTree-left {
+    width: 60px;
+    height: 100%;
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    @include flex(center, center, wrap);
+    .treeTree-left-box {
+      width: 100%;
+      border: 1px solid rgba(151, 151, 151, 0.34);
+      border-radius: 8px;
+      background-color: #fff;
+      @include flex(center, center, wrap);
+      @include p-number(10px, 0);
+    }
+  }
   .teamTree-right {
     /* prettier-ignore */
     width: 60px;
-    height: 85%;
+    height: 100%;
     position: absolute;
     z-index: 2;
-    bottom: 0px;
-    left: 0px;
+    top: 0;
+    right: 0;
     color: #7c84a0;
     align-content: flex-start;
-    border-top: 1px solid #c7cdd5;
-    border-right: 1px solid #c7cdd5;
-    border-top-right-radius: 12px;
     background-color: #fff;
-    @include p-number(10px, 0px);
+    @include p-number(10px, 0);
     @include flex(center, center, wrap);
 
     .teamTree-right-title {
-      margin: 10px 0px;
-      font-size: 16px;
+      //margin: 10px 0px;
+      font-size: 14px;
       font-weight: bolder;
     }
     .teamTree-right-box {
@@ -1435,10 +1350,6 @@ watch(contentVisible, (newVisible) => {
       > div {
         @include flex(center, center, wrap);
       }
-    }
-    .teamTree-right-name {
-      text-align: center;
-      margin-bottom: 10px;
     }
   }
 }

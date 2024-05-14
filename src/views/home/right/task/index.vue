@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import cHeader from "@/components/common/cHeader.vue";
 import Icon from "@/components/common/Icon.vue";
-import FileCard from "@/components/fileCard/fileCard.vue";
+import Task from "@/components/task/task.vue";
 import CDrawer from "@/components/common/cDrawer.vue";
 import CreateTask from "@/components/task/createTask.vue";
 
@@ -57,10 +57,8 @@ const chooseCard = (detail, type) => {
 };
 const chooseTree = (item) => {
   drawerVisible.value = true;
-  treeInfo.value = {
-    ...item,
-  };
-  teamKey.value = item.projectKey;
+  treeInfo.value = item;
+  teamKey.value = item ? item.projectKey : "";
 };
 watchEffect(() => {
   console.log(taskUser.value);
@@ -139,6 +137,7 @@ watchEffect(() => {
                             ? item.userAvatar
                             : '/common/defaultPerson.png'
                         "
+                        alt=""
                       />
                     </q-avatar>
                     {{ item?.userName }}
@@ -148,18 +147,22 @@ watchEffect(() => {
             </q-list>
           </q-menu>
         </div>
-        <div class="q-ml-lg">
-          <q-tabs
-            dense
-            v-model="taskTab"
-            active-color="primary"
-            class="text-grey-7"
-          >
-            <q-tab name="execute" label="执行" style="width: 60px" />
-            <q-tab name="create" label="创建" style="width: 60px" />
-          </q-tabs>
-        </div>
       </template>
+      <template #center>
+        <q-tabs
+          dense
+          v-model="taskTab"
+          active-color="primary"
+          class="text-grey-7"
+        >
+          <q-tab name="execute" label="执行" style="width: 60px" />
+          <q-tab name="create" label="创建" style="width: 60px" />
+        </q-tabs>
+      </template>
+      <template #button>
+        <q-btn round flat size="16px" @click="chooseTree(null)">
+          <Icon name="a-chuangjian2" :size="20" /> </q-btn
+      ></template>
     </cHeader>
     <div class="task-box">
       <div
@@ -180,11 +183,10 @@ watchEffect(() => {
             v-for="(taskItem, taskIndex) in item.taskList"
             :key="`taskItem${taskIndex}`"
           >
-            <FileCard
+            <Task
               :card="taskItem"
               :boxIndex="index"
               :taskIndex="taskIndex"
-              type="taskBox"
               @chooseCard="chooseCard"
             />
           </template>

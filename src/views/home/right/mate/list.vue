@@ -2,13 +2,10 @@
 import cHeader from "@/components/common/cHeader.vue";
 import riverChart from "@/components/chart/riverChart.vue";
 import { storeToRefs } from "pinia";
-import { signatureArray } from "@/services/config/config";
 import appStore from "@/store";
-import _ from "lodash";
 import Icon from "@/components/common/Icon.vue";
 const { user } = storeToRefs(appStore.authStore);
 const { mateList } = storeToRefs(appStore.mateStore);
-const signVisible = ref<boolean>(false);
 </script>
 <template>
   <cHeader title="队友">

@@ -1,23 +1,27 @@
 <script setup lang="ts">
-import fileCard from "@/components/fileCard/fileCard.vue";
+import Task from "@/components/task/task.vue";
 import _ from "lodash";
 import { ResultProps } from "@/interface/Common";
 import api from "@/services/api";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
+import Icon from "@/components/common/Icon.vue";
+import Tree from "@/components/tree/tree.vue";
+import CHeader from "@/components/common/cHeader.vue";
 const props = defineProps<{
-  type?: string;
-  nodeKey?: string;
+  cardKey?: string;
 }>();
 const { user } = storeToRefs(appStore.authStore);
 const { teamKey } = storeToRefs(appStore.teamStore);
+
 const taskList = ref<any>([]);
+const menuTab = ref<string>("tree");
 const getTaskList = async () => {
   let obj: any = {
-    projectKey: props.type ? "" : teamKey.value,
+    projectKey: teamKey.value,
   };
-  if (props.nodeKey) {
-    obj.cardKey = props.nodeKey;
+  if (props.cardKey) {
+    obj.cardKey = props.cardKey;
   }
   let taskRes = (await api.request.get("node/task/project", {
     ...obj,
@@ -61,88 +65,102 @@ watchEffect(() => {
 </script>
 <template>
   <div class="teamTask">
-    <div
-      class="teamTask-box"
-      v-for="(item, index) in taskList"
-      :key="`task${index}`"
-    >
-      <div class="teamTask-top">
-        <div class="teamTask-top-left">
-          <q-circular-progress
-            show-value
-            font-size="10px"
-            class="q-mr-md"
-            :value="
-              item.totalTask === 0
-                ? 0
-                : (item.finishTask / item.totalTask) * 100
-            "
-            size="80px"
-            :thickness="0.25"
-            color="primary"
-            track-color="grey-3"
-          >
-            <q-avatar color="#fff" size="73px">
-              <img
-                :src="
-                  item.userAvatar
-                    ? item.userAvatar
-                    : '/common/defaultPerson.png'
-                "
-                alt=""
-              />
-            </q-avatar>
-          </q-circular-progress>
-        </div>
-        <div class="teamTask-top-right">
-          <div>
-            {{ item.userName }}{{ item.userKey === user?._key ? "(我)" : "" }}
+    <c-header title="任务">
+      <template #center>
+        <q-tabs dense v-model="menuTab" active-color="primary">
+          <q-tab name="tree" label="任务树" style="width: 60px" />
+          <q-tab name="board" label="看板" style="width: 60px" />
+        </q-tabs>
+      </template>
+    </c-header>
+    <div class="teamTask-box">
+      <div
+        class="teamTask-container"
+        v-for="(item, index) in taskList"
+        :key="`task${index}`"
+        v-if="menuTab === 'board'"
+      >
+        <div class="teamTask-top">
+          <div class="teamTask-top-left">
+            <q-circular-progress
+              show-value
+              font-size="10px"
+              class="q-mr-md"
+              :value="
+                item.totalTask === 0
+                  ? 0
+                  : (item.finishTask / item.totalTask) * 100
+              "
+              size="80px"
+              :thickness="0.25"
+              color="primary"
+              track-color="grey-3"
+            >
+              <q-avatar color="#fff" size="73px">
+                <img
+                  :src="
+                    item.userAvatar
+                      ? item.userAvatar
+                      : '/common/defaultPerson.png'
+                  "
+                  alt=""
+                />
+              </q-avatar>
+            </q-circular-progress>
           </div>
-          <div>{{ item.finishTask }} / {{ item.totalTask }}</div>
+          <div class="teamTask-top-right">
+            <div>
+              {{ item.userName }}{{ item.userKey === user?._key ? "(我)" : "" }}
+            </div>
+            <div>{{ item.finishTask }} / {{ item.totalTask }}</div>
+          </div>
+        </div>
+        <div class="teamTask-bottom">
+          <template
+            v-for="(taskItem, taskIndex) in item.taskList"
+            :key="`taskItem${taskIndex}`"
+          >
+            <Task :card="taskItem" @chooseCard="chooseCard" />
+          </template>
         </div>
       </div>
-      <div class="teamTask-bottom">
-        <template
-          v-for="(taskItem, taskIndex) in item.taskList"
-          :key="`taskItem${taskIndex}`"
-        >
-          <fileCard
-            :card="taskItem"
-            type="taskBox"
-            :outType="type"
-            @chooseCard="chooseCard"
-          />
-        </template>
-      </div>
+      <Tree :card-key="cardKey" v-else />
     </div>
   </div>
 </template>
 <style scoped lang="scss">
 .teamTask {
-  min-width: 100%;
+  width: 100%;
   height: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  background: #f2f3f6;
-  @include flex(flex-start, center, null);
   .teamTask-box {
-    width: 455px;
-    height: 100%;
-    flex-shrink: 0;
-    margin-right: 27px;
-    .teamTask-top {
-      width: 100%;
-      /* prettier-ignore */
-      height: 90Px;
-      font-size: 14px;
-      @include flex(center, center, null);
-    }
-    .teamTask-bottom {
-      width: 100%;
-      /* prettier-ignore */
-      height: calc(100% - 90Px);
-      @include scroll();
-      @include p-number(10px, 10px);
+    min-width: 100%;
+    height: calc(100% - 50px);
+    overflow-x: auto;
+    overflow-y: hidden;
+    background: #f2f3f6;
+    @include flex(flex-start, center, null);
+
+    .teamTask-container {
+      width: 455px;
+      height: 100%;
+      flex-shrink: 0;
+      margin-right: 27px;
+
+      .teamTask-top {
+        width: 100%;
+        /* prettier-ignore */
+        height: 90Px;
+        font-size: 14px;
+        @include flex(center, center, null);
+      }
+
+      .teamTask-bottom {
+        width: 100%;
+        /* prettier-ignore */
+        height: calc(100% - 90Px);
+        @include scroll();
+        @include p-number(10px, 10px);
+      }
     }
   }
 }

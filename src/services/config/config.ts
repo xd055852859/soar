@@ -1,5 +1,4 @@
 import _ from "lodash";
-export const fileArray = ["全部", "图片", "文档", "视频", "音频", "其他"];
 export const nameArray = [
   {
     label: "文件",
@@ -18,62 +17,7 @@ export const nameArray = [
     key: "totalFinish",
   },
 ];
-export const docArray = [
-  {
-    label: "全部类型",
-    value: "",
-  },
-  {
-    label: "文档",
-    value: "text",
-  },
-  {
-    label: "绘图",
-    value: "draw",
-  },
-  {
-    label: "脑图",
-    value: "mind",
-  },
-  {
-    label: "表格",
-    value: "sheet",
-  },
-  {
-    label: "演示",
-    value: "ppt",
-  },
-  // {
-  //   label: "知识库",
-  //   value: "knowledgeBase",
-  // },
-];
-export const viewArray = [
-  {
-    value: "taskTree",
-    label: "事务",
-  },
-  // {
-  //   value: "doc",
-  //   label: "文档",
-  // },
-  // {
-  //   value: "file",
-  //   label: "文件",
-  // },
-  {
-    value: "knowledgeBase",
-    label: "知识库",
-  },
-  {
-    value: "table",
-    label: "多维表",
-  },
-  {
-    value: "taskBox",
-    label: "任务盒子",
-  },
-];
+
 export const dayArray = [
   {
     value: 7,
@@ -141,24 +85,6 @@ export const planArray = [
     label: "未来",
   },
 ];
-export const signatureArray = [
-  {
-    color: "#16d4b1",
-    label: "在岗",
-  },
-  {
-    color: "#6887f3",
-    label: "外出",
-  },
-  {
-    color: "#8f8f8f",
-    label: "请假",
-  },
-  {
-    color: "#fcb64e",
-    label: "出差",
-  },
-];
 export const statusArray = [
   {
     value: 1,
@@ -191,7 +117,7 @@ export const formatName = (list) => {
     let arr: any = [];
     for (let key in item) {
       if (key !== "time") {
-        console.log(item[key])
+        console.log(item[key]);
         arr.push([
           item.time,
           item[key],
@@ -199,11 +125,11 @@ export const formatName = (list) => {
         ]);
         if (
           chartNameArray.indexOf(
-            nameArray[_.findIndex(nameArray, { key: key })].label
+            nameArray[_.findIndex(nameArray, { key: key })].label,
           ) === -1
         ) {
           chartNameArray.push(
-            nameArray[_.findIndex(nameArray, { key: key })].label
+            nameArray[_.findIndex(nameArray, { key: key })].label,
           );
         }
       }

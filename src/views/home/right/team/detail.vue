@@ -2,7 +2,6 @@
 import cDialog from "@/components/common/cDialog.vue";
 import { ROLE_OPTIONS, ResultProps } from "@/interface/Common";
 import api from "@/services/api";
-import { viewArray } from "@/services/config/config";
 import { setLoading, setMessage } from "@/services/util/common";
 import appStore from "@/store";
 import _ from "lodash";

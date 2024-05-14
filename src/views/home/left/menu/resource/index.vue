@@ -10,9 +10,7 @@ import { typeIcon } from "@/services/config/config";
 import _ from "lodash";
 import CIcon from "@/components/common/Icon.vue";
 
-const { targetTeamKey, teamKey, teamList, teamFoldList } = storeToRefs(
-  appStore.teamStore,
-);
+const { teamKey } = storeToRefs(appStore.teamStore);
 const { token } = storeToRefs(appStore.authStore);
 const { spaceKey, spaceRole, privateTeamKey } = storeToRefs(
   appStore.spaceStore,
@@ -23,6 +21,7 @@ const { setIframeDetail } = appStore.commonStore;
 
 const fileList = ref<any>([]);
 const fileKey = ref<string>("");
+const fileOverKey = ref<string>("");
 const detailState = ref<boolean>(false);
 const sortType = ref<string>("view");
 const page = ref<number>(1);
@@ -108,6 +107,7 @@ watchEffect(() => {
           $router.push('/home/freedom');
           fileKey = item._key;
         "
+        @mouseenter="fileOverKey = item._key"
         :style="{
           background: fileKey === item._key ? '#eee' : '',
         }"
@@ -126,39 +126,31 @@ watchEffect(() => {
             />
             <div style="width: calc(100% - 30px)">{{ item.title }}</div>
           </div>
-          <div
-            class="resourceMenu-item-icon"
-            v-if="targetTeamKey === item._key"
-          >
-            <q-btn
-              flat
-              round
-              size="9px"
-              @click.stop="targetTeamKey = item._key"
-            >
-              <c-Icon name="gengduo" :size="18" />
-              <q-menu anchor="top right" self="top left" class="q-pa-sm">
-                <q-list dense>
-                  <q-item
-                    clickable
-                    v-close-popup
-                    @click=""
-                    v-if="item.role < 3"
-                  >
-                    <q-item-section class="common-title">编辑</q-item-section>
-                  </q-item>
-                  <q-item
-                    clickable
-                    v-close-popup
-                    @click=""
-                    v-if="item.role < 2"
-                  >
-                    <q-item-section class="common-title">删除</q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
-            </q-btn>
-          </div>
+          <!--          <div class="resourceMenu-item-icon" v-if="fileOverKey === item._key">-->
+          <!--            <q-btn flat round size="9px" @click.stop="">-->
+          <!--              <c-Icon name="gengduo" :size="18" />-->
+          <!--              <q-menu anchor="top right" self="top left" class="q-pa-sm">-->
+          <!--                <q-list dense>-->
+          <!--                  <q-item-->
+          <!--                    clickable-->
+          <!--                    v-close-popup-->
+          <!--                    @click=""-->
+          <!--                    v-if="item.role < 3"-->
+          <!--                  >-->
+          <!--                    <q-item-section class="common-title">编辑</q-item-section>-->
+          <!--                  </q-item>-->
+          <!--                  <q-item-->
+          <!--                    clickable-->
+          <!--                    v-close-popup-->
+          <!--                    @click=""-->
+          <!--                    v-if="item.role < 2"-->
+          <!--                  >-->
+          <!--                    <q-item-section class="common-title">删除</q-item-section>-->
+          <!--                  </q-item>-->
+          <!--                </q-list>-->
+          <!--              </q-menu>-->
+          <!--            </q-btn>-->
+          <!--          </div>-->
         </div>
 
         <div class="resourceMenu-item-subtitle icon-point">

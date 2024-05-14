@@ -230,7 +230,12 @@ watchEffect(() => {
       <div class="leftMenu-title-right">
         <q-btn flat round>
           <Icon name="sousuo" :size="20" />
-          <q-menu anchor="bottom left" self="top left" class="q-pa-sm">
+          <q-menu
+            anchor="bottom left"
+            self="top left"
+            class="q-pa-sm"
+            @before-hide="searchInput = ''"
+          >
             <q-list dense>
               <q-input
                 outlined
@@ -345,7 +350,7 @@ watchEffect(() => {
               v-for="(taskMenuItem, taskMenuIndex) in item.cardList"
               :key="`taskMenu${taskMenuIndex}`"
               @click="
-                $router.push(`/home/team/teamTree/${taskMenuItem._key}`);
+                $router.push(`/home/team/teamTask/${taskMenuItem._key}`);
                 treeKey = taskMenuItem._key;
               "
               @mouseenter="treeOverkey = taskMenuItem._key"
