@@ -15,6 +15,7 @@ const spaceName = ref<string>("");
 const spaceLogo = ref<string>("");
 const deleteVisible = ref<boolean>(false);
 const deleteInput = ref<string>("");
+const showTaskDays = ref<number>(99999);
 const updateSpace = async () => {
   if (!spaceName.value) {
     setMessage("error", "请输入空间名称");
@@ -25,6 +26,7 @@ const updateSpace = async () => {
     teamKey: spaceKey.value,
     name: spaceName.value,
     logo: spaceLogo.value,
+    showTaskDays: showTaskDays.value,
   })) as ResultProps;
   if (userRes.msg === "OK") {
     //@ts-ignore
@@ -141,6 +143,15 @@ watch(deleteVisible, (newVisible) => {
           :dense="true"
           :rules="[(val) => !!val || '空间名称必填']"
         />
+      </div>
+      <div>任务显示天数</div>
+      <div class="form-name">
+        <q-radio v-model="showTaskDays" :val="1" label="1天" />
+        <q-radio v-model="showTaskDays" :val="3" label="3天" />
+        <q-radio v-model="showTaskDays" :val="7" label="7天" />
+        <q-radio v-model="showTaskDays" :val="30" label="30天" />
+        <q-radio v-model="showTaskDays" :val="90" label="90天" />
+        <q-radio v-model="showTaskDays" :val="99999" label="永久" />
       </div>
     </div>
     <q-dialog v-model="deleteVisible" persistent>

@@ -88,18 +88,18 @@ export const teamStore = defineStore(
       }
     };
     watch(teamKey, (newKey) => {
+      teamInfo.value = null;
       if (newKey) {
         getTeamInfo(newKey);
         getTeamMemberList(newKey);
       }
     });
     watch(targetTeamKey, (newKey) => {
+      targetTeamInfo.value = null;
+      targetTeamMemberList.value = [];
       if (newKey) {
         getTeamInfo(newKey, "target");
         getTeamMemberList(newKey, "target");
-      } else {
-        targetTeamInfo.value = null;
-        targetTeamMemberList.value = [];
       }
     });
 

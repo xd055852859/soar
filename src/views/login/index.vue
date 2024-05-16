@@ -17,6 +17,9 @@ onMounted(() => {
     }
   }
 });
+const clickUrl = () => {
+  window.open("http://beian.miit.gov.cn/");
+};
 </script>
 <template>
   <div
@@ -52,26 +55,24 @@ onMounted(() => {
       <div class="title-box-subtitle">
         Integration of knowledge and action,Cooperate like flying
       </div>
-      <div class="title-box-footer">
-        <span
-          className="title-box-ICPLicensing"
-          @click="
-            () => {
-              //@ts-ignore
-              window.open('http://beian.miit.gov.cn/');
-            }
-          "
-        >
-          Copyright © 2024 江苏脑际互联有限公司 Soar.苏ICP备2022036554号-3
-        </span>
+      <div class="title-box-button">
+        <q-btn
+          style="width: 180px; height: 60px; font-size: 20px"
+          rounded
+          color="primary"
+          label="登  录"
+          @click="token ? $router.replace('/home') : (showLogin = true)"
+        />
       </div>
-      <q-btn
-        rounded
-        color="primary"
-        label="登录"
-        class="title-box-button"
-        @click="token ? $router.replace('/home') : (showLogin = true)"
-      />
+      <div class="title-box-footer" @click="clickUrl">
+        <div class="title-box-ICPLicensing">
+          Tel:0519-83908995 Email:liux@qingtime.cn
+        </div>
+        <div class="title-box-ICPLicensing">苏ICP备2022036554号-3</div>
+        <div class="title-box-ICPLicensing">
+          江苏脑际互联科技有限公司版权所有
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -88,7 +89,7 @@ onMounted(() => {
     height: 580px;
     background: #ffffff;
     border-radius: 12px;
-    box-shadow: 0px 2px 14px 0px rgba(0, 0, 0, 0.11);
+    box-shadow: 0 2px 14px 0px rgba(0, 0, 0, 0.11);
     padding-top: 44px;
     box-sizing: border-box;
     position: relative;
@@ -200,7 +201,6 @@ onMounted(() => {
       height: 15px;
       font-size: 14px;
       font-family: Arial, Arial-Regular;
-      font-weight: Regular;
       color: #b3b3b3;
       line-height: 15px;
       letter-spacing: 0.61px;
@@ -209,38 +209,44 @@ onMounted(() => {
     }
     .title-box-footer {
       width: 100%;
-      height: 28px;
+      //height: 28px;
       line-height: 28px;
       position: fixed;
-      left: 0px;
-      bottom: 7%;
+      left: 0;
+      bottom: 15px;
       text-align: center;
       .title-box-ICPLicensing {
+        width: 100%;
         height: 28px;
         font-size: 12px;
-        font-family: PingFang SC, PingFang SC-Regular;
-        font-weight: Regular;
         color: #969696;
         line-height: 28px;
         letter-spacing: 0.86px;
         cursor: pointer;
+        text-align: center;
       }
     }
+    //.title-box-button {
+    //  width: 13%;
+    //  height: 8%;
+    //  position: fixed;
+    //  z-index: 2;
+    //  top: 8%;
+    //  right: 5%;
+    //  border-radius: 44px;
+    //  font-size: 20px;
+    //  font-family:
+    //    PingFang SC,
+    //    PingFang SC-Medium;
+    //  text-align: center;
+    //  color: #ffffff;
+    //  line-height: 40px;
+    //  letter-spacing: 4.97px;
+    //}
     .title-box-button {
-      width: 13%;
-      height: 8%;
-      position: fixed;
-      z-index: 2;
-      top: 8%;
-      right: 5%;
-      border-radius: 44px;
-      font-size: 20px;
-      font-family: PingFang SC, PingFang SC-Medium;
-      font-weight: Medium;
-      text-align: center;
-      color: #ffffff;
-      line-height: 40px;
-      letter-spacing: 4.97px;
+      width: 100%;
+      height: 70px;
+      @include flex(center, center, null);
     }
   }
 }
@@ -251,7 +257,7 @@ onMounted(() => {
     }
     .title-header {
       top: 30px;
-      padding: 0px 27px;
+      padding: 0 27px;
     }
   }
 }

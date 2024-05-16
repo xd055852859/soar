@@ -6,6 +6,7 @@ import { setLoading, setMessage } from "@/services/util/common";
 import appStore from "@/store";
 import _ from "lodash";
 import { storeToRefs } from "pinia";
+import router from "@/router";
 const { targetTeamKey, targetTeamInfo, teamKey, teamList, teamInfo } =
   storeToRefs(appStore.teamStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
@@ -85,6 +86,7 @@ const updateTeam = async () => {
       });
       list.splice(targetIndex, 0, teamRes.data);
       setTeamList(list);
+      router.push(`/home/team`);
       emits("close");
     }
   }

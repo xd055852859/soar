@@ -117,13 +117,16 @@ watch(spaceList, (newList) => {
 
     .space-container {
       width: 100%;
+      height: 80vh;
       @include p-number(45px, 45px);
-      @include scroll();
+
       .space-container-title {
         width: 100%;
         height: 30px;
         font-size: 16px;
-        font-family: PingFang SC, PingFang SC-Semibold;
+        font-family:
+          PingFang SC,
+          PingFang SC-Semibold;
         font-weight: bold;
         text-align: left;
         color: #161616;
@@ -137,9 +140,11 @@ watch(spaceList, (newList) => {
         font-size: 14px;
         color: #161616;
         line-height: 22px;
-        margin-bottom: 42px;
+        margin-bottom: 20px;
       }
       .space-list {
+        height: calc(100% - 70px);
+        @include scroll();
         .space-item {
           width: 100%;
           height: 80px;

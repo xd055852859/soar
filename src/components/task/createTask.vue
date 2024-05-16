@@ -4,12 +4,14 @@ import { ResultProps } from "@/interface/Common";
 import { storeToRefs } from "pinia";
 import appStore from "@/store";
 import Task from "@/components/task/task.vue";
+import { commonscroll, setMessage } from "@/services/util/common";
 const { user } = storeToRefs(appStore.authStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const props = defineProps<{
   fatherTeamKey?: string;
   fatherTreeInfo?: any;
   fatherExecutorInfo?: any;
+  taskType?: string;
 }>();
 
 const addInput = ref<string>("");
@@ -27,15 +29,20 @@ const type = ref<number>(0);
 const searchTreeInput = ref<string>("");
 const searchMemberInput = ref<string>("");
 const topRef = ref<any>(null);
+const page = ref<number>(1);
+const total = ref<number>(0);
 onMounted(() => {
   if (props.fatherTeamKey) {
     teamKey.value = props.fatherTeamKey;
+  }
+  if (props.fatherTreeInfo) {
     treeKey.value = props.fatherTreeInfo._key;
     treeInfo.value = props.fatherTreeInfo;
-    executorInfo.value = props.fatherExecutorInfo
-      ? props.fatherExecutorInfo
-      : { ...user.value, userKey: user.value!._key };
   }
+  executorInfo.value = props.fatherExecutorInfo
+    ? props.fatherExecutorInfo
+    : { ...user.value, userKey: user.value!._key };
+
   getData();
 });
 const getData = async () => {
@@ -55,13 +62,21 @@ const getMemberData = async () => {
   }
 };
 const getTaskData = async () => {
-  let taskRes = (await api.request.get("task/card", {
-    cardKey: treeInfo.value._key,
-    assignor: executorInfo.value.userKey,
+  let obj: any = {
+    teamKey: spaceKey.value,
     type: type.value,
+    page: page.value,
+    limit: 50,
+  };
+  if (props.taskType === "tree") {
+    obj.onTree = false;
+  }
+  let taskRes = (await api.request.get("task/create/all", {
+    ...obj,
   })) as ResultProps;
   if (taskRes.msg === "OK") {
     taskList.value = [...taskRes.data];
+    total.value = taskRes.total!;
   }
 };
 // const changeInput = (value) => {
@@ -81,6 +96,8 @@ const addTask = async () => {
     titleArr: inputArray,
   })) as ResultProps;
   if (taskRes.msg === "OK") {
+    setMessage("success", "发布任务成功");
+    addInput.value = "";
     getTaskData();
   }
 };
@@ -97,17 +114,17 @@ watchEffect(() => {
   }
 });
 watchEffect(() => {
+  if (spaceKey.value) {
+    getTaskData();
+  }
+});
+watchEffect(() => {
   if (searchMemberInput.value) {
     searchMemberList.value = memberList.value.filter((item) =>
       item.userName.includes(searchMemberInput.value),
     );
   } else {
     searchMemberList.value = [...memberList.value];
-  }
-});
-watchEffect(() => {
-  if (treeInfo.value && executorInfo.value) {
-    getTaskData();
   }
 });
 </script>
@@ -130,11 +147,11 @@ watchEffect(() => {
             label="发布"
             color="primary"
             @click="addTask()"
-            :disable="!treeInfo || !executorInfo"
+            :disable="!treeInfo || !executorInfo || !addInput"
           />
         </div>
       </div>
-      <div class="create-task-search">
+      <div v-if="!taskType" class="create-task-search">
         <template v-if="treeInfo">
           <div>{{ treeInfo.title }}</div>
           <div>{{ executorInfo?.userName }}</div>
@@ -219,7 +236,29 @@ watchEffect(() => {
         </q-menu>
       </div>
       <div class="create-task-filter">
-        <q-space />
+        <div class="dp--center" v-if="taskType === 'tree'">
+          {{ executorInfo?.userName }}
+          <q-menu style="width: 100px">
+            <div class="create-member">
+              <div
+                v-for="(memberItem, memberIndex) in searchMemberList"
+                :key="`memberItem-${memberIndex}`"
+                :style="{
+                  background:
+                    executorInfo?.userKey === memberItem.userKey ? '#eee' : '',
+                }"
+                v-close-popup
+                class="create-member-item"
+                @click="executorInfo = memberItem"
+              >
+                <div>
+                  {{ memberItem.userName }}
+                </div>
+              </div>
+            </div>
+          </q-menu>
+        </div>
+        <q-space v-else />
         <q-select
           outlined
           v-model="type"
@@ -242,6 +281,11 @@ watchEffect(() => {
       class="create-task-container"
       v-if="topRef"
       :style="{ height: `calc(100vh - ${topRef.offsetHeight + 40}px)` }"
+      @scroll="
+        commonscroll($event, taskList, total, () => {
+          page++;
+        })
+      "
     >
       <template
         v-for="(taskItem, taskIndex) in taskList"
@@ -317,6 +361,17 @@ watchEffect(() => {
         cursor: pointer;
       }
     }
+  }
+}
+.create-member {
+  width: 100%;
+  max-height: 60vh;
+  @include scroll();
+  .create-member-item {
+    min-height: 30px;
+    line-height: 25px;
+    cursor: pointer;
+    @include flex(center, center, null);
   }
 }
 </style>

@@ -16,6 +16,8 @@ import { tagArray } from "@/services/config/config";
 import { setMessage } from "@/services/util/common";
 import { formatDocUrl } from "@/services/util/url";
 import TreeDetail from "./treeDetail.vue";
+import CDrawer from "@/components/common/cDrawer.vue";
+import CreateTask from "@/components/task/createTask.vue";
 const dayjs: any = inject("dayjs");
 const CustomTree = applyReactInVue(Tree);
 const { token, user } = storeToRefs(appStore.authStore);
@@ -51,7 +53,7 @@ const iconVisible = ref<boolean>(false);
 const iconKey = ref<string>("");
 const tagVisible = ref<boolean>(false);
 const milestoneVisible = ref<boolean>(false);
-
+const taskNum = ref<number>(0);
 const changed = ref(false);
 const nodeKey = ref<string>("");
 const nodeInfo = ref<any>(null);
@@ -70,7 +72,7 @@ const commentList = ref<string>("");
 const comment = ref<string>("");
 
 const drawerVisible = ref<boolean>(false);
-
+const taskVisible = ref<boolean>(false);
 const pathList = ref<any>([]);
 
 const updateVisible = ref<boolean>(false);
@@ -119,6 +121,7 @@ const getTreeInfo = async (key) => {
   })) as ResultProps;
   if (cardRes.msg === "OK") {
     cardDetail.value = cardRes.data;
+    taskNum.value = cardRes.data.taskNum;
     rootKey.value = cardRes.data.rootKey;
   }
 };
@@ -209,8 +212,8 @@ const updateExecutor = async (userKey, avatarUri) => {
             : "/common/defaultPerson.png"
           : "";
         nodes.value[item].executor = userKey;
-        nodes.value[item].isTask = userKey ? true : false;
-        nodes.value[item].showCheckbox = userKey ? true : false;
+        nodes.value[item].isTask = !!userKey;
+        nodes.value[item].showCheckbox = !!userKey;
       });
       console.log(nodes.value);
       treeRef.value.__veauryReactRef__.setNodes({ ...nodes.value });
@@ -404,7 +407,6 @@ const updateNoExecutorTask = () => {
       isAllTask = false;
     }
   });
-  console.log(isAllTask);
   if (isAllTask) {
     updateExecutor("", "");
   } else {
@@ -948,8 +950,17 @@ watch(contentVisible, (newVisible) => {
             /></q-btn>
           </q-menu>
         </q-btn>
-        <q-btn round flat size="sm" class="q-mb-sm">
+        <q-btn
+          round
+          flat
+          size="sm"
+          class="q-mb-sm"
+          @click="taskVisible = !taskVisible"
+        >
           <Icon name="renwu" :size="28" />
+          <q-badge rounded color="red" floating v-if="taskNum">{{
+            taskNum
+          }}</q-badge>
         </q-btn>
       </div>
     </div>
@@ -1231,6 +1242,22 @@ watch(contentVisible, (newVisible) => {
           @clearDetail="clearDetail"
           @close="drawerVisible = false"
           v-if="nodeKey"
+        />
+      </template>
+    </c-drawer>
+    <c-drawer
+      :visible="taskVisible"
+      @close="taskVisible = false"
+      :drawerStyle="{
+        width: '400px',
+      }"
+      opacityMask
+    >
+      <template #content>
+        <CreateTask
+          :father-team-key="teamKey"
+          :father-tree-info="cardDetail"
+          taskType="tree"
         />
       </template>
     </c-drawer>

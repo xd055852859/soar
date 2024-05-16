@@ -21,17 +21,16 @@ const $q = useQuasar();
 const { targetTeamKey, teamKey, teamList, teamFoldList } = storeToRefs(
   appStore.teamStore,
 );
-const { deviceHeight } = storeToRefs(appStore.commonStore);
+const { tabSearchVisible } = storeToRefs(appStore.commonStore);
 const { spaceRole, privateTeamKey } = storeToRefs(appStore.spaceStore);
 const { setTargetTeamKey, setTeamKey, setTeamList, setTeamFoldList } =
   appStore.teamStore;
-const { setClose } = appStore.commonStore;
+const { setTabSearchVisible } = appStore.commonStore;
 const addVisible = ref<boolean>(false);
 const detailState = ref<boolean>(false);
 const memberVisible = ref<boolean>(false);
 const searchList = ref<any>([]);
 const searchInput = ref<string>("");
-const searchVibisible = ref<boolean>(false);
 const foldVisible = ref<boolean>(false);
 const lineHeight = ref<number>(0);
 const treeOverkey = ref<string>("");
@@ -143,7 +142,7 @@ const createTree = async (item, index) => {
       list[index].cardList.unshift(taskRes.data);
       setTeamList(list);
       // teamKey.value = taskRes.data._key;
-      router.push(`/home/team/teamTree/${taskRes.data._key}`);
+      router.push(`/home/team/teamTask/${taskRes.data._key}`);
     }
   });
 };
@@ -170,7 +169,7 @@ const deleteTree = (item, index, teamIndex) => {
         } else {
           treeKey.value = list[teamIndex].cardList[0]._key;
           router.push(
-            `/home/team/teamTree/${list[teamIndex].cardList[0]._key}`,
+            `/home/team/teamTask/${list[teamIndex].cardList[0]._key}`,
           );
         }
         setTeamList(list);
@@ -211,8 +210,14 @@ watchEffect(() => {
     searchList.value = teamList.value.filter(
       (item) => item.name.indexOf(searchInput.value) !== -1,
     );
+    foldVisible.value = false;
   } else {
     searchList.value = [...teamList.value];
+  }
+});
+watch(tabSearchVisible, (visible) => {
+  if (!visible) {
+    searchInput.value = "";
   }
 });
 </script>
@@ -228,15 +233,14 @@ watchEffect(() => {
         <!--        <template v-else></template>-->
       </div>
       <div class="leftMenu-title-right">
-        <q-btn flat round>
+        <q-btn flat round @click="setTabSearchVisible(!tabSearchVisible)">
           <Icon name="sousuo" :size="20" />
-          <q-menu
-            anchor="bottom left"
-            self="top left"
-            class="q-pa-sm"
-            @before-hide="searchInput = ''"
-          >
-            <q-list dense>
+          <Teleport to="body">
+            <div
+              class="team-searchInput"
+              id="teamSearchInput"
+              v-if="tabSearchVisible"
+            >
               <q-input
                 outlined
                 dense
@@ -245,8 +249,8 @@ watchEffect(() => {
                 class="full-width"
                 clearable
               />
-            </q-list>
-          </q-menu>
+            </div>
+          </Teleport>
         </q-btn>
 
         <q-btn flat round @click="toggleTeam(null, true)" v-if="spaceRole < 4">
@@ -264,6 +268,7 @@ watchEffect(() => {
             console.log(item._key);
             setTeamKey(item._key);
             setTargetTeamKey(item._key);
+            setTabSearchVisible(false);
           "
           @mouseenter="setTargetTeamKey(item._key)"
           v-if="item._key !== privateTeamKey"
@@ -409,6 +414,7 @@ watchEffect(() => {
           @click="
             setTeamKey(item._key);
             setTargetTeamKey(item._key);
+            setTabSearchVisible(false);
           "
           @mouseenter="setTargetTeamKey(item._key)"
         >
@@ -574,4 +580,14 @@ watchEffect(() => {
   }
 }
 </style>
-<style></style>
+<style>
+.team-searchInput {
+  width: 188px;
+  height: 40px;
+  position: fixed;
+  left: 10px;
+  top: 195px;
+  z-index: 100;
+  background-color: #fff;
+}
+</style>

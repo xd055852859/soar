@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import cOutLoading from "@/components/common/cOutLoading.vue";
+import { setLoading } from "@/services/util/common";
 const dayjs: any = inject("dayjs");
 const props = defineProps<{
   title?: string;
@@ -13,10 +14,18 @@ watch(
     if (newVal) {
       console.log(newVal);
       iframeUrl.value = `${newVal}&timestamp=${dayjs().valueOf()}`;
-      // const iframe: any = document.getElementById("iframe-container");
-      // if (iframe && iframe.contentWindow) {
-      //   iframe.contentWindow.location.reload(true);
-      // }
+      const iframe: any = document.getElementById("iframe-container");
+      if (iframe && iframe.contentWindow) {
+        // iframe.contentWindow.location.reload(true);
+        // window.open(iframeUrl.value, "myFrameName");
+        iframe.src = "about:blank"; // 作为一个临时的链接，如果是其它正常可访问URL，会浪费一些不必要流量
+        loading.value = true;
+        const timer = setTimeout(() => {
+          iframe.src = iframeUrl.value;
+          clearTimeout(timer);
+          loading.value = false;
+        }, 100);
+      }
     }
   },
   { immediate: true },

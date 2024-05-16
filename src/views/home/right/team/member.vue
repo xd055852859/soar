@@ -93,7 +93,7 @@ watch(
     }
     searchMemberList.value = list;
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 watchEffect(() => {
   if (props.type === "target") {
@@ -131,7 +131,7 @@ watchEffect(() => {
         <q-menu
           class="q-pa-sm"
           v-if="
-            ((memberTeamInfo?.role < item.role && memberTeamInfo?.role < 1) ||
+            ((memberTeamInfo?.role < item.role && memberTeamInfo?.role < 2) ||
               spaceRole) &&
             item.userKey !== user?._key
           "
@@ -140,13 +140,13 @@ watchEffect(() => {
             <q-item
               v-if="
                 !spaceType ||
-                (memberTeamInfo?.role < item.role && memberTeamInfo?.role < 1)
+                (memberTeamInfo?.role < item.role && memberTeamInfo?.role < 2)
               "
               clickable
               v-close-popup
               v-for="(item, index) in ROLE_OPTIONS.slice(
-                1,
-                ROLE_OPTIONS.length
+                memberTeamInfo.role + 1,
+                ROLE_OPTIONS.length,
               )"
               :key="`role${index}`"
               @click="changeRole(item.value, memberIndex)"

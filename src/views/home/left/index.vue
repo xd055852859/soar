@@ -13,6 +13,7 @@ import { setMessage } from "@/services/util/common";
 import { base64ToFile, fileToBase64, uploadFile } from "@/services/util/file";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
+import { OnClickOutside } from "@vueuse/components";
 import Icon from "@/components/common/Icon.vue";
 import cDialog from "@/components/common/cDialog.vue";
 import cDrawer from "@/components/common/cDrawer.vue";
@@ -38,7 +39,8 @@ const {
   reportConfig,
 } = storeToRefs(appStore.spaceStore);
 
-const { clearStore, setSearchVisible, setIframeDetail } = appStore.commonStore;
+const { clearStore, setSearchVisible, setIframeDetail, setTabSearchVisible } =
+  appStore.commonStore;
 const { setUserInfo, setToken } = appStore.authStore;
 const { setSpaceKey, setSpaceList, setReportConfig } = appStore.spaceStore;
 const { setTeamKey, setTargetTeamKey } = appStore.teamStore;
@@ -215,271 +217,286 @@ watch(
 </script>
 
 <template>
-  <div class="left-title icon-point">
-    <!--       @mouseenter="spaceMenuVisible = true" -->
-    <div class="select-third-item" style="width: 100%; height: 45px">
-      <q-avatar :color="spaceInfo?.logo ? '#fff' : 'primary'" rounded size="lg">
-        <img v-if="spaceInfo?.logo" :src="spaceInfo.logo" alt="" />
-        <template v-else-if="spaceInfo?.name">
-          <div class="text-white">
-            {{ spaceInfo.name.substring(0, 1) }}
-          </div>
-        </template>
-        <img v-else src="/common/defaultGroup.png" alt="" />
-      </q-avatar>
+  <div style="width: 100%; height: 100%">
+    <div class="left-title icon-point">
+      <!--       @mouseenter="spaceMenuVisible = true" -->
+      <div class="select-third-item" style="width: 100%; height: 45px">
+        <q-avatar
+          :color="spaceInfo?.logo ? '#fff' : 'primary'"
+          rounded
+          size="lg"
+        >
+          <img v-if="spaceInfo?.logo" :src="spaceInfo.logo" alt="" />
+          <template v-else-if="spaceInfo?.name">
+            <div class="text-white">
+              {{ spaceInfo.name.substring(0, 1) }}
+            </div>
+          </template>
+          <img v-else src="/common/defaultGroup.png" alt="" />
+        </q-avatar>
 
-      <div
-        class="select-item-name single-to-long dp--center"
-        style="max-width: calc(100% - 80px); font-weight: bolder"
-      >
-        {{ spaceInfo?.name }}
-        <Icon name="a-xiala2" :size="8" class="q-ml-sm" />
-      </div>
-      <!--   @mouseleave="spaceMenuVisible = false" -->
-      <q-menu
-        style="width: 280px; padding: 10px; max-height: 70vh"
-        v-model="spaceMenuVisible"
-      >
-        <q-list class="q-mb-md left-space-item">
-          <VueDraggableNext v-model="sortList" item-key="id" @end="dragSpace">
-            <q-item
-              v-for="(item, index) in sortList"
-              :key="`space${index}`"
-              clickable
-              v-close-popup
-              class="left-space-title dp--center q-px-xs q-py-xs"
-              @click="
-                setSpaceKey(item._key);
-                setTeamKey('');
-                setCardKey('');
-                router.push('/home');
-              "
-            >
-              <Icon name="a-huibaoyaosu-yidong21" :size="14" class="q-mr-sm" />
-              <div style="width: calc(100% - 40px)">
-                <q-avatar
-                  rounded
-                  :color="item?.logo ? '#fff' : 'primary'"
-                  size="sm"
+        <div
+          class="select-item-name single-to-long dp--center"
+          style="max-width: calc(100% - 80px); font-weight: bolder"
+        >
+          {{ spaceInfo?.name }}
+          <Icon name="a-xiala2" :size="8" class="q-ml-sm" />
+        </div>
+        <!--   @mouseleave="spaceMenuVisible = false" -->
+        <q-menu
+          style="width: 280px; padding: 10px; max-height: 70vh"
+          v-model="spaceMenuVisible"
+        >
+          <q-list class="q-mb-md left-space-item">
+            <VueDraggableNext v-model="sortList" item-key="id" @end="dragSpace">
+              <q-item
+                v-for="(item, index) in sortList"
+                :key="`space${index}`"
+                clickable
+                v-close-popup
+                class="left-space-title dp--center q-px-xs q-py-xs"
+                @click="
+                  setSpaceKey(item._key);
+                  setTeamKey('');
+                  setCardKey('');
+                  router.push('/home');
+                "
+              >
+                <Icon
+                  name="a-huibaoyaosu-yidong21"
+                  :size="14"
                   class="q-mr-sm"
-                >
-                  <img v-if="item?.logo" :src="item.logo" alt="" />
+                />
+                <div style="width: calc(100% - 40px)">
+                  <q-avatar
+                    rounded
+                    :color="item?.logo ? '#fff' : 'primary'"
+                    size="sm"
+                    class="q-mr-sm"
+                  >
+                    <img v-if="item?.logo" :src="item.logo" alt="" />
 
-                  <template v-else-if="item?.name">
-                    <div class="text-white">
-                      {{ item.name.substring(0, 1) }}
-                    </div>
-                  </template>
-                  <img v-else src="/common/defaultGroup.png" alt="" />
-                </q-avatar>
-                {{ item.name }}
-              </div>
-              <Icon
-                name="a-shezhi2"
-                :size="18"
-                class="q-mr-sm"
-                color="#bdbdbd"
-                v-if="item.role < 2"
-                @click.stop="chooseSpace(item._key)"
-              />
-              <q-space />
-            </q-item>
-          </VueDraggableNext>
-        </q-list>
-        <q-btn
-          class="full-width"
-          label="创建空间"
-          color="primary"
-          @click="spaceVisible = true"
-        />
-        <!-- <div class="row justify-end items-center q-mt-sm">
+                    <template v-else-if="item?.name">
+                      <div class="text-white">
+                        {{ item.name.substring(0, 1) }}
+                      </div>
+                    </template>
+                    <img v-else src="/common/defaultGroup.png" alt="" />
+                  </q-avatar>
+                  {{ item.name }}
+                </div>
+                <Icon
+                  name="a-shezhi2"
+                  :size="18"
+                  class="q-mr-sm"
+                  color="#bdbdbd"
+                  v-if="item.role < 2"
+                  @click.stop="chooseSpace(item._key)"
+                />
+                <q-space />
+              </q-item>
+            </VueDraggableNext>
+          </q-list>
+          <q-btn
+            class="full-width"
+            label="创建空间"
+            color="primary"
+            @click="spaceVisible = true"
+          />
+          <!-- <div class="row justify-end items-center q-mt-sm">
           <q-btn flat label="退出登录" color="grey-5" @click="logout" />
         </div> -->
-      </q-menu>
-    </div>
-  </div>
-  <div class="left-button">
-    <div class="left-button-item">
-      <q-btn flat round @click="$router.push('/home/explore')">
-        <Icon
-          name="zhuye1"
-          :size="22"
-          :color="$route.name === 'explore' ? '#07be51' : '#333'"
-        />
-        <q-tooltip> 应用中心</q-tooltip>
-      </q-btn>
-    </div>
-    <div class="left-button-item">
-      <q-btn
-        flat
-        round
-        @click="
-          setTeamKey('');
-          setSearchVisible(true);
-        "
-      >
-        <Icon name="sousuo" :size="20" />
-        <q-tooltip> 搜索</q-tooltip>
-      </q-btn>
-    </div>
-    <div class="left-button-item">
-      <q-btn
-        flat
-        round
-        @click.stop="$router.push('/home/notice')"
-        class="left-notice-button"
-      >
-        <div class="badge-box">
-          <q-badge
-            rounded
-            color="red"
-            v-if="spaceMessageNum"
-            class="badge-button"
-            style="top: -5px; right: -20px"
-            >{{ spaceMessageNum }}
-          </q-badge>
-          <Icon name="xiaoxi1" :size="20" />
-        </div>
-
-        <q-tooltip> 消息中心</q-tooltip>
-      </q-btn>
-    </div>
-
-    <div class="left-button-item">
-      <q-btn flat round>
-        <Icon name="caidanrukou" :size="20" />
-        <q-tooltip> 更多操作</q-tooltip>
-        <q-menu class="q-pa-sm" auto-close anchor="top right" self="top left">
-          <q-list dense>
-            <!--  @click="editFile(item._key, index)" -->
-            <q-item clickable v-close-popup @click="userVisible = true">
-              <q-item-section>个人设置</q-item-section>
-            </q-item>
-            <q-item clickable v-close-popup @click="logout()">
-              <q-item-section>退出登录</q-item-section>
-            </q-item>
-          </q-list>
         </q-menu>
+      </div>
+    </div>
+    <div class="left-button">
+      <div class="left-button-item">
+        <q-btn flat round @click="$router.push('/home/explore')">
+          <Icon
+            name="zhuye1"
+            :size="22"
+            :color="$route.name === 'explore' ? '#07be51' : '#333'"
+          />
+          <q-tooltip> 应用中心</q-tooltip>
+        </q-btn>
+      </div>
+      <div class="left-button-item">
+        <q-btn
+          flat
+          round
+          @click="
+            setTeamKey('');
+            setSearchVisible(true);
+          "
+        >
+          <Icon name="sousuo" :size="20" />
+          <q-tooltip> 搜索</q-tooltip>
+        </q-btn>
+      </div>
+      <div class="left-button-item">
+        <q-btn
+          flat
+          round
+          @click.stop="$router.push('/home/notice')"
+          class="left-notice-button"
+        >
+          <div class="badge-box">
+            <q-badge
+              rounded
+              color="red"
+              v-if="spaceMessageNum"
+              class="badge-button"
+              style="top: -5px; right: -20px"
+              >{{ spaceMessageNum }}
+            </q-badge>
+            <Icon name="xiaoxi1" :size="20" />
+          </div>
+
+          <q-tooltip> 消息中心</q-tooltip>
+        </q-btn>
+      </div>
+
+      <div class="left-button-item">
+        <q-btn flat round>
+          <Icon name="caidanrukou" :size="20" />
+          <q-tooltip> 更多操作</q-tooltip>
+          <q-menu class="q-pa-sm" auto-close anchor="top right" self="top left">
+            <q-list dense>
+              <!--  @click="editFile(item._key, index)" -->
+              <q-item clickable v-close-popup @click="userVisible = true">
+                <q-item-section>个人设置</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="logout()">
+                <q-item-section>退出登录</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
+      </div>
+    </div>
+    <div
+      class="left-subtitle dp-space-center"
+      @click="
+        setIframeDetail({
+          url: `https://hb.qingtime.cn/?token=${token}&teamKey=${spaceKey}`,
+          title: '汇报',
+        });
+        router.push('/home/freedom');
+      "
+      :style="{ color: $route.name === 'freedom' ? '#07be51' : '#333' }"
+    >
+      <div class="dp--center">
+        <Icon
+          name="huibao1"
+          :size="20"
+          :color="$route.name === 'freedom' ? '#07be51' : '#333'"
+          class="q-mr-sm"
+        />
+
+        <!-- <div class="badge-box"> -->
+        汇报
+        <q-badge rounded color="red" v-if="spaceReportNum" class="q-ml-sm"
+          >{{ spaceReportNum }}
+        </q-badge>
+        <!-- </div> -->
+      </div>
+      <div class="dp--center">
+        <template v-if="reportConfig?.dayDone">
+          <span
+            class="icon-point"
+            @click.stop="toReport('day')"
+            :style="{ color: '#bdbdbd' }"
+            >日</span
+          >
+          <span class="text-grey-5 q-ma-xs">|</span>
+
+          <span
+            class="icon-point"
+            @click.stop="toReport('week')"
+            :style="{
+              color: reportConfig.weekDone ? '#bdbdbd' : '#07be51',
+            }"
+            >周</span
+          >
+          <span class="text-grey-5 q-ma-xs">|</span>
+          <span
+            class="icon-point"
+            @click.stop="toReport('month')"
+            :style="{
+              color: reportConfig.monthDone ? '#bdbdbd' : '#07be51',
+            }"
+            >月</span
+          >
+          <span class="text-grey-5 q-ma-xs">|</span>
+          <span
+            class="icon-point"
+            @click.stop="toReport('year')"
+            :style="{
+              color: reportConfig.yearDone ? '#bdbdbd' : '#07be51',
+            }"
+            >年</span
+          >
+        </template>
+        <template v-else>
+          <q-btn
+            label="写日报"
+            color="primary"
+            @click.stop="
+              setIframeDetail({
+                url: `https://hb.qingtime.cn/?token=${token}&teamKey=${spaceKey}&reportType=day&isWrite=1`,
+                title: '汇报',
+              });
+              router.push('/home/freedom');
+            "
+          />
+        </template>
+      </div>
+    </div>
+    <div
+      class="left-subtitle dp-space-center"
+      @click="$router.push('/home/task')"
+      :style="{ color: $route.name === 'task' ? '#07be51' : '#333' }"
+    >
+      <div class="dp--center">
+        <Icon
+          name="xiangmu"
+          :size="20"
+          :color="$route.name === 'task' ? '#07be51' : '#333'"
+          class="q-mr-sm"
+        />
+
+        任务
+        <q-badge rounded color="red" v-if="spaceTaskNum" class="q-ml-sm"
+          >{{ spaceTaskNum }}
+        </q-badge>
+      </div>
+      <q-btn round flat @click.stop="drawerVisible = true">
+        <Icon name="a-chuangjian2" :size="20" />
       </q-btn>
     </div>
-  </div>
-  <div
-    class="left-subtitle dp-space-center"
-    @click="
-      setIframeDetail({
-        url: `https://hb.qingtime.cn/?token=${token}&teamKey=${spaceKey}`,
-        title: '汇报',
-      });
-      router.push('/home/freedom');
-    "
-    :style="{ color: $route.name === 'freedom' ? '#07be51' : '#333' }"
-  >
-    <div class="dp--center">
-      <Icon
-        name="huibao1"
-        :size="20"
-        :color="$route.name === 'freedom' ? '#07be51' : '#333'"
-        class="q-mr-sm"
-      />
-
-      <!-- <div class="badge-box"> -->
-      汇报
-      <q-badge rounded color="red" v-if="spaceReportNum" class="q-ml-sm"
-        >{{ spaceReportNum }}
-      </q-badge>
-      <!-- </div> -->
-    </div>
-    <div class="dp--center">
-      <template v-if="reportConfig?.dayDone">
-        <span
-          class="icon-point"
-          @click.stop="toReport('day')"
-          :style="{ color: '#bdbdbd' }"
-          >日</span
-        >
-        <span class="text-grey-5 q-ma-xs">|</span>
-
-        <span
-          class="icon-point"
-          @click.stop="toReport('week')"
-          :style="{
-            color: reportConfig.weekDone ? '#bdbdbd' : '#07be51',
-          }"
-          >周</span
-        >
-        <span class="text-grey-5 q-ma-xs">|</span>
-        <span
-          class="icon-point"
-          @click.stop="toReport('month')"
-          :style="{
-            color: reportConfig.monthDone ? '#bdbdbd' : '#07be51',
-          }"
-          >月</span
-        >
-        <span class="text-grey-5 q-ma-xs">|</span>
-        <span
-          class="icon-point"
-          @click.stop="toReport('year')"
-          :style="{
-            color: reportConfig.yearDone ? '#bdbdbd' : '#07be51',
-          }"
-          >年</span
-        >
-      </template>
-      <template v-else>
-        <q-btn
-          label="写日报"
-          color="primary"
-          @click.stop="
-            setIframeDetail({
-              url: `https://hb.qingtime.cn/?token=${token}&teamKey=${spaceKey}&reportType=day&isWrite=1`,
-              title: '汇报',
-            });
-            router.push('/home/freedom');
-          "
-        />
-      </template>
-    </div>
-  </div>
-  <div
-    class="left-subtitle dp-space-center"
-    @click="$router.push('/home/task')"
-    :style="{ color: $route.name === 'task' ? '#07be51' : '#333' }"
-  >
-    <div class="dp--center">
-      <Icon
-        name="xiangmu"
-        :size="20"
-        :color="$route.name === 'task' ? '#07be51' : '#333'"
-        class="q-mr-sm"
-      />
-
-      任务
-      <q-badge rounded color="red" v-if="spaceTaskNum" class="q-ml-sm"
-        >{{ spaceTaskNum }}
-      </q-badge>
-    </div>
-    <q-btn round flat @click.stop="drawerVisible = true">
-      <Icon name="a-chuangjian2" :size="20" />
-    </q-btn>
-  </div>
-  <q-separator />
-  <div class="left-menu">
-    <div class="left-menu-tab">
-      <q-tabs
-        dense
-        v-model="menuTab"
-        active-color="primary"
-        class="text-grey-7"
-      >
-        <q-tab name="team" label="群组" style="width: 60px" />
-        <q-tab name="resource" label="文档" style="width: 60px" />
-        <q-tab name="mate" label="队友" style="width: 60px" />
-      </q-tabs>
-    </div>
-    <TeamMenu v-if="menuTab === 'team'" />
-    <ResourceMenu v-else-if="menuTab === 'resource'" />
-    <MateMenu v-else-if="menuTab === 'mate'" />
+    <q-separator />
+    <OnClickOutside
+      :options="{ ignore: ['#teamSearchInput'] }"
+      @trigger="setTabSearchVisible(false)"
+    >
+      <div class="left-menu">
+        <div class="left-menu-tab">
+          <q-tabs
+            dense
+            v-model="menuTab"
+            active-color="primary"
+            class="text-grey-7"
+          >
+            <q-tab name="team" label="群组" style="width: 60px" />
+            <q-tab name="resource" label="文档" style="width: 60px" />
+            <q-tab name="mate" label="队友" style="width: 60px" />
+          </q-tabs>
+        </div>
+        <TeamMenu v-if="menuTab === 'team'" />
+        <ResourceMenu v-else-if="menuTab === 'resource'" />
+        <MateMenu v-else-if="menuTab === 'mate'" />
+      </div>
+    </OnClickOutside>
     <c-dialog
       :visible="cropperVisible"
       @close="cropperVisible = false"

@@ -6,7 +6,18 @@ const dayjs: any = inject("dayjs");
 const { token } = storeToRefs(appStore.authStore);
 const { teamKey, teamInfo } = storeToRefs(appStore.teamStore);
 const knowledgeBaseUrl = ref<string>("");
-
+// onMounted(() => {
+//   if (token.value && teamInfo.value?.knowledgeBaseRoot) {
+//     knowledgeBaseUrl.value = `${
+//       import.meta.env.MODE === "development"
+//         ? "https://soar.cn"
+//         : location.origin
+//     }/base/#/login?token=${token.value}&redirectPath=${
+//       teamInfo.value.knowledgeBaseRoot
+//     }`;
+//     console.log(knowledgeBaseUrl.value);
+//   }
+// });
 // watch(
 //   teamKey,
 //   () => {
@@ -14,22 +25,26 @@ const knowledgeBaseUrl = ref<string>("");
 //   },
 //   { immediate: true }
 // );
-watch(teamInfo, (newInfo, oldInfo) => {
-  console.log(newInfo, oldInfo);
-  if (
-    token.value &&
-    newInfo?.knowledgeBaseRoot !== oldInfo?.knowledgeBaseRoot
-  ) {
-    knowledgeBaseUrl.value = `${
-      import.meta.env.MODE === "development"
-        ? "https://soar.cn"
-        : location.origin
-    }/base/#/login?token=${token.value}&redirectPath=${
-      newInfo.knowledgeBaseRoot
-    }`;
-    console.log(knowledgeBaseUrl.value);
-  }
-});
+watch(
+  teamInfo,
+  (newInfo, oldInfo) => {
+    console.log(newInfo, oldInfo);
+    if (
+      token.value &&
+      newInfo?.knowledgeBaseRoot !== oldInfo?.knowledgeBaseRoot
+    ) {
+      knowledgeBaseUrl.value = `${
+        import.meta.env.MODE === "development"
+          ? "https://soar.cn"
+          : location.origin
+      }/base/#/login?token=${token.value}&redirectPath=${
+        newInfo.knowledgeBaseRoot
+      }`;
+      console.log(knowledgeBaseUrl.value);
+    }
+  },
+  { immediate: true },
+);
 </script>
 <template>
   <div class="teamKnowledgeBase" v-if="knowledgeBaseUrl">

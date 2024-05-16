@@ -11,7 +11,6 @@ import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import { setMessage } from "@/services/util/common";
 import { statusArray } from "@/services/config/config";
-import { totalmem } from "os";
 const $q = useQuasar();
 const { spaceKey, spaceInfo } = storeToRefs(appStore.spaceStore);
 const { departmentList, departmentTree, departmentInfo } = storeToRefs(
