@@ -31,7 +31,8 @@ watch(
     console.log(newInfo, oldInfo);
     if (
       token.value &&
-      newInfo?.knowledgeBaseRoot !== oldInfo?.knowledgeBaseRoot
+      newInfo?.knowledgeBaseRoot &&
+      newInfo.knowledgeBaseRoot !== oldInfo?.knowledgeBaseRoot
     ) {
       knowledgeBaseUrl.value = `${
         import.meta.env.MODE === "development"

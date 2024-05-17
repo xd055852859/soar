@@ -33,6 +33,7 @@ const CustomTree = React.forwardRef((props, ref) => {
     onCloseMenu,
     drawerVisible,
     onChangeOutData,
+    onOutGetNode,
   } = props;
   const treeRef = useRef(null);
   const moveRef = useRef(null);
@@ -170,7 +171,7 @@ const CustomTree = React.forwardRef((props, ref) => {
     if (node) {
       setSelectedNode(node);
       setSelectedId(node._key);
-
+      onOutGetNode(node, "node");
       // if (type === 1) {
       //   treeRef.current.rename();
       // }
@@ -178,6 +179,7 @@ const CustomTree = React.forwardRef((props, ref) => {
       setSelectedNode(null);
       setSelectedId("");
       setSelectedNodes([]);
+      onOutGetNode(null, "clear");
     }
   };
   const addNode = async (nodeId, type) => {
@@ -593,6 +595,8 @@ const CustomTree = React.forwardRef((props, ref) => {
             showAvatar={true}
             showChildNum={true}
             uncontrolled={false}
+            paddingLeft={1000}
+            paddingTop={1000}
             startNodeBg="#07be51"
             defaultSelectedId={selectedId || undefined}
             singleColumn={viewType.includes("-single")}
@@ -634,6 +638,7 @@ const CustomTree = React.forwardRef((props, ref) => {
             dragEndFromOutside={dragEndFromOutside}
             handleMutiSelect={(nodeArray) => {
               setSelectedNodes(nodeArray);
+              onOutGetNode(nodeArray, "array");
             }}
             customAdornment={({ x, y, height, nodeKey }) =>
               getCustmAdornment(
@@ -659,6 +664,8 @@ const CustomTree = React.forwardRef((props, ref) => {
             showAvatar={true}
             showChildNum={true}
             uncontrolled={false}
+            paddingLeft={1000}
+            paddingTop={1000}
             hideHour
             handleClickAvatar={(selectedNode, e) => {
               chooseNode(selectedNode);
@@ -744,7 +751,12 @@ const CustomTree = React.forwardRef((props, ref) => {
     // },
   }));
   return (
-    <div className="tree-component">
+    <div
+      className="tree-component"
+      onClick={(e) => {
+        e.preventDefault();
+      }}
+    >
       <Moveable
         ref={moveRef}
         scrollable={true}
@@ -761,7 +773,7 @@ const CustomTree = React.forwardRef((props, ref) => {
         onCloseMenu={onCloseMenu}
         rightClickToStart={true}
       >
-        <div>{tree}</div>
+        <div style={{ transform: "scale(1)" }}>{tree}</div>
       </Moveable>
     </div>
   );

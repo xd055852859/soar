@@ -59,6 +59,8 @@ const nodeKey = ref<string>("");
 const nodeInfo = ref<any>(null);
 const nodes = ref<any>(null);
 const selectnodes = ref<any>(null);
+const highChooseKey = ref<string>("");
+const chooseKey = ref<string>("");
 const selectKeys = computed(() =>
   selectnodes.value.map((item) => {
     return item._key;
@@ -620,6 +622,7 @@ const chooseHighlight = (type, value) => {
         let node = nodes.value[key];
         let element = document.getElementById(`tree-node-${node._key}`);
         element!.style.opacity = "1";
+        highChooseKey.value = "";
       }
       break;
   }
@@ -635,9 +638,12 @@ const chooseExecutor = (executorDetail) => {
       setMessage("error", "不能选择根节点");
       return;
     }
+    console.log(executorDetail);
     updateExecutor(executorDetail.userKey, executorDetail.userAvatar);
+    chooseKey.value = executorDetail.userKey;
   } else {
     chooseHighlight("executor", executorDetail);
+    highChooseKey.value = executorDetail.userKey;
   }
 };
 
@@ -825,6 +831,17 @@ const changeOutData = (type, data) => {
       break;
   }
 };
+const outGetNode = (node, type) => {
+  console.log(node, type);
+  if (node) {
+    highChooseKey.value = "";
+    if (type === "node" && node.executor) {
+      chooseKey.value = node.executor;
+    }
+  } else if (type === "clear") {
+    chooseKey.value = "";
+  }
+};
 watch(
   () => props.cardKey,
   (newKey) => {
@@ -859,17 +876,25 @@ watch(contentVisible, (newVisible) => {
     timeout = null;
   }
 });
-// watch(
-//   () => props.viewType,
-//   (newType) => {
-//     console.log(newType);
-//     treeType.value = newType;
-//   },
-//   { immediate: true }
-// );
+watchEffect(() => {
+  if (nodeInfo.value || (selectnodes.value && selectnodes.value.length > 0)) {
+    highChooseKey.value = "";
+    if (nodeInfo.value?.executor) {
+      chooseKey.value = nodeInfo.value.executor;
+    }
+  }
+});
 </script>
 <template>
-  <div class="teamTree" id="teamTree" v-if="teamInfo">
+  <div
+    class="teamTree"
+    id="teamTree"
+    v-if="teamInfo"
+    @click="
+      chooseHighlight('clear', '')
+      // chooseKey = '';
+    "
+  >
     <!--     @contextmenu.prevent="menuVisible = false" -->
     <!-- <button :draggable="true">测试</button> -->
     <div class="teamTree-header">
@@ -964,7 +989,7 @@ watch(contentVisible, (newVisible) => {
         </q-btn>
       </div>
     </div>
-    <div class="teamTree-right">
+    <div class="teamTree-right" @click.stop="">
       <div class="teamTree-right-title">执行人</div>
       <div class="teamTree-right-box">
         <div
@@ -972,8 +997,13 @@ watch(contentVisible, (newVisible) => {
           v-for="(item, index) in teamMemberList"
           :key="`task${index}`"
           @click.stop="chooseExecutor(item)"
+          :style="
+            highChooseKey === item.userKey || chooseKey === item.userKey
+              ? { border: '3px solid #07be51' }
+              : {}
+          "
         >
-          <q-avatar color="#fff" size="35px" class="q-mb-sm">
+          <q-avatar color="#fff" size="35px">
             <img
               :src="
                 item.userAvatar ? item.userAvatar : '/common/defaultPerson.png'
@@ -999,6 +1029,7 @@ watch(contentVisible, (newVisible) => {
       @openAlt="openAlt"
       @openFile="openFile"
       @changeOutData="changeOutData"
+      @outGetNode="outGetNode"
     />
     <!-- 编辑器 -->
     <!-- <q-menu
@@ -1375,6 +1406,8 @@ watch(contentVisible, (newVisible) => {
       height: calc(100% - 40px);
       @include scroll();
       > div {
+        border-radius: 50%;
+        margin-bottom: 10px;
         @include flex(center, center, wrap);
       }
     }

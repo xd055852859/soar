@@ -217,7 +217,7 @@ watch(
 </script>
 
 <template>
-  <div style="width: 100%; height: 100%">
+  <div class="left-box">
     <div class="left-title icon-point">
       <!--       @mouseenter="spaceMenuVisible = true" -->
       <div class="select-third-item" style="width: 100%; height: 45px">
@@ -478,24 +478,23 @@ watch(
     <OnClickOutside
       :options="{ ignore: ['#teamSearchInput'] }"
       @trigger="setTabSearchVisible(false)"
+      class="left-menu"
     >
-      <div class="left-menu">
-        <div class="left-menu-tab">
-          <q-tabs
-            dense
-            v-model="menuTab"
-            active-color="primary"
-            class="text-grey-7"
-          >
-            <q-tab name="team" label="群组" style="width: 60px" />
-            <q-tab name="resource" label="文档" style="width: 60px" />
-            <q-tab name="mate" label="队友" style="width: 60px" />
-          </q-tabs>
-        </div>
-        <TeamMenu v-if="menuTab === 'team'" />
-        <ResourceMenu v-else-if="menuTab === 'resource'" />
-        <MateMenu v-else-if="menuTab === 'mate'" />
+      <div class="left-menu-tab">
+        <q-tabs
+          dense
+          v-model="menuTab"
+          active-color="primary"
+          class="text-grey-7"
+        >
+          <q-tab name="team" label="群组" style="width: 60px" />
+          <q-tab name="resource" label="文档" style="width: 60px" />
+          <q-tab name="mate" label="队友" style="width: 60px" />
+        </q-tabs>
       </div>
+      <TeamMenu v-if="menuTab === 'team'" />
+      <ResourceMenu v-else-if="menuTab === 'resource'" />
+      <MateMenu v-else-if="menuTab === 'mate'" />
     </OnClickOutside>
     <c-dialog
       :visible="cropperVisible"
@@ -601,45 +600,48 @@ watch(
 </template>
 
 <style scoped lang="scss">
-.left-title {
+.left-box {
   width: 100%;
-  height: 55px;
-  @include flex(center, center, null);
-}
-
-.left-button {
-  width: 100%;
-  @include flex(space-between, center, null);
-
-  .left-button-item {
-    width: 35px;
-    flex-shrink: 0;
+  height: 100%;
+  .left-title {
+    width: 100%;
+    height: 55px;
     @include flex(center, center, null);
   }
-}
 
-.left-subtitle {
-  width: 100%;
-  height: 45px;
-  line-height: 45px;
-  cursor: pointer;
-  // @include flex(flex-start, center, null);
-}
+  .left-button {
+    width: 100%;
+    @include flex(space-between, center, null);
 
-.left-menu {
-  width: 100%;
-  height: calc(100% - 195px);
-  position: relative;
-  z-index: 1;
+    .left-button-item {
+      width: 35px;
+      flex-shrink: 0;
+      @include flex(center, center, null);
+    }
+  }
 
-  .left-menu-tab {
-    position: absolute;
-    left: 0;
-    top: 8px;
-    z-index: 2;
+  .left-subtitle {
+    width: 100%;
+    height: 45px;
+    line-height: 45px;
+    cursor: pointer;
+    // @include flex(flex-start, center, null);
+  }
+
+  .left-menu {
+    width: 100%;
+    height: calc(100% - 195px);
+    position: relative;
+    z-index: 1;
+
+    .left-menu-tab {
+      position: absolute;
+      left: 0;
+      top: 8px;
+      z-index: 2;
+    }
   }
 }
-
 .form-container {
   width: 400px;
   height: 380px;

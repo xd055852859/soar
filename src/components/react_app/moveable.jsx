@@ -16,17 +16,17 @@ const Moveable = React.forwardRef(
       children,
       onCloseMenu,
     },
-    ref
+    ref,
   ) => {
     // 暴露方法
     useImperativeHandle(ref, () => ({
       reset: () => {
-        setTranslateX(0);
-        setTranslateY(0);
+        setTranslateX(-100);
+        setTranslateY(-920);
       },
     }));
-    const [translateX, setTranslateX] = useState(0);
-    const [translateY, setTranslateY] = useState(0);
+    const [translateX, setTranslateX] = useState(-100);
+    const [translateY, setTranslateY] = useState(-920);
     const [started, setStarted] = useState(false);
 
     const handleMoveStart = (e) => {
@@ -163,6 +163,6 @@ const Moveable = React.forwardRef(
         </div>
       </div>
     );
-  }
+  },
 );
 export default Moveable;

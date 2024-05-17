@@ -4,6 +4,7 @@ import riverChart from "@/components/chart/riverChart.vue";
 import { storeToRefs } from "pinia";
 import appStore from "@/store";
 import Icon from "@/components/common/Icon.vue";
+import CEmpty from "@/components/common/cEmpty.vue";
 const { user } = storeToRefs(appStore.authStore);
 const { mateList } = storeToRefs(appStore.mateStore);
 </script>
@@ -19,38 +20,41 @@ const { mateList } = storeToRefs(appStore.mateStore);
     </template>
   </cHeader>
   <div class="mate-box">
-    <div
-      class="mate-box-item"
-      v-for="(item, index) in mateList"
-      :key="`mate${index}`"
-      @click="$router.push(`/home/mate/detail/${item._key}`)"
-    >
-      <div class="mate-box-avatar">
-        <div text-color="white" class="mate-item-avatar">
-          <img
-            :src="
-              item.userAvatar ? item.userAvatar : '/common/defaultPerson.png'
-            "
+    <template v-if="mateList.length > 0">
+      <div
+        class="mate-box-item"
+        v-for="(item, index) in mateList"
+        :key="`mate${index}`"
+        @click="$router.push(`/home/mate/detail/${item._key}`)"
+      >
+        <div class="mate-box-avatar">
+          <div text-color="white" class="mate-item-avatar">
+            <img
+              :src="
+                item.userAvatar ? item.userAvatar : '/common/defaultPerson.png'
+              "
+            />
+          </div>
+        </div>
+        <div class="mate-item-online" v-if="item.online">
+          <Icon name="a-diannaozaixian2" :size="14" color="#fff" />
+        </div>
+        <div class="mate-item-name">
+          {{ item.userName }}
+        </div>
+
+        <div class="mate-item-chart">
+          <riverChart
+            :riverId="`mate${item._key}River`"
+            :chartData="item.chartData"
+            :chartName="item.chartName"
+            type="simple"
+            v-if="item.chartData"
           />
         </div>
       </div>
-      <div class="mate-item-online" v-if="item.online">
-        <Icon name="a-diannaozaixian2" :size="14" color="#fff" />
-      </div>
-      <div class="mate-item-name">
-        {{ item.userName }}
-      </div>
-
-      <div class="mate-item-chart">
-        <riverChart
-          :riverId="`mate${item._key}River`"
-          :chartData="item.chartData"
-          :chartName="item.chartName"
-          type="simple"
-          v-if="item.chartData"
-        />
-      </div>
-    </div>
+    </template>
+    <c-empty title="暂无队友" v-else />
   </div>
 </template>
 <style scoped lang="scss">

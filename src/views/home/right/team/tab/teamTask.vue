@@ -12,7 +12,7 @@ const props = defineProps<{
   cardKey?: string;
 }>();
 const { user } = storeToRefs(appStore.authStore);
-const { teamKey } = storeToRefs(appStore.teamStore);
+const { teamKey, teamInfo } = storeToRefs(appStore.teamStore);
 
 const taskList = ref<any>([]);
 const menuTab = ref<string>("tree");

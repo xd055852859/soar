@@ -4,7 +4,8 @@ import Icon from "@/components/common/Icon.vue";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import _ from "lodash";
-
+import CEmpty from "@/components/common/cEmpty.vue";
+const socket: any = inject("socket");
 const { mateList } = storeToRefs(appStore.mateStore);
 const mateKey = ref<string>("");
 </script>
@@ -23,47 +24,52 @@ const mateKey = ref<string>("");
       </div>
     </div>
     <div class="mateMenu-list">
-      <div
-        class="mateMenu-item"
-        v-for="(item, index) in mateList"
-        :key="`mate${index}`"
-        @click="
-          $router.push(`/home/mate/detail/${item._key}`);
-          mateKey = item._key;
-        "
-      >
+      <template v-if="mateList.length > 0">
         <div
-          class="mateMenu-item-title icon-point"
-          @click=""
-          :style="{
-            background: mateKey === item._key ? '#eee' : '',
-          }"
+          class="mateMenu-item"
+          v-for="(item, index) in mateList"
+          :key="`mate${index}`"
+          @click="
+            $router.push(`/home/mate/detail/${item._key}`);
+            mateKey = item._key;
+          "
         >
-          <div class="mateMenu-item-avatar q-mr-sm">
+          <div
+            class="mateMenu-item-title icon-point"
+            @click=""
+            :style="{
+              background: mateKey === item._key ? '#eee' : '',
+            }"
+          >
+            <div class="mateMenu-item-avatar q-mr-sm">
+              <img
+                :src="
+                  item.userAvatar
+                    ? item.userAvatar
+                    : '/common/defaultPerson.png'
+                "
+                alt=""
+              />
+
+              <!--            -->
+            </div>
             <img
-              :src="
-                item.userAvatar ? item.userAvatar : '/common/defaultPerson.png'
-              "
+              class="mateMenu-item-online"
+              src="/online.svg"
+              v-if="item.online"
               alt=""
             />
+            <div>
+              {{ item.userName }}
 
-            <!--            -->
-          </div>
-          <img
-            class="mateMenu-item-online"
-            src="/online.svg"
-            v-if="item.online"
-            alt=""
-          />
-          <div>
-            {{ item.userName }}
-
-            <span class="text-grey-6" style="font-size: 12px" v-if="item.post"
-              >( {{ item.post }} )
-            </span>
+              <span class="text-grey-6" style="font-size: 12px" v-if="item.post"
+                >( {{ item.post }} )
+              </span>
+            </div>
           </div>
         </div>
-      </div>
+      </template>
+      <c-empty title="暂无队友" v-else />
     </div>
   </div>
 </template>

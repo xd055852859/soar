@@ -9,6 +9,7 @@ import { ResultProps } from "@/interface/Common";
 import api from "@/services/api";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
+import CEmpty from "@/components/common/cEmpty.vue";
 
 const dayjs: any = inject("dayjs");
 const { spaceKey } = storeToRefs(appStore.spaceStore);
@@ -165,33 +166,36 @@ watchEffect(() => {
       ></template>
     </cHeader>
     <div class="task-box">
-      <div
-        class="taskItem-box"
-        v-for="(item, index) in taskList"
-        :key="`task${index}`"
-      >
-        <div class="taskItem-top">
-          <div>{{ item.projectName }} / {{ item.title }}</div>
-          <div>
-            <q-btn round flat size="16px" @click="chooseTree(item)">
-              <Icon name="a-chuangjian2" :size="20" />
-            </q-btn>
+      <template v-if="taskList.length > 0">
+        <div
+          class="taskItem-box"
+          v-for="(item, index) in taskList"
+          :key="`task${index}`"
+        >
+          <div class="taskItem-top">
+            <div>{{ item.projectName }} / {{ item.title }}</div>
+            <div>
+              <q-btn round flat size="16px" @click="chooseTree(item)">
+                <Icon name="a-chuangjian2" :size="20" />
+              </q-btn>
+            </div>
+          </div>
+          <div class="taskItem-bottom">
+            <template
+              v-for="(taskItem, taskIndex) in item.taskList"
+              :key="`taskItem${taskIndex}`"
+            >
+              <Task
+                :card="taskItem"
+                :boxIndex="index"
+                :taskIndex="taskIndex"
+                @chooseCard="chooseCard"
+              />
+            </template>
           </div>
         </div>
-        <div class="taskItem-bottom">
-          <template
-            v-for="(taskItem, taskIndex) in item.taskList"
-            :key="`taskItem${taskIndex}`"
-          >
-            <Task
-              :card="taskItem"
-              :boxIndex="index"
-              :taskIndex="taskIndex"
-              @chooseCard="chooseCard"
-            />
-          </template>
-        </div>
-      </div>
+      </template>
+      <c-empty title="暂无任务" v-else />
     </div>
     <c-drawer
       :visible="drawerVisible"

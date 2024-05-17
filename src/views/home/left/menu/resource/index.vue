@@ -9,6 +9,7 @@ import { storeToRefs } from "pinia";
 import { typeIcon } from "@/services/config/config";
 import _ from "lodash";
 import CIcon from "@/components/common/Icon.vue";
+import CEmpty from "@/components/common/cEmpty.vue";
 
 const { teamKey } = storeToRefs(appStore.teamStore);
 const { token } = storeToRefs(appStore.authStore);
@@ -95,76 +96,82 @@ watchEffect(() => {
         })
       "
     >
-      <div
-        class="resourceMenu-item"
-        v-for="(item, index) in fileList"
-        :key="`file${index}`"
-        @click="
-          setIframeDetail({
-            url: `https://soar.cn/base/#/login?token=${token}&redirectPath=node/${item._key}`,
-            title: item.title,
-          });
-          $router.push('/home/freedom');
-          fileKey = item._key;
-        "
-        @mouseenter="fileOverKey = item._key"
-        :style="{
-          background: fileKey === item._key ? '#eee' : '',
-        }"
-      >
+      <template v-if="fileList.length > 0">
         <div
-          class="resourceMenu-item-title icon-point"
-          @click="$router.push(`/home/team`)"
+          class="resourceMenu-item"
+          v-for="(item, index) in fileList"
+          :key="`file${index}`"
+          @click="
+            setIframeDetail({
+              url: `https://soar.cn/base/#/login?token=${token}&redirectPath=node/${item._key}`,
+              title: item.title,
+            });
+            $router.push('/home/freedom');
+            fileKey = item._key;
+          "
+          @mouseenter="fileOverKey = item._key"
+          :style="{
+            background: fileKey === item._key ? '#eee' : '',
+          }"
         >
-          <div class="dp--center" style="width: 100%">
-            <Icon
-              :icon="item.icon"
-              width="20"
-              height="20"
-              color="#757575"
-              class="q-mr-sm"
-            />
-            <div style="width: calc(100% - 30px)">{{ item.title }}</div>
-          </div>
-          <!--          <div class="resourceMenu-item-icon" v-if="fileOverKey === item._key">-->
-          <!--            <q-btn flat round size="9px" @click.stop="">-->
-          <!--              <c-Icon name="gengduo" :size="18" />-->
-          <!--              <q-menu anchor="top right" self="top left" class="q-pa-sm">-->
-          <!--                <q-list dense>-->
-          <!--                  <q-item-->
-          <!--                    clickable-->
-          <!--                    v-close-popup-->
-          <!--                    @click=""-->
-          <!--                    v-if="item.role < 3"-->
-          <!--                  >-->
-          <!--                    <q-item-section class="common-title">编辑</q-item-section>-->
-          <!--                  </q-item>-->
-          <!--                  <q-item-->
-          <!--                    clickable-->
-          <!--                    v-close-popup-->
-          <!--                    @click=""-->
-          <!--                    v-if="item.role < 2"-->
-          <!--                  >-->
-          <!--                    <q-item-section class="common-title">删除</q-item-section>-->
-          <!--                  </q-item>-->
-          <!--                </q-list>-->
-          <!--              </q-menu>-->
-          <!--            </q-btn>-->
-          <!--          </div>-->
-        </div>
-
-        <div class="resourceMenu-item-subtitle icon-point">
-          <template
-            v-for="(pathItem, pathIndex) in item.way"
-            :key="`${item._key}path${pathIndex}`"
+          <div
+            class="resourceMenu-item-title icon-point"
+            @click="$router.push(`/home/team`)"
           >
-            <div>{{ pathIndex === 0 ? "# " : "" }}{{ pathItem.title }}</div>
-            <div v-if="pathIndex < item.way.length - 1" style="margin: 0px 5px">
-              /
+            <div class="dp--center" style="width: 100%">
+              <Icon
+                :icon="item.icon"
+                width="20"
+                height="20"
+                color="#757575"
+                class="q-mr-sm"
+              />
+              <div style="width: calc(100% - 30px)">{{ item.title }}</div>
             </div>
-          </template>
+            <!--          <div class="resourceMenu-item-icon" v-if="fileOverKey === item._key">-->
+            <!--            <q-btn flat round size="9px" @click.stop="">-->
+            <!--              <c-Icon name="gengduo" :size="18" />-->
+            <!--              <q-menu anchor="top right" self="top left" class="q-pa-sm">-->
+            <!--                <q-list dense>-->
+            <!--                  <q-item-->
+            <!--                    clickable-->
+            <!--                    v-close-popup-->
+            <!--                    @click=""-->
+            <!--                    v-if="item.role < 3"-->
+            <!--                  >-->
+            <!--                    <q-item-section class="common-title">编辑</q-item-section>-->
+            <!--                  </q-item>-->
+            <!--                  <q-item-->
+            <!--                    clickable-->
+            <!--                    v-close-popup-->
+            <!--                    @click=""-->
+            <!--                    v-if="item.role < 2"-->
+            <!--                  >-->
+            <!--                    <q-item-section class="common-title">删除</q-item-section>-->
+            <!--                  </q-item>-->
+            <!--                </q-list>-->
+            <!--              </q-menu>-->
+            <!--            </q-btn>-->
+            <!--          </div>-->
+          </div>
+
+          <div class="resourceMenu-item-subtitle icon-point">
+            <template
+              v-for="(pathItem, pathIndex) in item.way"
+              :key="`${item._key}path${pathIndex}`"
+            >
+              <div>{{ pathIndex === 0 ? "# " : "" }}{{ pathItem.title }}</div>
+              <div
+                v-if="pathIndex < item.way.length - 1"
+                style="margin: 0px 5px"
+              >
+                /
+              </div>
+            </template>
+          </div>
         </div>
-      </div>
+      </template>
+      <c-empty title="暂无资源" v-else />
     </div>
   </div>
 </template>
