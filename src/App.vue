@@ -71,26 +71,6 @@ onMounted(() => {
         ? localStorage.getItem("teamKey")
         : "",
     );
-    socket.on("connect", () => {
-      socket.emit("login", token);
-      console.log(socket.id);
-      socket.on("remind", (data) => {
-        console.log(data);
-        if (data.teamKey === spaceKey.value) {
-          console.log(data.title);
-          // setTimeout(() => {
-          $q.notify({
-            progress: true,
-            icon: "warning",
-            color: "warning",
-            message: data.title,
-            timeout: 60000,
-            position: "top-right",
-          });
-          // }, 60000);
-        }
-      });
-    });
   } else {
     router.replace("/");
   }
@@ -157,7 +137,14 @@ watch(
   token,
   (newVal) => {
     if (newVal) {
+      console.log(socket);
       getUserInfo();
+      socket.connect();
+      socket.on("connect", () => {
+        request.setSocket(socket);
+        socket.emit("login", token);
+        console.log(socket.id);
+      });
     }
   },
   { immediate: true },

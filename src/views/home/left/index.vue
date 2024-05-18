@@ -26,6 +26,7 @@ const props = defineProps<{
   showState?: boolean;
 }>();
 const { token, user } = storeToRefs(appStore.authStore);
+const socket: any = inject("socket");
 const {
   spaceKey,
   spaceInfo,
@@ -179,6 +180,7 @@ const logout = () => {
   sessionStorage.clear();
   setMessage("success", "退出登录成功");
   setToken("");
+  socket.disconnect();
   commonStore().$reset();
   clearStore();
 };
@@ -588,7 +590,7 @@ watch(
       :visible="drawerVisible"
       @close="drawerVisible = false"
       :drawerStyle="{
-        width: '400px',
+        width: '450px',
       }"
       opacityMask
     >

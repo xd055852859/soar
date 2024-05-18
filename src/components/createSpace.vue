@@ -4,6 +4,7 @@ import api from "@/services/api";
 import { setMessage } from "@/services/util/common";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
+import router from "@/router";
 const { spaceList } = storeToRefs(appStore.spaceStore);
 const { setSpaceKey, setSpaceList } = appStore.spaceStore;
 const emits = defineEmits<{
@@ -69,6 +70,7 @@ const createSpace = async () => {
     if (!spaceList.value) {
       spaceList.value = [];
     }
+    router.push("/home/explore");
     setSpaceList([...spaceList.value, spaceRes.data]);
     emits("close");
   }

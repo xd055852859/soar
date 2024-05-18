@@ -1,14 +1,13 @@
 import router from "@/router";
-import appStore from "@/store";
 import axios from "axios";
-import { setLoading, setMessage } from "./util/common";
+import { setMessage } from "./util/common";
 import { JSONContent } from "@tiptap/vue-3";
-import { storeToRefs } from "pinia";
 import { commonStore } from "@/store/common";
 
 const AUTH_URL = import.meta.env.VITE_AUTH_URL;
 const API_URL = import.meta.env.VITE_BACK_URL;
 let token = localStorage.getItem("auth_token") || "";
+let socket: any = null;
 let loadNum = 0;
 axios.interceptors.request.use(
   function (config) {
@@ -32,6 +31,8 @@ axios.interceptors.response.use(
       sessionStorage.clear();
       router.replace("/");
       token = "";
+      socket.disconnect();
+      console.log(socket);
       commonStore().$reset();
       commonStore().clearStore();
     } else if (
@@ -232,6 +233,9 @@ export default {
   setToken: (_token: string) => {
     localStorage.setItem("auth_token", _token);
     token = _token;
+  },
+  setSocket: (_socket: string) => {
+    socket = _socket;
   },
   getToken: () => {
     return token;

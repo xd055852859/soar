@@ -1280,7 +1280,7 @@ watchEffect(() => {
       :visible="taskVisible"
       @close="taskVisible = false"
       :drawerStyle="{
-        width: '400px',
+        width: '450px',
       }"
       opacityMask
     >

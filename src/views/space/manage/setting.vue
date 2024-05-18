@@ -34,6 +34,7 @@ const updateSpace = async () => {
       ...spaceInfo.value,
       name: spaceName.value,
       logo: spaceLogo.value,
+      showTaskDays: showTaskDays.value,
     };
     setMessage("success", "编辑空间成功");
 
@@ -47,13 +48,14 @@ const updateSpace = async () => {
           ...list[index],
           name: spaceName.value,
           logo: spaceLogo.value,
+          showTaskDays: showTaskDays.value,
         };
         setSpaceList(list);
       }
     }
   }
 };
-const delateSpace = async () => {
+const deleteSpace = async () => {
   if (!deleteInput.value) {
     setMessage("error", "请输入空间名称");
     return;
@@ -86,6 +88,7 @@ watch(
     if (newInfo) {
       spaceLogo.value = newInfo?.logo ? newInfo.logo : "";
       spaceName.value = newInfo?.name ? newInfo.name : "";
+      showTaskDays.value = newInfo.showTaskDays ? newInfo.showTaskDays : 99999;
     }
   },
   { immediate: true },
@@ -178,9 +181,12 @@ watch(deleteVisible, (newVisible) => {
             flat
             label="取消"
             color="grey-5"
-            @click="deleteVisible = false"
+            @click="
+              deleteVisible = false;
+              deleteInput = '';
+            "
           />
-          <q-btn color="negative" label="确认" @click="delateSpace" />
+          <q-btn color="negative" label="确认" @click="deleteSpace" />
         </q-card-actions>
       </q-card>
     </q-dialog>

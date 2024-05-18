@@ -77,17 +77,19 @@ watchEffect(() => {
           @click="readAll()"
         />
       </template>
+      <template #center>
+        <q-tabs
+          v-model="noticeTab"
+          dense
+          align="left"
+          indicator-color="primary"
+          active-class="text-primary"
+        >
+          <q-tab name="unRead" label="未读" />
+          <q-tab name="read" label="已读" /> </q-tabs
+      ></template>
     </c-header>
-    <q-tabs
-      v-model="noticeTab"
-      dense
-      align="left"
-      indicator-color="primary"
-      active-class="text-primary"
-    >
-      <q-tab name="unRead" label="未读" />
-      <q-tab name="read" label="已读" />
-    </q-tabs>
+
     <div
       class="notice-box"
       @scroll="
@@ -97,7 +99,7 @@ watchEffect(() => {
       "
     >
       <template v-for="(item, index) in noticeList" :key="`notice${index}`">
-        <q-card class="notice-item q-mb-sm">
+        <q-card class="notice-item q-mb-sm card-hover" flat bordered>
           <q-card-section class="notice-item-box">
             <div style="width: 20%">
               <q-avatar color="#fff" size="30px" class="q-mr-xs">
@@ -156,7 +158,7 @@ watchEffect(() => {
 
   .notice-box {
     width: 100%;
-    height: calc(100% - 90px);
+    height: calc(100% - 60px);
     @include scroll();
     @include p-number(10px, 25px);
 

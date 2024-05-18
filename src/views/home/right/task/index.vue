@@ -201,7 +201,7 @@ watchEffect(() => {
       :visible="drawerVisible"
       @close="drawerVisible = false"
       :drawerStyle="{
-        width: '400px',
+        width: '450px',
       }"
       opacityMask
     >

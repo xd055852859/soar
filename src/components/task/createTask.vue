@@ -5,6 +5,8 @@ import { storeToRefs } from "pinia";
 import appStore from "@/store";
 import Task from "@/components/task/task.vue";
 import { commonscroll, setMessage } from "@/services/util/common";
+import Icon from "@/components/common/Icon.vue";
+import { searchArray } from "@/services/config/config";
 const { user } = storeToRefs(appStore.authStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
 const props = defineProps<{
@@ -16,11 +18,13 @@ const props = defineProps<{
 
 const addInput = ref<string>("");
 const moreState = ref<boolean>(false);
+const showMore = ref<boolean>(false);
 const treeList = ref<any>([]);
 const memberList = ref<any>([]);
 const taskList = ref<any>([]);
 const searchMemberList = ref<any>([]);
 const searchTreeList = ref<any>([]);
+const searchVisible = ref<boolean>(false);
 const teamKey = ref<string>("");
 const treeKey = ref<string>("");
 const treeInfo = ref<any>(null);
@@ -75,7 +79,10 @@ const getTaskData = async () => {
     ...obj,
   })) as ResultProps;
   if (taskRes.msg === "OK") {
-    taskList.value = [...taskRes.data];
+    if (page.value === 1) {
+      taskList.value = [];
+    }
+    taskList.value = [...taskList.value, ...taskRes.data];
     total.value = taskRes.total!;
   }
 };
@@ -104,6 +111,25 @@ const addTask = async () => {
 watch(teamKey, () => {
   getMemberData();
 });
+watch(type, () => {
+  page.value = 1;
+});
+watch(
+  addInput,
+  (newInput) => {
+    if (newInput) {
+      let arr = newInput.split(/\r?\n|\r/g);
+      if (arr.length > 1) {
+        showMore.value = true;
+      } else {
+        showMore.value = false;
+      }
+    } else {
+      showMore.value = false;
+    }
+  },
+  { immediate: true },
+);
 watchEffect(() => {
   if (searchTreeInput.value) {
     searchTreeList.value = treeList.value.filter((item) =>
@@ -116,15 +142,6 @@ watchEffect(() => {
 watchEffect(() => {
   if (spaceKey.value) {
     getTaskData();
-  }
-});
-watchEffect(() => {
-  if (searchMemberInput.value) {
-    searchMemberList.value = memberList.value.filter((item) =>
-      item.userName.includes(searchMemberInput.value),
-    );
-  } else {
-    searchMemberList.value = [...memberList.value];
   }
 });
 </script>
@@ -142,10 +159,18 @@ watchEffect(() => {
           placeholder="请输入任务"
         />
         <div class="create-task-button dp-space-center">
-          <q-checkbox v-model="moreState" label="多任务" dense />
+          <q-checkbox
+            v-model="moreState"
+            label="多任务"
+            dense
+            v-if="showMore"
+          />
+          <q-space v-else />
           <q-btn
             label="发布"
-            color="primary"
+            :color="
+              !treeInfo || !executorInfo || !addInput ? 'grey-5' : 'primary'
+            "
             @click="addTask()"
             :disable="!treeInfo || !executorInfo || !addInput"
           />
@@ -153,31 +178,77 @@ watchEffect(() => {
       </div>
       <div v-if="!taskType" class="create-task-search">
         <template v-if="treeInfo">
-          <div>{{ treeInfo.title }}</div>
-          <div>{{ executorInfo?.userName }}</div>
+          <div>
+            #
+            {{
+              treeInfo.projectName
+                ? treeInfo.projectName
+                : treeInfo.projectInfo
+                  ? treeInfo.projectInfo.name
+                  : ""
+            }}
+            / {{ treeInfo.title }}
+          </div>
+          <div>
+            <q-avatar color="#fff" size="30px" class="shadow-3 q-mr-sm">
+              <img
+                :src="
+                  executorInfo?.userAvatar
+                    ? executorInfo?.userAvatar
+                    : '/common/defaultPerson.png'
+                "
+                alt=""
+              />
+            </q-avatar>
+            {{ executorInfo?.userName
+            }}<q-icon
+              name="arrow_drop_down"
+              color="grey-7"
+              style="margin-left: 8px"
+              size="25px"
+              class="select-icon"
+            />
+          </div>
         </template>
         <template v-else
-          ><span style="font-size: 14px" class="text-grey-5"
-            >请选择任务树与执行人</span
-          ></template
-        >
+          ><div style="font-size: 14px" class="text-grey-5">
+            请选择任务树与执行人
+          </div>
+          <q-icon
+            name="arrow_drop_down"
+            color="grey-7"
+            style="margin-left: 8px"
+            size="25px"
+            class="select-icon"
+          />
+        </template>
+
         <q-menu style="margin-left: 20px">
           <div class="create-task-choose">
-            <div class="create-choose">
+            <div class="create-choose-tree create-choose">
               <div class="choose-header">
-                <div class="choose-title">树列表</div>
-                <div>
+                <div class="choose-title">任务树</div>
+                <div
+                  class="dp--center justify-end"
+                  style="width: calc(100% - 90px)"
+                >
                   <q-input
                     v-model="searchTreeInput"
                     outlined
                     dense
                     clearable
-                    style="width: 180px"
+                    style="width: calc(100% - 20px)"
                     placeholder="请输入任务树"
+                    v-if="searchVisible"
                   />
+                  <q-space v-else />
+                  <q-btn flat round @click="searchVisible = !searchVisible">
+                    <Icon name="sousuo" :size="20" />
+                    <q-tooltip> 搜索</q-tooltip>
+                  </q-btn>
                 </div>
               </div>
-              <div class="choose-container">
+              <div class="choose-container choose-container-tree">
                 <div
                   v-for="(treeItem, treeIndex) in searchTreeList"
                   :key="`treeItem-${treeIndex}`"
@@ -192,29 +263,19 @@ watchEffect(() => {
                   "
                 >
                   <div>
-                    {{ treeItem.projectInfo.name }} /
+                    # {{ treeItem.projectInfo.name }} /
                     {{ treeItem.title }}
                   </div>
                 </div>
               </div>
             </div>
-            <div class="create-choose">
+            <div class="create-choose-member create-choose">
               <div class="choose-header">
-                <div class="choose-title">执行人列表</div>
-                <div>
-                  <q-input
-                    v-model="searchMemberInput"
-                    outlined
-                    dense
-                    clearable
-                    style="width: 180px"
-                    placeholder="请输入执行人"
-                  />
-                </div>
+                <div class="choose-title">执行人</div>
               </div>
               <div class="choose-container">
                 <div
-                  v-for="(memberItem, memberIndex) in searchMemberList"
+                  v-for="(memberItem, memberIndex) in memberList"
                   :key="`memberItem-${memberIndex}`"
                   :style="{
                     background:
@@ -226,7 +287,7 @@ watchEffect(() => {
                   class="choose-container-item"
                   @click="executorInfo = memberItem"
                 >
-                  <div>
+                  <div class="full-width single-to-long">
                     {{ memberItem.userName }}
                   </div>
                 </div>
@@ -260,17 +321,18 @@ watchEffect(() => {
         </div>
         <q-space v-else />
         <q-select
-          outlined
+          borderless
           v-model="type"
           :options="[
-            { key: 0, value: '全部' },
-            { key: 1, value: '未完成' },
-            { key: 2, value: '指派他人' },
-            { key: 3, value: '已完成' },
+            { key: 0, value: '全部(我相关)' },
+            { key: 1, value: '我待执行' },
+            { key: 2, value: '我已执行' },
+            { key: 3, value: '指派给我' },
+            { key: 4, value: '指派他人' },
           ]"
           :option-value="(opt) => opt.key"
           :option-label="(opt) => opt.value"
-          style="width: 120px"
+          style="width: 110px; margin-right: 10px"
           dense
           emit-value
           map-options
@@ -303,7 +365,7 @@ watchEffect(() => {
     width: 100%;
     margin-bottom: 10px;
     border-radius: 6px;
-    border: 1px solid $grey-5;
+    border: 1px solid $grey-7;
     @include p-number(0px, 10px, 10px, 10px);
     .create-task-textarea {
       margin-bottom: 10px;
@@ -314,7 +376,7 @@ watchEffect(() => {
     height: 50px;
     border-radius: 6px;
     margin-bottom: 10px;
-    border: 1px solid $grey-5;
+    border: 1px solid $grey-2;
     @include p-number(0px, 10px);
     @include flex(space-between, center, null);
   }
@@ -331,12 +393,12 @@ watchEffect(() => {
   }
 }
 .create-task-choose {
-  width: 580px;
+  width: 420px;
   height: 60vh;
   @include p-number(10px, 10px);
   @include flex(space-between, center, null);
   .create-choose {
-    width: 50%;
+    width: 100px;
     height: 100%;
     @include p-number(0px, 5px);
     .choose-header {
@@ -361,6 +423,17 @@ watchEffect(() => {
         cursor: pointer;
       }
     }
+  }
+  .create-choose-tree {
+    width: calc(100% - 110px);
+    padding-right: 5px;
+    box-sizing: border-box;
+    border-right: 2px solid $grey-3;
+    .choose-container-tree {
+    }
+  }
+  .create-choose-member {
+    width: 100px;
   }
 }
 .create-member {

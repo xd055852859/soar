@@ -122,6 +122,8 @@ const updateTask = async (type, obj, detail) => {
 </script>
 <template>
   <q-card
+    flat
+    bordered
     class="teamTask-box-container q-mb-md icon-point card-hover"
     @click="chooseTask()"
     @mouseenter="chooseKey = card._key"

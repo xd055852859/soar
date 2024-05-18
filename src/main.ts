@@ -38,6 +38,12 @@ pinia.use(({ store }) => {
 app
   // .use(masonry)
   .use(router)
+  .use(SocketIO, {
+    connection: "https://data.soar.cn",
+    options: {
+      autoConnect: false, //关闭自动连接
+    },
+  })
   .use(pinia)
   .use(Quasar, {
     lang: langDe,
@@ -59,10 +65,7 @@ app
         /* look at QuasarConfOptions from the API card */
       },
     },
-  })
-  .use(SocketIO, {
-    connection: "https://data.soar.cn",
-    options: {},
   });
+
 registerStore();
 app.mount("#app");

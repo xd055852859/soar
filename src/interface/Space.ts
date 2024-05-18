@@ -18,6 +18,7 @@ export interface SpaceInfo {
   logo: string;
   contact: string;
   email: string;
+  showTaskDays: number;
   rootDepartment?: string;
 }
 
