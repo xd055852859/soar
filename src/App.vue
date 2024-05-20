@@ -142,7 +142,7 @@ watch(
       socket.connect();
       socket.on("connect", () => {
         request.setSocket(socket);
-        socket.emit("login", token);
+        socket.emit("login", newVal);
         console.log(socket.id);
       });
     }

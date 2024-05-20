@@ -10,6 +10,7 @@ import { ResultProps } from "@/interface/Common";
 import { setMessage } from "@/services/util/common";
 
 const $q = useQuasar();
+const socket: any = inject("socket");
 const dayjs: any = inject("dayjs");
 const { token } = storeToRefs(appStore.authStore);
 const { closeNum, showState, leftVisible } = storeToRefs(appStore.commonStore);
@@ -37,6 +38,37 @@ const clockVisible = ref<boolean>(false);
 const clockMessageVisible = ref<boolean>(false);
 const closeMessage = ref<any>(null);
 const timer = ref<any>(null);
+onMounted(() => {
+  console.log(socket);
+  socket.on("rightMessage", (data) => {
+    if (data.teamKey === spaceKey.value) {
+      switch (data.type) {
+        case "readReport":
+          console.log(data);
+          $q.notify({
+            message: `${data.fromUserInfo.userName}${data.log}`,
+            color: "primary",
+
+            caption: dayjs(data.createTime).format("YYYY-MM-DD HH:mm:ss"),
+            position: "top-right",
+            multiLine: true,
+            // actions: [
+            //   {
+            //     label: "确认",
+            //     color: "primary",
+            //     handler: () => {
+            //       // close();
+            //     },
+            //   },
+            // ],
+            progress: true,
+            timeout: 10000,
+          });
+          break;
+      }
+    }
+  });
+});
 onUnmounted(() => {
   if (closeMessage.value) {
     closeMessage.value();

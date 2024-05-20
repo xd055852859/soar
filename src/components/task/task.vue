@@ -160,7 +160,7 @@ const updateTask = async (type, obj, detail) => {
         v-for="(pathItem, pathIndex) in card.way"
         :key="`${card._key}path${pathIndex}`"
       >
-        <span>{{ pathItem.name }}</span>
+        <span>{{ pathIndex === 0 ? "# " : "" }}{{ pathItem.name }}</span>
         <span v-if="pathIndex < card.way.length - 1" style="margin: 0 2px">
           /
         </span>

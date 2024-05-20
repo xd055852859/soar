@@ -2,8 +2,8 @@
   position: relative;
   z-index: 1;
   width: 100vw;
-  height: 100vh;
-  @include scroll();
+  height: calc(100vh - 50px);
+
   g[id^="tree-node-"] {
     .tree-detail-icon {
       display: none;
@@ -13,5 +13,13 @@
         display: flex;
       }
     }
+  }
+}
+.tree-box {
+  &::-webkit-scrollbar {
+    /*滚动条整体样式*/
+    width: 0;
+    /*高宽分别对应横竖滚动条的尺寸*/
+    height: 0;
   }
 }

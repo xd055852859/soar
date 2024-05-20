@@ -7,22 +7,22 @@ import Icon from "@/components/common/Icon.vue";
 import TimeClock from "./clock/timeClock.vue";
 import ExploreSet from "./exploreSet/exploreSet.vue";
 import appStore from "@/store";
-import {storeToRefs} from "pinia";
+import { storeToRefs } from "pinia";
 import api from "@/services/api";
 import _ from "lodash";
-import {ResultProps} from "@/interface/Common";
-import {useQuasar} from "quasar";
+import { ResultProps } from "@/interface/Common";
+import { useQuasar } from "quasar";
 
-import {setMessage} from "@/services/util/common";
+import { setMessage } from "@/services/util/common";
 import router from "@/router";
 
 const $q = useQuasar();
 const dayjs: any = inject("dayjs");
-const {token} = storeToRefs(appStore.authStore);
-const {exploreConfig} = storeToRefs(appStore.exploreStore);
-const {spaceKey, lockList} = storeToRefs(appStore.spaceStore);
+const { token } = storeToRefs(appStore.authStore);
+const { exploreConfig } = storeToRefs(appStore.exploreStore);
+const { spaceKey, lockList } = storeToRefs(appStore.spaceStore);
 // const {setLockList} = appStore.spaceStore;
-const {clickExplore} = appStore.exploreStore;
+const { clickExplore } = appStore.exploreStore;
 
 const searchTitle = ref<string>("");
 const smallList = ref<any>([]);
@@ -81,22 +81,22 @@ const getBigList = async (list) => {
           if (clockIn) {
             if (clockIn.startWorkTime) {
               bigItem.titleArr.push(
-                  `${dayjs(clockIn.startWorkTime).format("HH:mm")} 上班打卡`
+                `${dayjs(clockIn.startWorkTime).format("HH:mm")} 上班打卡`,
               );
             }
             if (clockIn.noonBreakTime) {
               bigItem.titleArr.push(
-                  `${dayjs(clockIn.noonBreakTime).format("HH:mm")} 午休打卡`
+                `${dayjs(clockIn.noonBreakTime).format("HH:mm")} 午休打卡`,
               );
             }
             if (clockIn.noonEndTime) {
               bigItem.titleArr.push(
-                  `${dayjs(clockIn.noonEndTime).format("HH:mm")} 下午打卡`
+                `${dayjs(clockIn.noonEndTime).format("HH:mm")} 下午打卡`,
               );
             }
             if (clockIn.endWorkTime) {
               bigItem.titleArr.push(
-                  `${dayjs(clockIn.endWorkTime).format("HH:mm")} 下班打卡`
+                `${dayjs(clockIn.endWorkTime).format("HH:mm")} 下班打卡`,
               );
             }
           }
@@ -106,19 +106,19 @@ const getBigList = async (list) => {
           bigRes.data[index].forEach((reportItem) => {
             // year week momth total
             bigItem.titleArr.push(
-                `${dayjs(reportItem.createTime).format("MM-DD HH:mm")} ${
-                    reportItem.submitter.userName
-                } 提交${
-                    reportItem.reportType === "day"
-                        ? "日"
-                        : reportItem.reportType === "week"
-                            ? "周"
-                            : reportItem.reportType === "month"
-                                ? "月"
-                                : reportItem.reportType === "year"
-                                    ? "年"
-                                    : "十年"
-                }汇报`
+              `${dayjs(reportItem.createTime).format("MM-DD HH:mm")} ${
+                reportItem.submitter.userName
+              } 提交${
+                reportItem.reportType === "day"
+                  ? "日"
+                  : reportItem.reportType === "week"
+                    ? "周"
+                    : reportItem.reportType === "month"
+                      ? "月"
+                      : reportItem.reportType === "year"
+                        ? "年"
+                        : "十年"
+              }汇报`,
             );
           });
           break;
@@ -130,16 +130,16 @@ const changeSize = async (type, index, key) => {
   let applicationRes = (await api.request.patch("app/user/config", {
     teamKey: spaceKey.value,
     appKey: key,
-    config: {size: type},
+    config: { size: type },
   })) as ResultProps;
   if (applicationRes.msg === "OK") {
     if (type === "small") {
       bigList.value[index].config.size = "small";
-      smallList.value.push({...bigList.value[index]});
+      smallList.value.push({ ...bigList.value[index] });
       bigList.value.splice(index, 1);
     } else {
       smallList.value[index].config.size = "big";
-      bigList.value.push({...smallList.value[index]});
+      bigList.value.push({ ...smallList.value[index] });
       smallList.value.splice(index, 1);
     }
   }
@@ -162,7 +162,7 @@ const lockApplication = async (type, index, item) => {
     if (locked) {
       newLockList.push(item);
     } else {
-      let index = _.findIndex(newLockList, {_key: item._key});
+      let index = _.findIndex(newLockList, { _key: item._key });
       if (index !== -1) {
         newLockList.splice(index, 1);
       }
@@ -198,7 +198,7 @@ const addUrl = async () => {
     })) as ResultProps;
     if (urlRes.msg === "OK") {
       setMessage("success", "编辑第三方网站成功");
-      let index = _.findIndex(urlList.value, {_key: urlKey.value});
+      let index = _.findIndex(urlList.value, { _key: urlKey.value });
       if (index !== -1) {
         urlList.value[index] = {
           ...urlList.value[index],
@@ -211,21 +211,21 @@ const addUrl = async () => {
     }
   } else {
     let urlIconRes = (await api.request.get(
-        "",
-        {
-          url: urlType.value + url.value,
-        },
-        true,
-        "https://nodeserver.qingtime.cn/linkInfo"
+      "",
+      {
+        url: urlType.value + url.value,
+      },
+      true,
+      "https://nodeserver.qingtime.cn/linkInfo",
     )) as ResultProps;
     if (urlIconRes.msg === "OK") {
       let urlRes = (await api.request.post("app/custom", {
         teamKey: spaceKey.value,
         name: urlName.value
-            ? urlName.value
-            : urlIconRes.data.title === "302 Found"
-                ? "未命名"
-                : urlIconRes.data.title,
+          ? urlName.value
+          : urlIconRes.data.title === "302 Found"
+            ? "未命名"
+            : urlIconRes.data.title,
         url: urlType.value + url.value,
         icon: urlIconRes.data.icon,
       })) as ResultProps;
@@ -246,17 +246,16 @@ const deleteUrl = async (item, index) => {
       flat: true,
     },
   })
-      .onOk(async () => {
-        let fileRes = (await api.request.delete("app/custom", {
-          appKey: item._key,
-        })) as ResultProps;
-        if (fileRes.msg === "OK") {
-          setMessage("success", "删除成功");
-          urlList.value.splice(index, 1);
-        }
-      })
-      .onCancel(() => {
-      });
+    .onOk(async () => {
+      let fileRes = (await api.request.delete("app/custom", {
+        appKey: item._key,
+      })) as ResultProps;
+      if (fileRes.msg === "OK") {
+        setMessage("success", "删除成功");
+        urlList.value.splice(index, 1);
+      }
+    })
+    .onCancel(() => {});
 };
 const saveConfig = async () => {
   api.request.patch("app/team/config", {
@@ -282,8 +281,8 @@ watch(bigListText, (newList) => {
 </script>
 <template>
   <div
-      class="explore-bg"
-      :style="
+    class="explore-bg"
+    :style="
       exploreConfig.backType === 1
         ? {
             backgroundImage: `url(${exploreConfig.backImg})`,
@@ -292,83 +291,78 @@ watch(bigListText, (newList) => {
     "
   >
     <div
-        class="explore-gray"
-        :style="{
+      class="explore-gray"
+      :style="{
         background: `rgba(0,0,0,${exploreConfig.mask / 100})`,
       }"
-        v-if="exploreConfig.backType === 1"
+      v-if="exploreConfig.backType === 1"
     ></div>
     <div class="explore">
       <c-header title="应用">
         <template #button>
           <Icon
-              name="a-shezhi2"
-              :size="18"
-              class="q-mr-sm"
-              color="#bdbdbd"
-              @click="setVisible = true"
+            name="a-shezhi2"
+            :size="18"
+            class="q-mr-sm"
+            color="#bdbdbd"
+            @click="setVisible = true"
           />
         </template>
       </c-header>
       <div class="explore-box">
-        <TimeClock/>
+        <TimeClock />
         <div class="explore-search">
           <q-input
-              outlined
-              rounded
-              v-model="searchTitle"
-              placeholder="输入与搜索"
-              @keyup.enter="chooseSearch"
+            outlined
+            rounded
+            v-model="searchTitle"
+            placeholder="输入与搜索"
+            @keyup.enter="chooseSearch"
           >
             <template v-slot:prepend>
-              <q-icon name="search"/>
+              <q-icon name="search" />
             </template>
           </q-input>
         </div>
         <div class="explore-container">
           <div class="explore-container-left" v-if="bigList.length > 0">
             <div
-                class="explore-left-item q-mb-sm"
-                v-for="(item, index) in bigList"
-                :key="`big${index}`"
-                @click="clickExplore(item.enName)"
+              class="explore-left-item q-mb-sm"
+              v-for="(item, index) in bigList"
+              :key="`big${index}`"
+              @click="clickExplore(item.enName)"
             >
               <div class="text-bold">{{ item.name }}</div>
               <div
-                  v-for="(titleItem, titleIndex) in item.titleArr"
-                  :key="`big${index}-${titleIndex}`"
+                v-for="(titleItem, titleIndex) in item.titleArr"
+                :key="`big${index}-${titleIndex}`"
               >
                 {{ titleItem }}
               </div>
               <Icon
-                  class="explore-item-lock"
-                  name="pin"
-                  :size="14"
-                  v-if="item.locked"
+                class="explore-item-lock"
+                name="pin"
+                :size="14"
+                v-if="item.locked"
               />
               <q-menu context-menu>
                 <q-list dense>
                   <q-item
-                      clickable
-                      v-close-popup
-                      @click="changeSize('small', index, item._key)"
+                    clickable
+                    v-close-popup
+                    @click="changeSize('small', index, item._key)"
                   >
                     <q-item-section>1 * 1</q-item-section>
-                  </q-item
-                  >
+                  </q-item>
                   <q-item
-                      clickable
-                      v-close-popup
-                      @click="lockApplication('big', index, item)"
+                    clickable
+                    v-close-popup
+                    @click="lockApplication('big', index, item)"
                   >
                     <q-item-section
-                    >{{
-                        !item.locked ? "固定" : "取消"
-                      }}到侧边栏
-                    </q-item-section
-                    >
-                  </q-item
-                  >
+                      >{{ !item.locked ? "固定" : "取消" }}到侧边栏
+                    </q-item-section>
+                  </q-item>
                 </q-list>
               </q-menu>
             </div>
@@ -376,11 +370,11 @@ watch(bigListText, (newList) => {
           <div class="explore-container-right">
             <div class="explore-container-top">
               <div
-                  class="explore-item"
-                  v-for="(item, index) in smallList"
-                  :key="`small${index}`"
-                  @click="clickExplore(item.enName)"
-                  :style="{
+                class="explore-item"
+                v-for="(item, index) in smallList"
+                :key="`small${index}`"
+                @click="clickExplore(item.enName)"
+                :style="{
                   width: exploreConfig.iconSize + 'px',
                   height: exploreConfig.iconSize + 30 + 'px',
                   marginRight: exploreConfig.right + 'px',
@@ -389,8 +383,8 @@ watch(bigListText, (newList) => {
                 }"
               >
                 <div
-                    class="explore-item-top"
-                    :style="{
+                  class="explore-item-top"
+                  :style="{
                     backgroundColor: item.color,
                     width: exploreConfig.iconSize + 'px',
                     height: exploreConfig.iconSize + 'px',
@@ -398,15 +392,15 @@ watch(bigListText, (newList) => {
                   }"
                 >
                   <Icon
-                      :name="item.icon"
-                      :size="exploreConfig.iconSize - 25"
-                      color="#fff"
+                    :name="item.icon"
+                    :size="exploreConfig.iconSize - 25"
+                    color="#fff"
                   />
                   <Icon
-                      class="explore-item-lock"
-                      name="pin"
-                      :size="14"
-                      v-if="item.locked"
+                    class="explore-item-lock"
+                    name="pin"
+                    :size="14"
+                    v-if="item.locked"
                   />
                 </div>
                 <div class="explore-item-bottom single-to-long">
@@ -415,41 +409,36 @@ watch(bigListText, (newList) => {
                 <q-menu context-menu>
                   <q-list dense>
                     <q-item
-                        clickable
-                        v-close-popup
-                        @click="changeSize('big', index, item._key)"
-                        v-if="
+                      clickable
+                      v-close-popup
+                      @click="changeSize('big', index, item._key)"
+                      v-if="
                         item.enName === 'clockIn' || item.enName === 'report'
                       "
                     >
                       <q-item-section>2 * 4</q-item-section>
-                    </q-item
-                    >
+                    </q-item>
                     <q-item
-                        clickable
-                        v-close-popup
-                        @click="lockApplication('small', index, item)"
+                      clickable
+                      v-close-popup
+                      @click="lockApplication('small', index, item)"
                     >
                       <q-item-section
-                      >{{
-                          !item.locked ? "固定" : "取消"
-                        }}到侧边栏
-                      </q-item-section
-                      >
-                    </q-item
-                    >
+                        >{{ !item.locked ? "固定" : "取消" }}到侧边栏
+                      </q-item-section>
+                    </q-item>
                   </q-list>
                 </q-menu>
               </div>
             </div>
-            <q-separator/>
+            <q-separator />
             <div class="explore-container-bottom">
               <div
-                  class="explore-item"
-                  v-for="(item, index) in urlList"
-                  :key="`url${index}`"
-                  @click="clickExplore('url', item.url)"
-                  :style="{
+                class="explore-item"
+                v-for="(item, index) in urlList"
+                :key="`url${index}`"
+                @click="clickExplore('url', item.url)"
+                :style="{
                   width: exploreConfig.iconSize + 'px',
                   height: exploreConfig.iconSize + 30 + 'px',
                   marginRight: exploreConfig.right + 'px',
@@ -458,15 +447,15 @@ watch(bigListText, (newList) => {
                 }"
               >
                 <div
-                    class="explore-item-top"
-                    :style="{
+                  class="explore-item-top"
+                  :style="{
                     backgroundColor: item.color,
                     width: exploreConfig.iconSize + 'px',
                     height: exploreConfig.iconSize + 'px',
                     borderRadius: exploreConfig.radius + '%',
                   }"
                 >
-                  <img :src="item.icon" alt=""/>
+                  <img :src="item.icon" alt="" />
                 </div>
                 <div class="explore-item-bottom single-to-long">
                   {{ item.name }}
@@ -475,19 +464,17 @@ watch(bigListText, (newList) => {
                   <q-list dense>
                     <q-item clickable v-close-popup @click="chooseUrl(item)">
                       <q-item-section clickable v-close-popup
-                      >编辑
-                      </q-item-section
-                      >
+                        >编辑
+                      </q-item-section>
                     </q-item>
                     <q-item
-                        clickable
-                        v-close-popup
-                        @click="deleteUrl(item, index)"
+                      clickable
+                      v-close-popup
+                      @click="deleteUrl(item, index)"
                     >
                       <q-item-section clickable v-close-popup
-                      >删除
-                      </q-item-section
-                      >
+                        >删除
+                      </q-item-section>
                     </q-item>
                   </q-list>
                 </q-menu>
@@ -499,9 +486,8 @@ watch(bigListText, (newList) => {
           <q-list dense>
             <q-item clickable v-close-popup @click="urlVisible = true">
               <q-item-section clickable v-close-popup
-              >设置第三方
-              </q-item-section
-              >
+                >设置第三方
+              </q-item-section>
             </q-item>
             <q-item clickable v-close-popup @click="setVisible = true">
               <q-item-section clickable v-close-popup>设置</q-item-section>
@@ -512,73 +498,73 @@ watch(bigListText, (newList) => {
       <Teleport to="body">
         <div class="explore-dialog" v-if="iframeVisible" style="z-index: 20">
           <q-btn
-              round
-              color="primary"
-              size="16px"
-              class="explore-back"
-              @click="
+            round
+            color="primary"
+            size="16px"
+            class="explore-back"
+            @click="
               iframeVisible = false;
               iframeUrl = '';
             "
           >
-            <Icon name="a-fanhuikongjian21" :size="20"/>
+            <Icon name="a-fanhuikongjian21" :size="20" />
           </q-btn>
-          <c-iframe :url="iframeUrl" :title="iframeTitle"/>
+          <c-iframe :url="iframeUrl" :title="iframeTitle" />
         </div>
       </Teleport>
       <c-dialog
-          :visible="urlVisible"
-          @close="urlVisible = false"
-          :title="urlKey ? '编辑网址' : '添加网址'"
-          :dialogStyle="{ width: '350px' }"
+        :visible="urlVisible"
+        @close="urlVisible = false"
+        :title="urlKey ? '编辑网址' : '添加网址'"
+        :dialogStyle="{ width: '350px' }"
       >
         <template #content>
           <q-input
-              dense
-              outlined
-              v-model="url"
-              placeholder="网址"
-              class="q-mb-md full-width"
+            dense
+            outlined
+            v-model="url"
+            placeholder="网址"
+            class="q-mb-md full-width"
           >
             <template v-slot:prepend>
               <q-select
-                  v-model="urlType"
-                  :options="urlTypeArr"
-                  dense
-                  class="explore-url-search"
+                v-model="urlType"
+                :options="urlTypeArr"
+                dense
+                class="explore-url-search"
               />
             </template>
           </q-input>
           <q-input
-              class="full-width"
-              dense
-              outlined
-              v-model="urlName"
-              placeholder="标题"
+            class="full-width"
+            dense
+            outlined
+            v-model="urlName"
+            placeholder="标题"
           />
         </template>
         <template #footer>
           <q-btn
-              flat
-              label="取消"
-              color="grey-5"
-              @click="urlVisible = false"
-              :dense="true"
+            flat
+            label="取消"
+            color="grey-5"
+            @click="urlVisible = false"
+            :dense="true"
           />
-          <q-btn label="保存" color="primary" @click="addUrl()"/>
+          <q-btn label="保存" color="primary" @click="addUrl()" />
         </template>
       </c-dialog>
       <c-drawer
-          :visible="setVisible"
-          @close="
+        :visible="setVisible"
+        @close="
           setVisible = false;
           saveConfig();
         "
-          :drawerStyle="{ width: '400px' }"
-          opacityMask
+        :drawerStyle="{ width: '400px' }"
+        opacityMask
       >
         <template #content>
-          <ExploreSet/>
+          <ExploreSet />
         </template>
       </c-drawer>
     </div>
@@ -635,7 +621,6 @@ watch(bigListText, (newList) => {
           width: 350px;
           height: 100%;
           margin-right: 10px;
-
           .explore-left-item {
             width: 350px;
             height: 140px;

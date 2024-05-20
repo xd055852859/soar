@@ -773,7 +773,9 @@ const CustomTree = React.forwardRef((props, ref) => {
         onCloseMenu={onCloseMenu}
         rightClickToStart={true}
       >
-        <div style={{ transform: "scale(1)" }}>{tree}</div>
+        <div style={{ transform: "scale(1)" }} className="tree-box">
+          {tree}
+        </div>
       </Moveable>
     </div>
   );

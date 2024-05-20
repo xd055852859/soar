@@ -1067,20 +1067,22 @@ watchEffect(() => {
         >
           <q-item-section>
             <!--  @click="editFile(item._key, index)" -->
-            <q-avatar color="#fff" size="30px">
-              <img
-                :src="
-                  item.userAvatar
-                    ? item.userAvatar
-                    : '/common/defaultPerson.png'
-                "
-                alt=""
-              />
-            </q-avatar>
+            <div class="dp--center">
+              <q-avatar color="#fff" size="30px">
+                <img
+                  :src="
+                    item.userAvatar
+                      ? item.userAvatar
+                      : '/common/defaultPerson.png'
+                  "
+                  alt=""
+                />
+              </q-avatar>
+              <div style="width: 60px" class="single-to-long q-ml-sm">
+                {{ item.userName }}
+              </div>
+            </div>
           </q-item-section>
-          <q-tooltip class="text-body2" :offset="[10, 10]">
-            {{ item.userName }}
-          </q-tooltip>
         </q-item>
       </q-list>
     </q-menu>
@@ -1386,10 +1388,10 @@ watchEffect(() => {
   .teamTree-right {
     /* prettier-ignore */
     width: 60px;
-    height: 100%;
-    position: absolute;
+    height: calc(100vh - 50px);
+    position: fixed;
     z-index: 2;
-    top: 0;
+    top: 50px;
     right: 0;
     color: #7c84a0;
     align-content: flex-start;

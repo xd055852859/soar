@@ -60,6 +60,17 @@ const readAll = async () => {
     }
   }
 };
+onMounted(() => {
+  socket.on("message", (data) => {
+    console.log(data);
+    if (data.teamKey === spaceKey.value) {
+      switch (data.type) {
+        case "readReport":
+          break;
+      }
+    }
+  });
+});
 watchEffect(() => {
   if (spaceKey.value) {
     getNoticeList();

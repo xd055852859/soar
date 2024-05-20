@@ -108,6 +108,13 @@ const addTask = async () => {
     getTaskData();
   }
 };
+const chooseCard = (detail, type) => {
+  switch (type) {
+    case "delete":
+      taskList.value.splice(detail.taskIndex, 1);
+      break;
+  }
+};
 watch(teamKey, () => {
   getMemberData();
 });
@@ -332,7 +339,7 @@ watchEffect(() => {
           ]"
           :option-value="(opt) => opt.key"
           :option-label="(opt) => opt.value"
-          style="width: 110px; margin-right: 10px"
+          style="width: 150px; margin-right: 10px"
           dense
           emit-value
           map-options
@@ -353,7 +360,11 @@ watchEffect(() => {
         v-for="(taskItem, taskIndex) in taskList"
         :key="`taskItem${taskIndex}`"
       >
-        <Task :card="taskItem" :taskIndex="taskIndex" />
+        <Task
+          :card="taskItem"
+          :taskIndex="taskIndex"
+          @chooseCard="chooseCard"
+        />
       </template>
     </div>
   </div>

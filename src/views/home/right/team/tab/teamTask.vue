@@ -11,14 +11,17 @@ import CHeader from "@/components/common/cHeader.vue";
 const props = defineProps<{
   cardKey?: string;
 }>();
+
 const { user } = storeToRefs(appStore.authStore);
-const { teamKey, teamInfo } = storeToRefs(appStore.teamStore);
+const { teamKey, teamInfo, teamMemberList } = storeToRefs(appStore.teamStore);
 
 const taskList = ref<any>([]);
 const menuTab = ref<string>("tree");
+const assignor = ref<string>("");
 const getTaskList = async () => {
   let obj: any = {
     projectKey: teamKey.value,
+    assignor: assignor.value,
   };
   if (props.cardKey) {
     obj.cardKey = props.cardKey;
@@ -56,6 +59,10 @@ const chooseCard = (detail, type) => {
         break;
       }
   }
+};
+const chooseAssignor = (key) => {
+  console.log(key);
+  assignor.value === key ? (assignor.value = "") : (assignor.value = key);
 };
 watchEffect(() => {
   if (teamKey.value) {
@@ -123,6 +130,34 @@ watchEffect(() => {
             <Task :card="taskItem" @chooseCard="chooseCard" />
           </template>
         </div>
+        <div class="teamTask-right" @click.stop="">
+          <div class="teamTask-right-title">创建人</div>
+          <div class="teamTask-right-box">
+            <div
+              class="icon-point q-my-xs"
+              v-for="(item, index) in teamMemberList"
+              :key="`task${index}`"
+              @click.stop="chooseAssignor(item.userKey)"
+              :style="
+                assignor === item.userKey ? { border: '3px solid #07be51' } : {}
+              "
+            >
+              <q-avatar color="#fff" size="35px">
+                <img
+                  :src="
+                    item.userAvatar
+                      ? item.userAvatar
+                      : '/common/defaultPerson.png'
+                  "
+                  alt=""
+                />
+              </q-avatar>
+              <q-tooltip :offset="[0, -5]">
+                {{ item.userName }}
+              </q-tooltip>
+            </div>
+          </div>
+        </div>
       </div>
       <Tree :card-key="cardKey" v-else />
     </div>
@@ -135,9 +170,12 @@ watchEffect(() => {
   .teamTask-box {
     min-width: 100%;
     height: calc(100% - 50px);
+
     overflow-x: auto;
     overflow-y: hidden;
     background: #f2f3f6;
+    position: relative;
+    z-index: 1;
     @include flex(flex-start, center, null);
 
     .teamTask-container {
@@ -145,7 +183,8 @@ watchEffect(() => {
       height: 100%;
       flex-shrink: 0;
       margin-right: 27px;
-
+      padding-right: 40px;
+      box-sizing: border-box;
       .teamTask-top {
         width: 100%;
         /* prettier-ignore */
@@ -160,6 +199,35 @@ watchEffect(() => {
         height: calc(100% - 90Px);
         @include scroll();
         @include p-number(10px, 10px);
+      }
+    }
+    .teamTask-right {
+      /* prettier-ignore */
+      width: 60px;
+      height: calc(100vh - 50px);
+      position: fixed;
+      z-index: 2;
+      top: 50px;
+      right: 0;
+      color: #7c84a0;
+      align-content: flex-start;
+      background-color: #fff;
+      @include p-number(10px, 0);
+      @include flex(center, center, wrap);
+
+      .teamTask-right-title {
+        //margin: 10px 0px;
+        font-size: 14px;
+        font-weight: bolder;
+      }
+      .teamTask-right-box {
+        height: calc(100% - 40px);
+        @include scroll();
+        > div {
+          border-radius: 50%;
+          margin-bottom: 10px;
+          @include flex(center, center, wrap);
+        }
       }
     }
   }
