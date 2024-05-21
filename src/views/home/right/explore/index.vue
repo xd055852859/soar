@@ -582,10 +582,10 @@ watch(bigListText, (newList) => {
 
   .explore-gray {
     position: absolute;
-    top: 0px;
-    left: 0px;
-    bottom: 0px;
-    right: 0px;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
     z-index: 2;
   }
 
@@ -607,14 +607,14 @@ watch(bigListText, (newList) => {
       // @include p-number(10px, 25px);
       .explore-search {
         width: 60%;
-        margin: 10px 0px;
+        margin: 10px 0;
       }
 
       .explore-container {
         width: 80%;
         min-width: 700px;
         height: calc(100% - 200px);
-        margin: 10px 0px;
+        margin: 10px 0;
         @include flex(space-between, center, center);
 
         .explore-container-left {
@@ -623,12 +623,14 @@ watch(bigListText, (newList) => {
           margin-right: 10px;
           .explore-left-item {
             width: 350px;
-            height: 140px;
+            height: 145px;
             border-radius: 12px;
             background-color: #fff;
             position: relative;
             z-index: 1;
             cursor: pointer;
+            border: 1px solid $grey-5;
+            box-sizing: border-box;
             @include p-number(10px, 10px);
             @include scroll();
 
@@ -713,8 +715,8 @@ watch(bigListText, (newList) => {
   height: 100vh;
   position: fixed;
   z-index: 10;
-  top: 0px;
-  left: 0px;
+  top: 0;
+  left: 0;
   background-color: #fff;
   @include scroll();
 
@@ -729,7 +731,7 @@ watch(bigListText, (newList) => {
 <style lang="scss">
 .explore-url-search {
   .q-field__control:before {
-    border: 0px;
+    border: 0;
   }
 }
 </style>

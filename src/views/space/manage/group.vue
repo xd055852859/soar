@@ -12,7 +12,7 @@ import appStore from "@/store";
 import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
 const { spaceKey, spaceRole, spaceMemberList } = storeToRefs(
-  appStore.spaceStore
+  appStore.spaceStore,
 );
 const { teamList, targetTeamMemberList } = storeToRefs(appStore.teamStore);
 const { setTeamList, setTargetTeamKey } = appStore.teamStore;
@@ -122,7 +122,7 @@ watch(
       });
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 <template>
@@ -182,7 +182,7 @@ watch(
               {{ props.row.memberCount }}
             </q-td>
             <q-td key="cardNum" :props="props" style="width: 80px">
-              {{ props.row.cardNum - 1 }}
+              {{ props.row.cardNum }}
             </q-td>
 
             <q-td key="updateTime" :props="props" style="width: 100px">

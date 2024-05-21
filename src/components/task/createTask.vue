@@ -27,6 +27,7 @@ const searchTreeList = ref<any>([]);
 const searchVisible = ref<boolean>(false);
 const teamKey = ref<string>("");
 const treeKey = ref<string>("");
+const cardKey = ref<string>("");
 const treeInfo = ref<any>(null);
 const executorInfo = ref<any>(null);
 const type = ref<number>(0);
@@ -42,6 +43,9 @@ onMounted(() => {
   if (props.fatherTreeInfo) {
     treeKey.value = props.fatherTreeInfo._key;
     treeInfo.value = props.fatherTreeInfo;
+    if (props.taskType === "tree") {
+      cardKey.value = props.fatherTreeInfo._key;
+    }
   }
   executorInfo.value = props.fatherExecutorInfo
     ? props.fatherExecutorInfo
@@ -74,6 +78,7 @@ const getTaskData = async () => {
   };
   if (props.taskType === "tree") {
     obj.onTree = false;
+    obj.cardKey = cardKey.value;
   }
   let taskRes = (await api.request.get("task/create/all", {
     ...obj,
@@ -116,6 +121,7 @@ const chooseCard = (detail, type) => {
   }
 };
 watch(teamKey, () => {
+  page.value = 1;
   getMemberData();
 });
 watch(type, () => {
@@ -148,7 +154,11 @@ watchEffect(() => {
 });
 watchEffect(() => {
   if (spaceKey.value) {
-    getTaskData();
+    if (props.taskType === "tree" && cardKey.value) {
+      getTaskData();
+    } else if (props.taskType !== "tree") {
+      getTaskData();
+    }
   }
 });
 </script>

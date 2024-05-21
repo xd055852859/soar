@@ -47,7 +47,7 @@ export const exploreStore = defineStore(
     const setExploreConfig = (
       newConfig?: any,
       cover?: boolean,
-      clear?: boolean
+      clear?: boolean,
     ) => {
       if (cover) {
         exploreConfig.value = { ...newConfig };
@@ -85,12 +85,7 @@ export const exploreStore = defineStore(
           });
           break;
         case "apiTable":
-          window.open(
-            `https://apitable.qingtime.cn?username=${
-              authStore().user!._key
-            }@gmail.com&credential=${authStore().user!._key}`
-          );
-
+          window.open(`https://table.qingtime.cn`);
           break;
         case "url":
           window.open(url);
@@ -109,7 +104,7 @@ export const exploreStore = defineStore(
       celebrateAnimate,
       setCelebrateAnimate,
     };
-  }
+  },
   //   ,
   //   { persist: true }
 );

@@ -718,6 +718,7 @@ const updateDetail = (type, obj) => {
           //     day: dayjs(obj.date).date(),
           //   },
           // });
+          treeRef.value.__veauryReactRef__.setNodes(newNodes);
           getmilestoneList(props.cardKey);
         },
         nodeKey.value,

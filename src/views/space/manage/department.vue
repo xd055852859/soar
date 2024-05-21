@@ -82,6 +82,7 @@ const addDepartment = async () => {
     prompt: {
       model: "",
       type: "text", // optional
+      isValid: (val) => val.length > 0, // << here is the magic
     },
     cancel: {
       color: "grey-5",
@@ -105,7 +106,6 @@ const addDepartment = async () => {
       }
     } else {
       setMessage("error", "请输入部门名");
-      return;
     }
   });
 };

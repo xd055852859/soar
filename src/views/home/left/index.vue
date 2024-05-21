@@ -28,6 +28,7 @@ const props = defineProps<{
 }>();
 const { token, user } = storeToRefs(appStore.authStore);
 const socket: any = inject("socket");
+const dayjs: any = inject("dayjs");
 const $q = useQuasar();
 const {
   spaceKey,
@@ -45,7 +46,8 @@ const {
 const { clearStore, setSearchVisible, setIframeDetail, setTabSearchVisible } =
   appStore.commonStore;
 const { setUserInfo, setToken } = appStore.authStore;
-const { setSpaceKey, setSpaceList, setReportConfig } = appStore.spaceStore;
+const { setSpaceKey, setSpaceList, setReportConfig, setSpaceMessageNum } =
+  appStore.spaceStore;
 const { setTeamKey, setTargetTeamKey } = appStore.teamStore;
 const { setCardKey } = appStore.cardStore;
 const { clickExplore } = appStore.exploreStore;
@@ -64,67 +66,18 @@ const drawerVisible = ref<boolean>(false);
 onMounted(() => {
   window.addEventListener("message", getMessage);
   socket.on("message", (data) => {
-    console.log(data);
-    console.log(data.teamKey);
-    console.log(spaceKey.value);
-    console.log(data.type);
-    // createTime
-    //     :
-    //     1716184765779
-    // fromUser
-    //     :
-    //     "1518886963"
-    // fromUserInfo
-    //     :
-    // {userKey: '1518886963', userName: '倪菊芳', userAvatar: 'https://cdn-soar.qingtime.cn/1715214887636_worksoar.jpeg'}
-    // hasRead
-    //     :
-    //     0
-    // log
-    //     :
-    //     "倪菊芳审阅了你的周报{2024年第21周}"
-    // reportKey
-    //     :
-    //     "1553632456"
-    // teamKey
-    //     :
-    //     "1520059609"
-    // toUser
-    //     :
-    //     "1518014781"
-    // type
-    //     :
-    //     "reviewReport"
     if (data.teamKey === spaceKey.value) {
-      switch (data.type) {
-        case "readReport":
-          console.log(data.fromUserInfo.userName);
-          console.log(data.log);
-          $q.notify({
-            message: `${data.fromUserInfo.userName}${data.log}`,
-            position: "top-right",
-            multiLine: true,
-            // actions: [
-            //   {
-            //     label: "确认",
-            //     color: "primary",
-            //     handler: () => {
-            //       /* console.log('wooow') */
-            //     },
-            //   },
-            //   {
-            //     label: "取消",
-            //     color: "grey-5",
-            //     handler: () => {
-            //       /* console.log('wooow') */
-            //     },
-            //   },
-            // ],
-
-            // timeout: Math.random() * 5000 + 3000,
-          });
-          break;
-      }
+      spaceMessageNum.value = spaceMessageNum.value + 1;
+      setSpaceMessageNum(spaceMessageNum.value);
+      $q.notify({
+        message: `${data.log}`,
+        position: "top-right",
+        multiLine: true,
+        caption: dayjs(data.createTime).format("YYYY-MM-DD HH:mm:ss"),
+        progress: true,
+        timeout: 5000,
+      });
+      //     break;
     }
   });
 });

@@ -64,10 +64,7 @@ onMounted(() => {
   socket.on("message", (data) => {
     console.log(data);
     if (data.teamKey === spaceKey.value) {
-      switch (data.type) {
-        case "readReport":
-          break;
-      }
+      noticeList.value.unshift(data);
     }
   });
 });

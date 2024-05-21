@@ -113,14 +113,14 @@ watch(
   (newList) => {
     console.log(newList);
   },
-  { deep: true }
+  { deep: true },
 );
 </script>
 <template>
   <div class="application">
     <cHeader title="应用配置">
       <template #button>
-        <!-- <q-btn
+        <q-btn
           style="color: #1976d2"
           label="修改应用"
           @click="
@@ -128,7 +128,7 @@ watch(
               _key: '1538755380',
             })
           "
-        />-->
+        />
         <!-- <q-btn
           style="color: #1976d2"
           label="新增应用"

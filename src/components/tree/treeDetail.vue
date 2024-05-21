@@ -62,9 +62,8 @@ const getNodeInfo = async (key) => {
         tagLabel.value = nodeInfo.value.startAdornmentContent.tag.label;
         tagColor.value = nodeInfo.value.startAdornmentContent.tag.color;
       }
-      if (nodeInfo.value?.startAdornmentContent?.milestone) {
-        milestoneDate.value =
-          nodeInfo.value.startAdornmentContent.milestone.date;
+      if (nodeInfo.value?.endTime) {
+        milestoneDate.value = nodeInfo.value.endTime;
       }
       if (nodeInfo.value?.endAdornmentContent?.link) {
         nodeUrl.value = nodeInfo.value.endAdornmentContent.link.url;
@@ -382,6 +381,7 @@ watch(fileInput, (newName) => {
 
           <q-menu style="width: 300px" auto-close>
             <c-calendar
+              :endTime="nodeInfo.endTime"
               @clickDate="savemilestone"
               @clearDate="clearDetail('milestone')"
             />
