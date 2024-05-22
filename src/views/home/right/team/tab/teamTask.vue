@@ -14,14 +14,17 @@ const props = defineProps<{
 
 const { user } = storeToRefs(appStore.authStore);
 const { teamKey, teamInfo, teamMemberList } = storeToRefs(appStore.teamStore);
+const { spaceInfo } = storeToRefs(appStore.spaceStore);
 
 const taskList = ref<any>([]);
 const menuTab = ref<string>("tree");
 const assignor = ref<string>("");
+const showTaskDays = ref<number>(99999);
 const getTaskList = async () => {
   let obj: any = {
     projectKey: teamKey.value,
     assignor: assignor.value,
+    showTaskDays: showTaskDays.value,
   };
   if (props.cardKey) {
     obj.cardKey = props.cardKey;
@@ -64,6 +67,15 @@ const chooseAssignor = (key) => {
   console.log(key);
   assignor.value === key ? (assignor.value = "") : (assignor.value = key);
 };
+watch(
+  spaceInfo,
+  (info) => {
+    if (info) {
+      showTaskDays.value = info.showTaskDays;
+    }
+  },
+  { immediate: true },
+);
 watchEffect(() => {
   if (teamKey.value) {
     getTaskList();
@@ -78,6 +90,42 @@ watchEffect(() => {
           <q-tab name="tree" label="任务树" style="width: 60px" />
           <q-tab name="board" label="看板" style="width: 60px" />
         </q-tabs>
+      </template>
+      <template #button v-if="menuTab === 'board'">
+        <q-select
+          borderless
+          v-model="showTaskDays"
+          style="margin-right: 70px"
+          :options="[
+            {
+              label: '1天',
+              value: 1,
+            },
+            {
+              label: '3天',
+              value: 3,
+            },
+            {
+              label: '7天',
+              value: 7,
+            },
+            {
+              label: '30天',
+              value: 30,
+            },
+            {
+              label: '90天',
+              value: 90,
+            },
+            {
+              label: '永久',
+              value: 99999,
+            },
+          ]"
+          dense
+          emit-value
+          map-options
+        />
       </template>
     </c-header>
     <div class="teamTask-box">

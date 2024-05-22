@@ -47,17 +47,18 @@ const operateNotice = async (key, operate) => {
   }
 };
 const readAll = async () => {
-  let noticeRes = (await api.request.patch("/message/hasRead", {
+  let noticeRes = (await api.request.patch("message/hasRead", {
     teamKey: spaceKey.value,
   })) as ResultProps;
   if (noticeRes.msg === "OK") {
     setSpaceMessageNum(noticeRes.data);
-
     if (page.value !== 1) {
       page.value === 1;
-    } else {
-      getNoticeList();
     }
+    noticeList.value = [];
+    // else {
+    //   getNoticeList();
+    // }
   }
 };
 onMounted(() => {

@@ -12,6 +12,7 @@ import _ from "lodash";
 import Member from "@/views/home/right/team/member.vue";
 import Detail from "@/views/home/right/team/detail.vue";
 import Icon from "@/components/common/Icon.vue";
+import Tag from "@/components/tag/tag.vue";
 import Menu from "./menu.vue";
 import { useQuasar } from "quasar";
 import router from "@/router";
@@ -22,7 +23,9 @@ const { targetTeamKey, teamKey, teamList, teamFoldList } = storeToRefs(
   appStore.teamStore,
 );
 const { tabSearchVisible } = storeToRefs(appStore.commonStore);
-const { spaceRole, privateTeamKey } = storeToRefs(appStore.spaceStore);
+const { spaceRole, privateTeamKey, spaceKey } = storeToRefs(
+  appStore.spaceStore,
+);
 const { setTargetTeamKey, setTeamKey, setTeamList, setTeamFoldList } =
   appStore.teamStore;
 const { setTabSearchVisible } = appStore.commonStore;
@@ -35,6 +38,13 @@ const foldVisible = ref<boolean>(false);
 const lineHeight = ref<number>(0);
 const treeOverkey = ref<string>("");
 const treeKey = ref<string>("");
+const tagList = ref<any>([]);
+const tagKey = ref<string>("");
+const searchTeamList = ref<any>([]);
+const searchFoldTeamList = ref<any>([]);
+const tagVisible = ref<boolean>(false);
+const tagSelect = ref<string[]>([]);
+const teamSelect = ref<string[]>([]);
 const toggleTeam = async (item, visible) => {
   if (item) {
     detailState.value = true;
@@ -205,20 +215,81 @@ const editTree = (item, index, teamIndex) => {
     })
     .onCancel(() => {});
 };
-watchEffect(() => {
-  if (searchInput.value) {
-    searchList.value = teamList.value.filter(
-      (item) => item.name.indexOf(searchInput.value) !== -1,
-    );
-    foldVisible.value = false;
-  } else {
-    searchList.value = [...teamList.value];
+const getTag = async () => {
+  let tagRes = (await api.request.get("tag", {
+    teamKey: spaceKey.value,
+  })) as ResultProps;
+  if (tagRes.msg === "OK") {
+    tagList.value = tagRes.data;
   }
-});
+};
+const chooseTag = (list) => {
+  tagSelect.value = list;
+};
+const saveTag = async () => {
+  let tagRes = (await api.request.patch("project/tag/batch", {
+    projectKeyArr: teamSelect.value,
+    tagKeyArr: tagSelect.value,
+  })) as ResultProps;
+  if (tagRes.msg === "OK") {
+    setMessage("success", "设置标签成功");
+    let newTeamList = [...teamList.value];
+    let newFoldList = [...teamFoldList.value];
+    newTeamList.forEach((item) => {
+      if (teamSelect.value.indexOf(item._key) !== -1) {
+        item.tagArr = [...item.tagArr, ...tagSelect.value];
+      }
+    });
+    newFoldList.forEach((item) => {
+      if (teamSelect.value.indexOf(item._key) !== -1) {
+        item.tagArr = [...item.tagArr, ...tagSelect.value];
+      }
+    });
+    setTeamList(newTeamList);
+    setTeamFoldList(newFoldList);
+    getTag();
+    tagVisible.value = false;
+    teamSelect.value = [];
+  }
+};
+
 watch(tabSearchVisible, (visible) => {
   if (!visible) {
     searchInput.value = "";
   }
+});
+watch(
+  spaceKey,
+  (newKey) => {
+    if (newKey) {
+      getTag();
+    }
+  },
+  { immediate: true },
+);
+watchEffect(() => {
+  if (!searchInput.value) {
+    searchInput.value = "";
+  }
+  // if (tagKey.value) {
+  searchTeamList.value = teamList.value.filter(
+    (item) =>
+      ((tagKey.value && item.tagArr.indexOf(tagKey.value) !== -1) ||
+        !tagKey.value) &&
+      item.name.indexOf(searchInput.value) !== -1,
+  );
+  searchFoldTeamList.value = teamFoldList.value.filter(
+    (item) =>
+      ((tagKey.value && item.tagArr.indexOf(tagKey.value) !== -1) ||
+        !tagKey.value) &&
+      item.name.indexOf(searchInput.value) !== -1,
+  );
+  foldVisible.value = false;
+  // }
+  // else {
+  //   searchList.value = [...teamList.value];
+  //   searchFoldTeamList.value = [...teamFoldList.value];
+  // }
 });
 </script>
 <template>
@@ -258,10 +329,30 @@ watch(tabSearchVisible, (visible) => {
         </q-btn>
       </div>
     </div>
+    <div class="leftMenu-filter">
+      <q-btn
+        label="标签设置"
+        dense
+        color="primary"
+        @click="tagVisible = true"
+        class="q-mr-lg"
+      />
+      <q-select
+        borderless
+        v-model="tagKey"
+        :options="[{ _key: '', name: '全部' }, ...tagList]"
+        :option-value="(opt) => opt._key"
+        :option-label="(opt) => opt.name"
+        style="width: 100px; margin-right: 10px"
+        dense
+        emit-value
+        map-options
+      />
+    </div>
     <!-- </OnClickOutside> -->
 
     <div class="teamMenu-list">
-      <template v-for="(item, index) in searchList" :key="`team${index}`">
+      <template v-for="(item, index) in searchTeamList" :key="`team${index}`">
         <div
           class="teamMenu-item"
           @click="
@@ -405,7 +496,7 @@ watch(tabSearchVisible, (visible) => {
         <Icon :name="foldVisible ? 'a-youcezhedie21' : 'a-xiala2'" :size="8" />
       </div>
       <template
-        v-for="(item, index) in teamFoldList"
+        v-for="(item, index) in searchFoldTeamList"
         :key="`team${index}`"
         v-if="foldVisible"
       >
@@ -503,6 +594,45 @@ watch(tabSearchVisible, (visible) => {
         <Member type="target" />
       </template>
     </c-dialog>
+    <c-dialog
+      :visible="tagVisible"
+      @close="tagVisible = false"
+      title="标签设置"
+      :dialogStyle="{ width: '700px', maxWidth: '80vw' }"
+    >
+      <template #content>
+        <div class="teamMenu-tag">
+          <div class="teamMenu-tag-left">
+            <template v-for="(item, index) in teamList" :key="`tag${index}`">
+              <div
+                class="teamMenu-tag-item"
+                v-if="item._key !== privateTeamKey"
+              >
+                <q-checkbox
+                  v-model="teamSelect"
+                  :val="item._key"
+                  :label="item.name"
+                />
+              </div>
+            </template>
+          </div>
+          <div class="teamMenu-tag-right">
+            <Tag @chooseTag="chooseTag" />
+          </div>
+        </div>
+      </template>
+
+      <template #footer>
+        <q-btn
+          flat
+          label="取消"
+          color="grey-5"
+          @click="tagVisible = false"
+          :dense="true"
+        />
+        <q-btn label="确认" color="primary" @click="saveTag" />
+      </template>
+    </c-dialog>
   </div>
 </template>
 <style scoped lang="scss">
@@ -511,7 +641,12 @@ watch(tabSearchVisible, (visible) => {
   height: 100%;
   position: relative;
   z-index: 1;
-
+  .leftMenu-filter {
+    width: 100%;
+    height: 40px;
+    margin-bottom: 10px;
+    @include flex(flex-end, center, null);
+  }
   .teamMenu-subtitle {
     width: 100%;
     height: 30px;
@@ -523,7 +658,7 @@ watch(tabSearchVisible, (visible) => {
   }
 
   .teamMenu-list {
-    height: calc(100% - 55px);
+    height: calc(100% - 105px);
     @include scroll();
   }
 
@@ -546,7 +681,6 @@ watch(tabSearchVisible, (visible) => {
     box-sizing: border-box;
     line-height: 35px;
     margin-top: 5px;
-    box-sizing: border-box;
     @include flex(space-between, center, null);
 
     > div:nth-child(1) {
@@ -565,12 +699,11 @@ watch(tabSearchVisible, (visible) => {
     width: calc(100% - 10px);
     height: 30px;
     color: $grey-7;
-    margin-left: 10px;
     padding-left: 10px;
     font-size: 13px;
     border-radius: 4px;
     line-height: 30px;
-    margin: 2.5px 0px 2.5px 10px;
+    margin: 2.5px 0 2.5px 10px;
     box-sizing: border-box;
     @include flex(space-between, center, null);
 
@@ -580,7 +713,7 @@ watch(tabSearchVisible, (visible) => {
   }
 }
 </style>
-<style>
+<style lang="scss">
 .team-searchInput {
   width: 188px;
   height: 40px;
@@ -589,5 +722,24 @@ watch(tabSearchVisible, (visible) => {
   top: 195px;
   z-index: 100;
   background-color: #fff;
+}
+.teamMenu-tag {
+  width: 100%;
+  height: 70vh;
+  @include flex(space-between, center, null);
+  .teamMenu-tag-left {
+    width: 200px;
+    height: 100%;
+    @include scroll();
+    .teamMenu-tag-item {
+      width: 100%;
+      height: 50px;
+      @include flex(flex-start, center, null);
+    }
+  }
+  .teamMenu-tag-right {
+    width: calc(100% - 210px);
+    height: 100%;
+  }
 }
 </style>

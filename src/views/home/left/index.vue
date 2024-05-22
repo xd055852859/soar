@@ -55,6 +55,7 @@ const userVisible = ref<boolean>(false);
 const cropperVisible = ref<boolean>(false);
 const userName = ref<string>("");
 const userAvatar = ref<string>("");
+const email = ref<string>("");
 const spaceVisible = ref<boolean>(false);
 const spaceMenuVisible = ref<boolean>(false);
 const sortList = ref<any>([]);
@@ -63,6 +64,7 @@ const cropperRef = ref<any>(null);
 const menuTab = ref<string>("team");
 const reportState = ref<boolean>(false);
 const drawerVisible = ref<boolean>(false);
+
 onMounted(() => {
   window.addEventListener("message", getMessage);
   socket.on("message", (data) => {
@@ -71,6 +73,7 @@ onMounted(() => {
       setSpaceMessageNum(spaceMessageNum.value);
       $q.notify({
         message: `${data.log}`,
+        color: "primary",
         position: "top-right",
         multiLine: true,
         caption: dayjs(data.createTime).format("YYYY-MM-DD HH:mm:ss"),
@@ -148,9 +151,19 @@ const updateUser = async () => {
     setMessage("error", "请输入用户名");
     return;
   }
+  if (!email.value) {
+    setMessage("error", "请输入邮箱");
+    return;
+  }
+  let emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+  if (!emailRegex.test(email.value)) {
+    setMessage("error", "请输入正确邮箱");
+    return;
+  }
   let userRes = (await api.request.patch("user", {
     userName: userName.value,
     userAvatar: userAvatar.value,
+    email: email.value,
   })) as ResultProps;
   if (userRes.msg === "OK") {
     //@ts-ignore
@@ -158,6 +171,7 @@ const updateUser = async () => {
       ...user.value,
       userName: userName.value,
       userAvatar: userAvatar.value,
+      email: email.value,
     };
     setMessage("success", "编辑用户成功");
     userVisible.value = false;
@@ -210,9 +224,11 @@ watch(
     if (newUser) {
       userAvatar.value = newUser?.userAvatar ? newUser.userAvatar : "";
       userName.value = newUser?.userName ? newUser.userName : "";
+      email.value = newUser?.email ? newUser.email : "";
       console.log(newUser);
       console.log(userAvatar.value, userName.value);
-      if (newUser && !newUser.userAvatar && !newUser.userName) {
+      if (newUser && (!newUser.userName || !newUser.email)) {
+        setMessage("warning", "请输入完整信息");
         userVisible.value = true;
       }
     }
@@ -224,6 +240,7 @@ watch(userVisible, (newVisible) => {
   if (!newVisible) {
     userAvatar.value = user.value?.userAvatar ? user.value.userAvatar : "";
     userName.value = user.value?.userName ? user.value.userName : "";
+    email.value = user.value?.email ? user.value.email : "";
   }
 });
 watch(
@@ -575,9 +592,19 @@ watch(
           <div class="form-name">
             <q-input
               outlined
+              dense
               v-model="userName"
               label="用户名"
-              :rules="[(val) => !!val || '用户名必填']"
+              :rules="[(val) => !!val || '请填写用户名']"
+            />
+          </div>
+          <div class="form-name">
+            <q-input
+              outlined
+              dense
+              v-model="email"
+              label="邮箱"
+              :rules="[(val, rules) => rules.email(val) || '请输入正确邮箱']"
             />
           </div>
         </div>
@@ -665,11 +692,11 @@ watch(
 }
 .form-container {
   width: 400px;
-  height: 380px;
+  height: 420px;
 
   .form-logo {
     width: 100%;
-    height: 300px;
+    height: 280px;
     @include flex(center, center, null);
 
     .logo-box {

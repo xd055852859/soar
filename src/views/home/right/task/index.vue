@@ -12,7 +12,7 @@ import { storeToRefs } from "pinia";
 import CEmpty from "@/components/common/cEmpty.vue";
 
 const dayjs: any = inject("dayjs");
-const { spaceKey } = storeToRefs(appStore.spaceStore);
+const { spaceKey, spaceInfo } = storeToRefs(appStore.spaceStore);
 const { token, user } = storeToRefs(appStore.authStore);
 const { mateList } = storeToRefs(appStore.mateStore);
 const taskTab = ref<string>("execute");
@@ -23,7 +23,7 @@ const teamKey = ref<any>(null);
 const taskUser = ref<any>(null);
 const searchName = ref<string>("");
 const drawerVisible = ref<boolean>(false);
-
+const showTaskDays = ref<number>(99999);
 const getTaskList = async () => {
   let taskRes = (await api.request.get("task/team", {
     teamKey: spaceKey.value,
@@ -31,6 +31,7 @@ const getTaskList = async () => {
       ? taskUser.value._key
       : taskUser.value.userKey,
     type: taskTab.value,
+    showTaskDays: showTaskDays.value,
   })) as ResultProps;
   if (taskRes.msg === "OK") {
     taskList.value = [...taskRes.data];
@@ -61,6 +62,15 @@ const chooseTree = (item) => {
   treeInfo.value = item;
   teamKey.value = item ? item.projectKey : "";
 };
+watch(
+  spaceInfo,
+  (info) => {
+    if (info) {
+      showTaskDays.value = info.showTaskDays;
+    }
+  },
+  { immediate: true },
+);
 watchEffect(() => {
   console.log(taskUser.value);
   if (spaceKey.value && taskUser.value) {
@@ -161,9 +171,45 @@ watchEffect(() => {
         </q-tabs>
       </template>
       <template #button>
-        <q-btn round flat size="16px" @click="chooseTree(null)">
-          <Icon name="a-chuangjian2" :size="20" /> </q-btn
-      ></template>
+        <div class="dp--center">
+          <q-select
+            borderless
+            v-model="showTaskDays"
+            :options="[
+              {
+                label: '1天',
+                value: 1,
+              },
+              {
+                label: '3天',
+                value: 3,
+              },
+              {
+                label: '7天',
+                value: 7,
+              },
+              {
+                label: '30天',
+                value: 30,
+              },
+              {
+                label: '90天',
+                value: 90,
+              },
+              {
+                label: '永久',
+                value: 99999,
+              },
+            ]"
+            dense
+            emit-value
+            map-options
+          />
+          <q-btn round flat size="16px" @click="chooseTree(null)">
+            <Icon name="a-chuangjian2" :size="20" />
+          </q-btn>
+        </div>
+      </template>
     </cHeader>
     <div class="task-box">
       <template v-if="taskList.length > 0">

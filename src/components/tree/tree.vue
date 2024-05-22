@@ -61,6 +61,8 @@ const nodes = ref<any>(null);
 const selectnodes = ref<any>(null);
 const highChooseKey = ref<string>("");
 const chooseKey = ref<string>("");
+const searchInput = ref<string>("");
+const searchMemberList = ref<any>(null);
 const selectKeys = computed(() =>
   selectnodes.value.map((item) => {
     return item._key;
@@ -214,8 +216,10 @@ const updateExecutor = async (userKey, avatarUri) => {
             : "/common/defaultPerson.png"
           : "";
         nodes.value[item].executor = userKey;
-        nodes.value[item].isTask = !!userKey;
-        nodes.value[item].showCheckbox = !!userKey;
+        if (userKey) {
+          nodes.value[item].isTask = true;
+          nodes.value[item].showCheckbox = true;
+        }
       });
       console.log(nodes.value);
       treeRef.value.__veauryReactRef__.setNodes({ ...nodes.value });
@@ -858,7 +862,16 @@ watch(updateVisible, (newVisible) => {
     getUpdateList();
   }
 });
-
+watchEffect(() => {
+  console.log(searchInput.value);
+  if (searchInput.value) {
+    searchMemberList.value = teamMemberList.value.filter((item) =>
+      item.userName.includes(searchInput.value),
+    );
+  } else {
+    searchMemberList.value = [...teamMemberList.value];
+  }
+});
 // watch(note, (newVal, oldVal) => {
 //   if (newVal && !oldVal) {
 //     detailDialog.value = true;
@@ -1058,10 +1071,26 @@ watchEffect(() => {
       v-model="executorVisible"
       anchor="bottom middle"
       self="top middle"
+      style="padding: 10px 0; box-sizing: border-box"
     >
+      <div style="padding: 0 10px; box-sizing: border-box">
+        <q-input
+          outlined
+          dense
+          v-model="searchInput"
+          clearable
+          placeholder="请输入执行人名称"
+        />
+      </div>
       <q-list>
         <q-item
-          v-for="(item, index) in teamMemberList"
+          clickable
+          @click.stop="chooseExecutor({ userKey: '', userAvatar: '' })"
+        >
+          <q-item-section>无执行人 </q-item-section>
+        </q-item>
+        <q-item
+          v-for="(item, index) in searchMemberList"
           :key="`filter${index}`"
           clickable
           @click.stop="chooseExecutor(item)"
