@@ -17,10 +17,11 @@ const props = defineProps<{
   height: 100%;
   @include flex(center, center, null);
   .empty-img {
-    width: 60%;
-    max-width: 250px;
+    height: 30%;
+    min-height: 60px;
+    max-height: 250px;
     img {
-      width: 100%;
+      height: 100%;
     }
     .empty-title {
       width: 100%;

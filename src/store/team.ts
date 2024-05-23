@@ -87,6 +87,7 @@ export const teamStore = defineStore(
         teamInfo.value = newInfo;
       }
     };
+
     watch(teamKey, (newKey) => {
       teamInfo.value = null;
       if (newKey) {

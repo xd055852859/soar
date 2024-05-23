@@ -84,6 +84,14 @@ const updateApplication = async (value, key, application) => {
     // getLockList(spaceKey.value);
   }
 };
+// const deleteApplication =  (key) => {
+//
+// api.request.delete("app/team", {
+//     teamKey: spaceKey.value,
+//     appKey: application._key,
+//   })
+//
+// };
 const updateApplicationAll = async (value, key, application) => {
   let obj: any = { [key]: value };
   let appRes = (await api.request.patch("app", {
@@ -120,15 +128,15 @@ watch(
   <div class="application">
     <cHeader title="应用配置">
       <template #button>
-        <q-btn
-          style="color: #1976d2"
-          label="修改应用"
-          @click="
-            updateApplicationAll('AI', 'name', {
-              _key: '1538755380',
-            })
-          "
-        />
+        <!--        <q-btn-->
+        <!--          style="color: #1976d2"-->
+        <!--          label="修改应用"-->
+        <!--          @click="-->
+        <!--            updateApplicationAll('应用表', 'name', {-->
+        <!--              _key: '1543818590',-->
+        <!--            })-->
+        <!--          "-->
+        <!--        />-->
         <!-- <q-btn
           style="color: #1976d2"
           label="新增应用"

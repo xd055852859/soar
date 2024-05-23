@@ -91,8 +91,8 @@ const noteDialog = ref<boolean>(false);
   .team-button-right {
     position: absolute;
     z-index: 2;
-    top: 10px;
-    right: 0px;
+    top: 7px;
+    right: 0;
   }
   .team-box {
     width: 100%;

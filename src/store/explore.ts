@@ -85,7 +85,7 @@ export const exploreStore = defineStore(
           });
           break;
         case "apiTable":
-          window.open(`https://table.qingtime.cn`);
+          window.open(`https://apptable.qingtime.cn`);
           break;
         case "url":
           window.open(url);

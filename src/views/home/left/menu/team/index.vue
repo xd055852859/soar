@@ -12,23 +12,25 @@ import _ from "lodash";
 import Member from "@/views/home/right/team/member.vue";
 import Detail from "@/views/home/right/team/detail.vue";
 import Icon from "@/components/common/Icon.vue";
-import Tag from "@/components/tag/tag.vue";
 import Menu from "./menu.vue";
 import { useQuasar } from "quasar";
 import router from "@/router";
-
+import SingleTag from "@/components/tag/singleTag.vue";
+import Tag from "@/components/tag/tag.vue";
 const $q = useQuasar();
 
 const { targetTeamKey, teamKey, teamList, teamFoldList } = storeToRefs(
   appStore.teamStore,
 );
 const { tabSearchVisible } = storeToRefs(appStore.commonStore);
-const { spaceRole, privateTeamKey, spaceKey } = storeToRefs(
+const { spaceRole, privateTeamKey, spaceKey, tagList } = storeToRefs(
   appStore.spaceStore,
 );
 const { setTargetTeamKey, setTeamKey, setTeamList, setTeamFoldList } =
   appStore.teamStore;
 const { setTabSearchVisible } = appStore.commonStore;
+const { getTag } = appStore.spaceStore;
+
 const addVisible = ref<boolean>(false);
 const detailState = ref<boolean>(false);
 const memberVisible = ref<boolean>(false);
@@ -38,13 +40,14 @@ const foldVisible = ref<boolean>(false);
 const lineHeight = ref<number>(0);
 const treeOverkey = ref<string>("");
 const treeKey = ref<string>("");
-const tagList = ref<any>([]);
 const tagKey = ref<string>("");
 const searchTeamList = ref<any>([]);
 const searchFoldTeamList = ref<any>([]);
 const tagVisible = ref<boolean>(false);
+const singleTagVisible = ref<boolean>(false);
 const tagSelect = ref<string[]>([]);
 const teamSelect = ref<string[]>([]);
+const tagArr = ref<any>([]);
 const toggleTeam = async (item, visible) => {
   if (item) {
     detailState.value = true;
@@ -215,14 +218,6 @@ const editTree = (item, index, teamIndex) => {
     })
     .onCancel(() => {});
 };
-const getTag = async () => {
-  let tagRes = (await api.request.get("tag", {
-    teamKey: spaceKey.value,
-  })) as ResultProps;
-  if (tagRes.msg === "OK") {
-    tagList.value = tagRes.data;
-  }
-};
 const chooseTag = (list) => {
   tagSelect.value = list;
 };
@@ -237,19 +232,21 @@ const saveTag = async () => {
     let newFoldList = [...teamFoldList.value];
     newTeamList.forEach((item) => {
       if (teamSelect.value.indexOf(item._key) !== -1) {
-        item.tagArr = [...item.tagArr, ...tagSelect.value];
+        item.tagArr = [...tagSelect.value];
       }
     });
     newFoldList.forEach((item) => {
       if (teamSelect.value.indexOf(item._key) !== -1) {
-        item.tagArr = [...item.tagArr, ...tagSelect.value];
+        item.tagArr = [...tagSelect.value];
       }
     });
     setTeamList(newTeamList);
     setTeamFoldList(newFoldList);
     getTag();
     tagVisible.value = false;
+    singleTagVisible.value = false;
     teamSelect.value = [];
+    tagArr.value = [];
   }
 };
 
@@ -258,15 +255,6 @@ watch(tabSearchVisible, (visible) => {
     searchInput.value = "";
   }
 });
-watch(
-  spaceKey,
-  (newKey) => {
-    if (newKey) {
-      getTag();
-    }
-  },
-  { immediate: true },
-);
 watchEffect(() => {
   if (!searchInput.value) {
     searchInput.value = "";
@@ -330,24 +318,48 @@ watchEffect(() => {
       </div>
     </div>
     <div class="leftMenu-filter">
-      <q-btn
-        label="标签设置"
-        dense
-        color="primary"
-        @click="tagVisible = true"
-        class="q-mr-lg"
-      />
-      <q-select
-        borderless
-        v-model="tagKey"
-        :options="[{ _key: '', name: '全部' }, ...tagList]"
-        :option-value="(opt) => opt._key"
-        :option-label="(opt) => opt.name"
-        style="width: 100px; margin-right: 10px"
-        dense
-        emit-value
-        map-options
-      />
+      <div class="leftMenu-filter-tag icon-point">
+        {{
+          tagKey ? tagList[_.findIndex(tagList, { _key: tagKey })].name : "全部"
+        }}
+        <q-icon
+          name="arrow_drop_down"
+          color="grey-7"
+          style="margin-left: 8px"
+          size="25px"
+          class="select-icon"
+        />
+        <q-menu class="q-pa-sm" style="width: 150px; max-height: 300px">
+          <q-list dense>
+            <q-item
+              class="q-mb-sm"
+              clickable
+              v-close-popup
+              @click="tagVisible = true"
+            >
+              <q-item-section>设置</q-item-section>
+            </q-item>
+            <q-separator />
+            <q-item
+              class="q-mt-sm"
+              clickable
+              v-close-popup
+              @click="tagKey = ''"
+            >
+              <q-item-section>全部</q-item-section>
+            </q-item>
+            <q-item
+              clickable
+              v-for="(item, index) in tagList"
+              :key="`tag${index}`"
+              v-close-popup
+              @click="tagKey = item._key"
+            >
+              <q-item-section>{{ item.name }}</q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
+      </div>
     </div>
     <!-- </OnClickOutside> -->
 
@@ -418,6 +430,19 @@ watchEffect(() => {
                     >
                       <q-item-section class="common-title"
                         >{{ item.top ? "取消置顶" : "置顶" }}
+                      </q-item-section>
+                    </q-item>
+                    <q-item
+                      clickable
+                      v-close-popup
+                      @click="
+                        singleTagVisible = true;
+                        teamSelect = [item._key];
+                        tagArr = [...item.tagArr];
+                      "
+                    >
+                      <q-item-section class="common-title"
+                        >设置标签
                       </q-item-section>
                     </q-item>
                     <Menu :info="item" />
@@ -597,28 +622,41 @@ watchEffect(() => {
     <c-dialog
       :visible="tagVisible"
       @close="tagVisible = false"
-      title="标签设置"
-      :dialogStyle="{ width: '700px', maxWidth: '80vw' }"
+      title="批量设置"
+      :dialogStyle="{ width: '500px', maxWidth: '80vw' }"
     >
       <template #content>
-        <div class="teamMenu-tag">
-          <div class="teamMenu-tag-left">
-            <template v-for="(item, index) in teamList" :key="`tag${index}`">
-              <div
-                class="teamMenu-tag-item"
-                v-if="item._key !== privateTeamKey"
-              >
-                <q-checkbox
-                  v-model="teamSelect"
-                  :val="item._key"
-                  :label="item.name"
-                />
-              </div>
-            </template>
-          </div>
-          <div class="teamMenu-tag-right">
-            <Tag @chooseTag="chooseTag" />
-          </div>
+        <!--        <div class="teamMenu-tag">-->
+        <!--          <div class="teamMenu-tag-left">-->
+        <!--            <template v-for="(item, index) in teamList" :key="`tag${index}`">-->
+        <!--              <div-->
+        <!--                class="teamMenu-tag-item"-->
+        <!--                v-if="item._key !== privateTeamKey"-->
+        <!--              >-->
+        <!--                <q-checkbox-->
+        <!--                  v-model="teamSelect"-->
+        <!--                  :val="item._key"-->
+        <!--                  :label="item.name"-->
+        <!--                />-->
+        <!--              </div>-->
+        <!--            </template>-->
+        <!--          </div>-->
+        <!--          <div class="teamMenu-tag-right">-->
+        <!--            <Tag @chooseTag="chooseTag" />-->
+        <!--          </div>-->
+        <!--        </div>-->
+        <Tag />
+      </template>
+    </c-dialog>
+    <c-dialog
+      :visible="singleTagVisible"
+      @close="singleTagVisible = false"
+      title="标签设置"
+      :dialogStyle="{ width: '500px', maxWidth: '80vw' }"
+    >
+      <template #content>
+        <div class="teamMenu-singleTag">
+          <single-tag @chooseTag="chooseTag" :tagArr="tagArr" />
         </div>
       </template>
 
@@ -627,7 +665,7 @@ watchEffect(() => {
           flat
           label="取消"
           color="grey-5"
-          @click="tagVisible = false"
+          @click="singleTagVisible = false"
           :dense="true"
         />
         <q-btn label="确认" color="primary" @click="saveTag" />
@@ -643,9 +681,13 @@ watchEffect(() => {
   z-index: 1;
   .leftMenu-filter {
     width: 100%;
-    height: 40px;
-    margin-bottom: 10px;
+    height: 35px;
     @include flex(flex-end, center, null);
+    .leftMenu-filter-tag {
+      width: 150px;
+      height: 100%;
+      @include flex(flex-end, center, null);
+    }
   }
   .teamMenu-subtitle {
     width: 100%;
@@ -658,13 +700,13 @@ watchEffect(() => {
   }
 
   .teamMenu-list {
-    height: calc(100% - 105px);
+    height: calc(100% - 100px);
     @include scroll();
   }
 
   &::-webkit-scrollbar {
     /*滚动条整体样式*/
-    width: 0px;
+    width: 0;
   }
 }
 
@@ -712,17 +754,6 @@ watchEffect(() => {
     }
   }
 }
-</style>
-<style lang="scss">
-.team-searchInput {
-  width: 188px;
-  height: 40px;
-  position: fixed;
-  left: 10px;
-  top: 195px;
-  z-index: 100;
-  background-color: #fff;
-}
 .teamMenu-tag {
   width: 100%;
   height: 70vh;
@@ -741,5 +772,20 @@ watchEffect(() => {
     width: calc(100% - 210px);
     height: 100%;
   }
+}
+.teamMenu-singleTag {
+  width: 100%;
+  height: 70vh;
+}
+</style>
+<style lang="scss">
+.team-searchInput {
+  width: 188px;
+  height: 40px;
+  position: fixed;
+  left: 10px;
+  top: 195px;
+  z-index: 100;
+  background-color: #fff;
 }
 </style>
