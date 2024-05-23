@@ -623,7 +623,7 @@ watchEffect(() => {
       :visible="tagVisible"
       @close="tagVisible = false"
       title="批量设置"
-      :dialogStyle="{ width: '500px', maxWidth: '80vw' }"
+      :dialogStyle="{ width: '500px', maxWidth: '80vw', height: '80vh' }"
     >
       <template #content>
         <!--        <div class="teamMenu-tag">-->
@@ -652,7 +652,7 @@ watchEffect(() => {
       :visible="singleTagVisible"
       @close="singleTagVisible = false"
       title="标签设置"
-      :dialogStyle="{ width: '500px', maxWidth: '80vw' }"
+      :dialogStyle="{ width: '500px', maxWidth: '80vw', height: '80vh' }"
     >
       <template #content>
         <div class="teamMenu-singleTag">

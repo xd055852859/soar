@@ -8,7 +8,7 @@ import Icon from "@/components/common/Icon.vue";
 import CEmpty from "@/components/common/cEmpty.vue";
 import _ from "lodash";
 
-const { spaceKey, tagList } = storeToRefs(appStore.spaceStore);
+const { spaceKey, tagList, privateTeamKey } = storeToRefs(appStore.spaceStore);
 const { teamList } = storeToRefs(appStore.teamStore);
 const { setTag } = appStore.spaceStore;
 const { getTeamList } = appStore.teamStore;
@@ -131,9 +131,9 @@ watch(
         <q-list dense>
           <template v-if="searchTagList.length > 0">
             <q-item
-              clickable
               v-for="(item, index) in searchTagList"
               :key="`tag${index}`"
+              clickable
               v-close-popup
               @click="
                 tagKey = item._key;
@@ -162,17 +162,15 @@ watch(
     </div>
     <div class="tag-container">
       <template v-if="teamList.length > 0">
-        <div
-          v-for="(item, index) in teamList"
-          :key="`team${index}`"
-          class="tag-item"
-        >
-          <q-checkbox
-            v-model="teamSelect"
-            :val="item._key"
-            :label="item.name"
-          />
-        </div>
+        <template v-for="(item, index) in teamList" :key="`team${index}`">
+          <div class="tag-item" v-if="item._key !== privateTeamKey">
+            <q-checkbox
+              v-model="teamSelect"
+              :val="item._key"
+              :label="item.name"
+            />
+          </div>
+        </template>
       </template>
       <c-empty title="暂无群组" v-else />
     </div>
