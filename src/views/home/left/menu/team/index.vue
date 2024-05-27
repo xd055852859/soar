@@ -47,6 +47,8 @@ const tagVisible = ref<boolean>(false);
 const singleTagVisible = ref<boolean>(false);
 const tagSelect = ref<string[]>([]);
 const teamSelect = ref<string[]>([]);
+const tagTeamName = ref<string>("");
+const tagName = ref<string>("");
 const tagArr = ref<any>([]);
 const toggleTeam = async (item, visible) => {
   if (item) {
@@ -221,6 +223,9 @@ const editTree = (item, index, teamIndex) => {
 const chooseTag = (list) => {
   tagSelect.value = list;
 };
+const chooseTagName = (name) => {
+  tagName.value = name;
+};
 const saveTag = async () => {
   let tagRes = (await api.request.patch("project/tag/batch", {
     projectKeyArr: teamSelect.value,
@@ -320,7 +325,9 @@ watchEffect(() => {
     <div class="leftMenu-filter">
       <div class="leftMenu-filter-tag icon-point">
         {{
-          tagKey ? tagList[_.findIndex(tagList, { _key: tagKey })].name : "全部"
+          tagKey
+            ? `${tagList[_.findIndex(tagList, { _key: tagKey })].name}  ( ${tagList[_.findIndex(tagList, { _key: tagKey })].projectNum} )`
+            : `全部 ( ${teamList.length - 1} )`
         }}
         <q-icon
           name="arrow_drop_down"
@@ -329,8 +336,8 @@ watchEffect(() => {
           size="25px"
           class="select-icon"
         />
-        <q-menu class="q-pa-sm" style="width: 150px; max-height: 300px">
-          <q-list dense>
+        <q-menu class="q-pa-sm" style="width: 150px">
+          <q-list dense style="max-height: 300px">
             <q-item
               class="q-mb-sm"
               clickable
@@ -346,7 +353,9 @@ watchEffect(() => {
               v-close-popup
               @click="tagKey = ''"
             >
-              <q-item-section>全部</q-item-section>
+              <q-item-section
+                >全部 ( {{ teamList.length - 1 }} )</q-item-section
+              >
             </q-item>
             <q-item
               clickable
@@ -355,7 +364,9 @@ watchEffect(() => {
               v-close-popup
               @click="tagKey = item._key"
             >
-              <q-item-section>{{ item.name }}</q-item-section>
+              <q-item-section
+                >{{ item.name }} ( {{ item.projectNum }} )</q-item-section
+              >
             </q-item>
           </q-list>
         </q-menu>
@@ -439,6 +450,7 @@ watchEffect(() => {
                         singleTagVisible = true;
                         teamSelect = [item._key];
                         tagArr = [...item.tagArr];
+                        tagTeamName = item.name;
                       "
                     >
                       <q-item-section class="common-title"
@@ -622,36 +634,17 @@ watchEffect(() => {
     <c-dialog
       :visible="tagVisible"
       @close="tagVisible = false"
-      title="批量设置"
+      :title="`分组 ${tagName} 定义`"
       :dialogStyle="{ width: '500px', maxWidth: '80vw', height: '80vh' }"
     >
       <template #content>
-        <!--        <div class="teamMenu-tag">-->
-        <!--          <div class="teamMenu-tag-left">-->
-        <!--            <template v-for="(item, index) in teamList" :key="`tag${index}`">-->
-        <!--              <div-->
-        <!--                class="teamMenu-tag-item"-->
-        <!--                v-if="item._key !== privateTeamKey"-->
-        <!--              >-->
-        <!--                <q-checkbox-->
-        <!--                  v-model="teamSelect"-->
-        <!--                  :val="item._key"-->
-        <!--                  :label="item.name"-->
-        <!--                />-->
-        <!--              </div>-->
-        <!--            </template>-->
-        <!--          </div>-->
-        <!--          <div class="teamMenu-tag-right">-->
-        <!--            <Tag @chooseTag="chooseTag" />-->
-        <!--          </div>-->
-        <!--        </div>-->
-        <Tag />
+        <Tag @chooseTagName="chooseTagName" />
       </template>
     </c-dialog>
     <c-dialog
       :visible="singleTagVisible"
       @close="singleTagVisible = false"
-      title="标签设置"
+      :title="`设置 ${tagTeamName} 的分组`"
       :dialogStyle="{ width: '500px', maxWidth: '80vw', height: '80vh' }"
     >
       <template #content>
@@ -775,7 +768,7 @@ watchEffect(() => {
 }
 .teamMenu-singleTag {
   width: 100%;
-  height: 70vh;
+  height: 60vh;
 }
 </style>
 <style lang="scss">

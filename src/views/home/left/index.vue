@@ -595,6 +595,7 @@ watch(
               dense
               v-model="userName"
               label="用户名"
+              lazy-rules
               :rules="[(val) => !!val || '请填写用户名']"
             />
           </div>
@@ -604,6 +605,7 @@ watch(
               dense
               v-model="email"
               label="邮箱"
+              lazy-rules
               :rules="[(val, rules) => rules.email(val) || '请输入正确邮箱']"
             />
           </div>

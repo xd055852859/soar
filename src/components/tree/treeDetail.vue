@@ -470,6 +470,7 @@ watch(fileInput, (newName) => {
                 <q-btn
                   label="保存"
                   color="primary"
+                  v-close-popup
                   @click="
                     updateDetail('link', {
                       nodeUrl,

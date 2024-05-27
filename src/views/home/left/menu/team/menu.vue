@@ -8,6 +8,8 @@ import { ResultProps } from "@/interface/Common";
 import { setMessage } from "@/services/util/common";
 import router from "@/router";
 const { teamList } = storeToRefs(appStore.teamStore);
+const { privateTeamKey } = storeToRefs(appStore.spaceStore);
+
 const { setTeamKey, setTeamList } = appStore.teamStore;
 const props = defineProps<{
   info: any;
@@ -121,7 +123,7 @@ const copyTeam = () => {
       <q-list>
         <template v-for="(item, index) in teamList" :key="`merge${index}`">
           <q-item
-            v-if="item._key !== info._key"
+            v-if="item._key !== info._key && item._key !== privateTeamKey"
             clickable
             @click="mergeTeam(item)"
             v-close-popup

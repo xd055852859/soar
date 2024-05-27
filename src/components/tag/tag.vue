@@ -7,11 +7,15 @@ import { setMessage } from "@/services/util/common";
 import Icon from "@/components/common/Icon.vue";
 import CEmpty from "@/components/common/cEmpty.vue";
 import _ from "lodash";
-
+import { useQuasar } from "quasar";
+const $q = useQuasar();
+const emits = defineEmits<{
+  (e: "chooseTagName", name: string): void;
+}>();
 const { spaceKey, tagList, privateTeamKey } = storeToRefs(appStore.spaceStore);
 const { teamList } = storeToRefs(appStore.teamStore);
-const { setTag } = appStore.spaceStore;
-const { getTeamList } = appStore.teamStore;
+const { setTag, getTag } = appStore.spaceStore;
+const { getTeamList, setTeamList } = appStore.teamStore;
 const searchTagList = ref<any>([]);
 const teamSelect = ref<string[]>([]);
 const originSelect = ref<string[]>([]);
@@ -19,11 +23,14 @@ const tagKey = ref<string>("");
 const tagInput = ref<string>("");
 const menuVisible = ref<boolean>(false);
 const inputRef = ref<any>(null);
+const editKey = ref<string>("");
+const editInput = ref<string>("");
 const tagInfo = computed(() => {
   if (tagList.value.length > 0) {
     return tagList.value[_.findIndex(tagList, { _key: tagKey.value })];
   }
 });
+
 onMounted(() => {
   // if (tagList.value.length > 0) {
   //   tagKey.value = tagList.value[0]._key;
@@ -31,14 +38,18 @@ onMounted(() => {
   // }
   searchTagList.value = [...tagList.value];
 });
-
+onUnmounted(() => {
+  if (tagKey.value) {
+    saveTag(teamSelect.value, tagKey.value);
+  }
+});
 const createTag = async () => {
   let tagRes = (await api.request.post("tag", {
     teamKey: spaceKey.value,
     name: tagInput.value,
   })) as ResultProps;
   if (tagRes.msg === "OK") {
-    setMessage("success", "创建标签成功");
+    setMessage("success", "创建分组成功");
     tagInput.value = "";
     // tagInput.value = tagRes.data.name;
     // tagKey.value = tagRes.data._key;
@@ -49,39 +60,103 @@ const createTag = async () => {
   }
 };
 const saveTag = async (arr, key, type?: string) => {
-  let tagRes = (await api.request.patch("project/tag/batch", {
+  if (!key) {
+    setMessage("error", "请选择分组");
+    return;
+  }
+  let tagRes = (await api.request.patch("project/tag/batch/new", {
     projectKeyArr: arr,
-    tagKeyArr: [key],
+    tagKey: key,
   })) as ResultProps;
   if (tagRes.msg === "OK") {
     if (type) {
-      setMessage("success", "设置标签成功");
+      setMessage("success", "设置分组成功");
     }
-
     getTeamList(spaceKey.value);
+    let list = _.cloneDeep(teamList.value);
+    list.forEach((item, index) => {
+      let tagIndex = item.tagArr.indexOf(item._key);
+      if (arr.indexOf(item._key) !== -1) {
+        item.tagArr = [item.tagArr, ...key];
+      } else if (tagIndex !== -1) {
+        item.tagArr.splice(tagIndex, 1);
+      }
+    });
+    setTeamList(list);
+    let newList = [...tagList.value];
+    let index = _.findIndex(newList, { _key: key });
+    if (index !== -1) {
+      newList[index].projectNum = arr.length;
+      setTag(newList);
+    }
   }
 };
-watch(tagInput, (newInput) => {
-  if (newInput) {
-    searchTagList.value = tagList.value.filter((item) =>
-      item.name.includes(newInput),
-    );
-  } else {
+const editTag = async (item, index) => {
+  if (!editInput.value) {
+    setMessage("error", "请输入分组名称");
+    return;
+  }
+  let tagRes = (await api.request.patch("tag", {
+    tagKey: item._key,
+    name: editInput.value,
+  })) as ResultProps;
+  if (tagRes.msg === "OK") {
+    setMessage("success", "编辑分组成功");
+    let list = [...tagList.value];
+    list[index].name = editInput.value;
+    setTag(list);
+    editInput.value = "";
+    editKey.value = "";
+  }
+};
+const deleteTag = (item, index) => {
+  $q.dialog({
+    title: "删除标签",
+    message: `是否删除标签${item.name}`,
+    cancel: {
+      color: "grey-5",
+      flat: true,
+    },
+  })
+    .onOk(async () => {
+      let tagRes = (await api.request.delete("tag", {
+        tagKey: item._key,
+      })) as ResultProps;
+      if (tagRes.msg === "OK") {
+        setMessage("success", "删除分组成功");
+        let list = [...tagList.value];
+        list.splice(index, 1);
+        setTag(list);
+      }
+    })
+    .onCancel(() => {});
+};
+watch([tagInput, tagList], ([newInput, newList], [oldInput, oldList]) => {
+  if (newList && newList.length > 0 && newInput !== oldInput) {
+    if (newInput) {
+      console.log(newList);
+      searchTagList.value = newList.filter((item) =>
+        item.name.includes(newInput),
+      );
+    } else {
+      tagKey.value = "";
+      searchTagList.value = [...newList];
+    }
+  }
+});
+watch(menuVisible, (newVisible) => {
+  console.log(newVisible);
+  if (!newVisible) {
+    editInput.value = "";
+    editKey.value = "";
     searchTagList.value = [...tagList.value];
-    menuVisible.value = true;
   }
 });
 watch(
   tagKey,
   (newKey, oldKey) => {
     if (oldKey) {
-      if (
-        originSelect.value !== teamSelect.value &&
-        teamSelect.value.length > 0
-      ) {
-        //保存
-        saveTag(teamSelect.value, oldKey);
-      }
+      saveTag(teamSelect.value, oldKey);
     }
     if (newKey) {
       let list: any = [];
@@ -90,10 +165,8 @@ watch(
           list.push(item._key);
         }
       });
-      originSelect.value = [...list];
       teamSelect.value = [...list];
     } else {
-      originSelect.value = [];
       teamSelect.value = [];
     }
   },
@@ -106,19 +179,19 @@ watch(
       <q-input
         outlined
         v-model="tagInput"
-        placeholder="请输入标签名称"
+        placeholder="请输入分组名称"
         dense
         style="width: calc(100% - 100px)"
         clearable
         ref="inputRef"
-        @focus="menuVisible = true"
+        @click="menuVisible = true"
       />
       <q-btn
-        label="确认"
-        :color="tagKey ? 'primary' : 'grey-5'"
+        label="新建"
+        :color="searchTagList.length === 0 ? 'primary' : 'grey-5'"
         style="width: 90px"
-        :disable="!tagKey"
-        @click="saveTag(teamSelect, tagKey, 'message')"
+        :disable="searchTagList.length > 0"
+        @click="createTag()"
       />
       <q-menu
         no-focus
@@ -128,7 +201,7 @@ watch(
         auto-close
         no-parent-event
       >
-        <q-list dense>
+        <q-list dense style="max-height: 40vh">
           <template v-if="searchTagList.length > 0">
             <q-item
               v-for="(item, index) in searchTagList"
@@ -139,29 +212,57 @@ watch(
                 tagKey = item._key;
                 tagInput = item.name;
                 menuVisible = false;
-                // inputRef.blur();
+                emits('chooseTagName', item.name);
               "
             >
-              <q-item-section>{{ item.name }}</q-item-section>
+              <q-item-section>
+                <div class="tag-menu">
+                  <div
+                    class="tag-menu-left"
+                    :style="tagKey === item._key ? { color: '#07be51' } : {}"
+                  >
+                    <q-input
+                      outlined
+                      v-model="editInput"
+                      placeholder="请输入分组名称"
+                      dense
+                      style="width: calc(100% - 100px)"
+                      clearable
+                      autofocus
+                      class="full-width"
+                      @click.stop=""
+                      @keyup.enter.stop="editTag(item, index)"
+                      v-if="editKey === item._key"
+                    /><template v-else>
+                      {{ item.name }} ( {{ item.projectNum }} )</template
+                    >
+                  </div>
+                  <div class="tag-menu-right">
+                    <Icon
+                      name="bianji1"
+                      @click.stop="
+                        editKey = item._key;
+                        editInput = item.name;
+                      "
+                      class="q-mr-sm"
+                    />
+                    <Icon
+                      name="huishouzhan"
+                      @click.stop="deleteTag(item, index)"
+                    />
+                  </div>
+                </div>
+              </q-item-section>
             </q-item>
           </template>
           <div v-else style="width: 100%; height: 150px">
-            <c-empty title="暂无标签" />
+            <c-empty title="暂无分组" />
           </div>
-
-          <template v-if="tagInput">
-            <q-separator />
-            <q-item class="q-mt-sm" clickable v-close-popup @click="createTag">
-              <q-item-section class="text-grey-7"
-                >添加 新标签:{{ tagInput }}</q-item-section
-              >
-            </q-item>
-          </template>
         </q-list>
       </q-menu>
     </div>
     <div class="tag-container">
-      <template v-if="teamList.length > 0">
+      <template v-if="teamList.length > 0 && tagKey">
         <template v-for="(item, index) in teamList" :key="`team${index}`">
           <div class="tag-item" v-if="item._key !== privateTeamKey">
             <q-checkbox
@@ -191,13 +292,34 @@ watch(
     margin-bottom: 10px;
     @include flex(space-between, center, null);
   }
+
   .tag-container {
     width: 100%;
-    height: calc(100% - 50px);
+    height: calc(80vh - 250px);
     @include scroll();
     .tag-item {
       width: 100%;
       height: 50px;
+    }
+  }
+}
+.tag-menu {
+  width: 100%;
+  height: 40px;
+  @include flex(space-between, center, null);
+  .tag-menu-left {
+    flex: 1;
+    height: 100%;
+    @include flex(flex-start, center, null);
+  }
+  .tag-menu-right {
+    width: 60px;
+    height: 100%;
+    display: none;
+  }
+  &:hover {
+    .tag-menu-right {
+      @include flex(flex-end, center, null);
     }
   }
 }

@@ -2,6 +2,7 @@
 import request from "@/services/api";
 import cDialog from "@/components/common/cDialog.vue";
 import cIframe from "@/components/common/cIframe.vue";
+import cOutLoading from "@/components/common/cOutLoading.vue";
 import Search from "@/components/search/search.vue";
 import Icon from "@/components/common/Icon.vue";
 import { storeToRefs } from "pinia";
@@ -36,6 +37,7 @@ const {
   setClose,
   setIframeVisible,
 } = appStore.commonStore;
+const loading = ref<boolean>(true);
 const musicRef = ref<any>(null);
 const closeMessage = ref<any>(null);
 onMounted(() => {
@@ -187,7 +189,34 @@ watch([musicSrc, musicNum], ([newSrc, newNum]) => {
         :targetKey="iframeInfo.userKey"
         :targetTag="iframeInfo.planTag"
       /> -->
-      <c-iframe :url="iframeInfo.url" :title="iframeInfo.title" />
+      <div
+        :style="{
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          overflow: 'hidden',
+        }"
+        v-if="iframeInfo"
+      >
+        <!-- <q-inner-loading :showing="loading">
+          <q-spinner-gears size="50px" color="primary" />
+        </q-inner-loading> -->
+
+        <!-- `${url}${url.includes('?') ? '&' : '?'}t=${new Date().getTime()}` -->
+        <c-out-loading :visible="loading" />
+        <iframe
+          id="iframe-container"
+          class="web-view"
+          :title="iframeInfo.title"
+          :src="iframeInfo.url"
+          frameBorder="0"
+          width="100%"
+          height="100%"
+          @load="loading = false"
+          allow="clipboard-read; clipboard-write;fullscreen"
+        ></iframe>
+        <!--       -->
+      </div>
     </div>
   </Teleport>
 </template>

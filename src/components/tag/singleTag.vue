@@ -59,7 +59,7 @@ watch(
       <q-input
         outlined
         v-model="tagInput"
-        placeholder="请输入标签名称"
+        placeholder="请输入分组名称"
         dense
         class="full-width"
         style="width: calc(100% - 50px)"
@@ -73,10 +73,14 @@ watch(
           :key="`tag${index}`"
           class="tag-item"
         >
-          <q-checkbox v-model="tagSelect" :val="item._key" :label="item.name" />
+          <q-checkbox
+            v-model="tagSelect"
+            :val="item._key"
+            :label="`${item.name} ( ${item.projectNum} )`"
+          />
         </div>
       </template>
-      <c-empty title="暂无标签" v-else />
+      <c-empty title="暂无分组" v-else />
     </div>
   </div>
 </template>
