@@ -634,7 +634,7 @@ watchEffect(() => {
     <c-dialog
       :visible="tagVisible"
       @close="tagVisible = false"
-      :title="`分组 ${tagName} 定义`"
+      :title="`定义分组的群组`"
       :dialogStyle="{ width: '500px', maxWidth: '80vw', height: '80vh' }"
     >
       <template #content>
@@ -645,7 +645,11 @@ watchEffect(() => {
       :visible="singleTagVisible"
       @close="singleTagVisible = false"
       :title="`设置 ${tagTeamName} 的分组`"
-      :dialogStyle="{ width: '500px', maxWidth: '80vw', height: '80vh' }"
+      :dialogStyle="{
+        width: '500px',
+        maxWidth: '80vw',
+        height: 'calc(80vh - 10px)',
+      }"
     >
       <template #content>
         <div class="teamMenu-singleTag">

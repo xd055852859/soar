@@ -8,6 +8,8 @@ import { storeToRefs } from "pinia";
 import Icon from "@/components/common/Icon.vue";
 import Tree from "@/components/tree/tree.vue";
 import CHeader from "@/components/common/cHeader.vue";
+import CDrawer from "@/components/common/cDrawer.vue";
+import CreateTask from "@/components/task/createTask.vue";
 const props = defineProps<{
   cardKey?: string;
 }>();
@@ -20,6 +22,8 @@ const taskList = ref<any>([]);
 const menuTab = ref<string>("tree");
 const assignor = ref<string>("");
 const showTaskDays = ref<number>(99999);
+const taskVisible = ref<boolean>(false);
+const executorInfo = ref<any>(null);
 const getTaskList = async () => {
   let obj: any = {
     projectKey: teamKey.value,
@@ -67,6 +71,10 @@ const chooseAssignor = (key) => {
   console.log(key);
   assignor.value === key ? (assignor.value = "") : (assignor.value = key);
 };
+const chooseExecutor = (item) => {
+  taskVisible.value = true;
+  executorInfo.value = item;
+};
 watch(
   spaceInfo,
   (info) => {
@@ -77,7 +85,7 @@ watch(
   { immediate: true },
 );
 watchEffect(() => {
-  if (teamKey.value) {
+  if (teamKey.value && menuTab.value === "board") {
     getTaskList();
   }
 });
@@ -169,6 +177,9 @@ watchEffect(() => {
             </div>
             <div>{{ item.finishTask }} / {{ item.totalTask }}</div>
           </div>
+          <q-btn round flat size="16px" @click="chooseExecutor(item)">
+            <Icon name="a-chuangjian2" :size="20" />
+          </q-btn>
         </div>
         <div class="teamTask-bottom">
           <template
@@ -209,6 +220,25 @@ watchEffect(() => {
       </div>
       <Tree :card-key="cardKey" v-else />
     </div>
+    <c-drawer
+      :visible="taskVisible"
+      @close="taskVisible = false"
+      :drawerStyle="{
+        width: '450px',
+      }"
+      opacityMask
+    >
+      <template #content>
+        <CreateTask
+          :father-team-key="teamKey"
+          :father-tree-info="{
+            _key: cardKey,
+          }"
+          :father-executor-info="executorInfo"
+          taskType="tree"
+        />
+      </template>
+    </c-drawer>
   </div>
 </template>
 <style scoped lang="scss">

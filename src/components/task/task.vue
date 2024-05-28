@@ -94,9 +94,10 @@ const updateTask = async (type, obj, detail) => {
       break;
 
     case "link":
+      console.log(obj);
       changeObj.endAdornmentContent = {
         ...detail.endAdornmentContent,
-        link: { url: obj.nodeUrl, text: obj.nodeUrlText },
+        link: { url: obj.nodeUrl, text: obj.text },
       };
       break;
     case "file":
@@ -108,6 +109,14 @@ const updateTask = async (type, obj, detail) => {
         },
       };
       break;
+    case "clear": {
+      if (obj.type === "link") {
+        changeObj.endAdornmentContent = {
+          ...detail.endAdornmentContent,
+          link: { url: "", text: "" },
+        };
+      }
+    }
   }
   let updateRes = (await api.request.patch("node/more", {
     nodeKey: props.card._key,
@@ -116,6 +125,9 @@ const updateTask = async (type, obj, detail) => {
   if (updateRes.msg === "OK") {
     detail.boxIndex = props.boxIndex;
     detail.taskIndex = props.taskIndex;
+    if (type === "link") {
+      setMessage("success", "保存链接成功");
+    }
     emits("chooseCard", detail, "update");
   }
 };

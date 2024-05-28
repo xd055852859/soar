@@ -68,6 +68,10 @@ const getNodeInfo = async (key) => {
       if (nodeInfo.value?.endAdornmentContent?.link) {
         nodeUrl.value = nodeInfo.value.endAdornmentContent.link.url;
       }
+      if (nodeInfo.value?.endAdornmentContent?.link?.text) {
+        nodeUrlText.value = nodeInfo.value.endAdornmentContent.link.text;
+      }
+
       if (nodeInfo.value?.endAdornmentContent?.file) {
         fileName.value = nodeInfo.value.endAdornmentContent.file.fileName;
       }

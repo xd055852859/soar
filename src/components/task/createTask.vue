@@ -9,6 +9,7 @@ import Icon from "@/components/common/Icon.vue";
 import { searchArray } from "@/services/config/config";
 const { user } = storeToRefs(appStore.authStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
+const { teamMemberList } = storeToRefs(appStore.teamStore);
 const props = defineProps<{
   fatherTeamKey?: string;
   fatherTreeInfo?: any;
@@ -47,8 +48,11 @@ onMounted(() => {
       cardKey.value = props.fatherTreeInfo._key;
     }
   }
+  console.log(props.fatherExecutorInfo);
   executorInfo.value = props.fatherExecutorInfo
-    ? props.fatherExecutorInfo
+    ? props.fatherExecutorInfo.userKey || !props.fatherExecutorInfo._key
+      ? props.fatherExecutorInfo
+      : { ...props.fatherExecutorInfo, userKey: props.fatherExecutorInfo._key }
     : { ...user.value, userKey: user.value!._key };
 
   getData();
@@ -315,11 +319,28 @@ watchEffect(() => {
       </div>
       <div class="create-task-filter">
         <div class="dp--center" v-if="taskType === 'tree'">
+          <q-avatar color="#fff" size="30px" class="shadow-3 q-mr-sm">
+            <img
+              :src="
+                executorInfo?.userAvatar
+                  ? executorInfo?.userAvatar
+                  : '/common/defaultPerson.png'
+              "
+              alt=""
+            />
+          </q-avatar>
           {{ executorInfo?.userName }}
+          <q-icon
+            name="arrow_drop_down"
+            color="grey-7"
+            style="margin-left: 8px"
+            size="25px"
+            class="select-icon"
+          />
           <q-menu style="width: 100px">
             <div class="create-member">
               <div
-                v-for="(memberItem, memberIndex) in searchMemberList"
+                v-for="(memberItem, memberIndex) in teamMemberList"
                 :key="`memberItem-${memberIndex}`"
                 :style="{
                   background:
@@ -329,9 +350,17 @@ watchEffect(() => {
                 class="create-member-item"
                 @click="executorInfo = memberItem"
               >
-                <div>
-                  {{ memberItem.userName }}
-                </div>
+                <q-avatar color="#fff" size="20px" class="shadow-3 q-mr-sm">
+                  <img
+                    :src="
+                      memberItem?.userAvatar
+                        ? memberItem?.userAvatar
+                        : '/common/defaultPerson.png'
+                    "
+                    alt=""
+                  />
+                </q-avatar>
+                {{ memberItem.userName }}
               </div>
             </div>
           </q-menu>
@@ -465,7 +494,8 @@ watchEffect(() => {
     min-height: 30px;
     line-height: 25px;
     cursor: pointer;
-    @include flex(center, center, null);
+    @include p-number(0px, 10px);
+    @include flex(flex-start, center, null);
   }
 }
 </style>

@@ -1400,12 +1400,13 @@ watchEffect(() => {
   }
   .teamTree-left {
     width: 60px;
-    height: 100%;
+    height: calc(100% - 50px);
     position: absolute;
     z-index: 2;
-    top: 0;
-    left: 0;
-    @include flex(center, center, wrap);
+    top: 50px;
+    left: 25px;
+    box-sizing: border-box;
+    @include flex(center, flex-start, wrap);
     .treeTree-left-box {
       width: 100%;
       border: 1px solid rgba(151, 151, 151, 0.34);

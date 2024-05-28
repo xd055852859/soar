@@ -22,9 +22,10 @@ watch(
         loading.value = true;
         const timer = setTimeout(() => {
           iframe.src = iframeUrl.value;
-          clearTimeout(timer);
+          console.log(iframeUrl.value);
           loading.value = false;
-        }, 100);
+          clearTimeout(timer);
+        }, 200);
       }
     }
   },
@@ -39,7 +40,6 @@ watch(
       height: '100%',
       overflow: 'hidden',
     }"
-    v-if="iframeUrl"
   >
     <!-- <q-inner-loading :showing="loading">
       <q-spinner-gears size="50px" color="primary" />

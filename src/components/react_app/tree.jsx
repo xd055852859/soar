@@ -393,11 +393,14 @@ const CustomTree = React.forwardRef((props, ref) => {
         getNodeList(targetNodeKey, "child");
       }
     } else if (pasteType === "cut") {
-      dragNode({
-        dragNodeId: pasteNodeKey,
-        dropNodeId: targetNodeKey,
-        placement: "in",
-      });
+      dragNode(
+        {
+          dragNodeId: pasteNodeKey,
+          dropNodeId: targetNodeKey,
+          placement: "in",
+        },
+        [],
+      );
     }
   };
   const pasteText = async (text, event) => {

@@ -54,9 +54,10 @@ const createTag = async () => {
     // tagInput.value = tagRes.data.name;
     // tagKey.value = tagRes.data._key;
     let list = [...tagList.value];
+    tagRes.data.projectNum = 0;
     list.unshift(tagRes.data);
     setTag(list);
-    menuVisible.value = false;
+    // menuVisible.value = false;
   }
 };
 const saveTag = async (arr, key, type?: string) => {
@@ -126,15 +127,15 @@ const deleteTag = (item, index) => {
         setMessage("success", "删除分组成功");
         let list = [...tagList.value];
         list.splice(index, 1);
+        console.log(index, list);
         setTag(list);
       }
     })
     .onCancel(() => {});
 };
 watch([tagInput, tagList], ([newInput, newList], [oldInput, oldList]) => {
-  if (newList && newList.length > 0 && newInput !== oldInput) {
-    if (newInput) {
-      console.log(newList);
+  if (newList && newList.length > 0) {
+    if (newInput && newInput !== oldInput) {
       searchTagList.value = newList.filter((item) =>
         item.name.includes(newInput),
       );
