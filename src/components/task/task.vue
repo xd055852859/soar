@@ -2,6 +2,7 @@
 import Icon from "@/components/common/Icon.vue";
 import TreeDetail from "@/components/tree/treeDetail.vue";
 import cDrawer from "@/components/common/cDrawer.vue";
+import cCalendar from "@/components/common/cCalendar.vue";
 import api from "@/services/api";
 import { ResultProps } from "@/interface/Common";
 import { setMessage } from "@/services/util/common";
@@ -13,12 +14,14 @@ const props = defineProps<{
   boxIndex?: number;
   taskIndex?: number;
 }>();
+const emits = defineEmits<{
+  (e: "chooseCard", detail: any, type: string, key?: string): void;
+}>();
 
 const chooseKey = ref<string>("");
 const drawerVisible = ref<boolean>(false);
-const emits = defineEmits<{
-  (e: "chooseCard", key: string, type: string): void;
-}>();
+const cardDay = ref<number>(0);
+
 const chooseTask = () => {
   // console.log(props.card);
   // setTeamKey(props.card.projectInfo._key);
@@ -59,6 +62,7 @@ const deleteTask = async (detail) => {
 };
 const updateTask = async (type, obj, detail) => {
   let changeObj: any = {};
+  console.log(obj);
   switch (type) {
     case "name":
     case "hasDone":
@@ -68,8 +72,10 @@ const updateTask = async (type, obj, detail) => {
       changeObj[type] = obj[type];
       break;
     case "executor":
+      detail.executorInfo = {};
       detail.executorInfo.userAvatar = obj.userAvatar;
-      detail.executorInfo.userKey = obj.userKey;
+      detail.executorInfo._key = obj.userKey;
+      detail.executorInfo.userName = obj.userName;
       changeObj.executor = obj.userKey;
       break;
     case "tag":
@@ -89,8 +95,7 @@ const updateTask = async (type, obj, detail) => {
           day: dayjs(obj.date).date(),
         },
       };
-      console.log(detail.startAdornmentContent);
-      console.log(changeObj.startAdornmentContent);
+      // cardDay.value = dayjs().diff(dayjs(endTime), "day");
       break;
 
     case "link":
@@ -115,6 +120,12 @@ const updateTask = async (type, obj, detail) => {
           ...detail.endAdornmentContent,
           link: { url: "", text: "" },
         };
+      } else if (obj.type === "milestone") {
+        changeObj.endTime = null;
+        changeObj.endAdornmentContent = {
+          ...detail.startAdornmentContent,
+          milestone: {},
+        };
       }
     }
   }
@@ -123,14 +134,25 @@ const updateTask = async (type, obj, detail) => {
     obj: { ...changeObj },
   })) as ResultProps;
   if (updateRes.msg === "OK") {
+    detail = { ...detail, ...changeObj };
     detail.boxIndex = props.boxIndex;
     detail.taskIndex = props.taskIndex;
+    console.log(detail);
     if (type === "link") {
       setMessage("success", "保存链接成功");
     }
-    emits("chooseCard", detail, "update");
+    emits("chooseCard", detail, "update", type);
   }
 };
+watch(
+  () => props.card,
+  (newCard) => {
+    if (newCard?.endTime) {
+      cardDay.value = dayjs(newCard.endTime).diff(dayjs().endOf("day"), "day");
+    }
+  },
+  { immediate: true },
+);
 </script>
 <template>
   <q-card
@@ -153,8 +175,55 @@ const updateTask = async (type, obj, detail) => {
           @click.stop="finishTask(card)"
         />
       </div>
-
-      <div class="teamTask-box-top-title">{{ card.name }}</div>
+      <div
+        class="teamTask-box-top-time"
+        v-if="card.endTime"
+        @click.stop=""
+        :style="{
+          background:
+            cardDay === 0
+              ? '#07be51'
+              : cardDay < 0 && !card.hasDone
+                ? 'red'
+                : '#555555',
+        }"
+      >
+        {{
+          cardDay >= 0
+            ? cardDay > 99
+              ? "99+"
+              : cardDay + 1
+            : card.hasDone
+              ? cardDay < -99
+                ? "-99+"
+                : cardDay
+              : Math.abs(cardDay) > 99
+                ? "99+"
+                : Math.abs(cardDay)
+        }}
+        <q-menu style="width: 300px" auto-close>
+          <c-calendar
+            :endTime="props.card.endTime"
+            @clickDate="
+              (date) =>
+                updateTask(
+                  'milestone',
+                  {
+                    date: date,
+                  },
+                  card,
+                )
+            "
+            @clearDate="updateTask('clear', { type: 'milestone' }, card)"
+          />
+        </q-menu>
+      </div>
+      <div
+        class="teamTask-box-top-title"
+        :style="{ paddingLeft: props.card.endTime ? '55px' : '25px' }"
+      >
+        {{ card.name }}
+      </div>
       <div class="teamTask-box-top-icon" v-if="chooseKey === card._key">
         <q-btn flat round icon="more_horiz" size="9px" @click.stop="">
           <q-menu class="q-pa-sm">
@@ -213,7 +282,7 @@ const updateTask = async (type, obj, detail) => {
           </q-tooltip>
         </q-avatar>
         {{
-          card.executorInfo?.userName.length > 5
+          card.executorInfo?.userName && card.executorInfo?.userName.length > 5
             ? card.executorInfo.userName.substring(0, 3) + "..."
             : card.executorInfo.userName
         }}
@@ -266,9 +335,19 @@ const updateTask = async (type, obj, detail) => {
       z-index: 2;
       @include flex(center, flex-start, null);
     }
-
+    .teamTask-box-top-time {
+      width: 25px;
+      height: 25px;
+      position: absolute;
+      top: 2px;
+      left: 42px;
+      z-index: 2;
+      color: #fff;
+      font-size: 12px;
+      line-height: 25px;
+      text-align: center;
+    }
     .teamTask-box-top-title {
-      padding-left: 25px;
       padding-top: 5px;
       box-sizing: border-box;
       flex: 1;

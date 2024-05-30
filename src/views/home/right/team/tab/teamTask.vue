@@ -41,30 +41,53 @@ const getTaskList = async () => {
     taskList.value = [...taskRes.data];
   }
 };
-const chooseCard = (detail, type) => {
+const chooseCard = (detail, type, key) => {
   switch (type) {
     case "update":
+      console.log(detail);
+      let userKey = detail.executorInfo?._key
+        ? detail.executorInfo._key
+        : detail.executor;
       let userIndex = _.findIndex(taskList.value, {
-        _key: detail.executorInfo._key,
+        _key: userKey,
       });
+      console.log(userIndex);
       if (userIndex !== -1) {
+        console.log(detail._key);
         let updateIndex = _.findIndex(taskList.value[userIndex].taskList, {
           _key: detail._key,
         });
+        console.log(updateIndex);
         if (updateIndex !== -1) {
           console.log(taskList.value[userIndex]);
-          if (detail.hasDone) {
-            taskList.value[userIndex].finishTask++;
-          } else {
-            taskList.value[userIndex].finishTask--;
+          if (key === "hasDone") {
+            if (detail.hasDone) {
+              taskList.value[userIndex].finishTask++;
+            } else {
+              taskList.value[userIndex].finishTask--;
+            }
           }
           taskList.value[userIndex].taskList[updateIndex] = {
             ...taskList.value[userIndex].taskList[updateIndex],
             ...detail,
           };
         }
-        break;
       }
+      break;
+
+    case "delete":
+      let deleteIndex = _.findIndex(taskList.value, {
+        _key: detail.executorInfo._key,
+      });
+      if (deleteIndex !== -1) {
+        let updateIndex = _.findIndex(taskList.value[deleteIndex].taskList, {
+          _key: detail._key,
+        });
+        if (updateIndex !== -1) {
+          taskList.value[deleteIndex].taskList.splice(updateIndex, 1);
+        }
+      }
+      break;
   }
 };
 const chooseAssignor = (key) => {

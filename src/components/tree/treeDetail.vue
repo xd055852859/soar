@@ -119,6 +119,7 @@ const updateDetail = (type, obj) => {
         relaters.value.push(targetTeamMemberList.value[obj.memberIndex]);
       }
       obj = { relaters: relatersKey.value };
+      break;
     case "clear":
       if (obj.type === "file") {
         fileName.value = "";
@@ -244,6 +245,7 @@ watch(fileInput, (newName) => {
                 @click.stop="
                   updateDetail('executor', {
                     userKey: '',
+                    userName: '',
                     userAvatar: '',
                   })
                 "
@@ -258,6 +260,7 @@ watch(fileInput, (newName) => {
                 @click.stop="
                   updateDetail('executor', {
                     userKey: item.userKey,
+                    userName: item.userName,
                     userAvatar: item.userAvatar,
                   })
                 "

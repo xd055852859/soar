@@ -60,6 +60,7 @@ const createTag = async () => {
     // menuVisible.value = false;
   }
 };
+
 const saveTag = async (arr, key, type?: string) => {
   if (!key) {
     setMessage("error", "请选择分组");
@@ -143,6 +144,8 @@ watch([tagInput, tagList], ([newInput, newList], [oldInput, oldList]) => {
       tagKey.value = "";
       searchTagList.value = [...newList];
     }
+  } else {
+    searchTagList.value = [];
   }
 });
 watch(menuVisible, (newVisible) => {

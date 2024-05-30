@@ -44,12 +44,9 @@ const chooseCard = (detail, type) => {
         ...taskList.value[detail.boxIndex].taskList[detail.taskIndex],
         ...detail,
       };
+      console.log(taskList.value[detail.boxIndex].taskList[detail.taskIndex]);
       break;
     case "delete":
-      console.log(detail.boxIndex, detail.taskIndex);
-      console.log(taskList.value[detail.boxIndex]);
-      console.log(taskList.value[detail.boxIndex].taskList);
-      console.log(taskList.value[detail.boxIndex].taskList[detail.taskIndex]);
       taskList.value[detail.boxIndex].taskList.splice(detail.taskIndex, 1);
       if (taskList.value[detail.boxIndex].taskList.length === 0) {
         taskList.value.splice(detail.boxIndex, 1);

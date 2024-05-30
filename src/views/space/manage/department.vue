@@ -79,10 +79,11 @@ const addDepartment = async () => {
   }
   $q.dialog({
     title: "新增部门",
+    message: "请输入10字以内的部门名",
     prompt: {
       model: "",
       type: "text", // optional
-      isValid: (val) => val.length > 0, // << here is the magic
+      isValid: (val) => val.length > 0 && val.length < 11, // << here is the magic
     },
     cancel: {
       color: "grey-5",
@@ -104,8 +105,6 @@ const addDepartment = async () => {
         );
         setDepartmentTree(newTree, true);
       }
-    } else {
-      setMessage("error", "请输入部门名");
     }
   });
 };
@@ -266,6 +265,7 @@ watchEffect(() => {
             v-model="departmentName"
             style="width: calc(100% - 40px)"
             color="primary"
+            placeholder="请输入部门名"
           />
           <q-btn flat round @click="addDepartment()">
             <Icon name="a-chuangjian2" :size="20" />

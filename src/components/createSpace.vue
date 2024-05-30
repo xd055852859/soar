@@ -82,7 +82,14 @@ const createSpace = async () => {
     管理任务、文档团队协同，成为您的在线工作室
   </div>
   <div class="createSpace-input-title">您的企业/团队名称*</div>
-  <q-input filled dense v-model="name" class="createSpace-input" />
+  <q-input
+    :rules="[(val) => !!val || '名称必填']"
+    filled
+    dense
+    v-model="name"
+    class="createSpace-input"
+    maxlength="10"
+  />
   <!--     :rules="[(val) => !!val || '名称必填']" -->
   <div class="createSpace-input-title">团队人员规模*</div>
   <q-select outlined dense v-model="scale" :options="scaleArray" />

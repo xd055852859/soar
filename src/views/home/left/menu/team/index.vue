@@ -260,6 +260,11 @@ watch(tabSearchVisible, (visible) => {
     searchInput.value = "";
   }
 });
+watch(tagList, (newList) => {
+  if (_.findIndex(newList, { _key: tagKey.value }) === -1) {
+    tagKey.value = "";
+  }
+});
 watchEffect(() => {
   if (!searchInput.value) {
     searchInput.value = "";
@@ -286,7 +291,7 @@ watchEffect(() => {
 });
 </script>
 <template>
-  <div class="teamMenu">
+  <div class="teamMenu" :style="{ zIndex: tabSearchVisible ? 10 : 1 }">
     <c-out-loading :visible="!teamList" />
     <!-- <OnClickOutside @trigger="searchVibisible = false"> -->
     <div class="leftMenu-title">
@@ -299,22 +304,9 @@ watchEffect(() => {
       <div class="leftMenu-title-right">
         <q-btn flat round @click="setTabSearchVisible(!tabSearchVisible)">
           <Icon name="sousuo" :size="20" />
-          <Teleport to="body">
-            <div
-              class="team-searchInput"
-              id="teamSearchInput"
-              v-if="tabSearchVisible"
-            >
-              <q-input
-                outlined
-                dense
-                autofocus
-                v-model="searchInput"
-                class="full-width"
-                clearable
-              />
-            </div>
-          </Teleport>
+          <!--          <Teleport to="#leftMenu">-->
+
+          <!--          </Teleport>-->
         </q-btn>
 
         <q-btn flat round @click="toggleTeam(null, true)" v-if="spaceRole < 4">
@@ -325,7 +317,7 @@ watchEffect(() => {
     <div class="leftMenu-filter">
       <div class="leftMenu-filter-tag icon-point">
         {{
-          tagKey
+          tagKey && _.findIndex(tagList, { _key: tagKey }) !== -1
             ? `${tagList[_.findIndex(tagList, { _key: tagKey })].name}  ( ${tagList[_.findIndex(tagList, { _key: tagKey })].projectNum} )`
             : `全部 ( ${teamList.length - 1} )`
         }}
@@ -668,6 +660,16 @@ watchEffect(() => {
         <q-btn label="确认" color="primary" @click="saveTag" />
       </template>
     </c-dialog>
+    <div class="team-searchInput" id="teamSearchInput" v-if="tabSearchVisible">
+      <q-input
+        outlined
+        dense
+        autofocus
+        v-model="searchInput"
+        class="full-width"
+        clearable
+      />
+    </div>
   </div>
 </template>
 <style scoped lang="scss">
@@ -675,7 +677,6 @@ watchEffect(() => {
   width: 100%;
   height: 100%;
   position: relative;
-  z-index: 1;
   .leftMenu-filter {
     width: 100%;
     height: 35px;
@@ -777,12 +778,12 @@ watchEffect(() => {
 </style>
 <style lang="scss">
 .team-searchInput {
-  width: 188px;
+  width: 68%;
   height: 40px;
-  position: fixed;
-  left: 10px;
-  top: 195px;
-  z-index: 100;
+  position: absolute;
+  left: 0px;
+  top: 5px;
+  z-index: 20;
   background-color: #fff;
 }
 </style>

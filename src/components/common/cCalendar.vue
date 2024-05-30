@@ -53,7 +53,7 @@ const getCalendar = (targetDate: any) => {
 const changeDate = () => {
   console.log(inputData.value);
   calendarDate.value = dayjs(
-    inputData.value.replace("年", "/").replace("月", "")
+    inputData.value.replace("年", "/").replace("月", ""),
   );
   inputState.value = false;
 };
@@ -139,7 +139,7 @@ const getTargetDate = (targetDate: any, calendarDayNum: number) => {
           let momentDate = dayjs(
             `${targetDate.clone().year()}-${
               targetDate.clone().subtract(1, "months").month() + 1
-            }-${upDays}`
+            }-${upDays}`,
           );
 
           strDate.unshift({
@@ -160,7 +160,7 @@ const getTargetDate = (targetDate: any, calendarDayNum: number) => {
           let momentDate = dayjs(
             `${targetDate.clone().year()}-${
               targetDate.clone().add(1, "months").month() + 1
-            }-${nextFirstDate}`
+            }-${nextFirstDate}`,
           );
           strDate.push({
             month: "next",
@@ -182,8 +182,8 @@ const getTargetDate = (targetDate: any, calendarDayNum: number) => {
                 "/" +
                 (targetDate.clone().month() + 1) +
                 "/" +
-                (i - curWeek + 1)
-            ).getTime()
+                (i - curWeek + 1),
+            ).getTime(),
           );
           let obj: any = {
             month: "target",
@@ -207,7 +207,7 @@ const getTargetDate = (targetDate: any, calendarDayNum: number) => {
   emits(
     "getCalendarNum",
     strDate[0].startTime,
-    strDate[strDate.length - 1].endTime
+    strDate[strDate.length - 1].endTime,
   );
   console.log(strDate);
   calendarList.value = strDate;
@@ -221,7 +221,7 @@ watch(
   () => props.endTime,
   (newTime) => {
     chooseDate.value = dayjs(newTime).startOf("day").valueOf();
-  }
+  },
 );
 </script>
 <template>
