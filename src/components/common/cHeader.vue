@@ -31,7 +31,7 @@ const emits = defineEmits<{
         "
         class="icon-point q-mr-sm"
       >
-        <q-icon name="navigate_before" size="32px" />
+        <Icon name="left" :size="32" />
       </div>
       <div
         class="header-title single-to-long"

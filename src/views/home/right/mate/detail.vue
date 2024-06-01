@@ -11,6 +11,9 @@ import { storeToRefs } from "pinia";
 import _ from "lodash";
 import { formatName, dayArray } from "@/services/config/config";
 import { commonscroll } from "@/services/util/common";
+import Task from "@/components/task/task.vue";
+import File from "@/components/file/file.vue";
+import CEmpty from "@/components/common/cEmpty.vue";
 
 const { spaceKey, privateTeamKey } = storeToRefs(appStore.spaceStore);
 const { mateKey, mateList, mateInfo } = storeToRefs(appStore.mateStore);
@@ -216,11 +219,19 @@ const formatMonth = (time: number, arr: any) => {
   }
   return arr;
 };
-// watch(mateInfo, (newInfo) => {
-//   if (newInfo) {
-//     signature.value = newInfo.signature ? newInfo.signature : "在岗";
-//   }
-// });
+const chooseCard = (detail, type) => {
+  switch (type) {
+    case "update":
+      mateCardList.value[detail.taskIndex] = {
+        ...mateCardList.value[detail.taskIndex],
+        ...detail,
+      };
+      break;
+    case "delete":
+      mateCardList.value.splice(detail.taskIndex, 1);
+      break;
+  }
+};
 watch(
   () => props.mateKey,
   (newKey) => {
@@ -256,8 +267,8 @@ watch(
   { immediate: true },
 );
 watch(mateTab, () => {
-  getMateCard();
   page.value = 1;
+  getMateCard();
 });
 watchEffect(() => {
   if (mateTeamKey.value) {
@@ -283,67 +294,18 @@ watchEffect(() => {
                   ? mateInfo.userAvatar
                   : '/common/defaultGroup.png'
               "
+              alt=""
             />
           </div>
         </div>
         <div class="mateCard-info">
           <div class="mateCard-top">
             {{ mateInfo.userName }}
-            <q-icon name="keyboard_arrow_down" size="28px" />
           </div>
           <div class="mateCard-bottom">
             {{ mateInfo.post }}
           </div>
-          <!--          <div class="mateCard-signature">-->
-          <!--            <q-btn-->
-          <!--              color="#fff"-->
-          <!--              dense-->
-          <!--              class="createSpace-button full-width"-->
-          <!--              flat-->
-          <!--              :label="-->
-          <!--                signatureArray[-->
-          <!--                  _.findIndex(signatureArray, { label: signature })-->
-          <!--                ]?.label-->
-          <!--              "-->
-          <!--            />-->
-          <!--          </div>-->
         </div>
-        <q-menu style="width: 348px; padding: 10px 0px">
-          <q-list>
-            <q-item
-              v-for="(item, index) in mateList"
-              :key="`mate${index}`"
-              clickable
-              v-close-popup
-              class="mateCard-menu"
-              @click="setMateKey(item._key)"
-            >
-              <div class="mateCard-avatar-box">
-                <div class="mateCard-avatar">
-                  <img
-                    :src="
-                      item.userAvatar
-                        ? item.userAvatar
-                        : '/common/defaultGroup.png'
-                    "
-                    alt=""
-                  />
-                </div>
-              </div>
-              <div class="mateCard-info">
-                <div class="mateCard-top">
-                  {{ item.userName }}
-                </div>
-                <div class="mateCard-bottom">
-                  {{ item.post }}
-                </div>
-              </div>
-              <div class="dp-center-center" v-if="mateKey === item._key">
-                <q-icon name="check" size="28px" />
-              </div>
-            </q-item>
-          </q-list>
-        </q-menu>
       </div>
       <div class="mateCard-teamMenu">
         <q-tabs
@@ -353,9 +315,9 @@ watchEffect(() => {
           indicator-color="primary"
           active-class="text-primary"
         >
-          <q-tab name="payNum" label="贡献度" />
+          <q-tab name="payNum" label="执行力" />
           <q-tab name="cooperate" label="协作群" />
-          <q-tab name="notJoined" label="其他群" />
+          <q-tab name="file" label="创建文件" />
         </q-tabs>
         <div
           class="teamMenu-list vitality-month-container"
@@ -446,8 +408,6 @@ watchEffect(() => {
                 </q-btn> -->
             </div>
           </div>
-        </div>
-        <div class="teamMenu-list" v-else-if="menuTab === 'notJoined'">
           <template v-for="(item, index) in mateJoinList" :key="`team${index}`">
             <div
               class="teamMenu-item icon-point"
@@ -460,6 +420,7 @@ watchEffect(() => {
             </div>
           </template>
         </div>
+        <div class="teamMenu-list" v-else-if="menuTab === 'file'"></div>
       </div>
     </div>
     <div class="mateDetail-right">
@@ -506,16 +467,26 @@ watchEffect(() => {
                 })
               "
             >
-              <template
-                v-for="(item, index) in mateCardList"
-                :key="`file${index}`"
-              >
-                <fileCard
-                  :card="item"
-                  :type="mateTab === 'task' ? 'taskBox' : 'doc'"
-                  outType="mate"
-                />
+              <template v-if="mateCardList.length > 0">
+                <template
+                  v-for="(item, index) in mateCardList"
+                  :key="`file${index}`"
+                >
+                  <Task
+                    :card="item"
+                    :boxIndex="index"
+                    :taskIndex="index"
+                    @chooseCard="chooseCard"
+                    v-if="mateTab === 'task'"
+                  />
+                  <File :file="item" :fileIndex="index" v-else />
+                </template>
               </template>
+              <div v-else style="width: 100%; height: 250px">
+                <c-empty
+                  :title="mateTab === 'task' ? '暂无任务' : '暂无文档'"
+                />
+              </div>
             </div>
           </q-card-section>
         </q-card>
@@ -691,7 +662,7 @@ watchEffect(() => {
   .mateDetail-right {
     flex: 1;
     height: 100%;
-    width: 0px;
+    width: 0;
 
     .mateDetail-right-chart {
       width: 100%;

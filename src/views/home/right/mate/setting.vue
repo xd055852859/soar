@@ -83,7 +83,7 @@ const removeMate = async (userKey) => {
       :style="type === 'inside' ? { padding: '0px', height: '100%' } : {}"
     >
       <q-table
-        :rows="spaceMemberList.filter(item => item.userKey !== user!._key)"
+        :rows="spaceMemberList.filter((item) => item.userKey !== user!._key)"
         :columns="columns"
         row-key="_key"
         class="common-table member-table"
@@ -101,6 +101,7 @@ const removeMate = async (userKey) => {
                       ? props.row.userAvatar
                       : '/common/defaultPerson.png'
                   "
+                  alt=""
                 />
               </q-avatar>
             </q-td>

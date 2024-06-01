@@ -18,7 +18,7 @@ import router from "@/router";
 import SingleTag from "@/components/tag/singleTag.vue";
 import Tag from "@/components/tag/tag.vue";
 const $q = useQuasar();
-
+const dayjs: any = inject("dayjs");
 const { targetTeamKey, teamKey, teamList, teamFoldList } = storeToRefs(
   appStore.teamStore,
 );
@@ -26,8 +26,13 @@ const { tabSearchVisible } = storeToRefs(appStore.commonStore);
 const { spaceRole, privateTeamKey, spaceKey, tagList } = storeToRefs(
   appStore.spaceStore,
 );
-const { setTargetTeamKey, setTeamKey, setTeamList, setTeamFoldList } =
-  appStore.teamStore;
+const {
+  setTargetTeamKey,
+  setTeamKey,
+  setTeamList,
+  setTeamFoldList,
+  formatTeamList,
+} = appStore.teamStore;
 const { setTabSearchVisible } = appStore.commonStore;
 const { getTag } = appStore.spaceStore;
 
@@ -39,6 +44,7 @@ const searchInput = ref<string>("");
 const foldVisible = ref<boolean>(false);
 const lineHeight = ref<number>(0);
 const treeOverkey = ref<string>("");
+const teamOverKey = ref<string>("");
 const treeKey = ref<string>("");
 const tagKey = ref<string>("");
 const searchTeamList = ref<any>([]);
@@ -51,11 +57,7 @@ const tagTeamName = ref<string>("");
 const tagName = ref<string>("");
 const tagArr = ref<any>([]);
 const toggleTeam = async (item, visible) => {
-  if (item) {
-    detailState.value = true;
-  } else {
-    detailState.value = false;
-  }
+  detailState.value = !!item;
   addVisible.value = visible;
 };
 const watchTeam = async (item) => {
@@ -105,29 +107,35 @@ const topTeam = async (item, index, state) => {
     top: state,
   })) as ResultProps;
   if (teamRes.msg === "OK") {
+    api.request.patch("project/view", {
+      projectKey: item._key,
+    });
     setMessage("success", state ? "置顶群组成功" : "取消置顶群组成功");
     let list = _.cloneDeep(teamList.value);
-    list.splice(index, 1);
     item.top = !item.top;
-    let topIndex = -1;
-    if (state) {
-      list.forEach((listItem, listIndex) => {
-        console.log(listItem.createTime, item.createTime);
-        if (listItem.top && listItem.createTime > item.createTime) {
-          topIndex = listIndex;
-        }
-      });
-    } else {
-      list.forEach((listItem, listIndex) => {
-        console.log(!listItem.top, listItem.createTime > item.createTime);
-        if (!listItem.top && listItem.createTime > item.createTime) {
-          topIndex = listIndex;
-        }
-      });
+    item.viewTime = dayjs().valueOf();
+    let index = _.findIndex(list, { _key: item._key });
+    if (index !== -1) {
+      list[index] = { ...item };
+      setTeamList(formatTeamList(list));
     }
-    console.log(topIndex);
-    list.splice(topIndex + 1, 0, item);
-    setTeamList(list);
+  }
+};
+const clickTeam = (item) => {
+  setTeamKey(item._key);
+  // setTargetTeamKey(item._key);
+  api.request.patch("project/view", {
+    projectKey: item._key,
+  });
+  if (tabSearchVisible.value) {
+    setTabSearchVisible(false);
+    let list = _.cloneDeep(teamList.value);
+    item.viewTime = dayjs().valueOf();
+    let index = _.findIndex(list, { _key: item._key });
+    if (index !== -1) {
+      list[index] = { ...item };
+      setTeamList(formatTeamList(list));
+    }
   }
 };
 const createTree = async (item, index) => {
@@ -304,9 +312,6 @@ watchEffect(() => {
       <div class="leftMenu-title-right">
         <q-btn flat round @click="setTabSearchVisible(!tabSearchVisible)">
           <Icon name="sousuo" :size="20" />
-          <!--          <Teleport to="#leftMenu">-->
-
-          <!--          </Teleport>-->
         </q-btn>
 
         <q-btn flat round @click="toggleTeam(null, true)" v-if="spaceRole < 4">
@@ -319,7 +324,7 @@ watchEffect(() => {
         {{
           tagKey && _.findIndex(tagList, { _key: tagKey }) !== -1
             ? `${tagList[_.findIndex(tagList, { _key: tagKey })].name}  ( ${tagList[_.findIndex(tagList, { _key: tagKey })].projectNum} )`
-            : `全部 ( ${teamList.length - 1} )`
+            : `全部 ( ${teamList.length > 0 ? teamList.length - 1 : 0} )`
         }}
         <q-icon
           name="arrow_drop_down"
@@ -346,7 +351,9 @@ watchEffect(() => {
               @click="tagKey = ''"
             >
               <q-item-section
-                >全部 ( {{ teamList.length - 1 }} )</q-item-section
+                >全部 (
+                {{ teamList.length - 1 }}
+                )</q-item-section
               >
             </q-item>
             <q-item
@@ -370,13 +377,8 @@ watchEffect(() => {
       <template v-for="(item, index) in searchTeamList" :key="`team${index}`">
         <div
           class="teamMenu-item"
-          @click="
-            console.log(item._key);
-            setTeamKey(item._key);
-            setTargetTeamKey(item._key);
-            setTabSearchVisible(false);
-          "
-          @mouseenter="setTargetTeamKey(item._key)"
+          @click="clickTeam(item)"
+          @mouseenter="teamOverKey = item._key"
           v-if="item._key !== privateTeamKey"
         >
           <div
@@ -385,24 +387,25 @@ watchEffect(() => {
             :style="{
               borderLeft: `5px solid ${item.top ? '#f44336' : '#07be51'}`,
               background:
-                (teamKey === item._key || targetTeamKey === item._key) &&
+                (teamKey === item._key || teamOverKey === item._key) &&
                 $route.path!.indexOf('home/team') !== -1
                   ? '#eee'
                   : '',
             }"
           >
             <div># {{ item.name }}</div>
-            <div class="teamMenu-item-icon" v-if="targetTeamKey === item._key">
+            <div class="teamMenu-item-icon" v-if="teamOverKey === item._key">
               <q-btn
                 flat
                 round
                 @click="createTree(item, index)"
                 v-if="spaceRole < 4"
+                size="10px"
               >
-                <Icon name="a-chuangjian2" :size="20" />
+                <Icon name="a-chuangjian2" :size="18" />
               </q-btn>
-              <q-btn flat round @click.stop="targetTeamKey = item._key">
-                <Icon name="gengduo" :size="18" />
+              <q-btn flat round size="10px">
+                <Icon name="gengduo" :size="16" />
                 <q-menu anchor="top right" self="top left" class="q-pa-sm">
                   <q-list dense>
                     <q-item
@@ -488,7 +491,7 @@ watchEffect(() => {
                 class="teamMenu-item-icon"
                 v-if="treeOverkey === taskMenuItem._key && item.role < 3"
               >
-                <q-btn flat round size="9px" @click.stop="">
+                <q-btn flat round size="9px">
                   <Icon name="gengduo" :size="18" />
                   <q-menu anchor="top right" self="top left" class="q-pa-sm">
                     <q-list dense>
@@ -533,10 +536,9 @@ watchEffect(() => {
           class="teamMenu-item"
           @click="
             setTeamKey(item._key);
-            setTargetTeamKey(item._key);
             setTabSearchVisible(false);
           "
-          @mouseenter="setTargetTeamKey(item._key)"
+          @mouseenter="teamOverKey = item._key"
         >
           <div
             class="teamMenu-item-title icon-point"
@@ -544,20 +546,15 @@ watchEffect(() => {
             :style="{
               borderLeft: `5px solid #ccc`,
               background:
-                (teamKey === item._key || targetTeamKey === item._key) &&
+                (teamKey === item._key || teamOverKey === item._key) &&
                 $route.path!.indexOf('home/team') !== -1
                   ? '#eee'
                   : '',
             }"
           >
             <div class=""># {{ item.name }}</div>
-            <div class="teamMenu-item-icon" v-if="targetTeamKey === item._key">
-              <q-btn
-                flat
-                round
-                size="9px"
-                @click.stop="targetTeamKey = item._key"
-              >
+            <div class="teamMenu-item-icon" v-if="teamOverKey === item._key">
+              <q-btn flat round size="9px">
                 <Icon name="gengduo" :size="18" />
                 <q-menu anchor="top right" self="top left" class="q-pa-sm">
                   <q-list dense>
@@ -608,7 +605,7 @@ watchEffect(() => {
       </div> -->
     </div>
     <Detail
-      type="target"
+      type="team"
       :visible="addVisible"
       @close="addVisible = false"
       :state="detailState"
@@ -620,7 +617,7 @@ watchEffect(() => {
       :dialogStyle="{ width: '700px', maxWidth: '80vw' }"
     >
       <template #content>
-        <Member type="target" />
+        <Member type="team" />
       </template>
     </c-dialog>
     <c-dialog

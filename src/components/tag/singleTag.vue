@@ -101,7 +101,7 @@ watch(
   }
   .tag-container {
     width: 100%;
-    height: calc(100% - 50px);
+    height: calc(60vh - 50px);
     @include scroll();
     .tag-item {
       width: 100%;

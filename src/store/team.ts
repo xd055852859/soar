@@ -33,8 +33,23 @@ export const teamStore = defineStore(
         teamKey: key,
       })) as ResultProps;
       if (teamRes.msg === "OK") {
-        teamList.value = teamRes.data;
+        teamList.value = formatTeamList(teamRes.data);
       }
+    };
+    const formatTeamList = (list) => {
+      let topList: any = [];
+      let bottomList: any = [];
+      list.forEach((item) => {
+        if (item.top) {
+          topList.push(item);
+        } else {
+          bottomList.push(item);
+        }
+      });
+      topList = _.orderBy(topList, ["viewTime"], ["desc"]);
+      bottomList = _.orderBy(bottomList, ["viewTime"], ["desc"]);
+      console.log([...topList, ...bottomList]);
+      return [...topList, ...bottomList];
     };
     const setTeamList = async (newList) => {
       teamList.value = newList;
@@ -115,10 +130,10 @@ export const teamStore = defineStore(
       targetTeamInfo,
       setTeamInfo,
       getTeamInfo,
-
       teamList,
       setTeamList,
       getTeamList,
+      formatTeamList,
       teamFoldList,
       setTeamFoldList,
       getTeamFoldList,

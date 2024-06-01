@@ -5,8 +5,11 @@ import cDrawer from "@/components/common/cDrawer.vue";
 import cCalendar from "@/components/common/cCalendar.vue";
 import api from "@/services/api";
 import { ResultProps } from "@/interface/Common";
+import { tagArray } from "@/services/config/config";
 import { setMessage } from "@/services/util/common";
 import { useQuasar } from "quasar";
+import appStore from "@/store";
+import { storeToRefs } from "pinia";
 const dayjs: any = inject("dayjs");
 const $q = useQuasar();
 const props = defineProps<{
@@ -17,11 +20,14 @@ const props = defineProps<{
 const emits = defineEmits<{
   (e: "chooseCard", detail: any, type: string, key?: string): void;
 }>();
+const { targetTeamMemberList } = storeToRefs(appStore.teamStore);
+const { setTargetTeamKey } = appStore.teamStore;
 
 const chooseKey = ref<string>("");
 const drawerVisible = ref<boolean>(false);
 const cardDay = ref<number>(0);
-
+const originName = ref<string>("");
+const tagColor = ref<string>("");
 const chooseTask = () => {
   // console.log(props.card);
   // setTeamKey(props.card.projectInfo._key);
@@ -65,6 +71,10 @@ const updateTask = async (type, obj, detail) => {
   console.log(obj);
   switch (type) {
     case "name":
+      originName.value = obj.name;
+      detail[type] = obj[type];
+      changeObj[type] = obj[type];
+      break;
     case "hasDone":
     case "content":
     case "relaters":
@@ -144,9 +154,11 @@ const updateTask = async (type, obj, detail) => {
     emits("chooseCard", detail, "update", type);
   }
 };
+
 watch(
   () => props.card,
   (newCard) => {
+    originName.value = newCard.name;
     if (newCard?.endTime) {
       cardDay.value = dayjs(newCard.endTime).diff(dayjs().endOf("day"), "day");
     }
@@ -220,9 +232,29 @@ watch(
       </div>
       <div
         class="teamTask-box-top-title"
-        :style="{ paddingLeft: props.card.endTime ? '55px' : '25px' }"
+        :style="{ paddingLeft: props.card.endTime ? '60px' : '25px' }"
+        @click.stop=""
       >
-        {{ card.name }}
+        <q-input
+          v-model="originName"
+          class="teamTask-box-top-input"
+          borderless
+          dense
+          autogrow
+          @blur="
+            () => {
+              if (originName !== card.name) {
+                updateTask(
+                  'name',
+                  {
+                    name: originName,
+                  },
+                  card,
+                );
+              }
+            }
+          "
+        />
       </div>
       <div class="teamTask-box-top-icon" v-if="chooseKey === card._key">
         <q-btn flat round icon="more_horiz" size="9px" @click.stop="">
@@ -249,47 +281,137 @@ watch(
     </q-card-section>
     <q-card-section class="teamTask-box-bottom q-py-none">
       <div class="dp-center-center">
-        <q-avatar color="#fff" size="20px" class="q-mr-sm">
-          <img
-            :src="
-              card.assignorInfo?.userAvatar
-                ? card.assignorInfo.userAvatar
-                : '/common/defaultGroup.png'
+        <div>
+          <q-avatar color="#fff" size="20px" class="q-mr-sm">
+            <img
+              :src="
+                card.assignorInfo?.userAvatar
+                  ? card.assignorInfo.userAvatar
+                  : '/common/defaultGroup.png'
+              "
+              alt=""
+            />
+          </q-avatar>
+          {{
+            card.assignorInfo?.userName
+              ? card.assignorInfo?.userName.length > 5
+                ? card.assignorInfo.userName.substring(0, 5)
+                : card.assignorInfo.userName
+              : ""
+          }}
+          <q-tooltip
+            v-if="
+              card.assignorInfo?.userName &&
+              card.assignorInfo.userName.length > 5
             "
-            alt=""
-          />
-          <q-tooltip>
-            {{ card.assignorInfo?.userName }}
+          >
+            {{ card.assignorInfo.userName }}
           </q-tooltip>
-        </q-avatar>
-        {{
-          card.assignorInfo?.userName.length > 5
-            ? card.assignorInfo.userName.substring(0, 5)
-            : card.assignorInfo.userName
-        }}
+        </div>
         <q-icon name="arrow_right_alt" size="20px" class="q-ma-sm" />
-        <q-avatar color="#fff" size="20px" class="q-mr-sm">
-          <img
-            :src="
-              card.executorInfo?.userAvatar
-                ? card.executorInfo.userAvatar
-                : '/common/defaultPerson.png'
+        <div @click.stop="setTargetTeamKey(card.projectKey)">
+          <q-avatar color="#fff" size="20px" class="q-mr-sm">
+            <img
+              :src="
+                card.executorInfo?.userAvatar
+                  ? card.executorInfo.userAvatar
+                  : '/common/defaultPerson.png'
+              "
+              alt=""
+            />
+          </q-avatar>
+          {{
+            card.executorInfo?.userName
+              ? card.executorInfo?.userName.length > 5
+                ? card.executorInfo.userName.substring(0, 3) + "..."
+                : card.executorInfo.userName
+              : ""
+          }}
+          <q-tooltip
+            v-if="
+              card.executorInfo?.userName &&
+              card.executorInfo.userName.length > 5
             "
-            alt=""
-          />
-          <q-tooltip>
-            {{ card.executorInfo?.userName }}
+          >
+            {{ card.executorInfo.userName }}
           </q-tooltip>
-        </q-avatar>
-        {{
-          card.executorInfo?.userName && card.executorInfo?.userName.length > 5
-            ? card.executorInfo.userName.substring(0, 3) + "..."
-            : card.executorInfo.userName
-        }}
+          <q-menu auto-close>
+            <q-list>
+              <q-item
+                clickable
+                v-close-popup
+                class="row items-center justify-between"
+                @click.stop="
+                  updateTask(
+                    'executor',
+                    {
+                      userKey: '',
+                      userName: '',
+                      userAvatar: '',
+                    },
+                    card,
+                  )
+                "
+              >
+                无
+              </q-item>
+              <q-item
+                v-for="(item, index) in targetTeamMemberList"
+                :key="`member${index}`"
+                clickable
+                v-close-popup
+                class="row items-center justify-between"
+                @click.stop="
+                  updateTask(
+                    'executor',
+                    {
+                      userKey: item.userKey,
+                      userName: item.userName,
+                      userAvatar: item.userAvatar,
+                    },
+                    card,
+                  )
+                "
+              >
+                <q-avatar color="#fff" size="24px" class="q-mr-sm">
+                  <img
+                    :src="
+                      item?.userAvatar
+                        ? item?.userAvatar
+                        : '/common/defaultPerson.png'
+                    "
+                    alt=""
+                  />
+                </q-avatar>
+                <div class="single-to-long" style="width: 120px">
+                  {{ item.userName }}
+                </div>
+
+                <q-icon
+                  name="check"
+                  color="primary"
+                  size="24px"
+                  v-if="item.userKey === card.executorInfo.userKey"
+                />
+                <q-space v-else />
+              </q-item>
+            </q-list>
+          </q-menu>
+        </div>
       </div>
       {{ dayjs(card.createTime).fromNow() }}
       <!-- {{ dayjs(card.updateTime).fromNow() }} -->
     </q-card-section>
+    <!--    <div-->
+    <!--      class="teamTask-box-tag"-->
+    <!--      :style="{-->
+    <!--        borderTop: `9px solid ${tagColor}`,-->
+    <!--        borderRight: `9px solid ${tagColor} `,-->
+    <!--        borderLeft: '9px solid transparent',-->
+    <!--        borderBottom: '9px solid transparent',-->
+    <!--      }"-->
+    <!--      @click.stop=""-->
+    <!--    ></div>-->
   </q-card>
   <c-drawer
     :visible="drawerVisible"
@@ -315,7 +437,7 @@ watch(
   width: 100%;
   min-height: 80px;
   // border-radius: 0px;
-  padding: 5px 0px;
+  padding: 5px 0;
   box-sizing: border-box;
 
   .teamTask-box-top {
@@ -330,7 +452,7 @@ watch(
       width: 25px;
       height: 25px;
       position: absolute;
-      top: 0px;
+      top: 8px;
       left: 18px;
       z-index: 2;
       @include flex(center, flex-start, null);
@@ -339,7 +461,7 @@ watch(
       width: 25px;
       height: 25px;
       position: absolute;
-      top: 2px;
+      top: 11px;
       left: 42px;
       z-index: 2;
       color: #fff;
@@ -348,13 +470,12 @@ watch(
       text-align: center;
     }
     .teamTask-box-top-title {
-      padding-top: 5px;
       box-sizing: border-box;
       flex: 1;
       line-height: 20px;
       // word-wrap: break-word;
       // white-space: pre-wrap;
-      // text-align: left;
+      // text-align: left
     }
 
     .teamTask-box-top-icon {
@@ -380,6 +501,17 @@ watch(
     font-size: 12px;
     // height: 80px;
     @include flex(space-between, center, null);
+  }
+  .teamTask-box-tag {
+  }
+}
+</style>
+<style lang="scss">
+.teamTask-box-top-title {
+  .teamTask-box-top-input {
+    .q-field__native {
+      line-height: 25px;
+    }
   }
 }
 </style>

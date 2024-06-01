@@ -28,4 +28,5 @@ export interface SpaceMember {
   userAvatar: null | string;
   userKey: string;
   userName: null | string;
+  beMate: boolean;
 }

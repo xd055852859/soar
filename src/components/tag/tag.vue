@@ -141,7 +141,7 @@ watch([tagInput, tagList], ([newInput, newList], [oldInput, oldList]) => {
         item.name.includes(newInput),
       );
     } else {
-      tagKey.value = "";
+      // tagKey.value = "";
       searchTagList.value = [...newList];
     }
   } else {
@@ -149,7 +149,6 @@ watch([tagInput, tagList], ([newInput, newList], [oldInput, oldList]) => {
   }
 });
 watch(menuVisible, (newVisible) => {
-  console.log(newVisible);
   if (!newVisible) {
     editInput.value = "";
     editKey.value = "";
@@ -159,7 +158,13 @@ watch(menuVisible, (newVisible) => {
 watch(
   tagKey,
   (newKey, oldKey) => {
-    if (oldKey) {
+    if (
+      oldKey &&
+      !_.isEqual(
+        teamSelect.value.sort((a, b) => +a - +b),
+        originSelect.value.sort((a, b) => +a - +b),
+      )
+    ) {
       saveTag(teamSelect.value, oldKey);
     }
     if (newKey) {
@@ -169,10 +174,12 @@ watch(
           list.push(item._key);
         }
       });
+      originSelect.value = [...list];
       teamSelect.value = [...list];
-    } else {
+    } else if (!oldKey) {
       teamSelect.value = [];
     }
+    console.log(newKey);
   },
   { immediate: true },
 );
@@ -183,13 +190,23 @@ watch(
       <q-input
         outlined
         v-model="tagInput"
-        placeholder="请输入分组名称"
+        placeholder="请下拉选择分组，或创建新分组"
         dense
         style="width: calc(100% - 100px)"
         clearable
         ref="inputRef"
         @click="menuVisible = true"
-      />
+      >
+        <template v-slot:append v-if="!tagInput">
+          <q-icon
+            name="arrow_drop_down"
+            color="grey-7"
+            style="margin-left: 8px"
+            size="25px"
+            class="select-icon"
+          />
+        </template>
+      </q-input>
       <q-btn
         label="新建"
         :color="searchTagList.length === 0 ? 'primary' : 'grey-5'"
@@ -200,7 +217,7 @@ watch(
       <q-menu
         no-focus
         class="q-pa-sm"
-        style="width: 470px; max-height: 60vh"
+        style="width: 370px; max-height: 60vh"
         v-model="menuVisible"
         auto-close
         no-parent-event
@@ -228,7 +245,7 @@ watch(
                     <q-input
                       outlined
                       v-model="editInput"
-                      placeholder="请输入分组名称"
+                      placeholder="请输入标签名称"
                       dense
                       style="width: calc(100% - 100px)"
                       clearable
@@ -237,7 +254,8 @@ watch(
                       @click.stop=""
                       @keyup.enter.stop="editTag(item, index)"
                       v-if="editKey === item._key"
-                    /><template v-else>
+                    />
+                    <template v-else>
                       {{ item.name }} ( {{ item.projectNum }} )</template
                     >
                   </div>

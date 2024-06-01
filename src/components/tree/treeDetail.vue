@@ -241,6 +241,7 @@ watch(fileInput, (newName) => {
             <q-list>
               <q-item
                 clickable
+                v-close-popup
                 class="row items-center justify-between"
                 @click.stop="
                   updateDetail('executor', {
@@ -256,6 +257,7 @@ watch(fileInput, (newName) => {
                 v-for="(item, index) in targetTeamMemberList"
                 :key="`member${index}`"
                 clickable
+                v-close-popup
                 class="row items-center justify-between"
                 @click.stop="
                   updateDetail('executor', {

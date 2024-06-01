@@ -185,6 +185,7 @@ const CustomTree = React.forwardRef((props, ref) => {
   const addNode = async (nodeId, type) => {
     setSelectedId(nodeId);
     let newNodes = _.cloneDeep(nodes);
+    let obj = { nodeKey: nodeId, addType: type };
     if (type === "next" && rootKey === nodeId) {
       setMessage("error", "根结点不能创建同级节点");
       return;
@@ -192,21 +193,27 @@ const CustomTree = React.forwardRef((props, ref) => {
     let fatherKey = "";
     if (type === "child") {
       fatherKey = nodeId;
+      obj.fatherKey = nodeId;
     } else {
-      console.log(newNodes[nodeId]);
-      if (newNodes[nodeId] && newNodes[nodeId].father) {
-        fatherKey = newNodes[nodeId].father;
-      } else {
-        return;
-      }
+      fatherKey = newNodes[nodeId].father;
     }
     let addTaskRes = await api.request.post("node", {
-      nodeKey: nodeId,
-      fatherKey: fatherKey,
-      addType: type,
+      ...obj,
     });
     if (addTaskRes.msg === "OK") {
-      newNodes[fatherKey].sortList.push(addTaskRes.data._key);
+      if (type === "child") {
+        newNodes[fatherKey].sortList.push(addTaskRes.data._key);
+      } else {
+        let index = newNodes[fatherKey].sortList.indexOf(nodeId);
+        if (index !== -1) {
+          newNodes[fatherKey].sortList.splice(
+            type === "next" ? index + 1 : index - 1,
+            0,
+            addTaskRes.data._key,
+          );
+        }
+      }
+
       newNodes[addTaskRes.data._key] = { ...addTaskRes.data };
       setNodes(newNodes);
       chooseNode(addTaskRes.data, 1);
@@ -221,7 +228,7 @@ const CustomTree = React.forwardRef((props, ref) => {
     });
     if (updateRes.msg === "OK") {
       callback(newNodes);
-      if (key == "status" && value === 0) {
+      if (key === "status" && value === 0) {
         chooseNode(null);
       } else {
         setSelectedNode({

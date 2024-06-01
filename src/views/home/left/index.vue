@@ -503,7 +503,7 @@ watch(
           class="q-mr-sm"
         />
 
-        任务
+        任务池
         <q-badge rounded color="red" v-if="spaceTaskNum" class="q-ml-sm"
           >{{ spaceTaskNum }}
         </q-badge>
