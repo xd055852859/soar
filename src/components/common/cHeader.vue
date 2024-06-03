@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 import appStore from "@/store";
+import Icon from "@/components/common/Icon.vue";
 const { closeNum, leftVisible } = storeToRefs(appStore.commonStore);
 
 const { setLeftVisible } = appStore.commonStore;
@@ -47,7 +48,7 @@ const emits = defineEmits<{
       class="header-center"
       ref="centerRef"
       :style="
-        centerRef ? { left: `calc(50% - ${centerRef.offsetWidth}px)` } : {}
+        centerRef ? { left: `calc(50% - ${centerRef.offsetWidth / 2}px)` } : {}
       "
     >
       <slot name="center"></slot>

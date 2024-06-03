@@ -1406,12 +1406,14 @@ watchEffect(() => {
     top: 50px;
     left: 25px;
     box-sizing: border-box;
+    pointer-events: none;
     @include flex(center, flex-start, wrap);
     .treeTree-left-box {
       width: 100%;
       border: 1px solid rgba(151, 151, 151, 0.34);
       border-radius: 8px;
       background-color: #fff;
+      pointer-events: auto;
       @include flex(center, center, wrap);
       @include p-number(10px, 0);
     }

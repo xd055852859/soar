@@ -69,7 +69,7 @@ watch(
     <div class="tag-container">
       <template v-if="tagList.length > 0">
         <div
-          v-for="(item, index) in tagList"
+          v-for="(item, index) in searchTagList"
           :key="`tag${index}`"
           class="tag-item"
         >

@@ -52,7 +52,7 @@ export const teamStore = defineStore(
       return [...topList, ...bottomList];
     };
     const setTeamList = async (newList) => {
-      teamList.value = newList;
+      teamList.value = formatTeamList(newList);
     };
     const getTeamFoldList = async (key) => {
       let teamRes = (await api.request.get("project", {

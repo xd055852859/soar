@@ -10,7 +10,8 @@ import router from "@/router";
 const { targetTeamKey, targetTeamInfo, teamKey, teamList, teamInfo } =
   storeToRefs(appStore.teamStore);
 const { spaceKey } = storeToRefs(appStore.spaceStore);
-const { setTeamKey, setTeamList, setTeamInfo } = appStore.teamStore;
+const { setTeamKey, setTeamList, setTeamInfo, formatTeamList } =
+  appStore.teamStore;
 const props = defineProps<{
   type: string;
   visible: boolean;

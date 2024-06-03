@@ -117,7 +117,7 @@ const topTeam = async (item, index, state) => {
     let index = _.findIndex(list, { _key: item._key });
     if (index !== -1) {
       list[index] = { ...item };
-      setTeamList(formatTeamList(list));
+      setTeamList(list);
     }
   }
 };
@@ -134,7 +134,7 @@ const clickTeam = (item) => {
     let index = _.findIndex(list, { _key: item._key });
     if (index !== -1) {
       list[index] = { ...item };
-      setTeamList(formatTeamList(list));
+      setTeamList(list);
     }
   }
 };
@@ -144,16 +144,13 @@ const createTree = async (item, index) => {
     prompt: {
       model: "",
       type: "text", // optional
+      isValid: (val) => val.length > 0, // << here is the magic
     },
     cancel: {
       color: "grey-5",
       flat: true,
     },
   }).onOk(async (data) => {
-    if (!data) {
-      setMessage("error", "请输入任务树名称");
-      return;
-    }
     let taskRes = (await api.request.post("card", {
       projectKey: teamKey.value,
       type: "taskTree",
@@ -207,6 +204,7 @@ const editTree = (item, index, teamIndex) => {
     prompt: {
       model: item.title,
       type: "text", // optional
+      isValid: (val) => val.length > 0, // << here is the magic
     },
     cancel: {
       color: "grey-5",
@@ -369,6 +367,11 @@ watchEffect(() => {
             </q-item>
           </q-list>
         </q-menu>
+      </div>
+      <div>
+        <q-btn flat round @click="tagVisible = true" size="12px">
+          <Icon name="setting" :size="24" />
+        </q-btn>
       </div>
     </div>
     <!-- </OnClickOutside> -->
@@ -624,6 +627,7 @@ watchEffect(() => {
       :visible="tagVisible"
       @close="tagVisible = false"
       :title="`定义分组的群组`"
+      noFooter
       :dialogStyle="{ width: '500px', maxWidth: '80vw', height: '80vh' }"
     >
       <template #content>

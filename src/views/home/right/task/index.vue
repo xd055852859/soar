@@ -14,28 +14,84 @@ import CEmpty from "@/components/common/cEmpty.vue";
 const dayjs: any = inject("dayjs");
 const { spaceKey, spaceInfo } = storeToRefs(appStore.spaceStore);
 const { token, user } = storeToRefs(appStore.authStore);
-const { mateList } = storeToRefs(appStore.mateStore);
 const taskTab = ref<string>("execute");
 const taskList = ref<any>([]);
+const chooseTaskList = ref<any>([]);
 const searchMemberList = ref<any>([]);
 const treeInfo = ref<any>(null);
 const teamKey = ref<any>(null);
 const taskUser = ref<any>(null);
 const searchName = ref<string>("");
 const drawerVisible = ref<boolean>(false);
+const chooseKey = ref<string>("");
 const showTaskDays = ref<number>(99999);
+const memberList: any = computed(() => {
+  let obj: any = {};
+  taskList.value.forEach((item) => {
+    item.taskList.forEach((taskItem) => {
+      switch (taskTab.value) {
+        case "create":
+          if (!obj[taskItem.executorInfo._key]) {
+            obj[taskItem.executorInfo._key] = { taskNum: 0 };
+          }
+          obj[taskItem.executorInfo._key] = {
+            ...taskItem.executorInfo,
+            taskNum: obj[taskItem.executorInfo._key].taskNum + 1,
+          };
+          break;
+        case "execute":
+          if (!obj[taskItem.assignorInfo._key]) {
+            {
+              obj[taskItem.assignorInfo._key] = { taskNum: 0 };
+            }
+            obj[taskItem.assignorInfo._key] = {
+              ...taskItem.assignorInfo,
+              taskNum: obj[taskItem.assignorInfo._key].taskNum + 1,
+            };
+          }
+          break;
+      }
+    });
+  });
+  return Object.values(obj);
+});
 const getTaskList = async () => {
-  let taskRes = (await api.request.get("task/team", {
+  let taskRes = (await api.request.get("task/team/new", {
     teamKey: spaceKey.value,
-    targetUserKey: taskUser.value._key
-      ? taskUser.value._key
-      : taskUser.value.userKey,
     type: taskTab.value,
     showTaskDays: showTaskDays.value,
   })) as ResultProps;
   if (taskRes.msg === "OK") {
     taskList.value = [...taskRes.data];
+    chooseTaskList.value = [...taskRes.data];
   }
+};
+const chooseMember = (memberItem) => {
+  chooseKey.value = memberItem._key;
+  chooseTaskList.value = [];
+  let list: any = [];
+  taskList.value.forEach((item, index) => {
+    list[index] = { ...item };
+    list[index].taskList = [];
+    item.taskList.forEach((taskItem, taskIndex) => {
+      switch (taskTab.value) {
+        case "create":
+          if (chooseKey.value === taskItem.executorInfo._key) {
+            list[index].taskList.push(taskItem);
+          }
+          break;
+        case "execute":
+          if (chooseKey.value === taskItem.assignorInfo._key) {
+            list[index].taskList.push(taskItem);
+          }
+          break;
+      }
+    });
+    console.log(list[index].taskList);
+    if (list[index].taskList.length > 0) {
+      chooseTaskList.value.push(list[index]);
+    }
+  });
 };
 const chooseCard = (detail, type) => {
   switch (type) {
@@ -77,21 +133,6 @@ watchEffect(() => {
 watchEffect(() => {
   if (user.value && !taskUser.value) {
     taskUser.value = { ...user.value };
-  }
-});
-watchEffect(() => {
-  if (user.value && mateList.value) {
-    let memberList: any = [];
-    if (searchName.value) {
-      // let list = _.cloneDeep(searchMemberList);
-      memberList = [user.value, ...mateList.value].filter((item) => {
-        return item.userName && item.userName.indexOf(searchName.value) !== -1;
-      });
-    } else {
-      memberList = [user.value, ...mateList.value];
-    }
-    searchMemberList.value = memberList;
-    console.log(memberList);
   }
 });
 </script>
@@ -163,8 +204,9 @@ watchEffect(() => {
           active-color="primary"
           class="text-grey-7"
         >
-          <q-tab name="execute" label="执行" style="width: 60px" />
-          <q-tab name="create" label="创建" style="width: 60px" />
+          <q-tab name="execute" label="我执行的" style="width: 100px" />
+          <q-tab name="create" label="我创建的" style="width: 100px" />
+          <q-tab name="relate" label="干系人" style="width: 80px" />
         </q-tabs>
       </template>
       <template #button>
@@ -209,10 +251,10 @@ watchEffect(() => {
       </template>
     </cHeader>
     <div class="task-box">
-      <template v-if="taskList.length > 0">
+      <template v-if="chooseTaskList.length > 0">
         <div
           class="taskItem-box"
-          v-for="(item, index) in taskList"
+          v-for="(item, index) in chooseTaskList"
           :key="`task${index}`"
         >
           <div class="taskItem-top">
@@ -235,6 +277,42 @@ watchEffect(() => {
                 @chooseCard="chooseCard"
               />
             </template>
+          </div>
+          <div class="taskItem-right">
+            <div class="taskItem-right-title">
+              {{
+                taskTab === "create"
+                  ? "执行人"
+                  : taskTab === "execute"
+                    ? "指派人"
+                    : "干系人"
+              }}
+            </div>
+            <div class="taskItem-right-box">
+              <div
+                class="icon-point q-my-xs"
+                v-for="(item, index) in memberList"
+                :key="`task${index}`"
+                @click.stop="chooseMember(item)"
+                :style="
+                  chooseKey === item._key ? { border: '3px solid #07be51' } : {}
+                "
+              >
+                <q-avatar color="#fff" size="35px">
+                  <img
+                    :src="
+                      item.userAvatar
+                        ? item.userAvatar
+                        : '/common/defaultPerson.png'
+                    "
+                    alt=""
+                  />
+                </q-avatar>
+                <q-tooltip :offset="[0, -5]">
+                  {{ item.userName }}
+                </q-tooltip>
+              </div>
+            </div>
           </div>
         </div>
       </template>
@@ -264,6 +342,8 @@ watchEffect(() => {
     overflow-x: auto;
     overflow-y: hidden;
     background: #f2f3f6;
+    padding-right: 60px;
+    box-sizing: border-box;
     @include flex(flex-start, center, null);
     .taskItem-box {
       width: 455px;
@@ -287,6 +367,35 @@ watchEffect(() => {
         /* prettier-ignore */
         height: calc(100% - 50Px);
         @include scroll();
+      }
+      .taskItem-right {
+        /* prettier-ignore */
+        width: 60px;
+        height: calc(100vh - 50px);
+        position: fixed;
+        z-index: 2;
+        top: 50px;
+        right: 0;
+        color: #7c84a0;
+        align-content: flex-start;
+        background-color: #fff;
+        @include p-number(10px, 0);
+        @include flex(center, center, wrap);
+
+        .taskItem-right-title {
+          //margin: 10px 0px;
+          font-size: 14px;
+          font-weight: bolder;
+        }
+        .taskItem-right-box {
+          height: calc(100% - 40px);
+          @include scroll();
+          > div {
+            border-radius: 50%;
+            margin-bottom: 10px;
+            @include flex(center, center, wrap);
+          }
+        }
       }
     }
   }

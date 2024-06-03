@@ -5,7 +5,8 @@ import { storeToRefs } from "pinia";
 import _ from "lodash";
 import api from "@/services/api";
 import { useQuasar } from "quasar";
-import { setMessage } from "@/services/util/common";
+import { setLoading, setMessage } from "@/services/util/common";
+import router from "@/router";
 const {
   targetTeamMemberList,
   targetTeamInfo,
@@ -13,9 +14,13 @@ const {
   teamMemberList,
   teamInfo,
   teamKey,
+  teamList,
 } = storeToRefs(appStore.teamStore);
 const { user } = storeToRefs(appStore.authStore);
-const { spaceMemberList, spaceRole } = storeToRefs(appStore.spaceStore);
+const { spaceMemberList, spaceRole, spaceKey } = storeToRefs(
+  appStore.spaceStore,
+);
+const { setTeamList, setTeamInfo } = appStore.teamStore;
 const $q = useQuasar();
 const props = defineProps<{
   type: string;
@@ -27,6 +32,7 @@ const memberTeamInfo = ref<any>(null);
 const searchMemberList = ref<any>([]);
 const searchName = ref<string>("");
 const chooseKey = ref<string>("");
+const defaultRole = ref<number>(3);
 
 const addMember = async (index) => {
   let list = _.cloneDeep(searchMemberList.value);
@@ -73,6 +79,32 @@ const deleteMember = async (index) => {
     }
   });
 };
+const updateTeam = async () => {
+  let teamRes = (await api.request.patch("project", {
+    projectKey: memberTeamKey.value,
+    defaultRole: defaultRole.value,
+  })) as ResultProps;
+  if (teamRes.msg === "OK") {
+    let list = _.cloneDeep(teamList.value);
+    let index = _.findIndex(list, { _key: memberTeamKey.value });
+    if (index !== -1) {
+      list[index] = {
+        ...list[index],
+        defaultRole: defaultRole.value,
+      };
+      memberTeamInfo.value = {
+        ...memberTeamInfo.value,
+        ...teamRes.data,
+      };
+      setTeamList(list);
+      if (props.type === "target") {
+        setTeamInfo(memberTeamInfo.value, "target");
+      } else {
+        setTeamInfo(memberTeamInfo.value);
+      }
+    }
+  }
+};
 watch(
   [searchName, memberList],
   ([newName, newList]) => {
@@ -105,11 +137,27 @@ watchEffect(() => {
     memberTeamInfo.value = teamInfo.value;
     memberList.value = teamMemberList.value;
   }
+  defaultRole.value = memberTeamInfo.value.defaultRole;
 });
 </script>
 <template>
   <div class="member" v-if="memberList.length > 0 && memberTeamInfo">
-    <div class="member-title">已添加的协作者</div>
+    <div class="member-title dp-space-center">
+      已添加的协作者
+      <div class="dp--center" style="font-size: 14px">
+        默认权限
+        <q-select
+          borderless
+          dense
+          v-model="defaultRole"
+          @update:model-value="updateTeam"
+          :options="ROLE_OPTIONS.slice(1, ROLE_OPTIONS.length)"
+          class="q-ml-md"
+          emit-value
+          map-options
+        />
+      </div>
+    </div>
     <div
       class="member-item"
       v-for="(item, memberIndex) in memberList"
@@ -122,6 +170,7 @@ watchEffect(() => {
             :src="
               item?.userAvatar ? item.userAvatar : '/common/defaultPerson.png'
             "
+            alt=""
           />
         </q-avatar>
         <div class="member-item-nickName">{{ item.userName }}</div>

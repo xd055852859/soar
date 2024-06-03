@@ -135,6 +135,11 @@ const deleteTag = (item, index) => {
     .onCancel(() => {});
 };
 watch([tagInput, tagList], ([newInput, newList], [oldInput, oldList]) => {
+  if (!newInput) {
+    originSelect.value = [];
+    teamSelect.value = [];
+    tagKey.value = "";
+  }
   if (newList && newList.length > 0) {
     if (newInput && newInput !== oldInput) {
       searchTagList.value = newList.filter((item) =>
@@ -203,7 +208,8 @@ watch(
             color="grey-7"
             style="margin-left: 8px"
             size="25px"
-            class="select-icon"
+            class="select-icon icon-point"
+            @click="menuVisible = true"
           />
         </template>
       </q-input>
@@ -317,7 +323,7 @@ watch(
 
   .tag-container {
     width: 100%;
-    height: calc(80vh - 250px);
+    height: calc(80vh - 145px);
     @include scroll();
     .tag-item {
       width: 100%;

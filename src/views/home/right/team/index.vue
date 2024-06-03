@@ -70,7 +70,7 @@ const noteDialog = ref<boolean>(false);
       :visible="memberVisible"
       @close="memberVisible = false"
       title="成员"
-      :dialogStyle="{ width: '700px', maxWidth: '80vw' }"
+      :dialogStyle="{ width: '500px' }"
     >
       <template #content><Member type="team" /></template>
     </c-dialog>

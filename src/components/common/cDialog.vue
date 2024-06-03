@@ -4,6 +4,7 @@ const props = defineProps<{
   dialogStyle?: any;
   title?: string;
   showClose?: boolean;
+  noFooter?: boolean;
 }>();
 const emits = defineEmits<{
   (e: "close"): void;
@@ -14,11 +15,11 @@ watch(
   (newVisible) => {
     dialogVisible.value = newVisible;
   },
-  { immediate: true }
+  { immediate: true },
 );
 watch(dialogVisible, (newVisible) => {
   if (!newVisible) {
-    emits('close')
+    emits("close");
   }
 });
 </script>
@@ -47,7 +48,7 @@ watch(dialogVisible, (newVisible) => {
         <slot name="content"></slot>
       </q-card-section>
 
-      <q-card-actions align="right" class="common-title">
+      <q-card-actions align="right" class="common-title" v-if="!noFooter">
         <slot name="footer" />
       </q-card-actions>
     </q-card>
