@@ -39,8 +39,8 @@ const props = defineProps<{
   width: 100%;
   height: 100%;
   position: absolute;
-  left: 0px;
-  top: 0px;
+  left: 0;
+  top: 0;
   z-index: 10;
   //background-color: rgba(0, 0, 0, 0.1);
   @include flex(center, center, null);
@@ -213,4 +213,3 @@ const props = defineProps<{
 }
 </style>
 <style lang="scss"></style>
-

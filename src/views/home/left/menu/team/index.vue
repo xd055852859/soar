@@ -19,10 +19,9 @@ import SingleTag from "@/components/tag/singleTag.vue";
 import Tag from "@/components/tag/tag.vue";
 const $q = useQuasar();
 const dayjs: any = inject("dayjs");
-const { targetTeamKey, teamKey, teamList, teamFoldList } = storeToRefs(
-  appStore.teamStore,
-);
-const { tabSearchVisible } = storeToRefs(appStore.commonStore);
+const { targetTeamKey, teamKey, teamList, teamFoldList, tabSearchVisible } =
+  storeToRefs(appStore.teamStore);
+
 const { spaceRole, privateTeamKey, spaceKey, tagList } = storeToRefs(
   appStore.spaceStore,
 );
@@ -32,8 +31,8 @@ const {
   setTeamList,
   setTeamFoldList,
   formatTeamList,
+  setTabSearchVisible,
 } = appStore.teamStore;
-const { setTabSearchVisible } = appStore.commonStore;
 const { getTag } = appStore.spaceStore;
 
 const addVisible = ref<boolean>(false);
@@ -66,7 +65,7 @@ const watchTeam = async (item) => {
     watch: !item.watch,
   })) as ResultProps;
   if (teamRes.msg === "OK") {
-    setMessage("success", `${item.watch ? "取消关注" : "关注"}群组成功`);
+    setMessage("success", `${item.watch ? "取关" : "关注"}群组成功`);
     let list = _.cloneDeep(teamList.value);
     let index = _.findIndex(list, { _key: item._key });
     list[index] = { ...list[index], watch: !item.watch };
@@ -429,7 +428,7 @@ watchEffect(() => {
                     </q-item>
                     <q-item clickable v-close-popup @click="watchTeam(item)">
                       <q-item-section class="common-title"
-                        >{{ item.watch ? "取消关注" : "关注" }}
+                        >{{ item.watch ? "取关" : "关注" }}
                       </q-item-section>
                     </q-item>
                     <q-item
@@ -777,14 +776,4 @@ watchEffect(() => {
   height: 60vh;
 }
 </style>
-<style lang="scss">
-.team-searchInput {
-  width: 68%;
-  height: 40px;
-  position: absolute;
-  left: 0px;
-  top: 5px;
-  z-index: 20;
-  background-color: #fff;
-}
-</style>
+<style lang="scss"></style>

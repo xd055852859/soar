@@ -51,7 +51,7 @@ watch(drawerVisible, (newVisible) => {
           round
           dense
           @click="emits('close')"
-          v-if="!showClose"
+          v-if="showClose"
         />
       </q-card-section>
       <q-card-section

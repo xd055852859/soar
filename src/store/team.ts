@@ -21,6 +21,7 @@ export const teamStore = defineStore(
     const targetTeamRole = ref<number>(5);
     const teamRole = ref<number>(5);
     const createState = ref<boolean>(false);
+    const tabSearchVisible = ref<boolean>(false);
     const setTeamKey = (newKey) => {
       teamKey.value = newKey;
       localStorage.setItem("teamKey", newKey);
@@ -102,7 +103,9 @@ export const teamStore = defineStore(
         teamInfo.value = newInfo;
       }
     };
-
+    const setTabSearchVisible = (visible) => {
+      tabSearchVisible.value = visible;
+    };
     watch(teamKey, (newKey) => {
       teamInfo.value = null;
       if (newKey) {
@@ -141,6 +144,8 @@ export const teamStore = defineStore(
       teamMemberList,
       setTeamMemberList,
       createState,
+      tabSearchVisible,
+      setTabSearchVisible,
     };
   },
   // {

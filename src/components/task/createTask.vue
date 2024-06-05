@@ -35,6 +35,7 @@ const type = ref<number>(0);
 const searchTreeInput = ref<string>("");
 const searchMemberInput = ref<string>("");
 const topRef = ref<any>(null);
+const inputRef = ref<any>(null);
 const page = ref<number>(1);
 const total = ref<number>(0);
 onMounted(() => {
@@ -170,7 +171,7 @@ watchEffect(() => {
 <template>
   <div class="create-task">
     <div class="create-task-top" ref="topRef">
-      <div class="create-task-header">
+      <div class="create-task-header" @click="inputRef.focus()">
         <q-input
           v-model="addInput"
           borderless
@@ -178,6 +179,8 @@ watchEffect(() => {
           autogrow
           class="create-task-textarea"
           placeholder="请输入任务"
+          autofocus
+          ref="inputRef"
         />
         <div class="create-task-button dp-space-center">
           <q-checkbox
@@ -244,7 +247,14 @@ watchEffect(() => {
           />
         </template>
 
-        <q-menu style="margin-left: 20px">
+        <q-menu
+          style="margin-left: 20px"
+          @before-hide="
+            $nextTick(() => {
+              inputRef.focus();
+            })
+          "
+        >
           <div class="create-task-choose">
             <div class="create-choose-tree create-choose">
               <div class="choose-header">
@@ -388,7 +398,7 @@ watchEffect(() => {
     <div
       class="create-task-container"
       v-if="topRef"
-      :style="{ height: `calc(100vh - ${topRef.offsetHeight + 40}px)` }"
+      :style="{ height: `calc(100vh - ${topRef.offsetHeight + 80}px)` }"
       @scroll="
         commonscroll($event, taskList, total, () => {
           page++;
@@ -469,8 +479,11 @@ watchEffect(() => {
       @include scroll();
       .choose-container-item {
         min-height: 30px;
-        line-height: 25px;
+        line-height: 30px;
         cursor: pointer;
+        &:hover {
+          background-color: #eee;
+        }
       }
     }
   }

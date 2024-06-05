@@ -1310,11 +1310,13 @@ watchEffect(() => {
     </c-drawer>
     <c-drawer
       :visible="taskVisible"
+      title="游离任务"
       @close="taskVisible = false"
       :drawerStyle="{
         width: '450px',
       }"
-      opacityMask
+      noMask
+      showClose
     >
       <template #content>
         <CreateTask

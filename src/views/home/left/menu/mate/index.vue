@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import MateSetting from "@/views/home/right/mate/setting.vue";
+import router from "@/router";
 import Icon from "@/components/common/Icon.vue";
 import appStore from "@/store";
 import { storeToRefs } from "pinia";
@@ -10,12 +10,18 @@ import { ResultProps } from "@/interface/Common";
 import { setMessage } from "@/services/util/common";
 const socket: any = inject("socket");
 const { spaceMemberList, spaceKey } = storeToRefs(appStore.spaceStore);
+const { tabSearchVisible } = storeToRefs(appStore.teamStore);
 const { mateList } = storeToRefs(appStore.mateStore);
 const { user } = storeToRefs(appStore.authStore);
 const { setSpaceMemberList } = appStore.spaceStore;
 const { getMateList, setMateList } = appStore.mateStore;
+const { setTabSearchVisible } = appStore.teamStore;
 const mateKey = ref<string>("");
 const mateState = ref<boolean>(true);
+const searchInput = ref<string>("");
+const searchMateList = computed(() =>
+  mateList.value.filter((item) => item.userName.includes(searchInput.value)),
+);
 const memberList = computed(() =>
   spaceMemberList.value.filter(
     (item) => !item.beMate && item.userKey !== user.value!._key,
@@ -56,17 +62,36 @@ const removeMate = async (userKey, userIndex) => {
     setMateList([...newMateList]);
   }
 };
+const chooseMate = (mateItem) => {
+  router.push(`/home/mate/detail/${mateItem._key}`);
+  mateKey.value = mateItem._key;
+  if (tabSearchVisible) {
+    let list = [...mateList.value];
+    let index = _.findIndex(list, {
+      _key: mateItem._key,
+    });
+    if (index !== -1) {
+      list.splice(index, 1);
+      list.unshift(mateItem);
+    }
+    setMateList(list);
+    setTabSearchVisible(false);
+  }
+};
+watch(tabSearchVisible, (visible) => {
+  if (!visible) {
+    searchInput.value = "";
+  }
+});
 </script>
 <template>
-  <div class="mateMenu">
+  <div class="mateMenu" :style="{ zIndex: tabSearchVisible ? 10 : 1 }">
     <!-- <OnClickOutside @trigger="searchVibisible = false"> -->
     <div class="leftMenu-title">
       <div class="leftMenu-title-left"></div>
       <div class="leftMenu-title-right">
-        <q-btn flat round>
-          <Icon name="a-chuangjian2" :size="20" />
-          <q-menu anchor="top end" class="q-pa-none" style="height: 70vh">
-          </q-menu>
+        <q-btn flat round @click="setTabSearchVisible(!tabSearchVisible)">
+          <Icon name="sousuo" :size="20" />
         </q-btn>
       </div>
     </div>
@@ -77,15 +102,12 @@ const removeMate = async (userKey, userIndex) => {
           <Icon name="right" :size="24" />
         </div>
         <div class="mateMenu-list">
-          <template v-if="mateList.length > 0">
+          <template v-if="searchMateList.length > 0">
             <div
               class="mateMenu-item"
-              v-for="(item, index) in mateList"
+              v-for="(item, index) in searchMateList"
               :key="`mate${index}`"
-              @click="
-                $router.push(`/home/mate/detail/${item._key}`);
-                mateKey = item._key;
-              "
+              @click="chooseMate(item)"
             >
               <div
                 class="mateMenu-item-title icon-point"
@@ -125,7 +147,7 @@ const removeMate = async (userKey, userIndex) => {
               </div>
               <q-btn
                 flat
-                label="取消关注"
+                label="取关"
                 color="primary"
                 @click.stop="removeMate(item._key, index)"
                 class="mateMenu-item-button"
@@ -182,6 +204,16 @@ const removeMate = async (userKey, userIndex) => {
           </div>
         </div>
       </template>
+    </div>
+    <div class="team-searchInput" id="teamSearchInput" v-if="tabSearchVisible">
+      <q-input
+        outlined
+        dense
+        autofocus
+        v-model="searchInput"
+        class="full-width"
+        clearable
+      />
     </div>
   </div>
 </template>

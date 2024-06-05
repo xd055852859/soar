@@ -160,96 +160,102 @@ watchEffect(() => {
       </template>
     </c-header>
     <div class="teamTask-box">
-      <div
-        class="teamTask-container"
-        v-for="(item, index) in taskList"
-        :key="`task${index}`"
-        v-if="menuTab === 'board'"
-      >
-        <div class="teamTask-top">
-          <div class="teamTask-top-left">
-            <q-circular-progress
-              show-value
-              font-size="10px"
-              class="q-mr-md"
-              :value="
-                item.totalTask === 0
-                  ? 0
-                  : (item.finishTask / item.totalTask) * 100
-              "
-              size="80px"
-              :thickness="0.25"
-              color="primary"
-              track-color="grey-3"
-            >
-              <q-avatar color="#fff" size="73px">
-                <img
-                  :src="
-                    item.userAvatar
-                      ? item.userAvatar
-                      : '/common/defaultPerson.png'
-                  "
-                  alt=""
-                />
-              </q-avatar>
-            </q-circular-progress>
-          </div>
-          <div class="teamTask-top-right">
-            <div>
-              {{ item.userName }}{{ item.userKey === user?._key ? "(我)" : "" }}
+      <template v-if="menuTab === 'board'">
+        <div
+          class="teamTask-container"
+          v-for="(item, index) in taskList"
+          :key="`task${index}`"
+        >
+          <div class="teamTask-top">
+            <div class="teamTask-top-left">
+              <q-circular-progress
+                show-value
+                font-size="10px"
+                class="q-mr-md"
+                :value="
+                  item.totalTask === 0
+                    ? 0
+                    : (item.finishTask / item.totalTask) * 100
+                "
+                size="80px"
+                :thickness="0.25"
+                color="primary"
+                track-color="grey-3"
+              >
+                <q-avatar color="#fff" size="73px">
+                  <img
+                    :src="
+                      item.userAvatar
+                        ? item.userAvatar
+                        : '/common/defaultPerson.png'
+                    "
+                    alt=""
+                  />
+                </q-avatar>
+              </q-circular-progress>
             </div>
-            <div>{{ item.finishTask }} / {{ item.totalTask }}</div>
+            <div class="teamTask-top-right">
+              <div>
+                {{ item.userName
+                }}{{ item.userKey === user?._key ? "(我)" : "" }}
+              </div>
+              <div>{{ item.finishTask }} / {{ item.totalTask }}</div>
+            </div>
+            <q-btn round flat size="16px" @click="chooseExecutor(item)">
+              <Icon name="a-chuangjian2" :size="20" />
+            </q-btn>
           </div>
-          <q-btn round flat size="16px" @click="chooseExecutor(item)">
-            <Icon name="a-chuangjian2" :size="20" />
-          </q-btn>
-        </div>
-        <div class="teamTask-bottom">
-          <template
-            v-for="(taskItem, taskIndex) in item.taskList"
-            :key="`taskItem${taskIndex}`"
-          >
-            <Task :card="taskItem" @chooseCard="chooseCard" />
-          </template>
-        </div>
-        <div class="teamTask-right" @click.stop="">
-          <div class="teamTask-right-title">创建人</div>
-          <div class="teamTask-right-box">
-            <div
-              class="icon-point q-my-xs"
-              v-for="(item, index) in teamMemberList"
-              :key="`task${index}`"
-              @click.stop="chooseAssignor(item.userKey)"
-              :style="
-                assignor === item.userKey ? { border: '3px solid #07be51' } : {}
-              "
+          <div class="teamTask-bottom">
+            <template
+              v-for="(taskItem, taskIndex) in item.taskList"
+              :key="`taskItem${taskIndex}`"
             >
-              <q-avatar color="#fff" size="35px">
-                <img
-                  :src="
-                    item.userAvatar
-                      ? item.userAvatar
-                      : '/common/defaultPerson.png'
-                  "
-                  alt=""
-                />
-              </q-avatar>
-              <q-tooltip :offset="[0, -5]">
-                {{ item.userName }}
-              </q-tooltip>
+              <Task :card="taskItem" @chooseCard="chooseCard" />
+            </template>
+          </div>
+          <div class="teamTask-right" @click.stop="">
+            <div class="teamTask-right-title">创建人</div>
+            <div class="teamTask-right-box">
+              <div
+                class="icon-point q-my-xs"
+                v-for="(item, index) in teamMemberList"
+                :key="`task${index}`"
+                @click.stop="chooseAssignor(item.userKey)"
+                :style="
+                  assignor === item.userKey
+                    ? { border: '3px solid #07be51' }
+                    : {}
+                "
+              >
+                <q-avatar color="#fff" size="35px">
+                  <img
+                    :src="
+                      item.userAvatar
+                        ? item.userAvatar
+                        : '/common/defaultPerson.png'
+                    "
+                    alt=""
+                  />
+                </q-avatar>
+                <q-tooltip :offset="[0, -5]">
+                  {{ item.userName }}
+                </q-tooltip>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </template>
       <Tree :card-key="cardKey" v-else />
     </div>
     <c-drawer
       :visible="taskVisible"
+      title="快速任务"
       @close="taskVisible = false"
       :drawerStyle="{
         width: '450px',
       }"
-      opacityMask
+      noMark
+      showClose
     >
       <template #content>
         <CreateTask

@@ -43,12 +43,12 @@ const {
   reportConfig,
 } = storeToRefs(appStore.spaceStore);
 
-const { clearStore, setSearchVisible, setIframeDetail, setTabSearchVisible } =
-  appStore.commonStore;
+const { clearStore, setSearchVisible, setIframeDetail } = appStore.commonStore;
 const { setUserInfo, setToken } = appStore.authStore;
 const { setSpaceKey, setSpaceList, setReportConfig, setSpaceMessageNum } =
   appStore.spaceStore;
-const { setTeamKey, setTargetTeamKey } = appStore.teamStore;
+const { setTeamKey, setTargetTeamKey, setTabSearchVisible } =
+  appStore.teamStore;
 const { setCardKey } = appStore.cardStore;
 const { clickExplore } = appStore.exploreStore;
 const userVisible = ref<boolean>(false);
@@ -252,6 +252,9 @@ watch(
   },
   { immediate: true },
 );
+watch(menuTab, () => {
+  setTabSearchVisible(false);
+});
 </script>
 
 <template>
@@ -636,11 +639,13 @@ watch(
     </c-dialog>
     <c-drawer
       :visible="drawerVisible"
+      title="我的任务"
       @close="drawerVisible = false"
       :drawerStyle="{
         width: '450px',
       }"
-      opacityMask
+      noMask
+      showClose
     >
       <template #content>
         <CreateTask />
@@ -792,5 +797,14 @@ watch(
     height: 100%;
     @include flex(flex-end, center, null);
   }
+}
+.team-searchInput {
+  width: 68%;
+  height: 40px;
+  position: absolute;
+  left: 0;
+  top: 5px;
+  z-index: 20;
+  background-color: #fff;
 }
 </style>

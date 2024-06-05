@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import cOutLoading from "@/components/common/cOutLoading.vue";
+import { useDebounceFn } from "@vueuse/core";
 import { ResultProps } from "@/interface/Common";
 import { commonscroll } from "@/services/util/common";
 import api from "@/services/api";
@@ -11,15 +12,25 @@ import CEmpty from "@/components/common/cEmpty.vue";
 import Task from "@/components/task/task.vue";
 import File from "@/components/file/file.vue";
 import Icon from "@/components/common/Icon.vue";
+import router from "@/router";
+import _ from "lodash";
 
 const { spaceKey, spaceRole, privateTeamKey } = storeToRefs(
   appStore.spaceStore,
 );
-const { setTargetTeamKey, setTeamKey, setTeamList, setTeamFoldList } =
-  appStore.teamStore;
+const { tabSearchVisible } = storeToRefs(appStore.teamStore);
+const {
+  setTargetTeamKey,
+  setTeamKey,
+  setTeamList,
+  setTeamFoldList,
+  setTabSearchVisible,
+} = appStore.teamStore;
 
 const fileList = ref<any>([]);
 const fileKey = ref<string>("");
+const tabInput = ref<string>("");
+const searchInput = ref<string>("");
 const sortType = ref<string>("view");
 const page = ref<number>(1);
 const total = ref<number>(0);
@@ -30,6 +41,7 @@ const getFileList = async () => {
     teamKey: spaceKey.value,
     projectKey: "",
     sortBy: sortType.value,
+    keyword: searchInput.value,
     page: page.value,
     limit: 30,
     cardType: "docFile",
@@ -46,25 +58,47 @@ const getFileList = async () => {
     total.value = fileRes.total as number;
   }
 };
+const searchResource = useDebounceFn(() => {
+  searchInput.value = tabInput.value;
+}, 1000);
 watch(sortType, () => {
   page.value = 1;
 });
+const chooseResource = (fileItem) => {
+  fileKey.value = fileItem._key;
+  if (tabSearchVisible) {
+    let index = _.findIndex(fileList.value, {
+      _key: fileItem._key,
+    });
+    console.log(index);
+    if (index !== -1) {
+      fileList.value.splice(index, 1);
+      fileList.value.unshift(fileItem);
+    }
+    setTabSearchVisible(false);
+  }
+};
 watchEffect(() => {
   if (spaceKey.value) {
     page.value = 1;
     getFileList();
   }
 });
+watch(tabSearchVisible, (visible) => {
+  if (!visible) {
+    searchInput.value = "";
+  }
+});
 </script>
 <template>
-  <div class="resourceMenu">
+  <div class="resourceMenu" :style="{ zIndex: tabSearchVisible ? 10 : 1 }">
     <c-out-loading :visible="loading" />
     <div class="leftMenu-title">
       <div class="leftMenu-title-left"></div>
       <div class="leftMenu-title-right">
-        <!--        <q-btn flat round @click="setTabSearchVisible(!tabSearchVisible)">-->
-        <!--          <Icon name="sousuo" :size="20" />-->
-        <!--        </q-btn>-->
+        <q-btn flat round @click="setTabSearchVisible(!tabSearchVisible)">
+          <Icon name="sousuo" :size="20" />
+        </q-btn>
         <q-btn
           flat
           round
@@ -90,12 +124,23 @@ watchEffect(() => {
         <div
           v-for="(item, index) in fileList"
           :key="`file${index}`"
-          @click="fileKey = item._key"
+          @click="chooseResource(item)"
         >
           <File :file="item" :fileIndex="index" :fileKey="fileKey" />
         </div>
       </template>
       <c-empty title="暂无资源" v-else />
+    </div>
+    <div class="team-searchInput" id="teamSearchInput" v-if="tabSearchVisible">
+      <q-input
+        outlined
+        dense
+        autofocus
+        v-model="tabInput"
+        class="full-width"
+        clearable
+        @update:model-value="searchResource"
+      />
     </div>
   </div>
 </template>

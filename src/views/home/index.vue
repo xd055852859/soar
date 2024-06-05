@@ -233,11 +233,11 @@ watch(
       clockTime.value = dayjs().format("H:mm");
       clockDate.value =
         dayjs().format("M月D日") + " 星期" + "日一二三四五六"[dayjs().day()];
-      timer.value = setInterval(() => {
-        clockTime.value = dayjs().format("H:mm");
-        clockDate.value =
-          dayjs().format("M月") + " 星期" + "日一二三四五六"[dayjs().day()];
-      }, 60000);
+      // timer.value = setInterval(() => {
+      //   clockTime.value = dayjs().format("H:mm");
+      //   clockDate.value =
+      //     dayjs().format("M月") + " 星期" + "日一二三四五六"[dayjs().day()];
+      // }, 60000);
     } else {
       if (timer.value) {
         clearInterval(timer.value);
@@ -359,29 +359,29 @@ watch(
       </template>
     </div>
     <!-- -->
-    <div v-if="clockVisible" class="clockIn-box">
-      <div class="clockIn-left">
-        <div class="clockIn-time">{{ clockTime }}</div>
-        <div class="clockIn-date">{{ clockDate }}</div>
-      </div>
-      <div class="clockIn-button">
-        <q-btn flat round size="45px" @click="setTodayCheckIn">
-          <div style="font-size: 22px">{{ clockInText }}</div>
-        </q-btn>
-      </div>
-      <div
-        class="clockIn-link"
-        @click="
-          setIframeVisible(true, {
-            url: `https://checkin.qingtime.cn/checkIn?token=${token}&teamKey=${spaceKey}`,
-            title: '打卡',
-          })
-        "
-      >
-        查看工作
-        <Icon name="rightArrow" :size="12" class="q-ml-xs" />
-      </div>
-    </div>
+    <!--    <div v-if="clockVisible" class="clockIn-box">-->
+    <!--      <div class="clockIn-left">-->
+    <!--        <div class="clockIn-time">{{ clockTime }}</div>-->
+    <!--        <div class="clockIn-date">{{ clockDate }}</div>-->
+    <!--      </div>-->
+    <!--      <div class="clockIn-button">-->
+    <!--        <q-btn flat round size="45px" @click="setTodayCheckIn">-->
+    <!--          <div style="font-size: 22px">{{ clockInText }}</div>-->
+    <!--        </q-btn>-->
+    <!--      </div>-->
+    <!--      <div-->
+    <!--        class="clockIn-link"-->
+    <!--        @click="-->
+    <!--          setIframeVisible(true, {-->
+    <!--            url: `https://checkin.qingtime.cn/checkIn?token=${token}&teamKey=${spaceKey}`,-->
+    <!--            title: '打卡',-->
+    <!--          })-->
+    <!--        "-->
+    <!--      >-->
+    <!--        查看工作-->
+    <!--        <Icon name="rightArrow" :size="12" class="q-ml-xs" />-->
+    <!--      </div>-->
+    <!--    </div>-->
     <CelebrateAnimate v-if="celebrateAnimate" />
     <!-- <q-btn
       color="primary"

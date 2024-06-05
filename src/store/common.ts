@@ -25,7 +25,7 @@ export const commonStore = defineStore(
     const closeNum = ref<number>(-1);
     const showState = ref<boolean>(false);
     const searchVisible = ref<boolean>(false);
-    const tabSearchVisible = ref<boolean>(false);
+
     const leftVisible = ref<boolean>(false);
     const searchKey = ref<string | undefined>("");
     let searchCallBack: any = null;
@@ -85,9 +85,7 @@ export const commonStore = defineStore(
       searchVisible.value = visible;
       searchCallBack = callback;
     };
-    const setTabSearchVisible = (visible) => {
-      tabSearchVisible.value = visible;
-    };
+
     const setLeftVisible = (visible) => {
       leftVisible.value = visible;
     };
@@ -148,8 +146,6 @@ export const commonStore = defineStore(
       setIframeDetail,
       searchVisible,
       setSearchVisible,
-      tabSearchVisible,
-      setTabSearchVisible,
       chooseSearch,
       doSearch,
       overKey,
