@@ -63,7 +63,7 @@ const removeMate = async (userKey, userIndex) => {
   }
 };
 const chooseMate = (mateItem) => {
-  router.push(`/home/mate/detail/${mateItem._key}`);
+  router.push(`/home/mate/${mateItem._key}`);
   mateKey.value = mateItem._key;
   if (tabSearchVisible) {
     let list = [...mateList.value];

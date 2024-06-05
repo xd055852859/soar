@@ -1,76 +1,10 @@
-<template>
-  <bubble-menu
-    :editor="editor"
-    :tippy-options="{ duration: 100 }"
-    :should-show="shouldShow"
-  >
-    <q-card class="bubble-menu-wrapper" v-if="!readonly">
-      <EditorMenuItem
-        icon-name="paragraph"
-        title="paragraph"
-        @on-click="editor?.chain().focus().setParagraph().run()"
-      />
-      <EditorMenuItem
-        icon-name="bold"
-        title="bold"
-        @on-click="editor?.chain().focus().toggleBold().run()"
-      />
-      <EditorMenuItem
-        icon-name="italic"
-        title="italic"
-        @on-click="editor?.chain().focus().toggleItalic().run()"
-      />
-      <EditorMenuItem
-        icon-name="strike"
-        title="strike"
-        @on-click="editor?.chain().focus().toggleStrike().run()"
-      />
-      <EditorMenuItem
-        icon-name="left"
-        title="left"
-        @on-click="editor?.chain().focus().setTextAlign('left').run()"
-      />
-      <EditorMenuItem
-        icon-name="center"
-        title="center"
-        @on-click="editor?.chain().focus().setTextAlign('center').run()"
-      />
-      <EditorMenuItem
-        icon-name="right"
-        title="right"
-        @on-click="editor?.chain().focus().setTextAlign('right').run()"
-      />
-      <EditorMenuItem
-        icon-name="highlight"
-        title="highlight"
-        @on-click="editor?.chain().focus().toggleHighlight().run()"
-      />
-      <EditorMenuItem
-        icon-name="bulletList"
-        title="bulletList"
-        @on-click="editor?.chain().focus().toggleBulletList().run()"
-      />
-      <EditorMenuItem
-        icon-name="orderedList"
-        title="orderedList"
-        @on-click="editor?.chain().focus().toggleOrderedList().run()"
-      />
-      <EditorMenuItem
-        icon-name="taskList"
-        title="taskList"
-        @on-click="editor?.chain().focus().toggleTaskList().run()"
-      />
-      <EditorMenuItem icon-name="setLink" title="setLink" @on-click="setLink" />
-    </q-card>
-  </bubble-menu>
-</template>
 <script setup lang="ts">
 import { Editor, isTextSelection } from "@tiptap/vue-3";
 import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { computed } from "vue";
 import { BubbleMenu } from "./extensions/extension-bubble-menu/BubbleMenu";
-import EditorMenuItem from "./EditorMenuItem.vue";
+import EditorMenuItem from "./editorMenuItem.vue";
 
 const props = defineProps<{
   editor: Editor;
@@ -164,6 +98,72 @@ const shouldShow: any = ({
   return true;
 };
 </script>
+<template>
+  <bubble-menu
+    :editor="editor"
+    :tippy-options="{ duration: 100 }"
+    :should-show="shouldShow"
+  >
+    <q-card class="bubble-menu-wrapper" v-if="!readonly">
+      <EditorMenuItem
+        icon-name="paragraph"
+        title="paragraph"
+        @on-click="editor?.chain().focus().setParagraph().run()"
+      />
+      <EditorMenuItem
+        icon-name="bold"
+        title="bold"
+        @on-click="editor?.chain().focus().toggleBold().run()"
+      />
+      <EditorMenuItem
+        icon-name="italic"
+        title="italic"
+        @on-click="editor?.chain().focus().toggleItalic().run()"
+      />
+      <EditorMenuItem
+        icon-name="strike"
+        title="strike"
+        @on-click="editor?.chain().focus().toggleStrike().run()"
+      />
+      <EditorMenuItem
+        icon-name="left"
+        title="left"
+        @on-click="editor?.chain().focus().setTextAlign('left').run()"
+      />
+      <EditorMenuItem
+        icon-name="center"
+        title="center"
+        @on-click="editor?.chain().focus().setTextAlign('center').run()"
+      />
+      <EditorMenuItem
+        icon-name="right"
+        title="right"
+        @on-click="editor?.chain().focus().setTextAlign('right').run()"
+      />
+      <EditorMenuItem
+        icon-name="highlight"
+        title="highlight"
+        @on-click="editor?.chain().focus().toggleHighlight().run()"
+      />
+      <EditorMenuItem
+        icon-name="bulletList"
+        title="bulletList"
+        @on-click="editor?.chain().focus().toggleBulletList().run()"
+      />
+      <EditorMenuItem
+        icon-name="orderedList"
+        title="orderedList"
+        @on-click="editor?.chain().focus().toggleOrderedList().run()"
+      />
+      <EditorMenuItem
+        icon-name="taskList"
+        title="taskList"
+        @on-click="editor?.chain().focus().toggleTaskList().run()"
+      />
+      <EditorMenuItem icon-name="setLink" title="setLink" @on-click="setLink" />
+    </q-card>
+  </bubble-menu>
+</template>
 <style scoped>
 .bubble-menu-wrapper {
   /* background-color: var(--el-background-color-base);
@@ -174,13 +174,13 @@ const shouldShow: any = ({
   height: fit-content;
 }
 
-@media screen and (max-width: 415px) {
+/*@media screen and (max-width: 415px) {
   .bubble-menu-wrapper {
     background-color: var(--el-background-color-base);
-    box-shadow: var(--notes-color-shadow);
+    box-shadow:;
   }
   ::-webkit-scrollbar {
     height: 1px;
   }
-}
+}*/
 </style>

@@ -8,7 +8,7 @@ const { setLeftVisible } = appStore.commonStore;
 
 const centerRef = ref<any>(null);
 const props = defineProps<{
-  title: string;
+  title?: string;
   backPath?: string;
   type?: string;
   noTitle?: boolean;

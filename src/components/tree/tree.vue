@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { applyReactInVue, applyPureReactInVue } from "veaury";
 import Tree from "@/components/react_app/tree.jsx";
-import Editor from "@/components/note/Editor.vue";
 import { ResultProps } from "@/interface/Common";
 import cCalendar from "@/components/common/cCalendar.vue";
 import treeIcon from "@/components/tree/treeIcon.vue";

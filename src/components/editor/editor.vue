@@ -1,15 +1,3 @@
-<template>
-  <div class="editor-wrapper" @click="handleClickBlankSpace">
-    <editor-menu v-if="editor" :editor="editor" :readonly="readonly" />
-    <editor-content :editor="editor" />
-    <div class="character-count" v-if="editor">
-      <!-- <span v-if="taskInfo.total">{{
-        `${taskInfo.checked}/${taskInfo.total}${$t("notes.tasks")}`
-      }}</span> -->
-      <span>{{ `${editor.storage.characterCount.characters()}字` }}</span>
-    </div>
-  </div>
-</template>
 <script setup lang="ts">
 import {
   EditorContent,
@@ -43,36 +31,12 @@ import Typography from "@tiptap/extension-typography";
 import TextAlign from "@tiptap/extension-text-align";
 import Highlight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link";
-// import Mention from "./extensions/mentions";
-// import mentionSuggestion from "./extensions/mentions/suggestion";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
-// import CodeBlockComponent from "./extensions/code-block/CodeBlockComponent.vue";
-// import { ColorHighlighter } from "./extensions/clever-editor/ColorHighlighter";
-// import { SmilieReplacer } from "./extensions/clever-editor/SmilieReplacer";
 import Table from "@tiptap/extension-table";
 import TableRow from "@tiptap/extension-table-row";
 import TableCell from "@tiptap/extension-table-cell";
-import TableHeader from "@tiptap/extension-table-header";
-import Gapcursor from "@tiptap/extension-gapcursor";
-// import Commands from "./extensions/Commands/commands";
-// import Commands2 from "./extensions/Commands2/commands";
-// import suggestion from "./extensions/Commands/suggestion";
-// import MentionCard from "./extensions/mentions/extension-mention-card";
-// import MentionCoop from "./extensions/mentions/extension-mention-coop";
-// import Progress from "./extensions/extension-process";
-// import Star from "./extensions/extension-star";
-// import Qblock from "./extensions/qingtime-block";
-// import Bookmark from "./extensions/bookmark";
-// import LinkButton from "./extensions/button";
-// import Columns from "./extensions/columns";
-// import Column from "./extensions/column";
-import Image from "./extensions/image";
-// import EmbedVideo from "./extensions/embedVideo";
-// import AttachFile from "./extensions/file";
-// import Tips from "./extensions/tips";
-// import TaskBlock from "./extensions/taskBlock";
 import { ref, watch, computed, onBeforeUnmount, onMounted } from "vue";
-import EditorMenu from "./EditorMenu.vue";
+import EditorMenu from "./editorMenu.vue";
 // load all highlight.js languages
 // @ts-ignore
 import { lowlight } from "lowlight";
@@ -132,31 +96,12 @@ const editor = useEditor({
     Blockquote,
     BulletList,
     HardBreak,
-    Heading.extend({
-      // draggable: true,
-      // addNodeView() {
-      //   return VueNodeViewRenderer(HeadingNodeView);
-      // },
-    }),
-    HorizontalRule.extend({
-      // draggable: true,
-      // addNodeView() {
-      //   return VueNodeViewRenderer(HorizontalRuleNodeView);
-      // },
-    }),
+    Heading,
+    HorizontalRule,
     OrderedList,
     Document,
-    ListItem.extend({
-      // draggable: true,
-      // addNodeView() {
-      //   return VueNodeViewRenderer(ListItemNodeView);
-      // },
-    }),
+    ListItem,
     Paragraph.extend({
-      // draggable: true,
-      // addNodeView() {
-      //   return VueNodeViewRenderer(ParagraphNodeView);
-      // },
       addKeyboardShortcuts() {
         return {
           Tab: () => {
@@ -194,19 +139,11 @@ const editor = useEditor({
     Highlight,
     TaskList,
     TaskItem,
-    Image.configure({
-      allowBase64: false,
-    }),
+    // Image.configure({
+    //   allowBase64: false,
+    // }),
     Typography,
-    // ColorHighlighter,
-    // SmilieReplacer,
     CodeBlockLowlight.configure({ lowlight }),
-    // TaskItem.extend({
-    //   draggable: true,
-    //   addNodeView() {
-    //     return VueNodeViewRenderer(TaskItemNodeView);
-    //   },
-    // }).configure({ nested: true }),
     Placeholder.configure({
       placeholder: ({ node }) => {
         const placeholderStr = "写点什么吧";
@@ -225,15 +162,6 @@ const editor = useEditor({
     Table.configure({
       resizable: true,
     }),
-    TableRow,
-    TableHeader,
-    TableCell,
-    // Commands.configure({
-    //   suggestion,
-    // }),
-    // Commands2.configure({
-    //   suggestion,
-    // }),
   ],
   editorProps: {
     // @ts-ignore
@@ -268,7 +196,7 @@ const editor = useEditor({
             view,
             files,
             coordinates.pos,
-            view.state.selection.to === coordinates.pos ? true : false
+            view.state.selection.to === coordinates.pos,
           );
           return true;
         } else {
@@ -502,7 +430,7 @@ const insertFiles = async (
   view: EditorView,
   files: FileList,
   pos: number,
-  inSelection: boolean
+  inSelection: boolean,
 ) => {
   const { schema } = view.state;
   for (let index = 0; index < files.length; index++) {
@@ -531,7 +459,7 @@ const insertFiles = async (
       }
       const transaction = view.state.tr.insert(
         inSelection ? pos + index + 1 : pos + index,
-        node
+        node,
       );
       view.dispatch(transaction);
       if (index === files.length - 1) {
@@ -558,7 +486,19 @@ defineExpose({
   getEditor: () => editor.value,
 });
 </script>
-<style scoped>
+<template>
+  <div class="editor-wrapper" @click="handleClickBlankSpace">
+    <editor-menu v-if="editor" :editor="editor" :readonly="readonly" />
+    <editor-content :editor="editor" />
+    <div class="character-count" v-if="editor">
+      <!-- <span v-if="taskInfo.total">{{
+        `${taskInfo.checked}/${taskInfo.total}${$t("notes.tasks")}`
+      }}</span> -->
+      <span>{{ `${editor.storage.characterCount.characters()}字` }}</span>
+    </div>
+  </div>
+</template>
+<style scoped lang="scss">
 .editor-wrapper {
   /* padding: 0 15px 0 15px; */
   padding: 0;
@@ -566,7 +506,7 @@ defineExpose({
 
 .character-count {
   margin: 55px 0 15px;
-  color: var(--notes-color-gray);
+  color: $grey-5;
   text-align: end;
   font-size: 12px;
 }
@@ -583,7 +523,7 @@ defineExpose({
   overflow: hidden;
 }
 .head-tree-wrapper {
-  width: "100%";
+  width: 100%;
 }
 </style>
 <style lang="scss">
@@ -924,7 +864,7 @@ ul[data-type="taskList"] {
 
     input:checked + span::before {
       opacity: 1;
-      transform: all 0.5s;
+      //transform: all 0.5s;
     }
   }
 

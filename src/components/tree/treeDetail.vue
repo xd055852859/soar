@@ -3,10 +3,10 @@ import { ResultProps } from "@/interface/Common";
 import api from "@/services/api";
 import { tagArray } from "@/services/config/config";
 import _ from "lodash";
-import Editor from "../note/Editor.vue";
 import { storeToRefs } from "pinia";
 import appStore from "@/store";
 import cCalendar from "@/components/common/cCalendar.vue";
+import cEditor from "@/components/editor/editor.vue";
 import { setMessage } from "@/services/util/common";
 import Icon from "../common/Icon.vue";
 
@@ -515,7 +515,7 @@ watch(fileInput, (newName) => {
           }}</span>
           <div class="node-detail-editor">
             <!-- :handleSave="updateContent" -->
-            <Editor
+            <c-editor
               v-if="nodeInfo"
               ref="editorRef"
               :initData="nodeInfo"

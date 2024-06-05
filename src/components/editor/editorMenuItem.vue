@@ -1,11 +1,5 @@
-<template>
-  <div class="icon-button" @click="handleClick">
-    <Icon :name="iconName" :size="size" />
-  </div>
-</template>
 <script setup lang="ts">
 import Icon from "@/components/common/Icon.vue";
-
 defineProps({
   iconName: { type: String, required: true },
   title: { type: String, required: false },
@@ -22,6 +16,11 @@ const handleClick = (event: MouseEvent) => {
   emit("onClick");
 };
 </script>
+<template>
+  <div class="icon-button" @click="handleClick">
+    <Icon :name="iconName" :size="size" />
+  </div>
+</template>
 <style scoped>
 .icon-button {
   cursor: pointer;
